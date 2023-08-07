@@ -1,5 +1,6 @@
 package com.example.auto_ria.dto;
 
+import com.example.auto_ria.enums.ERegion;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserDTO {
 
-    private String userName;
-    private String picture;
+    private String name;
+    private String lastName;
+    private String city;
+    private ERegion region;
     private String email;
+    private String number;
 
 }

@@ -1,22 +1,21 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.CarUpdateDTO;
+import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.models.Car;
 import com.example.auto_ria.models.Seller;
-import com.example.auto_ria.models.UserSQL;
+import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.CarsService;
-import com.example.auto_ria.services.JwtService;
-import jakarta.annotation.security.RolesAllowed;
+import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -25,8 +24,7 @@ import java.util.List;
 public class CarController {
 
     private CarsService carsService;
-    private UserDaoSQL userDaoSQL; //todo create a separate controller and service!!!
-    private JwtService jwtService;
+    private UsersServiceMySQLImpl usersServiceMySQL;
 
     @GetMapping()
 //    @JsonView(ViewsCar.SL3.class)
@@ -44,7 +42,7 @@ public class CarController {
 //    @JsonView(ViewsCar.SL2.class)
     public ResponseEntity<List<Car>> getByPower(@PathVariable("power") int power) {
         return carsService.getByPower(power);
-    }
+    } // todo remove
 
     @GetMapping("/{id}")
 //    @JsonView(ViewsCar.SL1.class)
@@ -52,36 +50,55 @@ public class CarController {
         return carsService.getById(id);
     }
 
+    @SneakyThrows
     @PostMapping()
-//    @Secured("SELLER")
-    public ResponseEntity<Car> post(@RequestBody CarDTO car) {
-        System.out.println("Post car");
-        return carsService.post(car);
+    public ResponseEntity<Car> post(
+//            @RequestBody CarDTO car
+            @RequestParam("brand") String brand,
+            @RequestParam("power") int power,
+            @RequestParam("city") String city,
+            @RequestParam("region") ERegion region,
+            @RequestParam("producer") String producer,
+            @RequestParam("price") String price,
+            @RequestParam("picture") MultipartFile picture,
+            HttpServletRequest request) {
+
+        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+
+        String fileName = picture.getOriginalFilename() + new Date(); // todo unique name
+
+        CarDTO car = CarDTO
+                .builder()
+                .brand(brand)
+                .powerH(power)
+                .city(city)
+                .region(region)
+                .producer(producer)
+                .price(price)
+                .photo(fileName)
+                .build();
+
+
+        usersServiceMySQL.transferAvatar(picture, fileName);
+
+        return carsService.post(car, seller);
     }
 
+    @SneakyThrows
     @PatchMapping("/{id}")
-    public ResponseEntity<Car> patchCar(@PathVariable int id, @RequestBody CarUpdateDTO partialCar, HttpServletRequest request) throws IllegalAccessException {
-
-        String bearerToken = null;
-
-        String authorizationHeader = request.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            bearerToken = authorizationHeader.substring(7);
-        }
-
-        String email = jwtService.extractUsername(bearerToken);
-
-        Seller seller = userDaoSQL.findSellerByEmail(email);
-
-        // todo check if the car belongs to the user
-
-        return carsService.update(id, partialCar);
+    public ResponseEntity<Car> patchCar(@PathVariable int id,
+                                        @ModelAttribute CarUpdateDTO partialCar,
+                                        HttpServletRequest request) {
+//todo transfer album
+        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+        return carsService.update(id, partialCar, seller);
     }
 
 
     @DeleteMapping()
-    public ResponseEntity<List<Car>> deleteById(@RequestParam("id") int id) {
-        return carsService.deleteById(id);
+    public ResponseEntity<List<Car>> deleteById(@RequestParam("id") int id, HttpServletRequest request) throws ErrorResponse {
+        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+        return carsService.deleteById(id, seller);
     }
 
 }

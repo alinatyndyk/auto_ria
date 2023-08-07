@@ -20,6 +20,7 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class JwtService {
 
+    // todo key to app.props
     private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B625064536756685970";
 
     public String extractUsername(String jwt) {
@@ -56,14 +57,12 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String generateToken(UserDetails userDetails) {
-        System.out.println(userDetails);
-        System.out.println(userDetails.getUsername());
         return generateToken(new HashMap<>(), userDetails);
     }
 
@@ -76,7 +75,7 @@ public class JwtService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -90,23 +89,22 @@ public class JwtService {
         return (username.equals(userDetails.getUsername()) && !isTokenExprired(jwt));
     }
 
-    private boolean isTokenExprired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
-    }
-
-    private String extractAccessTokenFromHeader (HttpServletRequest request) {
-
+    public String extractTokenFromHeader(HttpServletRequest request) {
         String bearerToken = null;
 
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             bearerToken = authorizationHeader.substring(7);
         }
-            return bearerToken;
+        return bearerToken;
+    }
+
+    private boolean isTokenExprired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
 }

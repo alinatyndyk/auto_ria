@@ -27,7 +27,8 @@ public class SecurityConfiguration {
                 .csrf(configurer -> configurer.disable())
                 .authorizeHttpRequests(matcherRegistry ->
                         matcherRegistry
-//                                .requestMatchers("/api/v1/auth/**")
+//                                .requestMatchers("/api/v1/auth/**") //todo clear
+                                .requestMatchers(HttpMethod.GET, "/cars/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER")
                                 .requestMatchers(HttpMethod.DELETE, "/cars/**").hasAnyAuthority("SELLER")
                                 .requestMatchers(HttpMethod.PATCH, "/cars/**").hasAnyAuthority("SELLER")

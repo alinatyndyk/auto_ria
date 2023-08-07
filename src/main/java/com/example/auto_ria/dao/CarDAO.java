@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface CarDAO extends JpaRepository<Car, Integer> {
     List<Car> findByBrand(String brand);
-    List<Car> findByPower(int power);
+    List<Car> findByPowerH(int power);
 }

@@ -20,7 +20,8 @@ public class AuthenticationService {
 
     private JwtService jwtService;
     private UserDaoSQL sellerDaoSQL;
-    //    private UserRepoMD userRepoMD; //todo add mongo
+    //    private UserRepoMD userRepoMD;
+    // todo add mongo
     private AuthenticationManager authenticationManager;
     private PasswordEncoder passwordEncoder;
 

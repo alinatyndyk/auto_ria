@@ -4,6 +4,8 @@ import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ESeller;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -24,7 +26,6 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 public class Seller implements UserDetails {
 
     @Id
@@ -63,6 +64,8 @@ public class Seller implements UserDetails {
 
     private String password;
 
+
+    @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "seller_cars",

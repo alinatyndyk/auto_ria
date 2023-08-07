@@ -12,7 +12,6 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class UserSQL extends Seller {
 
     @NotBlank(message = "last name is required")

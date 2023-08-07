@@ -69,7 +69,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
-            ErrorResponse errorResponse = ErrorResponse
+            ErrorResponse errorResponse = ErrorResponse  //todo check
                     .builder()
                     .statusCode(403)
                     .message("jwt expired")

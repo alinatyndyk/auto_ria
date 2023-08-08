@@ -1,7 +1,7 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.UserDTO;
-import com.example.auto_ria.models.Seller;
+import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -20,28 +20,31 @@ public class UserController {
 
     @GetMapping()
 //    @JsonView(ViewsUser.NoSL.class)
-    public ResponseEntity<List<Seller>> getAll() {
+    public ResponseEntity<List<SellerSQL>> getAll() {
 
         return usersServiceMySQL.getAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Seller> getById(@PathVariable("id") int id) {
+    public ResponseEntity<SellerSQL> getById(@PathVariable("id") int id) {
         return usersServiceMySQL.getById(String.valueOf(id));
     }
 
     @SneakyThrows
     @PatchMapping("/{id}")
-    public ResponseEntity<Seller> patchCar(@PathVariable int id,
-                                           @ModelAttribute UserDTO partialUser,
-                                           HttpServletRequest request) {
-        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+    public ResponseEntity<SellerSQL> patchCar(@PathVariable int id,
+                                              @ModelAttribute UserDTO partialUser,
+                                              HttpServletRequest request) {
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return usersServiceMySQL.update(id, partialUser, seller);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id) {
-        return usersServiceMySQL.deleteById(id);
+    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        // todo check if person id = req id, managerType global or manager.
+        //  If manager then m.company.id = req.id;
+        return usersServiceMySQL.deleteById(id, seller);
     }
 
 }

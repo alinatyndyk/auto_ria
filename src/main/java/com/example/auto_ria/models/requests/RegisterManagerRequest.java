@@ -10,13 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterRequest {
+public class RegisterManagerRequest {
     private String name;
-    private String lastName = null;
-    private String city;
-    private ERegion region;
     private String email;
-    private String number;
     private String avatar = null;
     private String password;
 }

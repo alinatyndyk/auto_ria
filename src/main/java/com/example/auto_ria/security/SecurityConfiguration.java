@@ -28,10 +28,12 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(matcherRegistry ->
                         matcherRegistry
 //                                .requestMatchers("/api/v1/auth/**") //todo clear
-                                .requestMatchers(HttpMethod.GET, "/cars/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER")
+                                .requestMatchers("/api/v1/auth/**").permitAll() //todo clear
+//                                .requestMatchers(HttpMethod.GET, "/cars/**").permitAll()
+//                                .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("MANAGER")
                                 .requestMatchers(HttpMethod.DELETE, "/cars/**").hasAnyAuthority("SELLER")
                                 .requestMatchers(HttpMethod.PATCH, "/cars/**").hasAnyAuthority("SELLER")
+                                .requestMatchers(HttpMethod.GET, "/cars/**").hasAnyAuthority("MANAGER")
 //                                .authenticated()
                                 .anyRequest()
                                 .permitAll()

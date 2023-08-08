@@ -2,17 +2,19 @@ package com.example.auto_ria.models;
 
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.enums.ESeller;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.List;
+
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSQL extends Seller {
+public class UserSQL extends SellerSQL {
 
     @NotBlank(message = "last name is required")
     @Size(min = 3, message = "last name must have more than 3 characters")
@@ -20,9 +22,9 @@ public class UserSQL extends Seller {
 //    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String lastName;
 
-    @Builder
-    public UserSQL(String name, String city, ERegion region, ERole role, String email, String number, String avatar, String password, String lastName, ESeller sellerType) {
-        super(name, city, region, role, email, number, avatar, password, sellerType);
+    @Builder(builderMethodName = "userSQLBuilder")
+    public UserSQL(String name, String email, String avatar, String password, List<ERole> roles, String city, ERegion region, String number, String lastName) {
+        super(name, email, avatar, password, roles, city, region, number);
         this.lastName = lastName;
     }
 }

@@ -2,8 +2,7 @@ package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.UserDTO;
-import com.example.auto_ria.models.Car;
-import com.example.auto_ria.models.Seller;
+import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,24 +25,24 @@ public class UsersServiceMySQLImpl implements UsersService {
     private JwtService jwtService;
 
     @SneakyThrows
-    public Seller extractSellerFromHeader(HttpServletRequest request) {
+    public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
         String bearerToken = jwtService.extractTokenFromHeader(request);
 
         String email = jwtService.extractUsername(bearerToken);
 
-        Seller seller = userDaoSQL.findSellerByEmail(email);
+        SellerSQL seller = userDaoSQL.findSellerByEmail(email);
         System.out.println(seller);
         return seller;
     }
 
 
-    public ResponseEntity<List<Seller>> getAll() {
+    public ResponseEntity<List<SellerSQL>> getAll() {
         return new ResponseEntity<>(userDaoSQL.findAll(), HttpStatus.ACCEPTED);
     }
 
 
-    public ResponseEntity<Seller> getById(String id) {
-        Seller user = userDaoSQL.findById(Integer.parseInt(id)).get();
+    public ResponseEntity<SellerSQL> getById(String id) {
+        SellerSQL user = userDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
@@ -54,18 +53,18 @@ public class UsersServiceMySQLImpl implements UsersService {
         picture.transferTo(transferDestinationFile);
     }
 
-    public ResponseEntity<String> deleteById(String id) {
+    public ResponseEntity<String> deleteById(String id, SellerSQL seller) {
         userDaoSQL.deleteById(Integer.valueOf(id));
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
 
-    public boolean doesBelongToSeller(Seller seller, Seller seller1) {
+    public boolean doesBelongToSeller(SellerSQL seller, SellerSQL seller1) {
         return seller.getId() == seller1.getId();
     }
 
-    public ResponseEntity<Seller> update(int id, UserDTO userDTO, Seller seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
+    public ResponseEntity<SellerSQL> update(int id, UserDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
 
-        Seller seller1 = getById(String.valueOf(id)).getBody();
+        SellerSQL seller1 = getById(String.valueOf(id)).getBody();
 
         assert seller1 != null;
         if (doesBelongToSeller(seller, seller1)) {
@@ -83,7 +82,7 @@ public class UsersServiceMySQLImpl implements UsersService {
 
                 if (fieldValue != null) {
 
-                    Field carField = Seller.class.getDeclaredField(fieldName);
+                    Field carField = SellerSQL.class.getDeclaredField(fieldName);
 
                     carField.setAccessible(true);
                     carField.set(seller1, fieldValue);

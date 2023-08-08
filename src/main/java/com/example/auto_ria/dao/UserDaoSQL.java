@@ -1,9 +1,9 @@
 package com.example.auto_ria.dao;
 
-import com.example.auto_ria.models.Seller;
+import com.example.auto_ria.models.SellerSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserDaoSQL  extends JpaRepository<Seller, Integer> {
+public interface UserDaoSQL  extends JpaRepository<SellerSQL, Integer> {
 
-    Seller findSellerByEmail(String email);
+    SellerSQL findSellerByEmail(String email);
 }

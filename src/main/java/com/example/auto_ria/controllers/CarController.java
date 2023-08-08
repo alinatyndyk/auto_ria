@@ -4,7 +4,7 @@ import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.CarUpdateDTO;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.models.Car;
-import com.example.auto_ria.models.Seller;
+import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.CarsService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
@@ -63,7 +63,7 @@ public class CarController {
             @RequestParam("picture") MultipartFile picture,
             HttpServletRequest request) {
 
-        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
         String fileName = picture.getOriginalFilename() + new Date(); // todo unique name
 
@@ -90,14 +90,14 @@ public class CarController {
                                         @ModelAttribute CarUpdateDTO partialCar,
                                         HttpServletRequest request) {
 //todo transfer album
-        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.update(id, partialCar, seller);
     }
 
 
     @DeleteMapping()
     public ResponseEntity<List<Car>> deleteById(@RequestParam("id") int id, HttpServletRequest request) throws ErrorResponse {
-        Seller seller = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.deleteById(id, seller);
     }
 

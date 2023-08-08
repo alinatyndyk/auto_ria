@@ -4,7 +4,7 @@ import com.example.auto_ria.dao.CarDAO;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.CarUpdateDTO;
 import com.example.auto_ria.models.Car;
-import com.example.auto_ria.models.Seller;
+import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -32,7 +31,7 @@ public class CarsService {
         return new ResponseEntity<>(carDAO.findById(id).get(), HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<Car> post(CarDTO carDTO, Seller seller) {
+    public ResponseEntity<Car> post(CarDTO carDTO, SellerSQL seller) {
 
         Car car = Car.builder()
                 .brand(carDTO.getBrand())
@@ -47,7 +46,7 @@ public class CarsService {
         return new ResponseEntity<>(carDAO.save(car), HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<List<Car>> deleteById(int id, Seller seller) throws ErrorResponse {
+    public ResponseEntity<List<Car>> deleteById(int id, SellerSQL seller) throws ErrorResponse {
         Car car = carDAO.findById(id).get();
         if (!doesBelongToSeller(seller, car)) {
             throw new ErrorResponse(403, "Error.Delete_fail: The car does not belong to seller");
@@ -63,12 +62,12 @@ public class CarsService {
         return new ResponseEntity<>(carDAO.findByPowerH(power), HttpStatus.ACCEPTED);
     }
 
-    public boolean doesBelongToSeller(Seller seller, Car car) {
+    public boolean doesBelongToSeller(SellerSQL seller, Car car) {
         return seller.getId() == car.getSeller().getId();
     }
 
     //todo separate update for avatar
-    public ResponseEntity<Car> update(int id, CarUpdateDTO carDTO, Seller seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
+    public ResponseEntity<Car> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
 
         Car car = getById(id).getBody();
 

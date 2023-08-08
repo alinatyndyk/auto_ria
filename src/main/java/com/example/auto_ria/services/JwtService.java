@@ -1,5 +1,6 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.models.responses.AuthenticationResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -22,6 +23,7 @@ public class JwtService {
 
     // todo key to app.props
     private static final String SECRET_KEY = "404E635266556A586E3272357538782F413F4428472B4B625064536756685970";
+    private static final String SECRET_KEY_Manager = "404E635266556A586E3272357538782F413F4428472B4B625064536756685970";
 
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
@@ -35,15 +37,14 @@ public class JwtService {
     public Claims extractAllClaims(String token) {
         return Jwts
                 .parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(getSigningKey(SECRET_KEY))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
-    public Key getSigningKey() {
-        System.out.println(SECRET_KEY);
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+    public Key getSigningKey(String key) {
+        byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -58,7 +59,7 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(SECRET_KEY), SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -76,12 +77,41 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(getSigningKey(SECRET_KEY), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
         return generateRefreshToken(new HashMap<>(), userDetails);
+    }
+
+    public AuthenticationResponse generateManagerTokenPair (
+            Map<String, String> extraClaims,
+            UserDetails userDetails
+    ) {
+        String accessToken =  Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(getSigningKey(SECRET_KEY_Manager), SignatureAlgorithm.HS256)
+                .compact();
+
+        String refreshToken =  Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+                .signWith(getSigningKey(SECRET_KEY_Manager), SignatureAlgorithm.HS256)
+                .compact();
+
+        return new AuthenticationResponse(accessToken, refreshToken);
+    }
+
+    public AuthenticationResponse generateManagerTokenPair(UserDetails userDetails) {
+        return generateManagerTokenPair(new HashMap<>(), userDetails);
     }
 
     public boolean isTokenValid(String jwt, UserDetails userDetails) {

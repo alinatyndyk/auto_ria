@@ -1,16 +1,13 @@
 package com.example.auto_ria.models;
 
-import com.example.auto_ria.enums.EAccountType;
-import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.enums.ESeller;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,11 +23,11 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Seller implements UserDetails {
+public class Person implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @JsonView(ViewsUser.SL1.class)
+//    @JsonView(ViewsUser.SL1.class)  //todo json view
     private int id;
 
     @NotBlank(message = "name is required")
@@ -39,80 +36,63 @@ public class Seller implements UserDetails {
 //    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String name;
 
-    private String city; //todo search
-
-    @Enumerated(EnumType.STRING)
-    private ERegion region;
-
-    @Enumerated(EnumType.STRING)
-    private ERole role;
-
-    @Enumerated(EnumType.STRING)
-    private ESeller sellerType;
-
     @Column(unique = true) // todo add regex expressions
     @Size(min = 3, message = "email must have more than 3 characters")
     @Size(max = 255, message = "email must have less than 255 characters")
 //    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String email;
 
-    @Column(unique = true) // todo add regex expressions
-//    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
-    private String number;
-
     private String avatar = null;
 
     private String password;
 
+    @ElementCollection
+    private List<ERole> roles = new ArrayList<>();
 
-    @JsonBackReference
-    @OneToMany(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "seller_cars",
-            joinColumns = @JoinColumn(name = "seller_id"),
-            inverseJoinColumns = @JoinColumn(name = "car_id")
-    )
-    private List<Car> cars = new ArrayList<>();
+    private String refreshToken; // todo schedule cron isAccountNonLocked;
 
     private Boolean isActivated = false;
 
-    private String refreshToken;
-
     @Column(updatable = false)
-    @CreationTimestamp
+    @CreationTimestamp // todo change format date;
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Enumerated(EnumType.STRING)
-    private EAccountType accountType = EAccountType.BASIC;
-
-    public Seller(String name, String city, ERegion region, ERole role, String email, String number, String avatar, String password, ESeller sellerType) {
+    @Builder
+    public Person(String name, String email, String avatar, String password, List<ERole> roles) {
         this.name = name;
-        this.city = city;
-        this.region = region;
-        this.role = role;
         this.email = email;
-        this.number = number;
         this.avatar = avatar;
         this.password = password;
-        this.sellerType = sellerType;
+        this.roles = roles;
+    }
+
+    public Person(String email, String password, List<ERole> roles) {
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()), new SimpleGrantedAuthority(sellerType.name()));
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        this.roles.forEach(role -> {
+            SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role.name());
+            authorities.add(authority);
+        });
+        return authorities;
     }
 
     @Override
     public String getUsername() {
         return email;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override

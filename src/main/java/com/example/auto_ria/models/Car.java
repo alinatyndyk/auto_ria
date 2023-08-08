@@ -1,14 +1,9 @@
 package com.example.auto_ria.models;
 
 import com.example.auto_ria.enums.ERegion;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Data
@@ -57,11 +52,11 @@ public class Car {
             joinColumns = @JoinColumn(name = "car_id"),
             inverseJoinColumns = @JoinColumn(name = "seller_id")
     )
-    private Seller seller;
+    private SellerSQL seller;
 
     private String price; //todo currency
 
-    public Car(String brand, Integer powerH, String city, ERegion region, String producer, String photo, Seller seller, String price) {
+    public Car(String brand, Integer powerH, String city, ERegion region, String producer, String photo, SellerSQL seller, String price) {
         this.brand = brand;
         this.powerH = powerH;
         this.city = city;

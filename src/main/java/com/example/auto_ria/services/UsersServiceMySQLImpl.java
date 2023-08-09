@@ -1,9 +1,12 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.UserDTO;
+import com.example.auto_ria.models.Manager;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
+import com.example.auto_ria.services.serviceInterfaces.UsersService;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -22,17 +25,25 @@ import java.util.List;
 public class UsersServiceMySQLImpl implements UsersService {
 
     private UserDaoSQL userDaoSQL;
+    private ManagerDaoSQL managerDaoSQL;
     private JwtService jwtService;
+
+
+    @SneakyThrows
+    public String extractEmailFromHeader(HttpServletRequest request) {
+        String bearerToken = jwtService.extractTokenFromHeader(request);
+
+        return jwtService.extractUsername(bearerToken);
+    }
 
     @SneakyThrows
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
-        String bearerToken = jwtService.extractTokenFromHeader(request);
+        return userDaoSQL.findSellerByEmail(extractEmailFromHeader(request));
+    }
 
-        String email = jwtService.extractUsername(bearerToken);
-
-        SellerSQL seller = userDaoSQL.findSellerByEmail(email);
-        System.out.println(seller);
-        return seller;
+    @SneakyThrows
+    public Manager extractManagerFromHeader(HttpServletRequest request) {
+        return managerDaoSQL.findByEmail(extractEmailFromHeader(request));
     }
 
 
@@ -53,7 +64,7 @@ public class UsersServiceMySQLImpl implements UsersService {
         picture.transferTo(transferDestinationFile);
     }
 
-    public ResponseEntity<String> deleteById(String id, SellerSQL seller) {
+    public ResponseEntity<String> deleteById(String id) {
         userDaoSQL.deleteById(Integer.valueOf(id));
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
@@ -93,9 +104,5 @@ public class UsersServiceMySQLImpl implements UsersService {
         }
         return new ResponseEntity<>(userDaoSQL.save(seller1), HttpStatus.ACCEPTED);
     }
-
-//    public ResponseEntity<UserSQL> getByEmail(String email) {
-//        return new ResponseEntity<>(userDAO.findSellerByEmail(email), HttpStatus.GONE);
-//    }
 
 }

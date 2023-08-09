@@ -1,12 +1,12 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.CarDTO;
-import com.example.auto_ria.dto.CarUpdateDTO;
+import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.models.Car;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
-import com.example.auto_ria.services.CarsService;
+import com.example.auto_ria.services.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.List;
 @RequestMapping(value = "cars")
 public class CarController {
 
-    private CarsService carsService;
+    private CarsServiceMySQLImpl carsService;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
     @GetMapping()
@@ -65,7 +65,7 @@ public class CarController {
 
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
-        String fileName = picture.getOriginalFilename() + new Date(); // todo unique name
+        String fileName = new Date() + picture.getOriginalFilename(); // todo unique name
 
         CarDTO car = CarDTO
                 .builder()
@@ -87,16 +87,16 @@ public class CarController {
     @SneakyThrows
     @PatchMapping("/{id}")
     public ResponseEntity<Car> patchCar(@PathVariable int id,
-                                        @ModelAttribute CarUpdateDTO partialCar,
+//                                        @ModelAttribute CarUpdateDTO partialCar,
+                                        @RequestBody CarUpdateDTO partialCar,
                                         HttpServletRequest request) {
 //todo transfer album
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.update(id, partialCar, seller);
     }
 
-
-    @DeleteMapping()
-    public ResponseEntity<List<Car>> deleteById(@RequestParam("id") int id, HttpServletRequest request) throws ErrorResponse {
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) throws ErrorResponse {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.deleteById(id, seller);
     }

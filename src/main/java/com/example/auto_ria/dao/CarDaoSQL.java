@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CarDAO extends JpaRepository<Car, Integer> {
+public interface CarDaoSQL extends JpaRepository<Car, Integer> {
     List<Car> findByBrand(String brand);
     List<Car> findByPowerH(int power);
 }

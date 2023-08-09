@@ -27,7 +27,6 @@ import java.io.IOException;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtService jwtService;
-    //    private UserDaoSQL userDaoSQL;
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
@@ -44,6 +43,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                System.out.println(userDetails);
 
                 if (
                         jwtService.isTokenValid(jwt, userDetails)
@@ -55,6 +55,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                             null,
                             userDetails.getAuthorities()
                     );
+
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                     SecurityContextHolder
@@ -78,7 +79,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         } catch (UsernameNotFoundException e) {
             throw new RuntimeException(e.getMessage());
         }
-
 
         filterChain.doFilter(request, response);
     }

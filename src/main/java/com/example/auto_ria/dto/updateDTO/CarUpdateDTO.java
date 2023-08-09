@@ -1,4 +1,4 @@
-package com.example.auto_ria.dto;
+package com.example.auto_ria.dto.updateDTO;
 
 import com.example.auto_ria.enums.ERegion;
 import lombok.AllArgsConstructor;

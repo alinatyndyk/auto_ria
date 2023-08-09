@@ -1,7 +1,10 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.UserDTO;
+import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.models.Manager;
 import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -19,7 +22,7 @@ public class UserController {
     private UsersServiceMySQLImpl usersServiceMySQL;
 
     @GetMapping()
-//    @JsonView(ViewsUser.NoSL.class)
+//    @JsonView(ViewsUser.NoSL.class) //todo jsonView
     public ResponseEntity<List<SellerSQL>> getAll() {
 
         return usersServiceMySQL.getAll();
@@ -40,11 +43,16 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
+    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) throws ErrorResponse {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
-        // todo check if person id = req id, managerType global or manager.
-        //  If manager then m.company.id = req.id;
-        return usersServiceMySQL.deleteById(id, seller);
+
+        Manager manager = usersServiceMySQL.extractManagerFromHeader(request);
+
+        if (!Integer.valueOf(id).equals(seller.getId()) || !manager.getRoles().contains(ERole.MANAGER_GLOBAL)) {
+            throw new ErrorResponse(403, "Illegal_access_exception. No-permission");
+        }
+
+        return usersServiceMySQL.deleteById(id);
     }
 
 }

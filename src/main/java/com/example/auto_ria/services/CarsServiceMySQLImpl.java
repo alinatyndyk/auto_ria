@@ -1,11 +1,12 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.CarDAO;
+import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
-import com.example.auto_ria.dto.CarUpdateDTO;
+import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.models.Car;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
+import com.example.auto_ria.services.serviceInterfaces.CarsService;
 import io.jsonwebtoken.io.IOException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -18,9 +19,9 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class CarsService {
+public class CarsServiceMySQLImpl implements CarsService {
 
-    private CarDAO carDAO;
+    private CarDaoSQL carDAO;
 
     public ResponseEntity<List<Car>> getAll() {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -43,15 +44,16 @@ public class CarsService {
                 .photo(carDTO.getPhoto())
                 .seller(seller)
                 .build();
+
         return new ResponseEntity<>(carDAO.save(car), HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<List<Car>> deleteById(int id, SellerSQL seller) throws ErrorResponse {
+    public ResponseEntity<String> deleteById(int id, SellerSQL seller) throws ErrorResponse {
         Car car = carDAO.findById(id).get();
         if (!doesBelongToSeller(seller, car)) {
             throw new ErrorResponse(403, "Error.Delete_fail: The car does not belong to seller");
         }
-        return new ResponseEntity<>(carDAO.findAll(), HttpStatus.GONE);
+        return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
     }
 
     public ResponseEntity<List<Car>> getByBrand(String brand) {
@@ -92,6 +94,9 @@ public class CarsService {
                     carField.set(car, fieldValue);
                 }
             }
+            System.out.println(car);
+            System.out.println("UPDATEDcar");
+            //todo check update
         } else {
             throw new ErrorResponse(403, "Error.Update_fail: The car does not belong to seller");  //todo normal error
         }

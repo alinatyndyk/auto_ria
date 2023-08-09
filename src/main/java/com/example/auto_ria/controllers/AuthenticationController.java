@@ -1,10 +1,7 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.models.requests.RegisterManagerRequest;
-import com.example.auto_ria.models.requests.LoginRequest;
-import com.example.auto_ria.models.requests.RefreshRequest;
-import com.example.auto_ria.models.requests.RegisterRequest;
+import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
@@ -30,14 +27,11 @@ public class AuthenticationController {
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("number") String number,
-            @RequestParam("password") String password
+            @RequestParam("password") String password //todo @attribute
     ) {
         String fileName = picture.getOriginalFilename();
-
         usersServiceMySQL.transferAvatar(picture, fileName);
-
         RegisterRequest registerRequest = new RegisterRequest(name, lastName, city, region, email, number, fileName, password);
-
         return ResponseEntity.ok(authenticationService.register(registerRequest));
     }
 
@@ -46,25 +40,57 @@ public class AuthenticationController {
             @RequestParam("name") String name,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password // todo try req body @attribute
+            @RequestParam("password") String password
     ) {
         String fileName = picture.getOriginalFilename();
-
         usersServiceMySQL.transferAvatar(picture, fileName);
-
         RegisterManagerRequest registerRequest = new RegisterManagerRequest(name, email, fileName, password);
-
         return ResponseEntity.ok(authenticationService.registerManager(registerRequest));
     }
 
-    @PostMapping("/authenticate")
+    @PostMapping("/register-admin")
+    public ResponseEntity<AuthenticationResponse> registerAdmin(
+            @RequestParam("name") String name,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("avatar") MultipartFile picture,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password
+    ) {
+        String fileName = picture.getOriginalFilename();
+        usersServiceMySQL.transferAvatar(picture, fileName);
+        RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
+        return ResponseEntity.ok(authenticationService.registerAdmin(registerRequest));
+    }
+
+    @PostMapping("/authenticate/seller")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
-        System.out.println("62");
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/authenticate/manager")
+    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(authenticationService.loginManager(loginRequest));
+    }
+
+    @PostMapping("/authenticate/admin")
+    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
+    }
+
+    @PostMapping("/refresh/seller")
     public ResponseEntity<AuthenticationResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
     }
+
+    @PostMapping("/refresh/manager")
+    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody RefreshRequest refreshRequest) {
+        return ResponseEntity.ok(authenticationService.refreshManager(refreshRequest));
+    }
+
+    @PostMapping("/refresh/admin")
+    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody RefreshRequest refreshRequest) {
+        return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
+    }
+
+    //todo forgot password - reset password
 }

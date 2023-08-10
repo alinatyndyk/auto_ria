@@ -1,16 +1,15 @@
 package com.example.auto_ria.services;
 
 import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
+import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
 import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.models.Administrator;
-import com.example.auto_ria.models.Manager;
-import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.models.UserSQL;
+import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import lombok.AllArgsConstructor;
@@ -28,17 +27,18 @@ public class AuthenticationService {
     private UserDaoSQL sellerDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
-    //    private UserRepoMD userRepoMD;
-    // todo add mongo
+    private CustomerDaoSQL customerDaoSQL;
+
     private SellerAuthenticationProvider sellerAuthenticationManager;
     private ManagerAuthenticationProvider managerAuthenticationManager;
     private AdminAuthenticationProvider adminAuthenticationProvider;
+    private CustomerAuthenticationProvider customerAuthenticationProvider;
 
     private PasswordEncoder passwordEncoder;
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
 
-        UserSQL seller = UserSQL
+        SellerSQL seller = UserSQL
                 .userSQLBuilder()
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
@@ -68,7 +68,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse registerManager(RegisterManagerRequest registerRequest) {
 
-        Manager manager = Manager
+        ManagerSQL manager = ManagerSQL
                 .managerSQLBuilder()
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
@@ -92,7 +92,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse registerAdmin(RegisterAdminRequest registerRequest) {
 
-        Administrator administrator = Administrator
+        AdministratorSQL administrator = AdministratorSQL
                 .adminBuilder()
                 .name(registerRequest.getName())
                 .email(registerRequest.getEmail())
@@ -107,6 +107,31 @@ public class AuthenticationService {
         administrator.setRefreshToken(authenticationResponse.getRefreshToken());
 
         administratorDaoSQL.save(administrator);
+
+        return AuthenticationResponse
+                .builder()
+                .accessToken(authenticationResponse.getAccessToken())
+                .refreshToken(authenticationResponse.getRefreshToken())
+                .build();
+    }
+
+    public AuthenticationResponse registerCustomer(RegisterAdminRequest registerRequest) {
+
+        CustomerSQL customerSQL = CustomerSQL
+                .customerBuilder()
+                .name(registerRequest.getName())
+                .email(registerRequest.getEmail())
+                .avatar(registerRequest.getAvatar())
+                .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .lastName(registerRequest.getLastName())
+                .roles(List.of(ERole.CUSTOMER))
+                .build();
+
+        AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
+
+        customerSQL.setRefreshToken(authenticationResponse.getRefreshToken());
+
+        customerDaoSQL.save(customerSQL);
 
         return AuthenticationResponse
                 .builder()
@@ -135,7 +160,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse loginManager(LoginRequest loginRequest) {
-        Manager user = managerDaoSQL.findByEmail(loginRequest.getEmail());
+        ManagerSQL user = managerDaoSQL.findByEmail(loginRequest.getEmail());
 
         managerAuthenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -153,7 +178,7 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse loginAdmin(LoginRequest loginRequest) {
-        Administrator administrator = administratorDaoSQL.findByEmail(loginRequest.getEmail());
+        AdministratorSQL administrator = administratorDaoSQL.findByEmail(loginRequest.getEmail());
 
         adminAuthenticationProvider.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -170,9 +195,27 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
     }
 
+    public AuthenticationResponse loginCustomer(LoginRequest loginRequest) {
+        CustomerSQL customerSQL = customerDaoSQL.findByEmail(loginRequest.getEmail());
+
+        customerAuthenticationProvider.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getEmail(),
+                        loginRequest.getPassword(),
+                        customerSQL.getAuthorities()
+                )
+        );
+        AuthenticationResponse tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
+
+        customerSQL.setRefreshToken(tokenPair.getRefreshToken());
+        customerDaoSQL.save(customerSQL);
+
+        return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
+    }
+
     public AuthenticationResponse refresh(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken);
+        String username = jwtService.extractUsername(refreshToken, ERole.SELLER);
 
         SellerSQL user = sellerDaoSQL.findSellerByEmail(username);
         String newAccessToken = null;
@@ -190,9 +233,11 @@ public class AuthenticationService {
 
     public AuthenticationResponse refreshManager(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken);
 
-        Manager user = managerDaoSQL.findByEmail(username);
+        String username = jwtService.extractUsername(refreshToken, ERole.MANAGER); //extract from manager
+
+        ManagerSQL user = managerDaoSQL.findByEmail(username);
+
 
         AuthenticationResponse tokenPair = null;
 
@@ -208,9 +253,9 @@ public class AuthenticationService {
 
     public AuthenticationResponse refreshAdmin(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken);
+        String username = jwtService.extractUsername(refreshToken, ERole.ADMIN);
 
-        Administrator administrator = administratorDaoSQL.findByEmail(username);
+        AdministratorSQL administrator = administratorDaoSQL.findByEmail(username);
 
         AuthenticationResponse tokenPair = null;
 
@@ -218,6 +263,26 @@ public class AuthenticationService {
             tokenPair = jwtService.generateAdminTokenPair(administrator);
             administrator.setRefreshToken(tokenPair.getRefreshToken());
             administratorDaoSQL.save(administrator);
+        }
+
+        System.out.println(tokenPair);
+
+        assert tokenPair != null;
+        return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
+    }
+
+    public AuthenticationResponse refreshCustomer(RefreshRequest refreshRequest) {
+        String refreshToken = refreshRequest.getRefreshToken();
+        String username = jwtService.extractUsername(refreshToken, ERole.CUSTOMER);
+
+        CustomerSQL customerSQL = customerDaoSQL.findByEmail(username);
+
+        AuthenticationResponse tokenPair = null;
+
+        if (customerSQL.getRefreshToken().equals(refreshToken)) {
+            tokenPair = jwtService.generateAdminTokenPair(customerSQL);
+            customerSQL.setRefreshToken(tokenPair.getRefreshToken());
+            customerDaoSQL.save(customerSQL);
         }
 
         assert tokenPair != null;

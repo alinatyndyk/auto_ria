@@ -1,16 +1,20 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.UserDTO;
-import com.example.auto_ria.models.Manager;
+import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.models.AdministratorSQL;
+import com.example.auto_ria.models.CustomerSQL;
+import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.serviceInterfaces.UsersService;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,26 +28,33 @@ import java.util.List;
 @AllArgsConstructor
 public class UsersServiceMySQLImpl implements UsersService {
 
-    private UserDaoSQL userDaoSQL;
+    private AdministratorDaoSQL administratorDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
+    private UserDaoSQL userDaoSQL;
+    private CustomerDaoSQL customerDaoSQL;
     private JwtService jwtService;
 
 
-    @SneakyThrows
-    public String extractEmailFromHeader(HttpServletRequest request) {
+    public String extractEmailFromHeader(HttpServletRequest request, ERole role) {
         String bearerToken = jwtService.extractTokenFromHeader(request);
 
-        return jwtService.extractUsername(bearerToken);
+        return jwtService.extractUsername(bearerToken, role);
     }
 
-    @SneakyThrows
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
-        return userDaoSQL.findSellerByEmail(extractEmailFromHeader(request));
+        return userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
     }
 
-    @SneakyThrows
-    public Manager extractManagerFromHeader(HttpServletRequest request) {
-        return managerDaoSQL.findByEmail(extractEmailFromHeader(request));
+    public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
+        return managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
+    }
+
+    public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
+        return administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
+    }
+
+    public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
+        return customerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.CUSTOMER));
     }
 
 
@@ -57,8 +68,7 @@ public class UsersServiceMySQLImpl implements UsersService {
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
-    @SneakyThrows
-    public void transferAvatar(MultipartFile picture, String originalFileName) {
+    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
         String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
         File transferDestinationFile = new File(path);
         picture.transferTo(transferDestinationFile);
@@ -103,6 +113,15 @@ public class UsersServiceMySQLImpl implements UsersService {
             throw new ErrorResponse(403, "Error.Update_fail: The car does not belong to seller");  //todo normal error
         }
         return new ResponseEntity<>(userDaoSQL.save(seller1), HttpStatus.ACCEPTED);
+    }
+
+    public void updateAvatar(int id, String fileName) {
+
+        SellerSQL seller = getById(String.valueOf(id)).getBody();
+        assert seller != null;
+        seller.setAvatar(fileName);
+
+        userDaoSQL.save(seller);
     }
 
 }

@@ -1,7 +1,7 @@
 package com.example.auto_ria.configurations.providers;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.models.AdministratorSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
+import com.example.auto_ria.models.CustomerSQL;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -16,9 +16,9 @@ import java.util.Collection;
 
 @Component
 @AllArgsConstructor
-public class AdminAuthenticationProvider implements AuthenticationProvider {
+public class CustomerAuthenticationProvider implements AuthenticationProvider {
 
-    private AdministratorDaoSQL administratorDaoSQL;
+    private CustomerDaoSQL customerDaoSQL;
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -27,9 +27,9 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         Collection<? extends GrantedAuthority> permissions = authentication.getAuthorities();
 
-        AdministratorSQL administrator = administratorDaoSQL.findByEmail(username);
+        CustomerSQL customer = customerDaoSQL.findByEmail(username);
 
-        if (!passwordEncoder.matches(password, administrator.getPassword())) {
+        if (!passwordEncoder.matches(password, customer.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
 

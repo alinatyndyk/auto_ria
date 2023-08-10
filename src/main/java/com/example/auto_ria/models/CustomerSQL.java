@@ -11,12 +11,13 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Administrator extends Person {  // todo add admin when api starts
+
+public class CustomerSQL extends Person {
 
     private String lastName;
 
-    @Builder(builderMethodName = "adminBuilder")
-    public Administrator(String name, String lastName, String email, String avatar, String password, List<ERole> roles) {
+    @Builder(builderMethodName = "customerBuilder")
+    public CustomerSQL(String name, String lastName, String email, String avatar, String password, List<ERole> roles) {
         super(name, email, avatar, password, roles);
         this.lastName = lastName;
     }

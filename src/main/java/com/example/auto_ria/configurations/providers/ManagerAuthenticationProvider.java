@@ -1,7 +1,7 @@
 package com.example.auto_ria.configurations.providers;
 
 import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.models.Manager;
+import com.example.auto_ria.models.ManagerSQL;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,7 +27,7 @@ public class ManagerAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         Collection<? extends GrantedAuthority> permissions = authentication.getAuthorities();
 
-        Manager manager = managerService.findByEmail(username);
+        ManagerSQL manager = managerService.findByEmail(username);
 
         if (!passwordEncoder.matches(password, manager.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");

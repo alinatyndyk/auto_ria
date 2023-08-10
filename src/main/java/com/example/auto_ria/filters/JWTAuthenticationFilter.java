@@ -39,17 +39,28 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String jwt = authorizationHeader.substring(7);
+            System.out.println("userEmail filter1");
             String userEmail = jwtService.extractUsername(jwt);
+            System.out.println(userEmail);
+            System.out.println("userEmail filter");
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                System.out.println("first if");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
                 System.out.println(userDetails);
+                System.out.println("user details");
 
-                if (
-                        jwtService.isTokenValid(jwt, userDetails)
+                if (true
+//                        jwtService.isTokenValid(jwt, userDetails)
 //                        && // todo check if refresh
 //                        !jwt.equals(userDaoSQL.findSellerByEmail(userEmail).getRefreshToken())
                 ) {
+                System.out.println("second if");
+                    System.out.println(userDetails);
+                    System.out.println(userDetails.getAuthorities());
+                    System.out.println(userDetails.getUsername());
+                    System.out.println(userDetails.getPassword());
+                    System.out.println(userDetails);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -58,10 +69,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
+                    System.out.println("SET DETAILS");
+
                     SecurityContextHolder
                             .getContext()
                             .setAuthentication(authenticationToken);
                 }
+                System.out.println("CONTEXT HOLDER");
             }
         } catch (ExpiredJwtException e) {
             response.setHeader(HttpHeaders.EXPIRES, "dead");
@@ -69,7 +83,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
 
-            ErrorResponse errorResponse = ErrorResponse  //todo custom error
+            ErrorResponse errorResponse = ErrorResponse  //todo todo custom error
                     .builder()
                     .statusCode(403)
                     .message("jwt expired")

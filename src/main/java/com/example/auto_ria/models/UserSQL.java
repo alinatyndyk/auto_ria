@@ -14,6 +14,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class UserSQL extends SellerSQL {
 
     @NotBlank(message = "last name is required")
@@ -27,4 +28,5 @@ public class UserSQL extends SellerSQL {
         super(name, email, avatar, password, roles, city, region, number);
         this.lastName = lastName;
     }
+
 }

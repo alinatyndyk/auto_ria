@@ -34,7 +34,7 @@ public class SellerSQL extends Person {
             joinColumns = @JoinColumn(name = "seller_id"),
             inverseJoinColumns = @JoinColumn(name = "car_id")
     )
-    private List<Car> cars = new ArrayList<>();
+    private List<CarSQL> cars = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EAccountType accountType = EAccountType.BASIC;

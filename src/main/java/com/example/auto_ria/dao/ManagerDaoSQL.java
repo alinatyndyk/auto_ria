@@ -1,9 +1,9 @@
 package com.example.auto_ria.dao;
 
-import com.example.auto_ria.models.Manager;
+import com.example.auto_ria.models.ManagerSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ManagerDaoSQL extends JpaRepository<Manager, Integer> {
+public interface ManagerDaoSQL extends JpaRepository<ManagerSQL, Integer> {
 
-    Manager findByEmail(String email);
+    ManagerSQL findByEmail(String email);
 }

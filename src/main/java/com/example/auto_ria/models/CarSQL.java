@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Car {
+public class CarSQL {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,7 +56,7 @@ public class Car {
 
     private String price; //todo currency
 
-    public Car(String brand, Integer powerH, String city, ERegion region, String producer, String photo, SellerSQL seller, String price) {
+    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, String photo, SellerSQL seller, String price) {
         this.brand = brand;
         this.powerH = powerH;
         this.city = city;

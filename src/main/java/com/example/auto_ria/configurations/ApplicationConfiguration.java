@@ -1,9 +1,11 @@
 package com.example.auto_ria.configurations;
 
 import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
+import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
 import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import lombok.AllArgsConstructor;
@@ -21,10 +23,12 @@ public class ApplicationConfiguration {
 
     private UserDaoSQL userDAO;
     private ManagerDaoSQL managerDaoSQL;
+    private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
-    private SellerAuthenticationProvider sellerAuthenticationProvider;
+    private CustomerAuthenticationProvider customerAuthenticationProvider;
     private ManagerAuthenticationProvider managerAuthenticationProvider;
+    private SellerAuthenticationProvider sellerAuthenticationProvider;
     private AdminAuthenticationProvider adminAuthenticationProvider;
 
 
@@ -44,7 +48,16 @@ public class ApplicationConfiguration {
     }
 
     @Bean
+    public UserDetailsService customerDetailsService() {
+        return username -> customerDaoSQL.findByEmail(username);
+    }
+
+    @Bean
     public AuthenticationManager authenticationManager() {
-        return new ProviderManager(List.of(sellerAuthenticationProvider, managerAuthenticationProvider, adminAuthenticationProvider));
+        return new ProviderManager(
+                List.of(sellerAuthenticationProvider,
+                        managerAuthenticationProvider,
+                        adminAuthenticationProvider,
+                        customerAuthenticationProvider));
     }
 }

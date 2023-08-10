@@ -2,8 +2,9 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.models.Car;
+import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.CarsServiceMySQLImpl;
@@ -28,31 +29,19 @@ public class CarController {
 
     @GetMapping()
 //    @JsonView(ViewsCar.SL3.class)
-    public ResponseEntity<List<Car>> getAll() {
+    public ResponseEntity<List<CarSQL>> getAll() {
         return carsService.getAll();
     }
 
-    @GetMapping("/brands/{brand}")
-//    @JsonView(ViewsCar.SL2.class)
-    public ResponseEntity<List<Car>> getByBrand(@PathVariable("brand") String brand) {
-        return carsService.getByBrand(brand);
-    }
-
-    @GetMapping("/power/{power}")
-//    @JsonView(ViewsCar.SL2.class)
-    public ResponseEntity<List<Car>> getByPower(@PathVariable("power") int power) {
-        return carsService.getByPower(power);
-    } // todo remove
-
     @GetMapping("/{id}")
 //    @JsonView(ViewsCar.SL1.class)
-    public ResponseEntity<Car> getById(@PathVariable("id") int id) {
+    public ResponseEntity<CarSQL> getById(@PathVariable("id") int id) {
         return carsService.getById(id);
     }
 
     @SneakyThrows
     @PostMapping()
-    public ResponseEntity<Car> post(
+    public ResponseEntity<CarSQL> post(
 //            @RequestBody CarDTO car
             @RequestParam("brand") String brand,
             @RequestParam("power") int power,
@@ -62,6 +51,7 @@ public class CarController {
             @RequestParam("price") String price,
             @RequestParam("picture") MultipartFile picture,
             HttpServletRequest request) {
+        System.out.println("CAR CONTROLLer");
 
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
@@ -86,12 +76,17 @@ public class CarController {
 
     @SneakyThrows
     @PatchMapping("/{id}")
-    public ResponseEntity<Car> patchCar(@PathVariable int id,
+    public ResponseEntity<CarSQL> patchCar(@PathVariable int id,
 //                                        @ModelAttribute CarUpdateDTO partialCar,
-                                        @RequestBody CarUpdateDTO partialCar,
-                                        HttpServletRequest request) {
+                                           @RequestBody CarUpdateDTO partialCar,
+                                           HttpServletRequest request) {
 //todo transfer album
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        List<CarSQL> cars = carsService.getBySeller(seller).getBody();
+        assert cars != null;
+        if (seller.getAccountType().equals(EAccountType.BASIC) && cars.isEmpty()) {
+            throw new ErrorResponse(403, "Forbidden. Basic_account: The car already exists");
+        }
         return carsService.update(id, partialCar, seller);
     }
 

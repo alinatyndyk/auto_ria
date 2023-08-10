@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
@@ -28,7 +30,7 @@ public class AuthenticationController {
             @RequestParam("email") String email,
             @RequestParam("number") String number,
             @RequestParam("password") String password //todo @attribute
-    ) {
+    ) throws IOException {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterRequest registerRequest = new RegisterRequest(name, lastName, city, region, email, number, fileName, password);
@@ -41,7 +43,7 @@ public class AuthenticationController {
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("password") String password
-    ) {
+    ) throws IOException {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterManagerRequest registerRequest = new RegisterManagerRequest(name, email, fileName, password);
@@ -55,11 +57,25 @@ public class AuthenticationController {
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("password") String password
-    ) {
+    ) throws IOException {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
         return ResponseEntity.ok(authenticationService.registerAdmin(registerRequest));
+    }
+
+    @PostMapping("/register-customer")
+    public ResponseEntity<AuthenticationResponse> registerCustomer(
+            @RequestParam("name") String name,
+            @RequestParam("lastName") String lastName,
+            @RequestParam("avatar") MultipartFile picture,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password
+    ) throws IOException {
+        String fileName = picture.getOriginalFilename();
+        usersServiceMySQL.transferAvatar(picture, fileName);
+        RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
+        return ResponseEntity.ok(authenticationService.registerCustomer(registerRequest));
     }
 
     @PostMapping("/authenticate/seller")
@@ -77,6 +93,11 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
     }
 
+    @PostMapping("/authenticate/customer")
+    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody LoginRequest loginRequest) {
+        return ResponseEntity.ok(authenticationService.loginCustomer(loginRequest));
+    }
+
     @PostMapping("/refresh/seller")
     public ResponseEntity<AuthenticationResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
@@ -90,6 +111,11 @@ public class AuthenticationController {
     @PostMapping("/refresh/admin")
     public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
+    }
+
+    @PostMapping("/refresh/customer")
+    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody RefreshRequest refreshRequest) {
+        return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
     }
 
     //todo forgot password - reset password

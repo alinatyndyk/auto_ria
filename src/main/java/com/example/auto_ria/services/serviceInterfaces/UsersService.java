@@ -15,7 +15,7 @@ public interface UsersService {
 
     ResponseEntity<SellerSQL> getById(String id);
 
-    void transferAvatar(MultipartFile picture, String originalFileName);
+    void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException;
 
     ResponseEntity<String> deleteById(String id);
 

@@ -1,6 +1,7 @@
 package com.example.auto_ria.security;
 
 import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
+import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
 import com.example.auto_ria.filters.JWTAuthenticationFilter;
@@ -23,6 +24,7 @@ public class SecurityConfiguration {
     private SellerAuthenticationProvider sellerAuthenticationProvider;
     private ManagerAuthenticationProvider managerAuthenticationProvider;
     private AdminAuthenticationProvider adminAuthenticationProvider;
+    private CustomerAuthenticationProvider customerAuthenticationProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -37,10 +39,22 @@ public class SecurityConfiguration {
 
                                         .requestMatchers(HttpMethod.DELETE, "/sellers/**").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
                                         .requestMatchers(HttpMethod.PATCH, "sellers/**").hasAnyAuthority("SELLER", "ADMIN")
+                                        .requestMatchers(HttpMethod.GET, "sellers").hasAnyAuthority("ADMIN")
 
-                                        .requestMatchers(HttpMethod.POST, "/managers").hasAnyAuthority("ADMIN") //todo managers service and controller
-                                        .requestMatchers(HttpMethod.DELETE, "/managers/**").hasAnyAuthority("SELLER_COMPANY", "ADMIN")
-                                        .requestMatchers(HttpMethod.PATCH, "/managers/**").hasAnyAuthority("SELLER_COMPANY", "ADMIN")
+                                        .requestMatchers(HttpMethod.GET, "/managers/**").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/managers").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.DELETE, "/managers/**").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.PATCH, "/managers/**").hasAnyAuthority("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET, "/administrators/**").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/administrators").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.DELETE, "/administrators/**").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.PATCH, "/administrators/**").hasAnyAuthority("ADMIN")
+
+                                        .requestMatchers(HttpMethod.GET, "/customers/**").permitAll()
+                                        .requestMatchers(HttpMethod.GET, "/customers").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.DELETE, "/customers/**").hasAnyAuthority("CUSTOMER", "MANAGER", "ADMIN")
+                                        .requestMatchers(HttpMethod.PATCH, "/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
 
 //                                .authenticated()
                                         .anyRequest()
@@ -50,6 +64,7 @@ public class SecurityConfiguration {
                 .authenticationProvider(sellerAuthenticationProvider)
                 .authenticationProvider(managerAuthenticationProvider)
                 .authenticationProvider(adminAuthenticationProvider)
+                .authenticationProvider(customerAuthenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

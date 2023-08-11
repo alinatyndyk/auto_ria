@@ -1,11 +1,12 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dto.UserDTO;
+import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
+import com.example.auto_ria.services.MaxPanelService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -22,10 +23,18 @@ import java.util.List;
 public class UserController {
 
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private MaxPanelService maxPanelService;
 
     @GetMapping()
 //    @JsonView(ViewsUser.NoSL.class) //todo jsonView
     public ResponseEntity<List<SellerSQL>> getAll() {
+        System.out.println("before maxpanel");
+        maxPanelService.view("11");
+        System.out.println("after maxpanel");
+        System.out.println("before maxpanel1");
+        maxPanelService.getViews();
+        System.out.println("before maxpanel2");
+
         return usersServiceMySQL.getAll();
     }
 
@@ -36,7 +45,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<SellerSQL> patchManager(@PathVariable int id,
-                                                  @ModelAttribute UserDTO partialUser,
+                                                  @ModelAttribute UserUpdateDTO partialUser,
                                                   HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException, ErrorResponse {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         return usersServiceMySQL.update(id, partialUser, seller);

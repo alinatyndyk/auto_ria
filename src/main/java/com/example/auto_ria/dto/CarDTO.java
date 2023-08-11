@@ -5,7 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -19,6 +20,6 @@ public class CarDTO {
     private ERegion region;
     private String producer;
     private String price;
-    private String photo; //todo album
+    private List<String> photo; //todo album
 
 }

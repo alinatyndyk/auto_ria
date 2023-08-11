@@ -4,7 +4,7 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
-import com.example.auto_ria.dto.UserDTO;
+import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
@@ -89,7 +89,7 @@ public class UsersServiceMySQLImpl implements UsersService {
         return seller.getId() == seller1.getId();
     }
 
-    public ResponseEntity<SellerSQL> update(int id, UserDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
+    public ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
 
         SellerSQL seller1 = getById(String.valueOf(id)).getBody();
 

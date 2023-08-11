@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -34,6 +35,16 @@ public class CarsServiceMySQLImpl implements CarsService {
 
     public ResponseEntity<List<CarSQL>> getBySeller(SellerSQL seller) {
         return new ResponseEntity<>(carDAO.findBySeller(seller), HttpStatus.ACCEPTED);
+    }
+
+    public List<CarSQL> getBySellerList(SellerSQL seller) {
+        return carDAO.findBySeller(seller);
+    }
+
+    public void addView (int id, Date date) {
+        CarSQL carSQL = carDAO.findById(id).get();
+
+        return ;
     }
 
     public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) {

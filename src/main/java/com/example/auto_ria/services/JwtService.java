@@ -11,6 +11,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,16 @@ public class JwtService {
 
     // todo key to app.props
 
+    @Value("${token.generation.key.seller}")
     private static final String SECRET_KEY = "404E635268556A586E3272357538782F413F4428472B4B625064536756685970";
+
+    @Value("${token.generation.key.manager}")
     private static final String SECRET_KEY_Manager = "404E635267556A586E3272357538782F413F4428472B4B625064536756685970";
+
+    @Value("${token.generation.key.admin}")
     private static final String SECRET_KEY_Admin = "404E735266557A586E3272357538782F413F4428472B4B625064536756685970";
+
+    @Value("${token.generation.key.customer}")
     private static final String SECRET_KEY_Customer = "404E745266556A586E3272357538782F413F4428472B4B625064536756685970";
 
 
@@ -39,15 +47,7 @@ public class JwtService {
 
 
     public String extractUsername(String jwt) {
-//        for (ERole role : ERole.values()) {
-//            System.out.println(role);
         return extractClaim(jwt, Claims::getSubject);
-//            System.out.println(username);
-//            if (username != null) {
-//                return username;
-//            }
-//        }
-//        return null;
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsTFunction, ERole role) {
@@ -59,63 +59,41 @@ public class JwtService {
         Claims claims = Jwts.claims();
         try {
             for (ERole role : ERole.values()) {
-                System.out.println(role);
-                Claims x = extractAllClaims(token, role);
-                if (x !=null) {
-                    claims.putAll(x);
+                Claims result = extractAllClaims(token, role);
+                if (result != null) {
+                    claims.putAll(result);
                     return claimsTFunction.apply(claims);
                 }
             }
 
-        } catch (IllegalArgumentException exception) {}
-        catch (SignatureException exception) {}
-        catch (JwtException exception) {}
+        } catch (IllegalArgumentException | SignatureException ignored) {
+        }
         return claimsTFunction.apply(claims);
     }
 
     public Claims extractAllClaims(String token, ERole role) throws JwtException {
         Claims claims = null;
-//
         try {
-            Claims x = Jwts
+            claims = Jwts
                     .parserBuilder()
                     .setSigningKey(getSigningKey(role))
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
-            assert claims != null;
-            claims = x;
-        } catch (SignatureException e) {
-            // log the exception
-            System.out.println("dont care");
-        }
+
+        } catch (SignatureException ignored) {}
         return claims;
-//        throw new JwtException("JWT signature does not match locally computed signature");
     }
 
-//    public Key getSigningKey(String key) {
-//        byte[] keyBytes = Decoders.BASE64.decode(key);
-//        return Keys.hmacShaKeyFor(keyBytes);
-//    }
-
     public Key getSigningKey(ERole role) {
-        String key = null;
-        switch (role) {
-            case ADMIN:
-                key = SECRET_KEY_Admin;
-                break;
-            case MANAGER:
-                key = SECRET_KEY_Manager;
-                break;
-            case SELLER:
-                key = SECRET_KEY;
-                break;
-            case CUSTOMER:
-                key = SECRET_KEY_Customer;
-                break;
-        }
-        System.out.println(key);
-        System.out.println("key");
+        String key = switch (role) {
+            case ADMIN -> SECRET_KEY_Admin;
+            case MANAGER -> SECRET_KEY_Manager;
+            case SELLER -> SECRET_KEY;
+            case CUSTOMER -> SECRET_KEY_Customer;
+            default -> null;
+        };
+
         byte[] keyBytes = Decoders.BASE64.decode(key);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -132,7 +110,6 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(ERole.SELLER.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-//                .signWith(getSigningKey(SECRET_KEY), SignatureAlgorithm.HS256)
                 .signWith(getSigningKey(ERole.SELLER), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -152,7 +129,6 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(ERole.SELLER.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-//                .signWith(getSigningKey(SECRET_KEY), SignatureAlgorithm.HS256)
                 .signWith(getSigningKey(ERole.SELLER), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -162,7 +138,6 @@ public class JwtService {
     }
 
     public AuthenticationResponse generateTokenPair(
-            String key,
             ERole issuer,
             Map<String, String> extraClaims,
             UserDetails userDetails
@@ -177,7 +152,6 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(issuer.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-//                .signWith(getSigningKey(key), SignatureAlgorithm.HS256)
                 .signWith(getSigningKey(issuer), SignatureAlgorithm.HS256)
                 .compact();
 
@@ -188,13 +162,8 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(issuer.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-//                .signWith(getSigningKey(key), SignatureAlgorithm.HS256)
                 .signWith(getSigningKey(issuer), SignatureAlgorithm.HS256)
                 .compact();
-
-        System.out.println(accessToken);
-        System.out.println(refreshToken);
-        System.out.println("jwt service pair");
 
         return new AuthenticationResponse(accessToken, refreshToken);
     }
@@ -203,7 +172,7 @@ public class JwtService {
             Map<String, String> extraClaims,
             UserDetails userDetails
     ) {
-        return generateTokenPair(SECRET_KEY_Manager, ERole.MANAGER, extraClaims, userDetails);
+        return generateTokenPair(ERole.MANAGER, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateManagerTokenPair(UserDetails userDetails) {
@@ -214,7 +183,7 @@ public class JwtService {
             Map<String, String> extraClaims,
             UserDetails userDetails
     ) {
-        return generateTokenPair(SECRET_KEY_Admin, ERole.ADMIN, extraClaims, userDetails);
+        return generateTokenPair(ERole.ADMIN, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateAdminTokenPair(UserDetails userDetails) {
@@ -225,16 +194,16 @@ public class JwtService {
             Map<String, String> extraClaims,
             UserDetails userDetails
     ) {
-        return generateTokenPair(SECRET_KEY_Customer, ERole.CUSTOMER, extraClaims, userDetails);
+        return generateTokenPair(ERole.CUSTOMER, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateCustomerTokenPair(UserDetails userDetails) {
         return generateCustomerTokenPair(new HashMap<>(), userDetails);
     }
 
-    public boolean isTokenValid(String jwt, UserDetails userDetails, ERole role) {
-        String username = extractUsername(jwt, role);
-        return (username.equals(userDetails.getUsername()) && !isTokenExprired(jwt, role));
+    public boolean isTokenValid(String jwt, UserDetails userDetails) {
+        String username = extractUsername(jwt);
+        return (username.equals(userDetails.getUsername()) && !isTokenExprired(jwt));
     }
 
     public String extractTokenFromHeader(HttpServletRequest request) {
@@ -247,12 +216,12 @@ public class JwtService {
         return bearerToken;
     }
 
-    private boolean isTokenExprired(String token, ERole role) {
-        return extractExpiration(token, role).before(new Date());
+    private boolean isTokenExprired(String token) {
+        return extractExpiration(token).before(new Date());
     }
 
-    private Date extractExpiration(String token, ERole role) {
-        return extractClaim(token, Claims::getExpiration, role);
+    private Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
 }

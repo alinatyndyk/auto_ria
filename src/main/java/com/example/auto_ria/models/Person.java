@@ -1,8 +1,10 @@
 package com.example.auto_ria.models;
 
 import com.example.auto_ria.enums.ERole;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -36,14 +38,18 @@ public class Person implements UserDetails {
 //    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String name;
 
-    @Column(unique = true) // todo add regex expressions
+    @Column(unique = true)
     @Size(min = 3, message = "email must have more than 3 characters")
     @Size(max = 255, message = "email must have less than 255 characters")
+    @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
 //    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String email;
 
     private String avatar = null;
 
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
+            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
+                    "At least 8 characters long")
     private String password;
 
     @ElementCollection
@@ -54,10 +60,12 @@ public class Person implements UserDetails {
     private Boolean isActivated = false;
 
     @Column(updatable = false)
-    @CreationTimestamp // todo change format date;
+    @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
+    @UpdateTimestamp()
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime updatedAt;
 
     @Builder

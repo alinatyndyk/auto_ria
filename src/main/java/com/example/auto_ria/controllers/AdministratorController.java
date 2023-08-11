@@ -34,7 +34,7 @@ public class AdministratorController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<AdministratorSQL> patchCustomer(@PathVariable int id,
+    public ResponseEntity<AdministratorSQL> patchAdmin(@PathVariable int id,
                                                           @ModelAttribute AdministratorUpdateDTO partialUser)
             throws NoSuchFieldException,
             IllegalAccessException, ErrorResponse {

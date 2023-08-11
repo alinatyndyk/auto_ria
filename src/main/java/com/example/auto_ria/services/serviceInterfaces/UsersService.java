@@ -1,6 +1,6 @@
 package com.example.auto_ria.services.serviceInterfaces;
 
-import com.example.auto_ria.dto.UserDTO;
+import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
@@ -19,7 +19,7 @@ public interface UsersService {
 
     ResponseEntity<String> deleteById(String id);
 
-    ResponseEntity<SellerSQL> update(int id, UserDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException;
+    ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException;
 
     // todo     ResponseEntity<List<UserSQL>> getAllSL1();
 

@@ -1,5 +1,10 @@
 package com.example.auto_ria.filters;
 
+import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
+import com.example.auto_ria.dao.ManagerDaoSQL;
+import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.JwtService;
 import com.example.auto_ria.services.UserDetailsServiceImpl;
@@ -13,6 +18,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,10 +33,15 @@ import java.io.IOException;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtService jwtService;
+    private UserDaoSQL userDaoSQL;
+    private ManagerDaoSQL managerDaoSQL;
+    private CustomerDaoSQL customerDaoSQL;
+    private AdministratorDaoSQL administratorDaoSQL;
     private UserDetailsServiceImpl userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response, @NotNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response,
+                                    @NotNull FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -39,28 +50,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         try {
             String jwt = authorizationHeader.substring(7);
-            System.out.println("userEmail filter1");
             String userEmail = jwtService.extractUsername(jwt);
-            System.out.println(userEmail);
-            System.out.println("userEmail filter");
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                System.out.println("first if");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-                System.out.println(userDetails);
-                System.out.println("user details");
 
-                if (true
-//                        jwtService.isTokenValid(jwt, userDetails)
-//                        && // todo check if refresh
-//                        !jwt.equals(userDaoSQL.findSellerByEmail(userEmail).getRefreshToken())
+                if (
+                        jwtService.isTokenValid(jwt, userDetails)
+                                && !isRefresh(userDetails, jwt, userEmail)
                 ) {
-                System.out.println("second if");
-                    System.out.println(userDetails);
-                    System.out.println(userDetails.getAuthorities());
-                    System.out.println(userDetails.getUsername());
-                    System.out.println(userDetails.getPassword());
-                    System.out.println(userDetails);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -69,13 +67,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    System.out.println("SET DETAILS");
-
                     SecurityContextHolder
                             .getContext()
                             .setAuthentication(authenticationToken);
                 }
-                System.out.println("CONTEXT HOLDER");
             }
         } catch (ExpiredJwtException e) {
             response.setHeader(HttpHeaders.EXPIRES, "dead");
@@ -96,4 +91,19 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+    private boolean isRefresh(UserDetails userDetails, String jwt, String userEmail) {
+        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))) {
+            return jwt.equals(userDaoSQL.findSellerByEmail(userEmail).getRefreshToken());
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))) {
+            return jwt.equals(managerDaoSQL.findByEmail(userEmail).getRefreshToken());
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))) {
+            return jwt.equals(customerDaoSQL.findByEmail(userEmail).getRefreshToken());
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))) {
+            return jwt.equals(administratorDaoSQL.findByEmail(userEmail).getRefreshToken());
+        }
+        return false;
+    }
+
+
 }

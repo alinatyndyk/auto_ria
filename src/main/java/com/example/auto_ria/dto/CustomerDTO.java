@@ -1,4 +1,4 @@
-package com.example.auto_ria.dto.updateDTO;
+package com.example.auto_ria.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CustomerUpdateDTO {
+public class CustomerDTO {
 
     private String name;
     private String lastName;

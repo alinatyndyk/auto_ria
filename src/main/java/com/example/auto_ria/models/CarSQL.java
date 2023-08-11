@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -40,7 +43,8 @@ public class CarSQL {
     //    @JsonView({ViewsCar.SL1.class, ViewsCar.SL2.class, ViewsCar.SL3.class})
     private String producer; //todo ecountry
 
-    private String photo;
+    @ElementCollection
+    private List<String> photo = new ArrayList<>();
 
 //    @ElementCollection
 //    private List<String> album = new ArrayList<>();
@@ -56,7 +60,7 @@ public class CarSQL {
 
     private String price; //todo currency
 
-    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, String photo, SellerSQL seller, String price) {
+    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, List<String> photo, SellerSQL seller, String price) {
         this.brand = brand;
         this.powerH = powerH;
         this.city = city;

@@ -25,5 +25,7 @@ public enum ERegion {
     KHMELNYTSKYI,
     CHERKASY,
     CHERNIHIV,
-    CHERNIVTSI
+    CHERNIVTSI,
+
+    ALL
 }

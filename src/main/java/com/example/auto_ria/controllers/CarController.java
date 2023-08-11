@@ -4,19 +4,20 @@ import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -55,7 +56,8 @@ public class CarController {
 
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
-        String fileName = new Date() + picture.getOriginalFilename(); // todo unique name
+
+        String fileName = picture.getOriginalFilename(); // todo unique name
 
         CarDTO car = CarDTO
                 .builder()

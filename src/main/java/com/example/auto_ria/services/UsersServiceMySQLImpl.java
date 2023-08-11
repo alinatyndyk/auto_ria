@@ -42,6 +42,12 @@ public class UsersServiceMySQLImpl implements UsersService {
     }
 
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
+
+        String bearerToken = jwtService.extractTokenFromHeader(request);
+
+        jwtService.extractUsername(bearerToken, ERole.SELLER);
+
+
         return userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
     }
 

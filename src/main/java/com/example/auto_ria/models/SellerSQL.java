@@ -39,6 +39,7 @@ public class SellerSQL extends Person {
     @Enumerated(EnumType.STRING)
     private EAccountType accountType = EAccountType.BASIC;
 
+    @Builder(builderMethodName = "sellerBuilder")
     public SellerSQL(
             String name,
             String email,

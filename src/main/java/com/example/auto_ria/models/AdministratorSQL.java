@@ -21,4 +21,9 @@ public class AdministratorSQL extends Person {  // todo add admin when api start
         this.lastName = lastName;
     }
 
+    @Builder(builderMethodName = "adminCredentialsBuilder")
+    public AdministratorSQL(String email, String password, List<ERole> roles) {
+        super(email, password, roles);
+    }
+
 }

@@ -254,7 +254,6 @@ public class AuthenticationService {
     public AuthenticationResponse refreshAdmin(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
         String username = jwtService.extractUsername(refreshToken, ERole.ADMIN);
-
         AdministratorSQL administrator = administratorDaoSQL.findByEmail(username);
 
         AuthenticationResponse tokenPair = null;
@@ -264,8 +263,6 @@ public class AuthenticationService {
             administrator.setRefreshToken(tokenPair.getRefreshToken());
             administratorDaoSQL.save(administrator);
         }
-
-        System.out.println(tokenPair);
 
         assert tokenPair != null;
         return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();

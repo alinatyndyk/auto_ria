@@ -28,12 +28,10 @@ public class ProfanityFilterService {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(responseStream);
 
-        System.out.println(root.path("result").asText());
-
         return root.path("result").asText();
     }
 
-    public boolean containsProfanityBoolean(String filtered, String plain) throws IOException {
+    public boolean containsProfanityBoolean(String filtered, String plain) {
         return !filtered.equals(plain);
     }
 

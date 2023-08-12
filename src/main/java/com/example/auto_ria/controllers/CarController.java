@@ -4,10 +4,10 @@ import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.MixpanelService;
@@ -16,6 +16,7 @@ import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,7 +37,7 @@ public class CarController {
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
 
-    private static AtomicInteger validationFailureCounter = new AtomicInteger(0);
+    private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
 
     @GetMapping()
@@ -69,13 +70,13 @@ public class CarController {
     @GetMapping("/statistics/{id}")
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
-            HttpServletRequest request) throws ErrorResponse {
+            HttpServletRequest request) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
 
         assert administratorSQL == null;
         if (!sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-            throw new ErrorResponse(403, "Premium plan required");
+            throw new CustomException("Premium plan required", HttpStatus.PAYMENT_REQUIRED);
         }
 
         return ResponseEntity.ok(mixpanelService.getCarViewsStatistics(String.valueOf(id)));
@@ -103,16 +104,13 @@ public class CarController {
         String filteredText = profanityFilterService.containsProfanity(description);
         if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
             int currentCount = validationFailureCounter.incrementAndGet();
-            System.out.println(currentCount);
 
-            // If the counter exceeds the threshold, throw an exception
             if (currentCount > 3) {
-                throw new ErrorResponse(403, "Validation failed. We will have to check this application. It is not activated.");
+                throw new CustomException("Validation failed. We will have to check this application. It is not activated.", HttpStatus.NOT_ACCEPTABLE);
             }
-            int attemptsLeft = 3-currentCount;
-            throw new ErrorResponse(403, "Consider editing your description. Attempts left: " + attemptsLeft);
+            int attemptsLeft = 4 - currentCount;
+            throw new CustomException("Consider editing your description. Profanity found: attempts left: " + attemptsLeft, HttpStatus.BAD_REQUEST);
         }
-
 
         CarDTO car = CarDTO
                 .builder()
@@ -128,7 +126,7 @@ public class CarController {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
         if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.getBySellerList(seller).isEmpty()) {
-            throw new ErrorResponse(403, "Forbidden. Premium account required");
+            throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
         }
 
 
@@ -163,7 +161,7 @@ public class CarController {
         AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
 
         if (!sellerFromHeader.equals(sellerFromCar) && administrator == null) {
-            throw new ErrorResponse(403, "Access_denied");
+            throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
         }
 
         List<CarSQL> cars = carsService.getBySeller(sellerFromHeader).getBody();
@@ -171,13 +169,13 @@ public class CarController {
         assert cars != null;
         assert administrator != null; // todo check
         if (sellerFromHeader.getAccountType().equals(EAccountType.BASIC) && cars.isEmpty()) {
-            throw new ErrorResponse(403, "Forbidden. Basic_account: The car already exists");
+            throw new CustomException("Forbidden. Basic_account: The car already exists", HttpStatus.PAYMENT_REQUIRED);
         }
         return carsService.update(id, partialCar, sellerFromHeader);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) throws ErrorResponse {
+    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
 

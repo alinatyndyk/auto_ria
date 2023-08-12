@@ -5,10 +5,9 @@ import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.models.responses.ErrorResponse;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.services.JwtService;
 import com.example.auto_ria.services.UserDetailsServiceImpl;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,20 +72,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (ExpiredJwtException e) {
-            response.setHeader(HttpHeaders.EXPIRES, "dead");
-            response.resetBuffer();
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            response.setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-
-            ErrorResponse errorResponse = ErrorResponse  //todo todo custom error
-                    .builder()
-                    .statusCode(403)
-                    .message("jwt expired")
-                    .build();
-            response.getOutputStream().write(new ObjectMapper().writeValueAsBytes(errorResponse));
-            return;
+            throw new CustomException("Jwt expired", HttpStatus.UNAUTHORIZED);
         } catch (UsernameNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
+            throw new CustomException(e.getMessage(), HttpStatus.NOT_FOUND);
         }
 
         filterChain.doFilter(request, response);

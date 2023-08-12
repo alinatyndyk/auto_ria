@@ -6,11 +6,11 @@ import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.serviceInterfaces.UsersService;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +47,6 @@ public class UsersServiceMySQLImpl implements UsersService {
         try {
             sellerSQL = userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
         } catch (Exception e) {
-            System.out.println(e);
             return null;
         }
 
@@ -79,11 +78,13 @@ public class UsersServiceMySQLImpl implements UsersService {
 
 
     public ResponseEntity<SellerSQL> getById(String id) {
+        assert userDaoSQL.findById(Integer.parseInt(id)).isPresent();
         SellerSQL user = userDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
     public SellerSQL getById(int id) {
+        assert userDaoSQL.findById(id).isPresent();
         return userDaoSQL.findById(id).get();
     }
 
@@ -102,7 +103,8 @@ public class UsersServiceMySQLImpl implements UsersService {
         return seller.getId() == seller1.getId();
     }
 
-    public ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
+    public ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller)
+            throws IllegalAccessException, IOException, NoSuchFieldException {
 
         SellerSQL seller1 = getById(String.valueOf(id)).getBody();
 
@@ -129,7 +131,7 @@ public class UsersServiceMySQLImpl implements UsersService {
                 }
             }
         } else {
-            throw new ErrorResponse(403, "Error.Update_fail: The car does not belong to seller");  //todo normal error
+            throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(userDaoSQL.save(seller1), HttpStatus.ACCEPTED);
     }

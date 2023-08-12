@@ -25,8 +25,6 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class JwtService {
 
-    // todo key to app.props
-
     @Value("${token.generation.key.seller}")
     private static final String SECRET_KEY = "404E635268556A586E3272357538782F413F4428472B4B625064536756685970";
 
@@ -41,7 +39,6 @@ public class JwtService {
 
 
     public String extractUsername(String jwt, ERole role) {
-
         return extractClaim(jwt, Claims::getSubject, role);
     }
 
@@ -81,7 +78,8 @@ public class JwtService {
                     .parseClaimsJws(token)
                     .getBody();
 
-        } catch (SignatureException ignored) {}
+        } catch (SignatureException ignored) {
+        }
         return claims;
     }
 
@@ -142,9 +140,6 @@ public class JwtService {
             Map<String, String> extraClaims,
             UserDetails userDetails
     ) {
-        System.out.println(userDetails);
-        System.out.println(userDetails.getUsername());
-        System.out.println("details");
         String accessToken = Jwts
                 .builder()
                 .setClaims(extraClaims)

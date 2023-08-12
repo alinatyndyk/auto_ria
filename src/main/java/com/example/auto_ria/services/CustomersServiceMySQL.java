@@ -2,17 +2,15 @@ package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -28,14 +26,9 @@ public class CustomersServiceMySQL {
 
 
     public ResponseEntity<CustomerSQL> getById(String id) {
+        assert customerDaoSQL.findById(Integer.parseInt(id)).isPresent();
         CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
-    }
-
-    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
-        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
-        File transferDestinationFile = new File(path);
-        picture.transferTo(transferDestinationFile);
     }
 
     public ResponseEntity<String> deleteById(String id) {
@@ -47,7 +40,8 @@ public class CustomersServiceMySQL {
         return customerToUpdate.getId() == customerFromHeader.getId();
     }
 
-    public ResponseEntity<CustomerSQL> update(int id, CustomerUpdateDTO customerUpdateDTO, CustomerSQL customer) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
+    public ResponseEntity<CustomerSQL> update(int id, CustomerUpdateDTO customerUpdateDTO, CustomerSQL customer)
+            throws IllegalAccessException, IOException, NoSuchFieldException {
 
         CustomerSQL customerSQL = getById(String.valueOf(id)).getBody();
 
@@ -73,7 +67,7 @@ public class CustomersServiceMySQL {
                 }
             }
         } else {
-            throw new ErrorResponse(403, "Error.Update_fail: The car does not belong to seller");  //todo normal error
+            throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
         }
         return new ResponseEntity<>(customerDaoSQL.save(customerSQL), HttpStatus.ACCEPTED);
     }

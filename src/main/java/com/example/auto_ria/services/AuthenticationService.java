@@ -234,7 +234,7 @@ public class AuthenticationService {
     public AuthenticationResponse refreshManager(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
 
-        String username = jwtService.extractUsername(refreshToken, ERole.MANAGER); //extract from manager
+        String username = jwtService.extractUsername(refreshToken, ERole.MANAGER);
 
         ManagerSQL user = managerDaoSQL.findByEmail(username);
 

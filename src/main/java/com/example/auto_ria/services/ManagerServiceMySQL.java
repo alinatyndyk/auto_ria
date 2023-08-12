@@ -2,8 +2,8 @@ package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -26,18 +26,23 @@ public class ManagerServiceMySQL {
     }
 
     public ResponseEntity<ManagerSQL> getById(int id) {
+        assert managerDaoSQL.findById(id).isPresent();
         return new ResponseEntity<>(managerDaoSQL.findById(id).get(), HttpStatus.ACCEPTED);
     }
 
     public ResponseEntity<String> deleteById(int id) {
+        assert managerDaoSQL.findById(id).isPresent();
         managerDaoSQL.findById(id).get();
         return new ResponseEntity<>("Success.Manager_deleted", HttpStatus.GONE);
     }
-    public ResponseEntity<ManagerSQL> update(int id, ManagerUpdateDTO managerUpdateDTO) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException {
 
-        ManagerSQL manager = getById(id).getBody();
+    public ResponseEntity<ManagerSQL> update(int id, ManagerUpdateDTO managerUpdateDTO)
+            throws IllegalAccessException, IOException, NoSuchFieldException {
+        try {
 
-        assert manager != null;
+            ManagerSQL manager = getById(id).getBody();
+
+            assert manager != null;
             Class<?> managerUpdateDTOClass = managerUpdateDTO.getClass();
             Field[] fields = managerUpdateDTOClass.getDeclaredFields();
 
@@ -56,7 +61,10 @@ public class ManagerServiceMySQL {
                     managerField.set(manager, fieldValue);
                 }
             }
-        return new ResponseEntity<>(managerDaoSQL.save(manager), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(managerDaoSQL.save(manager), HttpStatus.ACCEPTED);
+        } catch (Exception exception) {
+            throw new CustomException("Fail_update", HttpStatus.CONFLICT);
+        }
     }
 
 

@@ -5,7 +5,6 @@ import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import io.jsonwebtoken.io.IOException;
 import org.springframework.http.ResponseEntity;
 
@@ -17,10 +16,10 @@ public interface CarsService {
 
     ResponseEntity<CarSQL> getById(int id);
 
-    ResponseEntity<String> deleteById(int id, SellerSQL seller, AdministratorSQL administratorSQL) throws ErrorResponse;
+    ResponseEntity<String> deleteById(int id, SellerSQL seller, AdministratorSQL administratorSQL);
 
     ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller);
-    ResponseEntity<CarSQL> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException, IOException, ErrorResponse, NoSuchFieldException;
+    ResponseEntity<CarSQL> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException, IOException, NoSuchFieldException;
 
 
 }

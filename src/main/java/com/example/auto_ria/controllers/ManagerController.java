@@ -2,7 +2,6 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.models.responses.ErrorResponse;
 import com.example.auto_ria.services.ManagerServiceMySQL;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +30,7 @@ public class ManagerController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<ManagerSQL> patch(@PathVariable int id,
-                                            @RequestBody ManagerUpdateDTO partial) throws NoSuchFieldException, IllegalAccessException, ErrorResponse {
+                                            @RequestBody ManagerUpdateDTO partial) throws NoSuchFieldException, IllegalAccessException {
         return managerServiceMySQL.update(id, partial);
     }
 

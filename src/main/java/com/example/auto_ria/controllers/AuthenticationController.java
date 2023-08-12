@@ -29,7 +29,7 @@ public class AuthenticationController {
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("number") String number,
-            @RequestParam("password") String password //todo @attribute
+            @RequestParam("password") String password
     ) throws IOException {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
@@ -79,7 +79,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate/seller")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) { // todo FIX
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 

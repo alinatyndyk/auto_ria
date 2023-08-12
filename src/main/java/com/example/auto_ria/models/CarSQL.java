@@ -3,7 +3,10 @@ package com.example.auto_ria.models;
 import com.example.auto_ria.enums.ERegion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,9 +49,6 @@ public class CarSQL {
     @ElementCollection
     private List<String> photo = new ArrayList<>();
 
-//    @ElementCollection
-//    private List<String> album = new ArrayList<>();
-
     @JsonManagedReference
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinTable(
@@ -60,14 +60,16 @@ public class CarSQL {
 
     private String price; //todo currency
 
-    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, List<String> photo, SellerSQL seller, String price) {
-        this.brand = brand;
-        this.powerH = powerH;
-        this.city = city;
-        this.region = region;
-        this.producer = producer;
-        this.photo = photo;
-        this.seller = seller;
-        this.price = price;
-    }
+    private String description;
+
+//    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, List<String> photo, SellerSQL seller, String price) {
+//        this.brand = brand;
+//        this.powerH = powerH;
+//        this.city = city;
+//        this.region = region;
+//        this.producer = producer;
+//        this.photo = photo;
+//        this.seller = seller;
+//        this.price = price;
+//    }
 }

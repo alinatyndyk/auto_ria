@@ -21,5 +21,6 @@ public class CarDTO {
     private String producer;
     private String price;
     private List<String> photo; //todo album
+    private String description; //todo album
 
 }

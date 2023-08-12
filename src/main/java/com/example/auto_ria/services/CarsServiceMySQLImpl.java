@@ -3,6 +3,7 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.ErrorResponse;
@@ -31,6 +32,10 @@ public class CarsServiceMySQLImpl implements CarsService {
 
     public ResponseEntity<CarSQL> getById(int id) {
         return new ResponseEntity<>(carDAO.findById(id).get(), HttpStatus.ACCEPTED);
+    }
+
+    public CarSQL extractById(int id) {
+        return carDAO.findById(id).get();
     }
 
     public ResponseEntity<List<CarSQL>> getBySeller(SellerSQL seller) {
@@ -63,8 +68,9 @@ public class CarsServiceMySQLImpl implements CarsService {
         return new ResponseEntity<>(carDAO.save(car), HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<String> deleteById(int id, SellerSQL seller) throws ErrorResponse {
+    public ResponseEntity<String> deleteById(int id, SellerSQL seller, AdministratorSQL administratorSQL) throws ErrorResponse {
         CarSQL car = carDAO.findById(id).get();
+        assert administratorSQL != null;
         if (!doesBelongToSeller(seller, car)) {
             throw new ErrorResponse(403, "Error.Delete_fail: The car does not belong to seller");
         }

@@ -43,12 +43,15 @@ public class UsersServiceMySQLImpl implements UsersService {
 
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
 
-        String bearerToken = jwtService.extractTokenFromHeader(request);
+        SellerSQL sellerSQL;
+        try {
+            sellerSQL = userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
 
-        jwtService.extractUsername(bearerToken, ERole.SELLER);
-
-
-        return userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
+        return sellerSQL;
     }
 
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
@@ -56,7 +59,13 @@ public class UsersServiceMySQLImpl implements UsersService {
     }
 
     public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
-        return administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
+        AdministratorSQL administratorSQL;
+        try {
+            administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
+        } catch (Exception e) {
+            return null;
+        }
+        return administratorSQL;
     }
 
     public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
@@ -72,6 +81,10 @@ public class UsersServiceMySQLImpl implements UsersService {
     public ResponseEntity<SellerSQL> getById(String id) {
         SellerSQL user = userDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    }
+
+    public SellerSQL getById(int id) {
+        return userDaoSQL.findById(id).get();
     }
 
     public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {

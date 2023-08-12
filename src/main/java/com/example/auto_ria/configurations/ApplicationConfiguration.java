@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
@@ -30,7 +31,6 @@ public class ApplicationConfiguration {
     private ManagerAuthenticationProvider managerAuthenticationProvider;
     private SellerAuthenticationProvider sellerAuthenticationProvider;
     private AdminAuthenticationProvider adminAuthenticationProvider;
-
 
     @Bean
     public UserDetailsService userDetailsService() {

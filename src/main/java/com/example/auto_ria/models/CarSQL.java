@@ -1,5 +1,6 @@
 package com.example.auto_ria.models;
 
+import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.ERegion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -38,12 +39,11 @@ public class CarSQL {
     //    @NotBlank(message = "brand is required")
 //    @Min(value = 2, message = "City has to be more than 2")
 //    @Max(value = 20, message = "City has to be less than 20")
-    private String city; //todo search
+    private String city;
 
     @Enumerated(EnumType.STRING)
     private ERegion region;
 
-    //    @JsonView({ViewsCar.SL1.class, ViewsCar.SL2.class, ViewsCar.SL3.class})
     private String producer; //todo ecountry
 
     @ElementCollection
@@ -58,18 +58,11 @@ public class CarSQL {
     )
     private SellerSQL seller;
 
-    private String price; //todo currency
+    private String price;
+
+    private ECurrency currency;
 
     private String description;
 
-//    public CarSQL(String brand, Integer powerH, String city, ERegion region, String producer, List<String> photo, SellerSQL seller, String price) {
-//        this.brand = brand;
-//        this.powerH = powerH;
-//        this.city = city;
-//        this.region = region;
-//        this.producer = producer;
-//        this.photo = photo;
-//        this.seller = seller;
-//        this.price = price;
-//    }
+    private boolean isActivated;
 }

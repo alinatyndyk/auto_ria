@@ -59,6 +59,7 @@ public class MixpanelService {
                 .viewsDay(extractCarViews(dayFormed, dayFormed, carId))
                 .viewsWeek(extractCarViews(weekFormed, dayFormed, carId))
                 .viewsMonth(extractCarViews(monthFormed, dayFormed, carId))
+                .viewsAll(extractCarViews("2011-07-10", dayFormed, carId))
                 .build();
 
     }

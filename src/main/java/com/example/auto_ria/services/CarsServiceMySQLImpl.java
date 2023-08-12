@@ -3,12 +3,15 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.services.serviceInterfaces.CarsService;
+import freemarker.template.TemplateException;
 import io.jsonwebtoken.io.IOException;
+import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,13 +19,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class CarsServiceMySQLImpl implements CarsService {
+public class CarsServiceMySQLImpl {
 
     private CarDaoSQL carDAO;
+    private FMService mailer;
 
     public ResponseEntity<List<CarSQL>> getAll() {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -47,7 +52,7 @@ public class CarsServiceMySQLImpl implements CarsService {
         return carDAO.findBySeller(seller);
     }
 
-    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) {
+    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller, boolean status) throws MessagingException, TemplateException, java.io.IOException {
 
         CarSQL car = CarSQL.builder()
                 .brand(carDTO.getBrand())
@@ -56,11 +61,21 @@ public class CarsServiceMySQLImpl implements CarsService {
                 .region(carDTO.getRegion())
                 .producer(carDTO.getProducer())
                 .price(carDTO.getPrice())
+                .currency(carDTO.getCurrency())
                 .photo(carDTO.getPhoto())
                 .seller(seller)
                 .build();
 
-        return new ResponseEntity<>(carDAO.save(car), HttpStatus.ACCEPTED);
+        CarSQL carSQL = carDAO.save(car);
+
+        if (!status) {
+            HashMap<String, Object> vars = new HashMap<>();
+            vars.put("car_id", carSQL.getId());
+
+            mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
+        }
+
+        return new ResponseEntity<>(carSQL, HttpStatus.ACCEPTED);
     }
 
     public ResponseEntity<String> deleteById(int id, SellerSQL seller, AdministratorSQL administratorSQL) {

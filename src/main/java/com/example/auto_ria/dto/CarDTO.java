@@ -1,5 +1,6 @@
 package com.example.auto_ria.dto;
 
+import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.ERegion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,7 +21,9 @@ public class CarDTO {
     private ERegion region;
     private String producer;
     private String price;
+    private ECurrency currency;
     private List<String> photo; //todo album
     private String description; //todo album
+    private boolean isActivated;
 
 }

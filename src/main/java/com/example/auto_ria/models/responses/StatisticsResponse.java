@@ -13,4 +13,5 @@ public class StatisticsResponse {
     private long viewsDay;
     private long viewsWeek;
     private long viewsMonth;
+    private long viewsAll;
 }

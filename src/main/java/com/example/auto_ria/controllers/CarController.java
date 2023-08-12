@@ -3,6 +3,7 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
+import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
@@ -41,7 +42,6 @@ public class CarController {
 
 
     @GetMapping()
-//    @JsonView(ViewsCar.SL3.class)
     public ResponseEntity<List<CarSQL>> getAll() throws IOException {
         return carsService.getAll();
     }
@@ -97,20 +97,12 @@ public class CarController {
             @RequestParam("region") ERegion region,
             @RequestParam("producer") String producer,
             @RequestParam("price") String price,
+            @RequestParam("currency") ECurrency currency,
             @RequestParam("pictures") MultipartFile[] pictures,
             @RequestParam("description") String description,
             HttpServletRequest request) {
 
-        String filteredText = profanityFilterService.containsProfanity(description);
-        if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
-            int currentCount = validationFailureCounter.incrementAndGet();
-
-            if (currentCount > 3) {
-                throw new CustomException("Validation failed. We will have to check this application. It is not activated.", HttpStatus.NOT_ACCEPTABLE);
-            }
-            int attemptsLeft = 4 - currentCount;
-            throw new CustomException("Consider editing your description. Profanity found: attempts left: " + attemptsLeft, HttpStatus.BAD_REQUEST);
-        }
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
         CarDTO car = CarDTO
                 .builder()
@@ -120,10 +112,22 @@ public class CarController {
                 .region(region)
                 .producer(producer)
                 .price(price)
+                .currency(currency)
                 .description(description)
                 .build();
 
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        boolean status = true;
+        String filteredText = profanityFilterService.containsProfanity(description);
+        if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
+            int currentCount = validationFailureCounter.incrementAndGet();
+            if (currentCount > 3) {
+                car.setActivated(false);
+                status = false;
+            }
+            int attemptsLeft = 4 - currentCount;
+            throw new CustomException("Consider editing your description. Profanity found: attempts left: " + attemptsLeft, HttpStatus.BAD_REQUEST);
+        }
+
 
         if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.getBySellerList(seller).isEmpty()) {
             throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
@@ -139,19 +143,18 @@ public class CarController {
             try {
                 usersServiceMySQL.transferAvatar(picture, fileName);
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new CustomException("Failed: Transfer_avatar", HttpStatus.EXPECTATION_FAILED);
             }
             return null;
         });
         car.setPhoto(fileNames);
 
-        return carsService.post(car, seller);
+        return carsService.post(car, seller, status);
     }
 
     @SneakyThrows
     @PatchMapping("/{id}")
     public ResponseEntity<CarSQL> patchCar(@PathVariable int id,
-//                                       todo  @ModelAttribute CarUpdateDTO partialCar,
                                            @RequestBody CarUpdateDTO partialCar,
                                            HttpServletRequest request) {
 //todo transfer album

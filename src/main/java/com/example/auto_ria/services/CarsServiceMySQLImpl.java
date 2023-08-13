@@ -3,9 +3,12 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
+import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import freemarker.template.TemplateException;
 import io.jsonwebtoken.io.IOException;
@@ -19,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -68,6 +72,20 @@ public class CarsServiceMySQLImpl {
         return carDAO.findById(id).get();
     }
 
+    public ResponseEntity<String> activate(int id) {
+        CarSQL carSQL = extractById(id);
+        carSQL.setActivated(true);
+        carDAO.save(carSQL);
+        try {
+            HashMap<String, Object> vars = new HashMap<>();
+            vars.put("name", carSQL.getSeller().getName());
+            vars.put("car_id", carSQL.getId());
+            mailer.sendEmail(carSQL.getSeller().getEmail(), EMail.CAR_BEING_ACTIVATED, vars);
+        } catch (Exception ignore) {
+        }
+        return ResponseEntity.ok("Car activated successfully");
+    }
+
     public ResponseEntity<List<CarSQL>> getBySeller(SellerSQL seller) {
         return new ResponseEntity<>(carDAO.findBySeller(seller), HttpStatus.ACCEPTED);
     }
@@ -103,9 +121,23 @@ public class CarsServiceMySQLImpl {
         return new ResponseEntity<>(carSQL, HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<String> deleteById(int id, SellerSQL seller) {
-        assert carDAO.findById(id).isEmpty();
+    public ResponseEntity<String> deleteById(int id, SellerSQL seller, ManagerSQL manager, AdministratorSQL administrator) {
+        assert carDAO.findById(id).isPresent();
         CarSQL car = carDAO.findById(id).get();
+
+        if (manager != null || administrator != null) {
+            carDAO.deleteById(id);
+            try {
+                HashMap<String, Object> vars = new HashMap<>();
+                vars.put("name", seller.getName());
+                vars.put("description", car.getDescription());
+
+                mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_BANNED, vars);
+
+                return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
+            } catch (Exception ignore) {
+            }
+        }
 
         if (!doesBelongToSeller(seller, car)) {
             throw new CustomException("Error.Delete_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);

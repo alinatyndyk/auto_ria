@@ -12,12 +12,11 @@
     <title>Title</title>
 </head>
 <body>
-<h1 class="header" style="color: #007bff">New announcement has been suspected</h1>
-<p style="color: darkred">Announcement has been suspected as it did not pass the profanity filter</p>
-
-<p>Offencive language was found:</p>
+<h1 class="header" style="color: #007bff">Announcement banned</h1>
+<p>Hello, ${name}</p>
+<p style="color: darkred">Our platform is a respectful place, our manager have detected offencive content on your announcement</p>
 <p class="desc">${description}</p>
-
+<p>We are sorry to inform that your announcement has been banned permanently</p>
 <p>With respect,</p>
 <p>AutoRia Team</p>
 </body>

@@ -72,11 +72,15 @@ public class AuthenticationService {
 
         sellerDaoSQL.save(seller);
 
+        mailer.sendWelcomeEmail(seller.getName(), seller.getEmail());
+
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", registerRequest.getName());
-        variables.put("car_id", "some car id"); //todo put id
 
-        mailer.sendEmail(registerRequest.getEmail(), EMail.CHECK_ANNOUNCEMENT, variables);
+        try {
+        mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
+        } catch (Exception ignore) {}
+
 
         return AuthenticationResponse
                 .builder()
@@ -102,6 +106,8 @@ public class AuthenticationService {
 
         managerDaoSQL.save(manager);
 
+        mailer.sendWelcomeEmail(manager.getName(), manager.getEmail());
+
         return AuthenticationResponse
                 .builder()
                 .accessToken(authenticationResponse.getAccessToken())
@@ -126,6 +132,8 @@ public class AuthenticationService {
         administrator.setRefreshToken(authenticationResponse.getRefreshToken());
 
         administratorDaoSQL.save(administrator);
+
+        mailer.sendWelcomeEmail(administrator.getName(), administrator.getEmail());
 
         return AuthenticationResponse
                 .builder()

@@ -4,8 +4,10 @@ import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ECurrency;
+import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.ManagerSQL;
@@ -26,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -41,6 +44,8 @@ public class CarController {
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
     private StripeService stripeService;
+    private FMService mailer;
+    private ManagerServiceMySQL managerServiceMySQL;
 
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
@@ -77,6 +82,13 @@ public class CarController {
             @PathVariable("id") int id
     ) {
         mixpanelService.view(String.valueOf(id));
+    }
+
+    @PostMapping("/activate/{id}")
+    public ResponseEntity<String> activate(
+            @PathVariable("id") int id
+    ) {
+        return carsService.activate(id);
     }
 
     @GetMapping("seller/{id}")
@@ -133,6 +145,7 @@ public class CarController {
             @RequestParam("description") String description,
             HttpServletRequest request) {
 
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request); //todo admin post car
         CarDTO car = CarDTO
                 .builder()
                 .brand(brand)
@@ -150,12 +163,26 @@ public class CarController {
             int currentCount = validationFailureCounter.incrementAndGet();
             if (currentCount > 3) {
                 car.setActivated(false);
+                try {
+                    HashMap<String, Object> vars = new HashMap<>();
+                    vars.put("name", seller.getName());
+                    vars.put("description", car.getDescription());
+
+                    List<ManagerSQL> managers = managerServiceMySQL.getAll().getBody();
+
+                    assert managers != null;
+                    managers.forEach(managerSQL -> {
+                        try {
+                            mailer.sendEmail(seller.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
+                        } catch (Exception ignore) {}
+                    });
+                    mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
+                } catch (Exception ignore) {}
             }
             int attemptsLeft = 4 - currentCount;
             throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
         }
 
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request); //todo admin post car
 
         if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.getBySellerList(seller).isEmpty()) {
             throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
@@ -202,7 +229,9 @@ public class CarController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
-        return carsService.deleteById(id, seller);
+        ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
+        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
+        return carsService.deleteById(id, seller, manager, administrator);
     }
 
 }

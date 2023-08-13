@@ -105,15 +105,19 @@ public class UsersServiceMySQLImpl {
     public ResponseEntity<String> deleteById(String id, SellerSQL seller, AdministratorSQL administratorSQL, ManagerSQL manager) {
         userDaoSQL.deleteById(Integer.valueOf(id));
 
+        HashMap<String, Object> vars = new HashMap<>();
+        vars.put("name", seller.getName());
+        vars.put("email", seller.getEmail());
+
         if (administratorSQL != null || manager != null) {
             try {
-                mailer.sendEmail(seller.getEmail(), EMail.YOUR_ACCOUNT_BANNED, new HashMap<>());
+                mailer.sendEmail(seller.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
             } catch (Exception ignore) {
             }
         }
 
         try {
-            mailer.sendEmail(seller.getEmail(), EMail.PLATFORM_LEAVE, new HashMap<>());
+            mailer.sendEmail(seller.getEmail(), EMail.PLATFORM_LEAVE, vars);
         } catch (Exception ignore) {
         }
 

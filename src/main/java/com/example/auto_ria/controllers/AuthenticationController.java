@@ -1,6 +1,7 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;

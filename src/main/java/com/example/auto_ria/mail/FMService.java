@@ -49,30 +49,14 @@ public class FMService {
         javaMailSender.send(message);
     }
 
-    public void sendEmailWithAttachment(String recipientEmail, EMail templateName, Map<String, Object> variables, File file) throws MessagingException, IOException, TemplateException {
+    public void sendWelcomeEmail(String name, String email) {
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("name", name);
 
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-
-        helper.setTo(recipientEmail);
-
-        HashMap<String, String> result = mailConfig.parser(templateName);
-
-        helper.setSubject(result.get("subject"));
-
-        Template template = freemarkerConfig.getTemplate(result.get("templateName"));
-        String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, variables);
-
-//        File file = ResourceUtils.getFile(filePath);  todo add path!!
-//        FileSystemResource file = new FileSystemResource(file);
-//        helper.addAttachment(file.getFilename(), file);
-
-        FileSystemResource fileSystemResource = new FileSystemResource(file);
-
-        helper.addAttachment("avatar.jpg", fileSystemResource );
-        helper.setText(html, true);
-
-        javaMailSender.send(message);
+        try {
+            sendEmail(email, EMail.WELCOME, variables);
+        } catch (Exception ignore) {
+        }
     }
 }
 

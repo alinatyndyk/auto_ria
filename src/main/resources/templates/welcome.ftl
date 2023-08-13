@@ -1,10 +1,6 @@
 <html lang="">
 <head>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: #333333;
-        }
         h2 {
             color: #007bff;
         }

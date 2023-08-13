@@ -49,11 +49,6 @@ public class MailConfiguration {
             put("templateName", "check-announcement.ftl");
         }});
 
-        emails.put(EMail.USERS, new HashMap<>() {{
-            put("subject", "USERS SUBJECT");
-            put("templateName", "users.html");
-        }});
-
         return emails.get(templateName);
 
     }

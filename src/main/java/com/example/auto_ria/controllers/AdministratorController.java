@@ -58,7 +58,7 @@ public class AdministratorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id) {
-        return usersServiceMySQL.deleteById(id);
+        return administratorServiceMySQL.deleteById(id);
     }
 
 }

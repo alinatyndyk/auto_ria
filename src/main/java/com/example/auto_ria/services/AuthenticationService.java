@@ -10,6 +10,7 @@ import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
@@ -17,6 +18,7 @@ import com.example.auto_ria.models.responses.AuthenticationResponse;
 import freemarker.template.TemplateException;
 import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -45,6 +47,10 @@ public class AuthenticationService {
 
     public AuthenticationResponse register(RegisterRequest registerRequest) throws MessagingException, TemplateException, IOException {
 
+        if(sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
+            throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+        }
+
         SellerSQL seller = UserSQL
                 .userSQLBuilder()
                 .name(registerRequest.getName())
@@ -68,7 +74,7 @@ public class AuthenticationService {
 
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", registerRequest.getName());
-        variables.put("car_id", "some car id");
+        variables.put("car_id", "some car id"); //todo put id
 
         mailer.sendEmail(registerRequest.getEmail(), EMail.CHECK_ANNOUNCEMENT, variables);
 
@@ -156,15 +162,18 @@ public class AuthenticationService {
 
     public AuthenticationResponse login(LoginRequest loginRequest) {
         SellerSQL user = sellerDaoSQL.findSellerByEmail(loginRequest.getEmail());
+
         sellerAuthenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
+                        user.getEmail(),
                         loginRequest.getPassword(),
                         user.getAuthorities()
                 )
         );
         String access_token = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+        System.out.println(access_token);
+        System.out.println(refreshToken);
 
         user.setRefreshToken(refreshToken);
         sellerDaoSQL.save(user);
@@ -177,7 +186,7 @@ public class AuthenticationService {
 
         managerAuthenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
+                        user.getEmail(),
                         loginRequest.getPassword(),
                         user.getAuthorities()
                 )

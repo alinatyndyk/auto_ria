@@ -8,7 +8,6 @@ import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.services.JwtService;
 import com.example.auto_ria.services.UserDetailsServiceImpl;
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +19,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -54,10 +52,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
+                    System.out.println("first uf");
                 if (
                         jwtService.isTokenValid(jwt, userDetails)
                                 && !isRefresh(userDetails, jwt, userEmail)
                 ) {
+                    System.out.println("secondif");
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -71,10 +71,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                             .setAuthentication(authenticationToken);
                 }
             }
-        } catch (ExpiredJwtException e) {
-            throw new CustomException("Jwt expired", HttpStatus.UNAUTHORIZED);
-        } catch (UsernameNotFoundException e) {
-            throw new CustomException(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.UNAUTHORIZED); //todo check
         }
 
         filterChain.doFilter(request, response);

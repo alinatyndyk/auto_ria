@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +45,7 @@ public class CarSQL {
     @Enumerated(EnumType.STRING)
     private ERegion region;
 
-    private String producer; //todo ecountry
+    private String producer;
 
     @ElementCollection
     private List<String> photo = new ArrayList<>();

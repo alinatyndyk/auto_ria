@@ -81,7 +81,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate/seller")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) { // todo FIX
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 

@@ -65,12 +65,13 @@ public class UserController {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
         ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
+        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
 
         if (!Integer.valueOf(id).equals(seller.getId()) || !manager.getRoles().contains(ERole.MANAGER_GLOBAL)) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }
 
-        return usersServiceMySQL.deleteById(id);
+        return usersServiceMySQL.deleteById(id, seller, administrator, manager);
     }
 
 }

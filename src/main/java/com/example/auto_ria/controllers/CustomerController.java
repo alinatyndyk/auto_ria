@@ -75,7 +75,7 @@ public class CustomerController {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }
 
-        return usersServiceMySQL.deleteById(id);
+        return customersServiceMySQL.deleteById(id);
     }
 
 }

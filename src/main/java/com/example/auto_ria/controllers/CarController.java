@@ -8,25 +8,28 @@ import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
+import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.StatisticsResponse;
-import com.example.auto_ria.services.CarsServiceMySQLImpl;
-import com.example.auto_ria.services.MixpanelService;
-import com.example.auto_ria.services.ProfanityFilterService;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -37,14 +40,37 @@ public class CarController {
     private UsersServiceMySQLImpl usersServiceMySQL;
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
+    private StripeService stripeService;
 
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
+    @GetMapping("page/{page}")
+    public ResponseEntity<Page<CarSQL>> getAllPageQuery(
+            @PathVariable("page") int page,
+            @RequestParam Map<String, String> queryParams
+    ) {
+        CarSQL carQueryParams = new CarSQL();
 
-    @GetMapping()
-    public ResponseEntity<List<CarSQL>> getAll() throws IOException {
-        return carsService.getAll();
+        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+            String fieldName = entry.getKey();
+            String fieldValue = entry.getValue();
+
+            try {
+                Field field = CarSQL.class.getDeclaredField(fieldName);
+                field.setAccessible(true);
+                if (fieldValue != null) {
+                    field.set(carQueryParams, fieldValue);
+                }
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                throw new CustomException("Forbidden query params found", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        Pageable pageable = PageRequest.of(page, 2);
+
+        return carsService.getAll(pageable, carQueryParams);
     }
+
 
     @PostMapping("/viewed/{id}")
     public void addView(
@@ -73,8 +99,11 @@ public class CarController {
             HttpServletRequest request) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
+        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
 
         assert administratorSQL == null;
+        assert managerSQL == null;
+
         if (!sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
             throw new CustomException("Premium plan required", HttpStatus.PAYMENT_REQUIRED);
         }
@@ -84,8 +113,10 @@ public class CarController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CarSQL> getById(@PathVariable("id") int id) {
-        return carsService.getById(id);
+    public ResponseEntity<CarSQL> getById(
+            HttpServletRequest request,
+            @PathVariable("id") int id) {
+        return carsService.getById(id, request); //todo check
     }
 
     @SneakyThrows
@@ -98,11 +129,9 @@ public class CarController {
             @RequestParam("producer") String producer,
             @RequestParam("price") String price,
             @RequestParam("currency") ECurrency currency,
-            @RequestParam("pictures") MultipartFile[] pictures,
+            @RequestParam("pictures[]") MultipartFile[] pictures,
             @RequestParam("description") String description,
             HttpServletRequest request) {
-
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
 
         CarDTO car = CarDTO
                 .builder()
@@ -116,40 +145,34 @@ public class CarController {
                 .description(description)
                 .build();
 
-        boolean status = true;
         String filteredText = profanityFilterService.containsProfanity(description);
         if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
             int currentCount = validationFailureCounter.incrementAndGet();
             if (currentCount > 3) {
                 car.setActivated(false);
-                status = false;
             }
             int attemptsLeft = 4 - currentCount;
-            throw new CustomException("Consider editing your description. Profanity found: attempts left: " + attemptsLeft, HttpStatus.BAD_REQUEST);
+            throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
         }
 
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request); //todo admin post car
 
         if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.getBySellerList(seller).isEmpty()) {
             throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
         }
 
-
-        List<String> fileNames = new ArrayList<>();  //todo check album
-
-        Arrays.stream(pictures).map(picture -> {
+        List<String> names = Arrays.stream(pictures).map(picture -> {
             String fileName = picture.getOriginalFilename();
-            System.out.println(fileName);
-            fileNames.add(fileName);
             try {
                 usersServiceMySQL.transferAvatar(picture, fileName);
             } catch (IOException e) {
-                throw new CustomException("Failed: Transfer_avatar", HttpStatus.EXPECTATION_FAILED);
+                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
             }
-            return null;
-        });
-        car.setPhoto(fileNames);
+            return fileName;
+        }).collect(Collectors.toList());
+        car.setPhoto(names);
 
-        return carsService.post(car, seller, status);
+        return carsService.post(car, seller);
     }
 
     @SneakyThrows
@@ -157,7 +180,6 @@ public class CarController {
     public ResponseEntity<CarSQL> patchCar(@PathVariable int id,
                                            @RequestBody CarUpdateDTO partialCar,
                                            HttpServletRequest request) {
-//todo transfer album
         SellerSQL sellerFromHeader = usersServiceMySQL.extractSellerFromHeader(request);
         SellerSQL sellerFromCar = carsService.extractById(id).getSeller();
 
@@ -180,9 +202,7 @@ public class CarController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
-
-        return carsService.deleteById(id, seller, administrator);
+        return carsService.deleteById(id, seller);
     }
 
 }

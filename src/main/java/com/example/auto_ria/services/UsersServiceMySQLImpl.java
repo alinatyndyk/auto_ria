@@ -5,13 +5,14 @@ import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
+import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import com.example.auto_ria.services.serviceInterfaces.UsersService;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -22,17 +23,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
 @AllArgsConstructor
-public class UsersServiceMySQLImpl implements UsersService {
+public class UsersServiceMySQLImpl {
 
     private AdministratorDaoSQL administratorDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
     private UserDaoSQL userDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
     private JwtService jwtService;
+    private FMService mailer;
 
 
     public String extractEmailFromHeader(HttpServletRequest request, ERole role) {
@@ -49,11 +52,16 @@ public class UsersServiceMySQLImpl implements UsersService {
         } catch (Exception e) {
             return null;
         }
-
         return sellerSQL;
     }
 
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
+        ManagerSQL managerSQL = null;
+        try {
+            managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
+        } catch (Exception e) {
+            return null;
+        }
         return managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
     }
 
@@ -94,8 +102,21 @@ public class UsersServiceMySQLImpl implements UsersService {
         picture.transferTo(transferDestinationFile);
     }
 
-    public ResponseEntity<String> deleteById(String id) {
+    public ResponseEntity<String> deleteById(String id, SellerSQL seller, AdministratorSQL administratorSQL, ManagerSQL manager) {
         userDaoSQL.deleteById(Integer.valueOf(id));
+
+        if (administratorSQL != null || manager != null) {
+            try {
+                mailer.sendEmail(seller.getEmail(), EMail.YOUR_ACCOUNT_BANNED, new HashMap<>());
+            } catch (Exception ignore) {
+            }
+        }
+
+        try {
+            mailer.sendEmail(seller.getEmail(), EMail.PLATFORM_LEAVE, new HashMap<>());
+        } catch (Exception ignore) {
+        }
+
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
 

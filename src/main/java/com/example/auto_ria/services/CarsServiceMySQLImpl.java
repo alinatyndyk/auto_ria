@@ -3,6 +3,7 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
@@ -10,12 +11,15 @@ import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import freemarker.template.TemplateException;
+import com.example.auto_ria.models.responses.CarResponse;
+import com.example.auto_ria.models.responses.CurrencyConverterResponse;
 import io.jsonwebtoken.io.IOException;
-import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +36,18 @@ public class CarsServiceMySQLImpl {
     private CarDaoSQL carDAO;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private FMService mailer;
+    private CurrencyConverterService currencyConverterService;
 
 
     public ResponseEntity<List<CarSQL>> getAll() {
         HttpHeaders httpHeaders = new HttpHeaders();
         return new ResponseEntity<>(carDAO.findAll(), httpHeaders, HttpStatus.ACCEPTED);
     }
+
+//    public ResponseEntity<List<CarSQL>> getMiddlePrice() {
+//
+//        carDAO.findAllPricesAndCurrencies();
+//    }
 
     public ResponseEntity<Page<CarSQL>> getAll(Pageable page, CarSQL params) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
@@ -50,8 +60,6 @@ public class CarsServiceMySQLImpl {
 
         Page<CarSQL> cars = carDAO.findAll(example, page);
 
-        System.out.println(cars);
-        System.out.println("CARS");
         return new ResponseEntity<>(cars, HttpStatus.ACCEPTED);
     }
 
@@ -64,6 +72,25 @@ public class CarsServiceMySQLImpl {
                 throw new CustomException("The announcement is not activated", HttpStatus.FORBIDDEN);
             }
         }
+
+        CurrencyConverterResponse converterResponse =
+                currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
+
+        CarResponse.builder()
+                .brand(carSQL.getBrand())
+                .powerH(carSQL.getPowerH())
+                .city(carSQL.getCity())
+                .region(carSQL.getRegion())
+                .producer(carSQL.getProducer())
+                .price(carSQL.getPrice())
+                .currency(carSQL.getCurrency())
+                .photo(carSQL.getPhoto())
+                .description(carSQL.getDescription())
+                .priceUAH(converterResponse.getCurrencyHashMap().get(ECurrency.UAH))
+                .priceUSD(converterResponse.getCurrencyHashMap().get(ECurrency.USD))
+                .priceEUR(converterResponse.getCurrencyHashMap().get(ECurrency.EUR))
+                .build();
+
         return new ResponseEntity<>(carDAO.findById(id).get(), HttpStatus.ACCEPTED);
     }
 
@@ -94,7 +121,7 @@ public class CarsServiceMySQLImpl {
         return carDAO.findBySeller(seller);
     }
 
-    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) throws MessagingException, TemplateException, java.io.IOException {
+    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) {
 
         CarSQL car = CarSQL.builder()
                 .brand(carDTO.getBrand())
@@ -110,13 +137,6 @@ public class CarsServiceMySQLImpl {
                 .build();
 
         CarSQL carSQL = carDAO.save(car);
-
-//        if (!carDTO.isActivated()) {
-//            HashMap<String, Object> vars = new HashMap<>(); // todo add variables
-//            vars.put("car_id", carSQL.getId());
-//
-//            mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
-//        }
 
         return new ResponseEntity<>(carSQL, HttpStatus.ACCEPTED);
     }

@@ -1,5 +1,7 @@
 package com.example.auto_ria.controllers;
 
+import com.example.auto_ria.currency_converter.ExchangeRateCache;
+import com.example.auto_ria.models.responses.ExchangeRateResponse;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
@@ -131,6 +133,16 @@ public class CarController {
         return carsService.getById(id, request); //todo check
     }
 
+    @GetMapping("/currency-rates")
+    public ResponseEntity<ExchangeRateResponse> getCurrencyRates() { //todo check
+        return ResponseEntity.ok(ExchangeRateResponse.builder()
+                .eurBuy(ExchangeRateCache.getEurBuy())
+                .eurSell(ExchangeRateCache.getEurSell())
+                .usdBuy(ExchangeRateCache.getUsdBuy())
+                .usdSell(ExchangeRateCache.getUsdSell())
+                .build());
+    }
+
     @SneakyThrows
     @PostMapping()
     public ResponseEntity<CarSQL> post(
@@ -155,6 +167,7 @@ public class CarController {
                 .producer(producer)
                 .price(price)
                 .currency(currency)
+                .isActivated(true)
                 .description(description)
                 .build();
 
@@ -174,10 +187,12 @@ public class CarController {
                     managers.forEach(managerSQL -> {
                         try {
                             mailer.sendEmail(seller.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
-                        } catch (Exception ignore) {}
+                        } catch (Exception ignore) {
+                        }
                     });
                     mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
             }
             int attemptsLeft = 4 - currentCount;
             throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);

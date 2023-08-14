@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 import org.springframework.stereotype.Repository;
 
@@ -16,11 +17,9 @@ import java.util.List;
 public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL>, QueryByExampleExecutor<CarSQL> {
     List<CarSQL> findBySeller(SellerSQL sellerSQL);
 
-//    Page<CarSQL> findAllByActivatedIsTrue(Pageable pageable);
-
-    //        Page<CarSQL> findAll(Pageable pageable, Example example);
+    @Query("SELECT c.price, c.currency FROM CarSQL c")
+    List<Object[]> findAllPricesAndCurrencies();
     @Override
     <S extends CarSQL> Page<S> findAll(Example<S> example, Pageable pageable);
-//    <S extends CarSQL> Page<S> findAll(Example<S> example, Pageable pageable);
 
 }

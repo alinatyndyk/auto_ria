@@ -17,5 +17,4 @@ public class CarUpdateDTO {
     private ERegion region;
     private String price;
     private ECurrency currency;
-
 }

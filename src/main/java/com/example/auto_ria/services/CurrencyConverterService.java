@@ -17,16 +17,16 @@ public class CurrencyConverterService {
 
         if (currency.equals(ECurrency.UAH)) {
             converterRes.put(ECurrency.UAH, Double.valueOf(price));
-            converterRes.put(ECurrency.USD, Double.parseDouble(price) * ExchangeRateCache.getUsdBuy());
-            converterRes.put(ECurrency.EUR, Double.parseDouble(price) * ExchangeRateCache.getEurBuy());
+            converterRes.put(ECurrency.USD, Double.parseDouble(price) / ExchangeRateCache.getUsdBuy());
+            converterRes.put(ECurrency.EUR, Double.parseDouble(price) / ExchangeRateCache.getEurBuy());
         } else if (currency.equals(ECurrency.USD)) {
             converterRes.put(ECurrency.USD, Double.valueOf(price));
             converterRes.put(ECurrency.UAH, Double.parseDouble(price) * ExchangeRateCache.getUsdSell());
-            converterRes.put(ECurrency.EUR, 1 / ExchangeRateCache.getUsdBuy() * ExchangeRateCache.getEurBuy() * Double.parseDouble(price));
+            converterRes.put(ECurrency.EUR,  Double.parseDouble(price) * ExchangeRateCache.getUsdSell() / ExchangeRateCache.getEurBuy());
         } else if (currency.equals(ECurrency.EUR)) {
             converterRes.put(ECurrency.EUR, Double.valueOf(price));
             converterRes.put(ECurrency.UAH, Double.parseDouble(price) * ExchangeRateCache.getEurBuy());
-            converterRes.put(ECurrency.USD, 1 / ExchangeRateCache.getEurBuy() * ExchangeRateCache.getUsdBuy() * Double.parseDouble(price));
+            converterRes.put(ECurrency.USD,  Double.parseDouble(price) * ExchangeRateCache.getEurSell() / ExchangeRateCache.getUsdBuy());
         }
 
         return CurrencyConverterResponse.builder()

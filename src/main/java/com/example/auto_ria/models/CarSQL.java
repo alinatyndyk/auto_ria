@@ -1,6 +1,8 @@
 package com.example.auto_ria.models;
 
+import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
+import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.enums.ERegion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -8,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.Example;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class CarSQL {
 
     @Id
@@ -29,7 +29,7 @@ public class CarSQL {
 //    @Size(min = 3, message = "brand must have more than 2 characters")
 //    @Size(max = 255, message = "name must have less than 255 characters")
 //    @JsonView({ViewsCar.SL1.class, ViewsCar.SL2.class})
-    private String brand;
+    private EBrand brand;
 
     //    @NotNull(message = "power is required")
 //    @Min(value = 200, message = "Power has to be more than 200")
@@ -45,7 +45,7 @@ public class CarSQL {
     @Enumerated(EnumType.STRING)
     private ERegion region;
 
-    private String producer;
+    private EModel model;
 
     @ElementCollection
     private List<String> photo = new ArrayList<>();
@@ -66,4 +66,30 @@ public class CarSQL {
     private String description;
 
     private boolean isActivated;
+
+
+    @Builder
+    @SuppressWarnings("unused")
+    public CarSQL(EBrand brand, Integer powerH, String city, ERegion region,
+                  EModel model, List<String> photo, SellerSQL seller, String price,
+                  ECurrency currency, String description, boolean isActivated) {
+        this.brand = brand;
+        this.model = model;
+        validateBrandAndModel();
+        this.powerH = powerH;
+        this.city = city;
+        this.region = region;
+        this.photo = photo;
+        this.seller = seller;
+        this.price = price;
+        this.currency = currency;
+        this.description = description;
+        this.isActivated = isActivated;
+    }
+
+    private void validateBrandAndModel() {
+        if (model.getBrand() != brand) {
+            throw new IllegalArgumentException("Invalid model for brand: " + brand);
+        }
+    }
 }

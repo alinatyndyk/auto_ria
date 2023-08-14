@@ -15,15 +15,12 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
-import freemarker.template.TemplateException;
-import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,7 +42,7 @@ public class AuthenticationService {
     private PasswordEncoder passwordEncoder;
     private FMService mailer;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) throws MessagingException, TemplateException, IOException {
+    public AuthenticationResponse register(RegisterRequest registerRequest) {
 
         if(sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
             throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);

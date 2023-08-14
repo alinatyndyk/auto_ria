@@ -1,27 +1,24 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
-import com.example.auto_ria.models.responses.ExchangeRateResponse;
+import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
-import com.example.auto_ria.enums.EAccountType;
-import com.example.auto_ria.enums.ECurrency;
-import com.example.auto_ria.enums.EMail;
-import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.responses.CarResponse;
+import com.example.auto_ria.models.responses.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,12 +40,12 @@ public class CarController {
 
     private CarsServiceMySQLImpl carsService;
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private UserDaoSQL userDaoSQL;
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
     private StripeService stripeService;
     private FMService mailer;
     private ManagerServiceMySQL managerServiceMySQL;
-
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
     @GetMapping("page/{page}")
@@ -66,16 +63,18 @@ public class CarController {
                 Field field = CarSQL.class.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 if (fieldValue != null) {
-                    field.set(carQueryParams, fieldValue);
+                    if (fieldName.equals("region")) {
+                        field.set(carQueryParams, ERegion.valueOf(fieldValue));
+                    } else {
+                        field.set(carQueryParams, fieldValue);
+                    }
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new CustomException("Forbidden query params found", HttpStatus.FORBIDDEN);
             }
         }
 
-        Pageable pageable = PageRequest.of(page, 2);
-
-        return carsService.getAll(pageable, carQueryParams);
+        return carsService.getAll(page, carQueryParams);
     }
 
 
@@ -86,6 +85,17 @@ public class CarController {
         mixpanelService.view(String.valueOf(id));
     }
 
+    @PostMapping("/buy-premium")
+    public ResponseEntity<String> getPremium(
+            HttpServletRequest request
+    ) {
+        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
+        stripeService.createPayment(sellerSQL);
+        sellerSQL.setAccountType(EAccountType.PREMIUM);
+        userDaoSQL.save(sellerSQL);
+        return ResponseEntity.ok("Premium bought successfully");
+    }
+
     @PostMapping("/activate/{id}")
     public ResponseEntity<String> activate(
             @PathVariable("id") int id
@@ -93,18 +103,20 @@ public class CarController {
         return carsService.activate(id);
     }
 
-    @GetMapping("seller/{id}")
-    public ResponseEntity<List<CarSQL>> getAllBySeller(
-            @PathVariable("id") int id) {
+    @GetMapping("/by-seller/page/{page}")
+    public ResponseEntity<Page<CarSQL>> getAllBySeller(
+            @PathVariable("page") int page,
+            @RequestParam("id") int id
+    ) {
         SellerSQL sellerSQL = usersServiceMySQL.getById(id);
-
-        return carsService.getBySeller(sellerSQL);
+        return carsService.getBySeller(sellerSQL, page);
     }
 
-    @GetMapping("/my-cars")
-    public ResponseEntity<List<CarSQL>> getMyCars(HttpServletRequest request) {
+    @GetMapping("/my-cars/page/{page}")
+    public ResponseEntity<Page<CarSQL>> getMyCars(HttpServletRequest request,
+                                                  @PathVariable("page") int page) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-        return carsService.getBySeller(sellerSQL);
+        return carsService.getBySeller(sellerSQL, page);
     }
 
     @GetMapping("/statistics/{id}")
@@ -127,14 +139,14 @@ public class CarController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CarSQL> getById(
+    public ResponseEntity<CarResponse> getById(
             HttpServletRequest request,
             @PathVariable("id") int id) {
         return carsService.getById(id, request); //todo check
     }
 
     @GetMapping("/currency-rates")
-    public ResponseEntity<ExchangeRateResponse> getCurrencyRates() { //todo check
+    public ResponseEntity<ExchangeRateResponse> getCurrencyRates() {
         return ResponseEntity.ok(ExchangeRateResponse.builder()
                 .eurBuy(ExchangeRateCache.getEurBuy())
                 .eurSell(ExchangeRateCache.getEurSell())
@@ -146,11 +158,11 @@ public class CarController {
     @SneakyThrows
     @PostMapping()
     public ResponseEntity<CarSQL> post(
-            @RequestParam("brand") String brand,
+            @RequestParam("brand") EBrand brand,
+            @RequestParam("model") EModel model,
             @RequestParam("power") int power,
             @RequestParam("city") String city,
             @RequestParam("region") ERegion region,
-            @RequestParam("producer") String producer,
             @RequestParam("price") String price,
             @RequestParam("currency") ECurrency currency,
             @RequestParam("pictures[]") MultipartFile[] pictures,
@@ -164,7 +176,7 @@ public class CarController {
                 .powerH(power)
                 .city(city)
                 .region(region)
-                .producer(producer)
+                .model(model)
                 .price(price)
                 .currency(currency)
                 .isActivated(true)
@@ -181,7 +193,7 @@ public class CarController {
                     vars.put("name", seller.getName());
                     vars.put("description", car.getDescription());
 
-                    List<ManagerSQL> managers = managerServiceMySQL.getAll().getBody();
+                    List<ManagerSQL> managers = managerServiceMySQL.getAll();
 
                     assert managers != null;
                     managers.forEach(managerSQL -> {
@@ -193,13 +205,14 @@ public class CarController {
                     mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
                 } catch (Exception ignore) {
                 }
+            } else {
+                int attemptsLeft = 4 - currentCount;
+                throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
             }
-            int attemptsLeft = 4 - currentCount;
-            throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
         }
 
 
-        if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.getBySellerList(seller).isEmpty()) {
+        if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.findAllBySeller(seller).isEmpty()) {
             throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
         }
 
@@ -217,21 +230,20 @@ public class CarController {
         return carsService.post(car, seller);
     }
 
-    @SneakyThrows
     @PatchMapping("/{id}")
     public ResponseEntity<CarSQL> patchCar(@PathVariable int id,
                                            @RequestBody CarUpdateDTO partialCar,
-                                           HttpServletRequest request) {
+                                           HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
+
         SellerSQL sellerFromHeader = usersServiceMySQL.extractSellerFromHeader(request);
         SellerSQL sellerFromCar = carsService.extractById(id).getSeller();
-
         AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
 
         if (!sellerFromHeader.equals(sellerFromCar) && administrator == null) {
             throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
         }
 
-        List<CarSQL> cars = carsService.getBySeller(sellerFromHeader).getBody();
+        List<CarSQL> cars = carsService.findAllBySeller(sellerFromHeader);
 
         assert cars != null;
         assert administrator != null; // todo check

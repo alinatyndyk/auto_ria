@@ -16,6 +16,9 @@ import com.example.auto_ria.models.SellerSQL;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,7 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -56,13 +58,13 @@ public class UsersServiceMySQLImpl {
     }
 
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
-        ManagerSQL managerSQL = null;
+        ManagerSQL managerSQL;
         try {
             managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
         } catch (Exception e) {
             return null;
         }
-        return managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
+        return managerSQL;
     }
 
     public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
@@ -80,8 +82,9 @@ public class UsersServiceMySQLImpl {
     }
 
 
-    public ResponseEntity<List<SellerSQL>> getAll() {
-        return new ResponseEntity<>(userDaoSQL.findAll(), HttpStatus.ACCEPTED);
+    public ResponseEntity<Page<SellerSQL>> getAll(int page) {
+        Pageable pageable = PageRequest.of(page, 2);
+        return new ResponseEntity<>(userDaoSQL.findAll(pageable), HttpStatus.ACCEPTED);
     }
 
 

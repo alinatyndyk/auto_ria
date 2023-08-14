@@ -34,10 +34,9 @@ public class SecurityConfiguration {
                                 matcherRegistry
                                         .requestMatchers("/api/v1/auth/**").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER", "ADMIN") // todo enable admin to post car
-                                        .requestMatchers(HttpMethod.POST, "/cars/viewed/{id}").authenticated() //todo check
                                         .requestMatchers(HttpMethod.POST, "/cars/activate/{id}").hasAnyAuthority("MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.GET, "/cars/my-cars").hasAnyAuthority("SELLER", "ADMIN")
-                                        .requestMatchers(HttpMethod.GET, "/cars//statistics/{id}").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
+                                        .requestMatchers(HttpMethod.GET, "/cars/statistics/{id}").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
                                         .requestMatchers(HttpMethod.DELETE, "/cars/**").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
                                         .requestMatchers(HttpMethod.PATCH, "/cars/**").hasAnyAuthority("SELLER", "ADMIN")
 

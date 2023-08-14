@@ -1,5 +1,6 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.models.responses.MixpanelResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.mixpanel.mixpanelapi.ClientDelivery;
 import com.mixpanel.mixpanelapi.MessageBuilder;
@@ -7,7 +8,12 @@ import com.mixpanel.mixpanelapi.MixpanelAPI;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
@@ -16,6 +22,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
 
 @Service
@@ -73,8 +80,21 @@ public class MixpanelService {
                 .build();
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         System.out.println(response.body());
-
         String responseBody = response.body();
+
+//        RestTemplate restTemplate = new RestTemplate();
+//        HttpHeaders headers = new HttpHeaders();
+//        headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
+//        headers.setBasicAuth("ODUxNmM1ZTUxZWRhZTQxZWY3OTUzYzhiMjJlNzllYTY6YWxpbmFhbm5hMzQw");
+//        HttpEntity<String> entity = new HttpEntity<String>(headers);
+//        String url = "https://data-eu.mixpanel.com/api/2.0/export?from_date=" + from_date + "&to_date=" + to_date;
+//        MixpanelResponse[] events = restTemplate.exchange(url, HttpMethod.GET, entity, MixpanelResponse[].class).getBody();
+//
+//        assert events != null;
+//        for (MixpanelResponse mixpanelResponse : events) {
+//            System.out.println(mixpanelResponse); //todo diff approach
+//            System.out.println("mixel reaponse");
+//        }
 
         String string = String.format("\"car_id\":\"%s\"", carId);
 

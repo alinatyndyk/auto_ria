@@ -3,9 +3,14 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +24,16 @@ import java.util.List;
 public class ManagerServiceMySQL {
 
     private ManagerDaoSQL managerDaoSQL;
+    private UsersServiceMySQLImpl usersServiceMySQL;
 
-    public ResponseEntity<List<ManagerSQL>> getAll() {
+    public ResponseEntity<Page<ManagerSQL>> getAll(int page) {
         HttpHeaders httpHeaders = new HttpHeaders();
-        return new ResponseEntity<>(managerDaoSQL.findAll(), httpHeaders, HttpStatus.ACCEPTED);
+        Pageable pageable = PageRequest.of(page, 2);
+        return new ResponseEntity<>(managerDaoSQL.findAll(pageable), httpHeaders, HttpStatus.ACCEPTED);
+    }
+
+    public List<ManagerSQL> getAll() {
+        return managerDaoSQL.findAll();
     }
 
     public ResponseEntity<ManagerSQL> getById(int id) {
@@ -34,6 +45,16 @@ public class ManagerServiceMySQL {
         assert managerDaoSQL.findById(id).isPresent();
         managerDaoSQL.findById(id).get();
         return new ResponseEntity<>("Success.Manager_deleted", HttpStatus.GONE);
+    }
+
+    public void checkCredentials(HttpServletRequest request, int id) {
+        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
+        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
+        ManagerSQL manager = getById(id).getBody();
+
+        if (administratorSQL == null && managerSQL.equals(manager)) {
+            throw new CustomException("Forbidden. Check credentials", HttpStatus.FORBIDDEN);
+        }
     }
 
     public ResponseEntity<ManagerSQL> update(int id, ManagerUpdateDTO managerUpdateDTO)

@@ -9,15 +9,13 @@ import com.stripe.param.PaymentIntentCreateParams;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.*;
 
 @Service
 public class StripeService {
 
-    public ResponseEntity<String> createPayment(SellerSQL sellerSQL) {
+    public void createPayment(SellerSQL sellerSQL) {
         try {
             Stripe.apiKey = "sk_test_51Nf481Ae4RILjJWGnrK0ByYfSZcW7FRzMZorxUraOwKjvOJEcejN4W05quGPkXf3AhJ1mtkaYgs5JvmEAonLCcpE00zeZqzgEI";
 
@@ -45,12 +43,12 @@ public class StripeService {
             PaymentIntent paymentIntent = PaymentIntent.create(createParams);
 
             if (paymentIntent.getStatus().equals("succeeded")) {
-                return ResponseEntity.ok("Payment completed successfully");
+                ResponseEntity.ok("Payment completed successfully");
             } else {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Payment failed");
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Payment failed");
             }
         } catch (StripeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 //-----------------------------------------------------------------------------------------------

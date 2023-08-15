@@ -65,14 +65,11 @@ public class CarController {
                 field.setAccessible(true);
                 if (fieldValue != null) {
 
-                    if (fieldName.equals("region")) {
-                        field.set(carQueryParams, ERegion.valueOf(fieldValue));
-                    } else if (fieldName.equals("brand")) {
-                        field.set(carQueryParams, EBrand.valueOf(fieldValue));
-                    } else if (fieldName.equals("model")) {
-                        field.set(carQueryParams, EModel.valueOf(fieldValue));
-                    } else {
-                        field.set(carQueryParams, fieldValue);
+                    switch (fieldName) {
+                        case "region" -> field.set(carQueryParams, ERegion.valueOf(fieldValue));
+                        case "brand" -> field.set(carQueryParams, EBrand.valueOf(fieldValue));
+                        case "model" -> field.set(carQueryParams, EModel.valueOf(fieldValue));
+                        default -> field.set(carQueryParams, fieldValue);
                     }
                 }
             } catch (NoSuchFieldException | IllegalAccessException e) {

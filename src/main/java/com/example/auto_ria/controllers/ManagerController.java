@@ -1,20 +1,13 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
-import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.ManagerServiceMySQL;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor

@@ -14,8 +14,6 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(errorResponse);
     }
 
-    // ... other exception handlers
-
     private static class ErrorResponse {
         private final String message;
         private final int statusCode;

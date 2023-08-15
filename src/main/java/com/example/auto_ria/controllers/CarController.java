@@ -49,7 +49,7 @@ public class CarController {
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
     @GetMapping("page/{page}")
-    public ResponseEntity<Page<CarSQL>> getAllPageQuery(
+    public ResponseEntity<Page<CarResponse>> getAllPageQuery(
             @PathVariable("page") int page,
             @RequestParam Map<String, String> queryParams
     ) {
@@ -104,7 +104,7 @@ public class CarController {
     }
 
     @GetMapping("/by-seller/page/{page}")
-    public ResponseEntity<Page<CarSQL>> getAllBySeller(
+    public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
             @RequestParam("id") int id
     ) {
@@ -113,7 +113,7 @@ public class CarController {
     }
 
     @GetMapping("/my-cars/page/{page}")
-    public ResponseEntity<Page<CarSQL>> getMyCars(HttpServletRequest request,
+    public ResponseEntity<Page<CarResponse>> getMyCars(HttpServletRequest request,
                                                   @PathVariable("page") int page) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.getBySeller(sellerSQL, page);
@@ -123,9 +123,11 @@ public class CarController {
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
             HttpServletRequest request) {
+        System.out.println("in mapping");
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
         ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
+        System.out.println("in afterr extract");
 
         assert administratorSQL == null;
         assert managerSQL == null;
@@ -231,7 +233,7 @@ public class CarController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<CarSQL> patchCar(@PathVariable int id,
+    public ResponseEntity<CarResponse> patchCar(@PathVariable int id,
                                            @RequestBody CarUpdateDTO partialCar,
                                            HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
 
@@ -246,7 +248,7 @@ public class CarController {
         List<CarSQL> cars = carsService.findAllBySeller(sellerFromHeader);
 
         assert cars != null;
-        assert administrator != null; // todo check
+        assert administrator != null;
         if (sellerFromHeader.getAccountType().equals(EAccountType.BASIC) && cars.isEmpty()) {
             throw new CustomException("Forbidden. Basic_account: The car already exists", HttpStatus.PAYMENT_REQUIRED);
         }

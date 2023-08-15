@@ -75,7 +75,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            throw new CustomException(e.getMessage(), HttpStatus.UNAUTHORIZED); //todo check
+            throw new CustomException(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
 
         filterChain.doFilter(request, response);

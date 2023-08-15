@@ -8,22 +8,20 @@ import com.mixpanel.mixpanelapi.MixpanelAPI;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -51,7 +49,7 @@ public class MixpanelService {
     @SneakyThrows
     public StatisticsResponse getCarViewsStatistics(String carId) {
 
-        LocalDate day = LocalDate.now();
+        LocalDate day = LocalDate.now().minusDays(0);
         LocalDate week = LocalDate.now().minusDays(7);
         LocalDate month = LocalDate.now().minusDays(30);
 
@@ -72,34 +70,29 @@ public class MixpanelService {
     }
 
     public int extractCarViews(String from_date, String to_date, String carId) throws IOException, InterruptedException {
+        String encodedToDate = URLEncoder.encode(to_date, StandardCharsets.UTF_8);
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://data-eu.mixpanel.com/api/2.0/export?from_date=" + from_date + "&to_date=" + to_date))
+                .uri(URI.create("https://data-eu.mixpanel.com/api/2.0/export?from_date=" + from_date + "&to_date=" + encodedToDate))
                 .header("accept", "text/plain")
                 .header("authorization", "Basic ODUxNmM1ZTUxZWRhZTQxZWY3OTUzYzhiMjJlNzllYTY6YWxpbmFhbm5hMzQw")
                 .method("GET", HttpRequest.BodyPublishers.noBody())
                 .build();
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
         String responseBody = response.body();
 
-//        RestTemplate restTemplate = new RestTemplate();
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setAccept(Arrays.asList(MediaType.TEXT_PLAIN));
-//        headers.setBasicAuth("ODUxNmM1ZTUxZWRhZTQxZWY3OTUzYzhiMjJlNzllYTY6YWxpbmFhbm5hMzQw");
-//        HttpEntity<String> entity = new HttpEntity<String>(headers);
-//        String url = "https://data-eu.mixpanel.com/api/2.0/export?from_date=" + from_date + "&to_date=" + to_date;
-//        MixpanelResponse[] events = restTemplate.exchange(url, HttpMethod.GET, entity, MixpanelResponse[].class).getBody();
-//
-//        assert events != null;
-//        for (MixpanelResponse mixpanelResponse : events) {
-//            System.out.println(mixpanelResponse); //todo diff approach
-//            System.out.println("mixel reaponse");
-//        }
+        List<MixpanelResponse> events = Collections.singletonList(MixpanelResponse.fromJson(responseBody));
+//        int count = 0;
+//        System.out.println(count);
+        System.out.println("count");
+        for (MixpanelResponse event : events) {
+            System.out.println(event.getEventName());
+//            if(event.getEventName().equals("carView") && event.getProperties().getCarId().equals(carId)) {
+//                count++;
+//            }
 
-        String string = String.format("\"car_id\":\"%s\"", carId);
+        }
 
-        String[] substrings = responseBody.split(string);
-        return substrings.length - 1;
+        return 3;
     }
 
 }

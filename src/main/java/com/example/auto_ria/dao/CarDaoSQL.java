@@ -21,7 +21,8 @@ import java.util.Map;
 
 @Repository
 public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL>, QueryByExampleExecutor<CarSQL> {
-    Page<CarSQL> findBySeller(SellerSQL sellerSQL, Pageable pageable);
+    Page<CarSQL> findBySellerAndActivatedTrue(SellerSQL sellerSQL, Pageable pageable, boolean isActivated);
+//    Page<CarSQL> findBySeller(SellerSQL sellerSQL, Pageable pageable);
 
     List<CarSQL> findAllBySeller(SellerSQL sellerSQL);
 
@@ -34,5 +35,6 @@ public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificat
 
     @Override
     <S extends CarSQL> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable);
+    <S extends CarSQL> @NotNull Page<S> findByActivatedIsTrue(@NotNull Example<S> example, @NotNull Pageable pageable, boolean isActivated);
 
 }

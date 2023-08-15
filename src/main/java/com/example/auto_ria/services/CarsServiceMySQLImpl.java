@@ -3,10 +3,7 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
-import com.example.auto_ria.enums.EBrand;
-import com.example.auto_ria.enums.ECurrency;
-import com.example.auto_ria.enums.EMail;
-import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
@@ -57,22 +54,17 @@ public class CarsServiceMySQLImpl {
         params.put("region", region);
 
         List<Map<String, Object>> pricesAndCurrencies = carDAO.findPricesByBrandAndRegion(params);
-        System.out.println(pricesAndCurrencies);
-        System.out.println("pricesAndCurrencies");
 
         for (Map<String, Object> map : pricesAndCurrencies) {
             String currency = map.get("currency").toString();
             String price = map.get("price").toString();
 
-        System.out.println("in map");
             CurrencyConverterResponse response =
                     currencyConverterService.convert(ECurrency.valueOf(currency), price);
-        System.out.println("converted");
 
             totalInUAH = totalInUAH + response.getCurrencyHashMap().get(ECurrency.UAH);
             totalInEUR = totalInEUR + response.getCurrencyHashMap().get(ECurrency.EUR);
             totalInUSD = totalInUSD + response.getCurrencyHashMap().get(ECurrency.USD);
-        System.out.println("totals");
         }
 
         return ResponseEntity.ok(MiddlePriceResponse.builder()
@@ -82,7 +74,7 @@ public class CarsServiceMySQLImpl {
                 .build());
     }
 
-    public ResponseEntity<Page<CarSQL>> getAll(int page, CarSQL params) {
+    public ResponseEntity<Page<CarResponse>> getAll(int page, CarSQL params) {
         ExampleMatcher matcher = ExampleMatcher.matchingAll()
                 .withIgnoreNullValues()
                 .withIgnorePaths("id")
@@ -92,57 +84,39 @@ public class CarsServiceMySQLImpl {
         Example<CarSQL> example = Example.of(params, matcher);
 
         Pageable pageable = PageRequest.of(page, 2);
-        Page<CarSQL> cars = carDAO.findAll(example, pageable);
+//        Page<CarSQL> carsPage = carDAO.findAll(example, pageable); //todo check!
+        Page<CarSQL> carsPage = carDAO.findByActivatedIsTrue(example, pageable, true);
 
-        return new ResponseEntity<>(cars, HttpStatus.ACCEPTED);
+        Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(carResponsesPage);
     }
 
     public ResponseEntity<CarResponse> getById(int id, HttpServletRequest request) {
         assert carDAO.findById(id).isPresent();
         CarSQL carSQL = carDAO.findById(id).get();
+
+        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
+        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
+        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
+
         if (!carSQL.isActivated()) {
-            if (usersServiceMySQL.extractManagerFromHeader(request) == null
-                    && usersServiceMySQL.extractAdminFromHeader(request) == null) {
+            if (managerSQL == null
+                    && administratorSQL == null) {
                 throw new CustomException("The announcement is not activated", HttpStatus.FORBIDDEN);
             }
         }
-        System.out.println("is activated");
 
-        CurrencyConverterResponse converterResponse =
-                currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
+        CarResponse carResponse = formCarResponse(carSQL);
 
-        System.out.println("is converted");
-        MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
-        System.out.println("is middle");
+        if (managerSQL != null || administratorSQL != null || sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+            MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
 
-        assert response != null;
-        CarResponse carResponse = CarResponse.builder()
-                .brand(carSQL.getBrand())
-                .powerH(carSQL.getPowerH())
-                .city(carSQL.getCity())
-                .region(carSQL.getRegion())
-                .model(carSQL.getModel())
-                .price(carSQL.getPrice())
-                .currency(carSQL.getCurrency())
-                .photo(carSQL.getPhoto())
-                .seller(SellerResponse.builder()
-                        .id(carSQL.getSeller().getId())
-                        .name(carSQL.getSeller().getName())
-                        .avatar(carSQL.getSeller().getAvatar())
-                        .city(carSQL.getSeller().getCity())
-                        .region(carSQL.getSeller().getRegion())
-                        .number(carSQL.getSeller().getNumber())
-                        .createdAt(carSQL.getSeller().getCreatedAt())
-                        .build())
-                .description(carSQL.getDescription())
-                .priceUAH(converterResponse.getCurrencyHashMap().get(ECurrency.UAH))
-                .priceUSD(converterResponse.getCurrencyHashMap().get(ECurrency.USD))
-                .priceEUR(converterResponse.getCurrencyHashMap().get(ECurrency.EUR))
-                .middlePriceEUR(response.getMiddleInEUR())
-                .middlePriceUAH(response.getMiddleInUAH())
-                .middlePriceUSD(response.getMiddleInUSD())
-                .build();
-        System.out.println("built");
+            assert response != null;
+            carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
+            carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
+            carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
+        }
 
         return new ResponseEntity<>(carResponse, HttpStatus.ACCEPTED);
     }
@@ -166,9 +140,28 @@ public class CarsServiceMySQLImpl {
         return ResponseEntity.ok("Car activated successfully");
     }
 
-    public ResponseEntity<Page<CarSQL>> getBySeller(SellerSQL seller, int page) {
+    public ResponseEntity<Page<CarResponse>> getBySeller(SellerSQL seller, int page) {
         Pageable pageable = PageRequest.of(page, 2);
-        return new ResponseEntity<>(carDAO.findBySeller(seller, pageable), HttpStatus.ACCEPTED);
+
+        Page<CarSQL> carsPage = carDAO.findBySellerAndActivatedTrue(seller, pageable, true);
+
+        Page<CarResponse> carResponsesPage = carsPage.map(carSQL -> {
+            CarResponse carResponse = formCarResponse(carSQL);
+
+            if (seller.equals(carSQL.getSeller()) && seller.getAccountType().equals(EAccountType.PREMIUM)) {
+                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
+
+                assert response != null;
+                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
+                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
+                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
+            }
+
+            return carResponse;
+
+        });
+
+        return new ResponseEntity<>(carResponsesPage, HttpStatus.ACCEPTED);
     }
 
     public List<CarSQL> findAllBySeller(SellerSQL seller) {
@@ -225,10 +218,11 @@ public class CarsServiceMySQLImpl {
         return seller.getId() == car.getSeller().getId();
     }
 
-    public ResponseEntity<CarSQL> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException,
+    public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException,
             IOException, NoSuchFieldException {
 
-        CarSQL car = extractById(id); //todo profanity filter
+        CarSQL car = extractById(id);
+        CarResponse carResponse;
 
         assert car != null;
         if (doesBelongToSeller(seller, car)) {
@@ -252,10 +246,52 @@ public class CarsServiceMySQLImpl {
                 }
             }
 
+            CarSQL carSQL = carDAO.save(car);
+
+            carResponse = formCarResponse(carSQL);
+
+            if (seller.getAccountType().equals(EAccountType.PREMIUM)) {
+                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
+
+                assert response != null;
+                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
+                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
+                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
+            }
+
         } else {
             throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
         }
-        return new ResponseEntity<>(carDAO.save(car), HttpStatus.ACCEPTED);
+        return ResponseEntity.ok(carResponse);
+    }
+
+    private CarResponse formCarResponse(CarSQL carSQL) {
+        CurrencyConverterResponse converterResponse =
+                currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
+
+        return CarResponse.builder()
+                .brand(carSQL.getBrand())
+                .powerH(carSQL.getPowerH())
+                .city(carSQL.getCity())
+                .region(carSQL.getRegion())
+                .model(carSQL.getModel())
+                .price(carSQL.getPrice())
+                .currency(carSQL.getCurrency())
+                .photo(carSQL.getPhoto())
+                .seller(SellerResponse.builder()
+                        .id(carSQL.getSeller().getId())
+                        .name(carSQL.getSeller().getName())
+                        .avatar(carSQL.getSeller().getAvatar())
+                        .city(carSQL.getSeller().getCity())
+                        .region(carSQL.getSeller().getRegion())
+                        .number(carSQL.getSeller().getNumber())
+                        .createdAt(carSQL.getSeller().getCreatedAt())
+                        .build())
+                .description(carSQL.getDescription())
+                .priceUAH(converterResponse.getCurrencyHashMap().get(ECurrency.UAH))
+                .priceUSD(converterResponse.getCurrencyHashMap().get(ECurrency.USD))
+                .priceEUR(converterResponse.getCurrencyHashMap().get(ECurrency.EUR))
+                .build();
     }
 
 

@@ -6,20 +6,27 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.PaymentMethod;
 import com.stripe.param.PaymentIntentCreateParams;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import org.slf4j.Logger;
 
 @Service
 public class StripeService {
+
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(StripeService.class);
 
     public void createPayment(SellerSQL sellerSQL) {
         try {
             Stripe.apiKey = "sk_test_51Nf481Ae4RILjJWGnrK0ByYfSZcW7FRzMZorxUraOwKjvOJEcejN4W05quGPkXf3AhJ1mtkaYgs5JvmEAonLCcpE00zeZqzgEI";
 
+
             Map<String, Object> paymentMethodParams = new HashMap<>();
+            Map<String, Object> card = new HashMap<>();
+            card.put("token", "tok_visa");
             paymentMethodParams.put("type", "card");
             paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
 
@@ -42,13 +49,15 @@ public class StripeService {
 
             PaymentIntent paymentIntent = PaymentIntent.create(createParams);
 
+
             if (paymentIntent.getStatus().equals("succeeded")) {
                 ResponseEntity.ok("Payment completed successfully");
             } else {
                 ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Payment failed");
             }
         } catch (StripeException e) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Stripe API error: {}", e.getMessage());
+            ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
 //-----------------------------------------------------------------------------------------------

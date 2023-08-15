@@ -93,7 +93,7 @@ public class CarController {
             HttpServletRequest request
     ) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-        stripeService.createPayment(sellerSQL);
+//        stripeService.createPayment(sellerSQL);
         sellerSQL.setAccountType(EAccountType.PREMIUM);
         userDaoSQL.save(sellerSQL);
         return ResponseEntity.ok("Premium bought successfully");
@@ -113,11 +113,16 @@ public class CarController {
         return carsService.ban(id);
     }
 
-    @PostMapping("/middle/{id}")
+    @GetMapping("/middle/{id}")
     public ResponseEntity<MiddlePriceResponse> middle(
-            @PathVariable("id") int id
+            @PathVariable("id") int id,
+            HttpServletRequest request
     ) {
         CarSQL carSQL = carsService.extractById(id);
+        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
+        if(sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.BASIC)) {
+            throw new CustomException("Premium plan required", HttpStatus.FORBIDDEN);
+        }
         return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
     }
 
@@ -134,11 +139,9 @@ public class CarController {
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
             HttpServletRequest request) {
-        System.out.println("in mapping");
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
         ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
-        System.out.println("in afterr extract");
 
         assert administratorSQL == null;
         assert managerSQL == null;

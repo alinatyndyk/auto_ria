@@ -35,14 +35,16 @@ public class SecurityConfiguration {
                                         .requestMatchers("/api/v1/auth/**").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/activate/{id}").hasAnyAuthority("MANAGER", "ADMIN")
-                                        .requestMatchers(HttpMethod.GET, "/cars/my-cars").hasAnyAuthority("SELLER", "ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/cars/ban/{id}").hasAnyAuthority("MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.GET, "/cars/statistics/{id}").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
+                                        .requestMatchers(HttpMethod.GET, "/cars/middle/{id}").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
+                                        .requestMatchers(HttpMethod.GET, "/cars/buy-premium").hasAnyAuthority("SELLER")
                                         .requestMatchers(HttpMethod.DELETE, "/cars/**").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
                                         .requestMatchers(HttpMethod.PATCH, "/cars/**").hasAnyAuthority("SELLER", "ADMIN")
 
                                         .requestMatchers(HttpMethod.DELETE, "/sellers/**").hasAnyAuthority("SELLER", "ADMIN", "MANAGER")
                                         .requestMatchers(HttpMethod.PATCH, "sellers/**").hasAnyAuthority("SELLER", "ADMIN")
-//                                        .requestMatchers(HttpMethod.GET, "sellers").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.GET, "sellers").hasAnyAuthority("ADMIN")
 
                                         .requestMatchers(HttpMethod.GET, "/managers/**").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/managers").hasAnyAuthority("ADMIN")

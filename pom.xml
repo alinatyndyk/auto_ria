@@ -139,6 +139,17 @@
             <scope>runtime</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.0.0-M5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+        </dependency>
+
         <!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-jackson -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -166,6 +177,8 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <outputDirectory>volumes/backend</outputDirectory>
+                    <finalName>app</finalName>
                 </configuration>
             </plugin>
         </plugins>

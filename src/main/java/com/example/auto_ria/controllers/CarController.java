@@ -13,6 +13,7 @@ import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.responses.CarResponse;
 import com.example.auto_ria.models.responses.ExchangeRateResponse;
+import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -63,8 +64,13 @@ public class CarController {
                 Field field = CarSQL.class.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 if (fieldValue != null) {
+
                     if (fieldName.equals("region")) {
                         field.set(carQueryParams, ERegion.valueOf(fieldValue));
+                    } else if (fieldName.equals("brand")) {
+                        field.set(carQueryParams, EBrand.valueOf(fieldValue));
+                    } else if (fieldName.equals("model")) {
+                        field.set(carQueryParams, EModel.valueOf(fieldValue));
                     } else {
                         field.set(carQueryParams, fieldValue);
                     }
@@ -103,19 +109,27 @@ public class CarController {
         return carsService.activate(id);
     }
 
+    @PostMapping("/ban/{id}")
+    public ResponseEntity<String> banCar(
+            @PathVariable("id") int id
+    ) {
+        return carsService.ban(id);
+    }
+
+    @PostMapping("/middle/{id}")
+    public ResponseEntity<MiddlePriceResponse> middle(
+            @PathVariable("id") int id
+    ) {
+        CarSQL carSQL = carsService.extractById(id);
+        return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
+    }
+
     @GetMapping("/by-seller/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
             @RequestParam("id") int id
     ) {
         SellerSQL sellerSQL = usersServiceMySQL.getById(id);
-        return carsService.getBySeller(sellerSQL, page);
-    }
-
-    @GetMapping("/my-cars/page/{page}")
-    public ResponseEntity<Page<CarResponse>> getMyCars(HttpServletRequest request,
-                                                  @PathVariable("page") int page) {
-        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
         return carsService.getBySeller(sellerSQL, page);
     }
 
@@ -144,7 +158,7 @@ public class CarController {
     public ResponseEntity<CarResponse> getById(
             HttpServletRequest request,
             @PathVariable("id") int id) {
-        return carsService.getById(id, request); //todo check
+        return carsService.getById(id, request);
     }
 
     @GetMapping("/currency-rates")
@@ -171,7 +185,7 @@ public class CarController {
             @RequestParam("description") String description,
             HttpServletRequest request) {
 
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request); //todo admin post car
+        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
         CarDTO car = CarDTO
                 .builder()
                 .brand(brand)
@@ -234,8 +248,8 @@ public class CarController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<CarResponse> patchCar(@PathVariable int id,
-                                           @RequestBody CarUpdateDTO partialCar,
-                                           HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
+                                                @RequestBody CarUpdateDTO partialCar,
+                                                HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
 
         SellerSQL sellerFromHeader = usersServiceMySQL.extractSellerFromHeader(request);
         SellerSQL sellerFromCar = carsService.extractById(id).getSeller();

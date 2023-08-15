@@ -4,7 +4,7 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.Person;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,13 +25,15 @@ public class AdministratorServiceMySQL {
 
     public ResponseEntity<Page<AdministratorSQL>> getAll(int page) {
         Pageable pageable = PageRequest.of(page, 2);
-        return new ResponseEntity<>(administratorDaoSQL.findAllByIsActivatedIsTrue(pageable), HttpStatus.ACCEPTED);
+        Page<AdministratorSQL> admins = administratorDaoSQL.findAll(pageable);
+        System.out.println(admins);
+        return new ResponseEntity<>(admins, HttpStatus.ACCEPTED);
     }
 
 
     public ResponseEntity<AdministratorSQL> getById(String id) {
         AdministratorSQL administratorSQL = null;
-        if (administratorDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
+        if (administratorDaoSQL.findById(Integer.parseInt(id)).isPresent()) {
             administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
         }
         return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
@@ -50,15 +52,12 @@ public class AdministratorServiceMySQL {
 
     public ResponseEntity<AdministratorSQL> update(int id, AdministratorUpdateDTO administratorUpdateDTO) throws IllegalAccessException, NoSuchFieldException {
         try {
-
             AdministratorSQL administratorSQL = getById(String.valueOf(id)).getBody();
-
             assert administratorSQL != null;
             Class<?> adminDtoClass = administratorUpdateDTO.getClass();
             Field[] fields = adminDtoClass.getDeclaredFields();
 
             for (Field field : fields) {
-
                 field.setAccessible(true);
 
                 String fieldName = field.getName();
@@ -66,7 +65,12 @@ public class AdministratorServiceMySQL {
 
                 if (fieldValue != null) {
 
-                    Field adminField = SellerSQL.class.getDeclaredField(fieldName);
+                    Field adminField = Person.class.getDeclaredField(fieldName);
+
+                    if (fieldName.equals("lastName")) {
+                        adminField.setAccessible(true);
+                        adminField.set(administratorSQL, fieldValue);
+                    }
 
                     adminField.setAccessible(true);
                     adminField.set(administratorSQL, fieldValue);
@@ -74,7 +78,7 @@ public class AdministratorServiceMySQL {
             }
             return new ResponseEntity<>(administratorDaoSQL.save(administratorSQL), HttpStatus.ACCEPTED);
         } catch (Exception exception) {
-            throw new CustomException("Administrator_update_failed", HttpStatus.CONFLICT);
+            throw new CustomException("Administrator_update_failed. Forbidden fields found", HttpStatus.CONFLICT);
         }
     }
 

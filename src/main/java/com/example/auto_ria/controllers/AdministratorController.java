@@ -59,8 +59,13 @@ public class AdministratorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id) {
-        return administratorServiceMySQL.deleteById(id);
+    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
+        AdministratorSQL administratorHeader = usersServiceMySQL.extractAdminFromHeader(request);
+        assert administratorHeader != null;
+        if (administratorHeader.getId() != id) {
+            throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+        }
+        return administratorServiceMySQL.deleteById(String.valueOf(id));
     }
 
 }

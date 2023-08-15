@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AdministratorDaoSQL extends JpaRepository<AdministratorSQL, Integer> {
     AdministratorSQL findByEmail(String email);
-    Page<AdministratorSQL> findAllByIsActivatedIsTrue(Pageable pageable);
+    Page<AdministratorSQL> findAll(Pageable pageable);
     long count();
 }

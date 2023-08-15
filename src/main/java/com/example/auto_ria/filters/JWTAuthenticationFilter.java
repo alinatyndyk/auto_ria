@@ -48,8 +48,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         try {
             String jwt = authorizationHeader.substring(7);
             String userEmail = jwtService.extractUsername(jwt);
-
+            System.out.println(userEmail);
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                System.out.println("first uf1");
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
                 System.out.println(userDetails);
@@ -60,6 +61,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 !isRefresh(userDetails, jwt, userEmail)
                 ) {
                     System.out.println("secondif");
+                    System.out.println(userDetails);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,

@@ -20,7 +20,7 @@ public class InitialDataLoader {
         if (administratorDaoSQL.count() == 0) {
             RegisterAdminRequest request = RegisterAdminRequest.builder()
                     .name("Initial Admin")
-                    .email("alinatyndyk777@gmail.com") //todo to env
+                    .email("alinatyndyk777@gmail.com")
                     .password("password123")
                     .build();
             authenticationService.registerAdmin(request);

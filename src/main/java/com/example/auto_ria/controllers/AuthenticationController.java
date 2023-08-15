@@ -1,13 +1,10 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
-import freemarker.template.TemplateException;
-import jakarta.mail.MessagingException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +30,7 @@ public class AuthenticationController {
             @RequestParam("email") String email,
             @RequestParam("number") String number,
             @RequestParam("password") String password
-    ) throws IOException, MessagingException, TemplateException {
+    ) throws IOException {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterRequest registerRequest = new RegisterRequest(name, lastName, city, region, email, number, fileName, password);

@@ -43,17 +43,23 @@ public class CarsServiceMySQLImpl {
         return new ResponseEntity<>(carDAO.findAll(), httpHeaders, HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EBrand brand, ERegion region) { //todo by model
+    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EBrand brand, ERegion region) {
 
         double totalInUSD = 0.00;
         double totalInUAH = 0.00;
         double totalInEUR = 0.00;
+
+        double middleInUSD = 0.00;
+        double middleInUAH = 0.00;
+        double middleInEUR = 0.00;
 
         HashMap<String, Object> params = new HashMap<>();
         params.put("brand", brand);
         params.put("region", region);
 
         List<Map<String, Object>> pricesAndCurrencies = carDAO.findPricesByBrandAndRegion(params);
+        System.out.println(pricesAndCurrencies);
+        System.out.println("pricesAndCurrencies");
 
         for (Map<String, Object> map : pricesAndCurrencies) {
             String currency = map.get("currency").toString();
@@ -65,12 +71,17 @@ public class CarsServiceMySQLImpl {
             totalInUAH = totalInUAH + response.getCurrencyHashMap().get(ECurrency.UAH);
             totalInEUR = totalInEUR + response.getCurrencyHashMap().get(ECurrency.EUR);
             totalInUSD = totalInUSD + response.getCurrencyHashMap().get(ECurrency.USD);
+
+            middleInUAH = totalInUAH / carDAO.countByBrandAndRegion(brand, region);
+            middleInUSD = totalInUSD / carDAO.countByBrandAndRegion(brand, region);
+            middleInEUR = totalInEUR / carDAO.countByBrandAndRegion(brand, region);
+
         }
 
         return ResponseEntity.ok(MiddlePriceResponse.builder()
-                .middleInUAH(totalInUAH / carDAO.countByBrandAndRegion(brand, region))
-                .middleInEUR(totalInEUR / carDAO.countByBrandAndRegion(brand, region))
-                .middleInUSD(totalInUSD / carDAO.countByBrandAndRegion(brand, region))
+                .middleInUAH(middleInUAH)
+                .middleInEUR(middleInEUR)
+                .middleInUSD(middleInUSD)
                 .build());
     }
 
@@ -84,8 +95,7 @@ public class CarsServiceMySQLImpl {
         Example<CarSQL> example = Example.of(params, matcher);
 
         Pageable pageable = PageRequest.of(page, 2);
-//        Page<CarSQL> carsPage = carDAO.findAll(example, pageable); //todo check!
-        Page<CarSQL> carsPage = carDAO.findByActivatedIsTrue(example, pageable, true);
+        Page<CarSQL> carsPage = carDAO.findAll(example, pageable);
 
         Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 
@@ -109,13 +119,14 @@ public class CarsServiceMySQLImpl {
 
         CarResponse carResponse = formCarResponse(carSQL);
 
-        if (managerSQL != null || administratorSQL != null || sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-            MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
-
-            assert response != null;
-            carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
-            carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
-            carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
+        if (managerSQL != null || administratorSQL != null || sellerSQL != null) {
+            if (sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
+                assert response != null;
+                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
+                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
+                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
+            }
         }
 
         return new ResponseEntity<>(carResponse, HttpStatus.ACCEPTED);
@@ -140,13 +151,29 @@ public class CarsServiceMySQLImpl {
         return ResponseEntity.ok("Car activated successfully");
     }
 
+    public ResponseEntity<String> ban(int id) {
+        CarSQL carSQL = extractById(id);
+        carSQL.setActivated(false);
+        carDAO.save(carSQL);
+        try {
+            HashMap<String, Object> vars = new HashMap<>();
+            vars.put("name", carSQL.getSeller().getName());
+            vars.put("car_id", carSQL.getId());
+            mailer.sendEmail(carSQL.getSeller().getEmail(), EMail.CAR_BEING_BANNED, vars);
+        } catch (Exception ignore) {
+        }
+        return ResponseEntity.ok("Car banned successfully");
+    }
+
     public ResponseEntity<Page<CarResponse>> getBySeller(SellerSQL seller, int page) {
         Pageable pageable = PageRequest.of(page, 2);
 
-        Page<CarSQL> carsPage = carDAO.findBySellerAndActivatedTrue(seller, pageable, true);
+        Page<CarSQL> carsPage = carDAO.findAllBySeller(seller, pageable);
+        System.out.println("jvhyasjnagsvd");
 
         Page<CarResponse> carResponsesPage = carsPage.map(carSQL -> {
             CarResponse carResponse = formCarResponse(carSQL);
+        System.out.println("zzzzzzzzzzzzzz");
 
             if (seller.equals(carSQL.getSeller()) && seller.getAccountType().equals(EAccountType.PREMIUM)) {
                 MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
@@ -165,7 +192,7 @@ public class CarsServiceMySQLImpl {
     }
 
     public List<CarSQL> findAllBySeller(SellerSQL seller) {
-        return carDAO.findAllBySeller(seller);
+        return carDAO.findBySeller(seller);
     }
 
     public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) {
@@ -266,8 +293,8 @@ public class CarsServiceMySQLImpl {
     }
 
     private CarResponse formCarResponse(CarSQL carSQL) {
-        CurrencyConverterResponse converterResponse =
-                currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
+
+        CurrencyConverterResponse converterResponse = currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
 
         return CarResponse.builder()
                 .brand(carSQL.getBrand())

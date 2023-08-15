@@ -1,7 +1,6 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
@@ -68,10 +67,11 @@ public class UserController {
         ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
         AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
 
-        if (!Integer.valueOf(id).equals(seller.getId()) || !manager.getRoles().contains(ERole.MANAGER_GLOBAL)) {
-            throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+        if (administrator == null && manager == null) {
+            if (seller == null || !Integer.valueOf(id).equals(seller.getId())) {
+                throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+            }
         }
-
         return usersServiceMySQL.deleteById(id, seller, administrator, manager);
     }
 

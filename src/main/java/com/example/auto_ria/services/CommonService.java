@@ -29,7 +29,7 @@ public class CommonService {
     private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
-    public void validate (BindingResult result) {
+    public void validate(BindingResult result) {
         if (result.hasErrors()) {
             List<String> errors = result.getAllErrors().stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
@@ -67,7 +67,7 @@ public class CommonService {
     }
 
     public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
-        AdministratorSQL administratorSQL;
+        AdministratorSQL administratorSQL = null;
         try {
             administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
         } catch (Exception e) {

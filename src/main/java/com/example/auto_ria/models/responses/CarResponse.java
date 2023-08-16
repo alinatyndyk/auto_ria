@@ -30,7 +30,7 @@ public class CarResponse {
     private double priceEUR;
     private double priceUSD;
 
-    private double middlePriceUAH;
-    private double middlePriceEUR;
-    private double middlePriceUSD;
+//    private double middlePriceUAH;
+//    private double middlePriceEUR;
+//    private double middlePriceUSD;
 }

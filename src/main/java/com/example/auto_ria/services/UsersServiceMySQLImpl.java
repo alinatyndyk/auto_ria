@@ -94,7 +94,6 @@ public class UsersServiceMySQLImpl {
                 field.setAccessible(true);
 
                 String fieldName = field.getName();
-                System.out.println(fieldName);
                 Object fieldValue = field.get(userDTO);
 
                 if (fieldValue != null) {

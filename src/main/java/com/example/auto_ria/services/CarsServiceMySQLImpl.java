@@ -106,7 +106,6 @@ public class CarsServiceMySQLImpl {
         assert carDAO.findById(id).isPresent();
         CarSQL carSQL = carDAO.findById(id).get();
 
-        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
         ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
         AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
@@ -118,16 +117,6 @@ public class CarsServiceMySQLImpl {
         }
 
         CarResponse carResponse = formCarResponse(carSQL);
-
-        if (managerSQL != null || administratorSQL != null || sellerSQL != null) {
-            if (sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
-                assert response != null;
-                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
-                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
-                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
-            }
-        }
 
         return new ResponseEntity<>(carResponse, HttpStatus.ACCEPTED);
     }
@@ -169,24 +158,8 @@ public class CarsServiceMySQLImpl {
         Pageable pageable = PageRequest.of(page, 2);
 
         Page<CarSQL> carsPage = carDAO.findAllBySeller(seller, pageable);
-        System.out.println("jvhyasjnagsvd");
 
-        Page<CarResponse> carResponsesPage = carsPage.map(carSQL -> {
-            CarResponse carResponse = formCarResponse(carSQL);
-            System.out.println("zzzzzzzzzzzzzz");
-
-            if (seller.equals(carSQL.getSeller()) && seller.getAccountType().equals(EAccountType.PREMIUM)) {
-                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
-
-                assert response != null;
-                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
-                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
-                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
-            }
-
-            return carResponse;
-
-        });
+        Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 
         return new ResponseEntity<>(carResponsesPage, HttpStatus.ACCEPTED);
     }
@@ -246,15 +219,15 @@ public class CarsServiceMySQLImpl {
         return seller.getId() == car.getSeller().getId();
     }
 
-    public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO, SellerSQL seller) throws IllegalAccessException,
+    public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO) throws IllegalAccessException,
             IOException, NoSuchFieldException {
 
         CarSQL car = extractById(id);
         CarResponse carResponse;
 
         assert car != null;
-        if (doesBelongToSeller(seller, car)) {
 
+        try {
             Class<?> carDTOClass = carDTO.getClass();
             Field[] fields = carDTOClass.getDeclaredFields();
 
@@ -266,10 +239,15 @@ public class CarsServiceMySQLImpl {
                 Object fieldValue = field.get(carDTO);
 
                 if (fieldValue != null) {
-
                     Field carField = CarSQL.class.getDeclaredField(fieldName);
-
                     carField.setAccessible(true);
+                    if (fieldName.equals("currency")) {
+
+                        carField.set(car, ECurrency.valueOf(fieldValue.toString()));
+                    } else if (fieldName.equals("region")) {
+                        carField.set(car, ERegion.valueOf(fieldValue.toString()));
+                    }
+
                     carField.set(car, fieldValue);
                 }
             }
@@ -278,17 +256,8 @@ public class CarsServiceMySQLImpl {
 
             carResponse = formCarResponse(carSQL);
 
-            if (seller.getAccountType().equals(EAccountType.PREMIUM)) {
-                MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();
-
-                assert response != null;
-                carResponse.setMiddlePriceUAH(response.getMiddleInUAH());
-                carResponse.setMiddlePriceUAH(response.getMiddleInEUR());
-                carResponse.setMiddlePriceUAH(response.getMiddleInUSD());
-            }
-
-        } else {
-            throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            throw new CustomException("Error.Update_fail", HttpStatus.FORBIDDEN);
         }
         return ResponseEntity.ok(carResponse);
     }

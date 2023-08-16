@@ -171,6 +171,10 @@ public class AuthenticationService {
     public AuthenticationResponse login(LoginRequest loginRequest) {
         SellerSQL user = sellerDaoSQL.findSellerByEmail(loginRequest.getEmail());
 
+        if(user == null) {
+            throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+        }
+
         sellerAuthenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getEmail(),

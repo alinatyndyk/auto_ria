@@ -263,21 +263,20 @@ public class CarController {
                                                 HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
 
         SellerSQL sellerFromHeader = commonService.extractSellerFromHeader(request);
-        SellerSQL sellerFromCar = carsService.extractById(id).getSeller();
         AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
 
-        if (!sellerFromHeader.equals(sellerFromCar) && administrator == null) {
+        CarSQL carSQL = carsService.extractById(id);
+
+        assert sellerFromHeader != null || administrator != null;
+
+        if (sellerFromHeader == null) {
+            return carsService.update(id, partialCar);
+        }
+
+        if (!sellerFromHeader.equals(carSQL.getSeller()) && administrator == null) {
             throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
         }
-
-        List<CarSQL> cars = carsService.findAllBySeller(sellerFromHeader);
-
-        assert cars != null;
-        assert administrator != null;
-        if (sellerFromHeader.getAccountType().equals(EAccountType.BASIC) && cars.isEmpty()) {
-            throw new CustomException("Forbidden. Basic_account: The car already exists", HttpStatus.PAYMENT_REQUIRED);
-        }
-        return carsService.update(id, partialCar, sellerFromHeader);
+        return carsService.update(id, partialCar);
     }
 
     @DeleteMapping("/{id}")

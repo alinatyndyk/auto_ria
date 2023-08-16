@@ -29,20 +29,17 @@ public class Person implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @JsonView(ViewsUser.SL1.class)  //todo json view
     private int id;
 
     @NotBlank(message = "name is required")
     @Size(min = 3, message = "name must have more than 3 characters")
     @Size(max = 255, message = "name must have less than 255 characters")
-//    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String name;
 
     @Column(unique = true)
     @Size(min = 3, message = "email must have more than 3 characters")
     @Size(max = 255, message = "email must have less than 255 characters")
     @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
-//    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String email;
 
     private String avatar = null;

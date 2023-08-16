@@ -24,7 +24,7 @@ import java.util.List;
 public class ManagerServiceMySQL {
 
     private ManagerDaoSQL managerDaoSQL;
-    private UsersServiceMySQLImpl usersServiceMySQL;
+    private CommonService commonService;
 
     public ResponseEntity<Page<ManagerSQL>> getAll(int page) {
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -48,8 +48,8 @@ public class ManagerServiceMySQL {
     }
 
     public void checkCredentials(HttpServletRequest request, int id) {
-        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
-        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
+        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+        ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
         ManagerSQL manager = getById(id).getBody();
 
         if (administratorSQL == null && managerSQL.equals(manager)) {

@@ -4,7 +4,6 @@ import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.models.SellerSQL;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -36,6 +36,4 @@ public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificat
     @Override
     <S extends CarSQL> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable);
 
-    <S extends CarSQL> @NotNull Page<S> findByActivatedIsTrue(@NotNull Example<S> example, @NotNull Pageable pageable, boolean isActivated);
-
 }

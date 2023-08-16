@@ -34,7 +34,7 @@ public class UserDTO {
     @Size(max = 20, message = "lastName must have less than 20 characters")
     private String lastName;
 
-    @NotBlank(message = "name cant be empty")
+    @NotBlank(message = "email cant be empty")
     @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
     private String email;
 

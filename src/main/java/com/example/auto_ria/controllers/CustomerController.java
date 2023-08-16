@@ -6,6 +6,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.ManagerSQL;
+import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.CustomersServiceMySQL;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +25,7 @@ import java.io.IOException;
 public class CustomerController {
 
     private CustomersServiceMySQL customersServiceMySQL;
+    private CommonService commonService;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
     @GetMapping("/page/{page}")
@@ -43,7 +45,7 @@ public class CustomerController {
                                                      @ModelAttribute CustomerUpdateDTO partialUser,
                                                      HttpServletRequest request) throws NoSuchFieldException,
             IllegalAccessException {
-        CustomerSQL customerSQL = usersServiceMySQL.extractCustomerFromHeader(request);
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
         return customersServiceMySQL.update(id, partialUser, customerSQL);
     }
 
@@ -51,8 +53,8 @@ public class CustomerController {
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
-        CustomerSQL customerSQL = usersServiceMySQL.extractCustomerFromHeader(request);
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
         assert customerSQL != null;
         if (customerSQL.getId() != id || administrator == null) {
             throw new CustomException("Illegal_access_exception. No-permission: check credentials", HttpStatus.FORBIDDEN);
@@ -66,10 +68,10 @@ public class CustomerController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
-        CustomerSQL customerSQL = usersServiceMySQL.extractCustomerFromHeader(request);
-        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
-        ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
+        ManagerSQL manager = commonService.extractManagerFromHeader(request);
 
         if (!Integer.valueOf(id).equals(customerSQL.getId())
                 || !manager.getRoles().contains(ERole.MANAGER_GLOBAL)

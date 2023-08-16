@@ -20,7 +20,6 @@ public class UserSQL extends SellerSQL {
     @NotBlank(message = "last name is required")
     @Size(min = 3, message = "last name must have more than 3 characters")
     @Size(max = 255, message = "last name must have less than 255 characters")
-//    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String lastName;
 
     @Builder(builderMethodName = "userSQLBuilder")

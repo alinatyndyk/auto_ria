@@ -6,17 +6,18 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.PaymentMethod;
 import com.stripe.param.PaymentIntentCreateParams;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class StripeService {
 
-    public ResponseEntity<?> createPayment(SellerSQL sellerSQL) {
+    public void createPayment() {
         try {
             Stripe.apiKey = "sk_test_51Nf481Ae4RILjJWGnrK0ByYfSZcW7FRzMZorxUraOwKjvOJEcejN4W05quGPkXf3AhJ1mtkaYgs5JvmEAonLCcpE00zeZqzgEI";
 
@@ -36,11 +37,13 @@ public class StripeService {
             PaymentIntent paymentIntent = PaymentIntent.create(createParams);
 
             if (!paymentIntent.getStatus().equals("succeeded")) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Payment failed"));
+                ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Payment failed"));
+                return;
             }
         } catch (StripeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+            return;
         }
-        return ResponseEntity.ok(Map.of("message", "Payment completed successfully"));
+        ResponseEntity.ok(Map.of("message", "Payment completed successfully"));
     }
 }

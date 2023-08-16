@@ -4,7 +4,7 @@ import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.services.AdministratorServiceMySQL;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.CommonService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import java.io.IOException;
 public class AdministratorController {
 
     private AdministratorServiceMySQL administratorServiceMySQL;
-    private UsersServiceMySQLImpl usersServiceMySQL;
+    private CommonService commonService;
 
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<AdministratorSQL>> getAll(
@@ -48,7 +48,7 @@ public class AdministratorController {
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
-        AdministratorSQL administratorHeader = usersServiceMySQL.extractAdminFromHeader(request);
+        AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
         assert administratorHeader != null;
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
@@ -61,7 +61,7 @@ public class AdministratorController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
-        AdministratorSQL administratorHeader = usersServiceMySQL.extractAdminFromHeader(request);
+        AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
         assert administratorHeader != null;
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);

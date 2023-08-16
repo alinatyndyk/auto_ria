@@ -41,14 +41,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         UserSQL seller = sellerDao.findByEmail(email);
         if (seller != null) {
             System.out.println(seller.getRoles());
-            Person builder = Person.builder()
+
+            return Person.builder()
                     .email(seller.getEmail())
                     .password(seller.getPassword())
                     .roles(seller.getRoles())
                     .build();
-            System.out.println(builder);
-            System.out.println("Builder");
-            return builder;
         }
 
         CustomerSQL customer = customerDaoSQL.findByEmail(email);

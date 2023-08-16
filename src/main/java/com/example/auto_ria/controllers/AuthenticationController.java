@@ -1,9 +1,6 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dto.AdministratorDTO;
 import com.example.auto_ria.dto.CustomerDTO;
-import com.example.auto_ria.dto.ManagerDTO;
-import com.example.auto_ria.dto.UserDTO;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
@@ -30,7 +27,7 @@ public class AuthenticationController {
 
     @PostMapping("/register-seller/person")
     public ResponseEntity<AuthenticationResponse> register(
-            @Valid UserDTO ignoreValid,
+            @Valid RegisterRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("city") String city,
@@ -46,13 +43,13 @@ public class AuthenticationController {
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
-        RegisterRequest registerRequest = new RegisterRequest(name, lastName, city, region, email, number, fileName, password);
+        RegisterRequest registerRequest = new RegisterRequest(city, region, number, name, lastName, email, fileName, password);
         return ResponseEntity.ok(authenticationService.register(registerRequest));
     }
 
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
-            @Valid ManagerDTO ignoreValid,
+            @Valid RegisterManagerRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
@@ -70,7 +67,7 @@ public class AuthenticationController {
 
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
-            @Valid AdministratorDTO ignoreValid,
+            @Valid RegisterAdminRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("avatar") MultipartFile picture,
@@ -107,42 +104,42 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate/seller")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
     @PostMapping("/authenticate/manager")
-    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginManager(loginRequest));
     }
 
     @PostMapping("/authenticate/admin")
-    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
     }
 
     @PostMapping("/authenticate/customer")
-    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody @Valid LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginCustomer(loginRequest));
     }
 
     @PostMapping("/refresh/seller")
-    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody @Valid RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
     }
 
     @PostMapping("/refresh/manager")
-    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody @Valid RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refreshManager(refreshRequest));
     }
 
     @PostMapping("/refresh/admin")
-    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody @Valid RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
     }
 
     @PostMapping("/refresh/customer")
-    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody RefreshRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody @Valid RefreshRequest refreshRequest) {
         return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
     }
 

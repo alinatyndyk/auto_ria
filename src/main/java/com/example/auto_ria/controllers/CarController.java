@@ -93,7 +93,7 @@ public class CarController {
             HttpServletRequest request
     ) {
         SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-//        stripeService.createPayment(sellerSQL);
+        stripeService.createPayment(sellerSQL);
         sellerSQL.setAccountType(EAccountType.PREMIUM);
         userDaoSQL.save(sellerSQL);
         return ResponseEntity.ok("Premium bought successfully");

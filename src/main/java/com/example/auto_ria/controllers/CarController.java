@@ -17,11 +17,14 @@ import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -41,6 +44,7 @@ public class CarController {
 
     private CarsServiceMySQLImpl carsService;
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private CommonService commonService;
     private UserDaoSQL userDaoSQL;
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
@@ -92,7 +96,7 @@ public class CarController {
     public ResponseEntity<String> getPremium(
             HttpServletRequest request
     ) {
-        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
         stripeService.createPayment(sellerSQL);
         sellerSQL.setAccountType(EAccountType.PREMIUM);
         userDaoSQL.save(sellerSQL);
@@ -119,8 +123,8 @@ public class CarController {
             HttpServletRequest request
     ) {
         CarSQL carSQL = carsService.extractById(id);
-        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-        if(sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.BASIC)) {
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+        if (sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.BASIC)) {
             throw new CustomException("Premium plan required", HttpStatus.FORBIDDEN);
         }
         return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
@@ -139,9 +143,9 @@ public class CarController {
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
             HttpServletRequest request) {
-        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
-        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+        ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
 
         assert administratorSQL == null;
         assert managerSQL == null;
@@ -174,6 +178,7 @@ public class CarController {
     @SneakyThrows
     @PostMapping()
     public ResponseEntity<CarSQL> post(
+            @Valid CarDTO ignoredValid,
             @RequestParam("brand") EBrand brand,
             @RequestParam("model") EModel model,
             @RequestParam("power") int power,
@@ -183,9 +188,17 @@ public class CarController {
             @RequestParam("currency") ECurrency currency,
             @RequestParam("pictures[]") MultipartFile[] pictures,
             @RequestParam("description") String description,
-            HttpServletRequest request) {
+            HttpServletRequest request,
+            BindingResult result) {
 
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        if (result.hasErrors()) {
+            List<String> errors = result.getAllErrors().stream()
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                    .toList();
+            throw new CustomException(errors.toString(), HttpStatus.BAD_REQUEST);
+        }
+
+        SellerSQL seller = commonService.extractSellerFromHeader(request);
         CarDTO car = CarDTO
                 .builder()
                 .brand(brand)
@@ -251,9 +264,9 @@ public class CarController {
                                                 @RequestBody CarUpdateDTO partialCar,
                                                 HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
 
-        SellerSQL sellerFromHeader = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL sellerFromHeader = commonService.extractSellerFromHeader(request);
         SellerSQL sellerFromCar = carsService.extractById(id).getSeller();
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
 
         if (!sellerFromHeader.equals(sellerFromCar) && administrator == null) {
             throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
@@ -271,9 +284,9 @@ public class CarController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
-        ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
+        SellerSQL seller = commonService.extractSellerFromHeader(request);
+        ManagerSQL manager = commonService.extractManagerFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
         return carsService.deleteById(id, seller, manager, administrator);
     }
 

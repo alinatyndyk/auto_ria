@@ -6,6 +6,7 @@ import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -37,7 +38,7 @@ public class AdministratorController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<AdministratorSQL> patchAdmin(@PathVariable int id,
-                                                       @ModelAttribute AdministratorUpdateDTO partialUser)
+                                                       @ModelAttribute @Valid AdministratorUpdateDTO partialUser)
             throws NoSuchFieldException,
             IllegalAccessException {
         return administratorServiceMySQL.update(id, partialUser);

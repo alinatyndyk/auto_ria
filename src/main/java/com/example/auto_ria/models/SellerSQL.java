@@ -5,7 +5,6 @@ import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -18,14 +17,12 @@ import java.util.List;
 @NoArgsConstructor
 public class SellerSQL extends Person {
 
-    private String city; //todo search
+    private String city;
 
     @Enumerated(EnumType.STRING)
     private ERegion region;
 
     @Column(unique = true)
-    @Pattern(regexp = "^\\d+$", message = "Invalid number: Must contain only numbers")
-//    @JsonView({ViewsUser.SL1.class, ViewsUser.NoSL.class})
     private String number;
 
 

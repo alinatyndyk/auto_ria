@@ -22,24 +22,10 @@ public class CarSQL {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @JsonView(ViewsCar.SL1.class)
     private int id;
 
-    //    @NotBlank(message = "brand is required")
-//    @Size(min = 3, message = "brand must have more than 2 characters")
-//    @Size(max = 255, message = "name must have less than 255 characters")
-//    @JsonView({ViewsCar.SL1.class, ViewsCar.SL2.class})
     private EBrand brand;
-
-    //    @NotNull(message = "power is required")
-//    @Min(value = 200, message = "Power has to be more than 200")
-//    @Max(value = 3000, message = "Power has to be less than 3000")
-//    @JsonView({ViewsCar.SL1.class, ViewsCar.SL2.class})
     private Integer powerH;
-
-    //    @NotBlank(message = "brand is required")
-//    @Min(value = 2, message = "City has to be more than 2")
-//    @Max(value = 20, message = "City has to be less than 20")
     private String city;
 
     @Enumerated(EnumType.STRING)

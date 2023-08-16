@@ -5,6 +5,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import java.io.IOException;
 public class UserController {
 
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private CommonService commonService;
 
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<SellerSQL>> getAll(
@@ -40,7 +42,7 @@ public class UserController {
                                                   @ModelAttribute UserUpdateDTO partialUser,
                                                   HttpServletRequest request) throws NoSuchFieldException,
             IllegalAccessException {
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL seller = commonService.extractSellerFromHeader(request);
         return usersServiceMySQL.update(id, partialUser, seller);
     }
 
@@ -48,8 +50,8 @@ public class UserController {
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
+        SellerSQL seller = commonService.extractSellerFromHeader(request);
         assert seller != null;
         if (seller.getId() != id || administrator == null) {
             throw new CustomException("Illegal_access_exception. No-permission: check credentials", HttpStatus.FORBIDDEN);
@@ -62,10 +64,10 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
-        SellerSQL seller = usersServiceMySQL.extractSellerFromHeader(request);
+        SellerSQL seller = commonService.extractSellerFromHeader(request);
 
-        ManagerSQL manager = usersServiceMySQL.extractManagerFromHeader(request);
-        AdministratorSQL administrator = usersServiceMySQL.extractAdminFromHeader(request);
+        ManagerSQL manager = commonService.extractManagerFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
 
         if (administrator == null && manager == null) {
             if (seller == null || !Integer.valueOf(id).equals(seller.getId())) {

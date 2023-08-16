@@ -33,7 +33,7 @@ import java.util.Map;
 public class CarsServiceMySQLImpl {
 
     private CarDaoSQL carDAO;
-    private UsersServiceMySQLImpl usersServiceMySQL;
+    private CommonService commonService;
     private FMService mailer;
     private CurrencyConverterService currencyConverterService;
 
@@ -106,9 +106,9 @@ public class CarsServiceMySQLImpl {
         assert carDAO.findById(id).isPresent();
         CarSQL carSQL = carDAO.findById(id).get();
 
-        SellerSQL sellerSQL = usersServiceMySQL.extractSellerFromHeader(request);
-        ManagerSQL managerSQL = usersServiceMySQL.extractManagerFromHeader(request);
-        AdministratorSQL administratorSQL = usersServiceMySQL.extractAdminFromHeader(request);
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+        ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
+        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
         if (!carSQL.isActivated()) {
             if (managerSQL == null
@@ -173,7 +173,7 @@ public class CarsServiceMySQLImpl {
 
         Page<CarResponse> carResponsesPage = carsPage.map(carSQL -> {
             CarResponse carResponse = formCarResponse(carSQL);
-        System.out.println("zzzzzzzzzzzzzz");
+            System.out.println("zzzzzzzzzzzzzz");
 
             if (seller.equals(carSQL.getSeller()) && seller.getAccountType().equals(EAccountType.PREMIUM)) {
                 MiddlePriceResponse response = getMiddlePrice(carSQL.getBrand(), carSQL.getRegion()).getBody();

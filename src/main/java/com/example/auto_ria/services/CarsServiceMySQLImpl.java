@@ -205,6 +205,7 @@ public class CarsServiceMySQLImpl {
                 .model(carDTO.getModel())
                 .price(carDTO.getPrice())
                 .currency(carDTO.getCurrency())
+                .description(carDTO.getDescription())
                 .photo(carDTO.getPhoto())
                 .seller(seller)
                 .isActivated(carDTO.isActivated())

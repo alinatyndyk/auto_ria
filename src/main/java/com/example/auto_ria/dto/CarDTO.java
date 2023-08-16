@@ -49,7 +49,9 @@ public class CarDTO {
     @NotBlank(message = "currency cant be empty")
     private ECurrency currency;
     private List<String> photo;
+
     private String description;
+
     private boolean isActivated;
 
 }

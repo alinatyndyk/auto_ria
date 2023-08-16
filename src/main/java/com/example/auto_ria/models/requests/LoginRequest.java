@@ -18,9 +18,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "password cant be empty")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
-                    "At least 8 characters long")
     private String password;
 
 }

@@ -17,14 +17,11 @@ import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -178,7 +175,7 @@ public class CarController {
     @SneakyThrows
     @PostMapping()
     public ResponseEntity<CarSQL> post(
-            @Valid CarDTO ignoredValid,
+//            @Valid CarDTO ignoredValid,
             @RequestParam("brand") EBrand brand,
             @RequestParam("model") EModel model,
             @RequestParam("power") int power,
@@ -188,15 +185,16 @@ public class CarController {
             @RequestParam("currency") ECurrency currency,
             @RequestParam("pictures[]") MultipartFile[] pictures,
             @RequestParam("description") String description,
-            HttpServletRequest request,
-            BindingResult result) {
+            HttpServletRequest request
+//            BindingResult result
+    ) {
 
-        if (result.hasErrors()) {
-            List<String> errors = result.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .toList();
-            throw new CustomException(errors.toString(), HttpStatus.BAD_REQUEST);
-        }
+//        if (result.hasErrors()) {
+//            List<String> errors = result.getAllErrors().stream()
+//                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+//                    .toList();
+//            throw new CustomException(errors.toString(), HttpStatus.BAD_REQUEST);
+//        }
 
         SellerSQL seller = commonService.extractSellerFromHeader(request);
         CarDTO car = CarDTO

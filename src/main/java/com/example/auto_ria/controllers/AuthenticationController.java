@@ -1,16 +1,13 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dto.CustomerDTO;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
-import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,12 +19,12 @@ import java.io.IOException;
 public class AuthenticationController {
 
     private AuthenticationService authenticationService;
-    private CommonService commonService;
+//    private CommonService commonService;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
     @PostMapping("/register-seller/person")
     public ResponseEntity<AuthenticationResponse> register(
-            @Valid RegisterRequest ignoreValid,
+//            @Valid RegisterRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("city") String city,
@@ -35,11 +32,11 @@ public class AuthenticationController {
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("number") String number,
-            @RequestParam("password") String password,
-            BindingResult result
+            @RequestParam("password") String password
+//            BindingResult result
     ) throws IOException {
 
-        commonService.validate(result);
+//        commonService.validate(result);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
@@ -49,15 +46,15 @@ public class AuthenticationController {
 
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
-            @Valid RegisterManagerRequest ignoreValid,
+//            @Valid RegisterManagerRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            BindingResult result
+            @RequestParam("password") String password
+//            BindingResult result
     ) throws IOException {
 
-        commonService.validate(result);
+//        commonService.validate(result);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
@@ -67,16 +64,16 @@ public class AuthenticationController {
 
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
-            @Valid RegisterAdminRequest ignoreValid,
+//            @Valid RegisterAdminRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            BindingResult result
+            @RequestParam("password") String password
+//            BindingResult result
     ) throws IOException {
 
-        commonService.validate(result);
+//        commonService.validate(result);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
@@ -86,16 +83,16 @@ public class AuthenticationController {
 
     @PostMapping("/register-customer")
     public ResponseEntity<AuthenticationResponse> registerCustomer(
-            @Valid CustomerDTO ignoreValid,
+//            @Valid CustomerDTO ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password,
-            BindingResult result
+            @RequestParam("password") String password
+//            BindingResult result
     ) throws IOException {
 
-        commonService.validate(result);
+//        commonService.validate(result);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
@@ -104,22 +101,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate/seller")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.login(loginRequest));
     }
 
     @PostMapping("/authenticate/manager")
-    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginManager(loginRequest));
     }
 
     @PostMapping("/authenticate/admin")
-    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
     }
 
     @PostMapping("/authenticate/customer")
-    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody @Valid LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody LoginRequest loginRequest) {
         return ResponseEntity.ok(authenticationService.loginCustomer(loginRequest));
     }
 

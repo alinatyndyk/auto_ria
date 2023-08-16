@@ -15,6 +15,7 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,13 +37,15 @@ public class AuthenticationService {
 
     private SellerAuthenticationProvider sellerAuthenticationManager;
     private ManagerAuthenticationProvider managerAuthenticationManager;
+//    private CommonService commonService;
     private AdminAuthenticationProvider adminAuthenticationProvider;
     private CustomerAuthenticationProvider customerAuthenticationProvider;
 
     private PasswordEncoder passwordEncoder;
     private FMService mailer;
 
-    public AuthenticationResponse register(RegisterRequest registerRequest) {
+    public AuthenticationResponse register(
+            @Valid RegisterRequest registerRequest) {
 
         if(sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
             throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);

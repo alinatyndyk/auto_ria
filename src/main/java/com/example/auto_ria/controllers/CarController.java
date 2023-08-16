@@ -197,6 +197,8 @@ public class CarController {
 //        }
 
         SellerSQL seller = commonService.extractSellerFromHeader(request);
+        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+
         CarDTO car = CarDTO
                 .builder()
                 .brand(brand)
@@ -210,26 +212,37 @@ public class CarController {
                 .description(description)
                 .build();
 
+        assert seller != null || administratorSQL != null;
+
         String filteredText = profanityFilterService.containsProfanity(description);
+
         if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
             int currentCount = validationFailureCounter.incrementAndGet();
             if (currentCount > 3) {
                 car.setActivated(false);
                 try {
                     HashMap<String, Object> vars = new HashMap<>();
-                    vars.put("name", seller.getName());
+                    List<ManagerSQL> managers = managerServiceMySQL.getAll();
+                    assert managers != null;
+
+                    String email;
+
+                    if (seller != null) {
+                        vars.put("name", seller.getName());
+                        email = seller.getEmail();
+                    } else {
+                        vars.put("name", administratorSQL.getName());
+                        email = administratorSQL.getEmail();
+                    }
                     vars.put("description", car.getDescription());
 
-                    List<ManagerSQL> managers = managerServiceMySQL.getAll();
-
-                    assert managers != null;
                     managers.forEach(managerSQL -> {
                         try {
-                            mailer.sendEmail(seller.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
+                            mailer.sendEmail(managerSQL.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
                         } catch (Exception ignore) {
                         }
                     });
-                    mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_CHECKED, vars);
+                    mailer.sendEmail(email, EMail.CAR_BEING_CHECKED, vars);
                 } catch (Exception ignore) {
                 }
             } else {
@@ -239,7 +252,7 @@ public class CarController {
         }
 
 
-        if (seller.getAccountType().equals(EAccountType.BASIC) && !carsService.findAllBySeller(seller).isEmpty()) {
+        if (administratorSQL == null && seller.getAccountType().equals(EAccountType.BASIC) && !carsService.findAllBySeller(seller).isEmpty()) {
             throw new CustomException("Forbidden. Premium account required", HttpStatus.FORBIDDEN);
         }
 
@@ -254,7 +267,7 @@ public class CarController {
         }).collect(Collectors.toList());
         car.setPhoto(names);
 
-        return carsService.post(car, seller);
+        return carsService.post(car, seller, administratorSQL);
     }
 
     @PatchMapping("/{id}")

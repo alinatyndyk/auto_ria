@@ -168,7 +168,7 @@ public class CarsServiceMySQLImpl {
         return carDAO.findBySeller(seller);
     }
 
-    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller) {
+    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
 
         CarSQL car = CarSQL.builder()
                 .brand(carDTO.getBrand())
@@ -180,9 +180,18 @@ public class CarsServiceMySQLImpl {
                 .currency(carDTO.getCurrency())
                 .description(carDTO.getDescription())
                 .photo(carDTO.getPhoto())
-                .seller(seller)
                 .isActivated(carDTO.isActivated())
                 .build();
+
+        if (administratorSQL != null) {
+            car.setSeller(SellerSQL.adminBuilder().name("Auto.Ria Services")
+                    .id(administratorSQL.getId())
+                    .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
+                    .name("Auto.Ria Services")
+                    .build());
+        } else {
+            car.setSeller(seller);
+        }
 
         CarSQL carSQL = carDAO.save(car);
 

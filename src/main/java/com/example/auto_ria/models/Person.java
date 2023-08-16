@@ -80,6 +80,12 @@ public class Person implements UserDetails {
         this.roles = roles;
     }
 
+    public Person(int id, String name, List<ERole> roles) {
+        this.id = id;
+        this.name = name;
+        this.roles = roles;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

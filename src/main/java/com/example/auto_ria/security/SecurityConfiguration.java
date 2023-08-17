@@ -49,7 +49,7 @@ public class SecurityConfiguration {
                                         .requestMatchers(HttpMethod.GET, "/managers/**").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/managers").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.DELETE, "/managers/**").hasAnyAuthority("ADMIN")
-                                        .requestMatchers(HttpMethod.PATCH, "/managers/**").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.PATCH, "/managers/**").hasAnyAuthority("ADMIN", "MANAGER")
 
                                         .requestMatchers(HttpMethod.GET, "/administrators/**").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/administrators").hasAnyAuthority("ADMIN")

@@ -38,10 +38,17 @@ public class AdministratorController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<AdministratorSQL> patchAdmin(@PathVariable int id,
-                                                       @ModelAttribute @Valid AdministratorUpdateDTO partialUser)
+                                                       @ModelAttribute @Valid AdministratorUpdateDTO partialUser,
+                                                       HttpServletRequest request)
             throws NoSuchFieldException,
             IllegalAccessException {
-        return administratorServiceMySQL.update(id, partialUser);
+        AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
+        AdministratorSQL administratorSQL = administratorServiceMySQL.getById(String.valueOf(id)).getBody();
+        if (administratorHeader.getId() != id) {
+            throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+        }
+
+        return administratorServiceMySQL.update(partialUser, administratorSQL);
     }
 
     @PatchMapping("/change-avatar/{id}")
@@ -49,7 +56,8 @@ public class AdministratorController {
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
         AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
-        assert administratorHeader != null;
+        administratorServiceMySQL.getById(String.valueOf(id));
+
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }
@@ -62,7 +70,7 @@ public class AdministratorController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
-        assert administratorHeader != null;
+
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }

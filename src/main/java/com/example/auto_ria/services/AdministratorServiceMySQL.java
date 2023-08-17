@@ -32,10 +32,10 @@ public class AdministratorServiceMySQL {
 
 
     public ResponseEntity<AdministratorSQL> getById(String id) {
-        AdministratorSQL administratorSQL = null;
-        if (administratorDaoSQL.findById(Integer.parseInt(id)).isPresent()) {
-            administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
+        if (administratorDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
+            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
         }
+        AdministratorSQL administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
     }
 
@@ -50,10 +50,9 @@ public class AdministratorServiceMySQL {
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
 
-    public ResponseEntity<AdministratorSQL> update(int id, AdministratorUpdateDTO administratorUpdateDTO) throws IllegalAccessException, NoSuchFieldException {
+    public ResponseEntity<AdministratorSQL> update(AdministratorUpdateDTO administratorUpdateDTO, AdministratorSQL administratorSQL) throws IllegalAccessException, NoSuchFieldException {
         try {
-            AdministratorSQL administratorSQL = getById(String.valueOf(id)).getBody();
-            assert administratorSQL != null;
+
             Class<?> adminDtoClass = administratorUpdateDTO.getClass();
             Field[] fields = adminDtoClass.getDeclaredFields();
 
@@ -63,14 +62,13 @@ public class AdministratorServiceMySQL {
                 String fieldName = field.getName();
                 Object fieldValue = field.get(administratorUpdateDTO);
 
-                if (fieldValue != null) {
+                if (fieldName.equals("name")) {
+                    Field personField = Person.class.getDeclaredField(fieldName);
+                    personField.setAccessible(true);
+                    personField.set(administratorSQL, fieldValue);
+                } else if (fieldValue != null) {
 
-                    Field adminField = Person.class.getDeclaredField(fieldName);
-
-                    if (fieldName.equals("lastName")) {
-                        adminField.setAccessible(true);
-                        adminField.set(administratorSQL, fieldValue);
-                    }
+                    Field adminField = AdministratorSQL.class.getDeclaredField(fieldName);
 
                     adminField.setAccessible(true);
                     adminField.set(administratorSQL, fieldValue);

@@ -67,7 +67,7 @@ public class CommonService {
     }
 
     public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
-        AdministratorSQL administratorSQL = null;
+        AdministratorSQL administratorSQL;
         try {
             administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
         } catch (Exception e) {

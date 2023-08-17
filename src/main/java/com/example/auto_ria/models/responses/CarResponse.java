@@ -15,6 +15,7 @@ import java.util.List;
 @Builder
 public class CarResponse {
 
+    private int id;
     private EBrand brand;
     private EModel model;
     private int powerH;

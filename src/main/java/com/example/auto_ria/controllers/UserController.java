@@ -38,11 +38,15 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<SellerSQL> patchManager(@PathVariable int id,
-                                                  @ModelAttribute UserUpdateDTO partialUser,
-                                                  HttpServletRequest request) throws NoSuchFieldException,
+    public ResponseEntity<SellerSQL> patchSeller(@PathVariable int id,
+                                                 @ModelAttribute UserUpdateDTO partialUser,
+                                                 HttpServletRequest request) throws NoSuchFieldException,
             IllegalAccessException {
         SellerSQL seller = commonService.extractSellerFromHeader(request);
+        SellerSQL sellerById = usersServiceMySQL.getById(id);
+        if (seller != null && seller.getId() != sellerById.getId()) {
+            throw new CustomException("Failed. Check credentials", HttpStatus.FORBIDDEN);
+        }
         return usersServiceMySQL.update(id, partialUser, seller);
     }
 

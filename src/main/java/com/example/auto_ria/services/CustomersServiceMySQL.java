@@ -6,6 +6,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import io.jsonwebtoken.io.IOException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +16,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
 public class CustomersServiceMySQL {
 
     private CustomerDaoSQL customerDaoSQL;
+    private CommonService commonService;
 
     public ResponseEntity<Page<CustomerSQL>> getAll(int page) {
         Pageable pageable = PageRequest.of(page, 2);
@@ -29,9 +32,20 @@ public class CustomersServiceMySQL {
 
 
     public ResponseEntity<CustomerSQL> getById(String id) {
-        assert customerDaoSQL.findById(Integer.parseInt(id)).isPresent();
+        if (customerDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
+            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+        }
         CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    }
+
+    public void checkCredentials(HttpServletRequest request, int id) {
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+        CustomerSQL customerById = getById(String.valueOf(id)).getBody();
+
+        if (customerSQL != null && customerSQL.getId() != Objects.requireNonNull(customerById).getId()) {
+            throw new CustomException("Failed. Check credentials", HttpStatus.FORBIDDEN);
+        }
     }
 
     public ResponseEntity<String> deleteById(String id) {

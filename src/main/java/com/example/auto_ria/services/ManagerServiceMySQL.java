@@ -3,7 +3,6 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +36,10 @@ public class ManagerServiceMySQL {
     }
 
     public ResponseEntity<ManagerSQL> getById(int id) {
-        assert managerDaoSQL.findById(id).isPresent();
+        if (managerDaoSQL.findById(id).isEmpty()) {
+            throw new CustomException("User doesnt exist", HttpStatus.NOT_FOUND);
+        }
+
         return new ResponseEntity<>(managerDaoSQL.findById(id).get(), HttpStatus.ACCEPTED);
     }
 
@@ -48,12 +50,17 @@ public class ManagerServiceMySQL {
     }
 
     public void checkCredentials(HttpServletRequest request, int id) {
-        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
         ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
         ManagerSQL manager = getById(id).getBody();
 
-        if (administratorSQL == null && managerSQL.equals(manager)) {
-            throw new CustomException("Forbidden. Check credentials", HttpStatus.FORBIDDEN);
+        if (manager == null) {
+            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+        }
+
+        if (managerSQL != null) {
+            if (managerSQL.getId() == manager.getId()) {
+                throw new CustomException("Forbidden. Check credentials", HttpStatus.FORBIDDEN);
+            }
         }
     }
 
@@ -88,5 +95,13 @@ public class ManagerServiceMySQL {
         }
     }
 
+    public void updateAvatar(int id, String fileName) {
+
+        ManagerSQL managerSQL = getById(id).getBody();
+        assert managerSQL != null;
+        managerSQL.setAvatar(fileName);
+
+        managerDaoSQL.save(managerSQL);
+    }
 
 }

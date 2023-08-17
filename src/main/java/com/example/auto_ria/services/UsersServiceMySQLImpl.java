@@ -42,7 +42,9 @@ public class UsersServiceMySQLImpl {
     }
 
     public SellerSQL getById(int id) {
-        assert userDaoSQL.findById(id).isPresent();
+        if (userDaoSQL.findById(id).isEmpty()) {
+            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+        }
         return userDaoSQL.findById(id).get();
     }
 

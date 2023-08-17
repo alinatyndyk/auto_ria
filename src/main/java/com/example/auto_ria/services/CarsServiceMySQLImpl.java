@@ -103,7 +103,9 @@ public class CarsServiceMySQLImpl {
     }
 
     public ResponseEntity<CarResponse> getById(int id, HttpServletRequest request) {
-        assert carDAO.findById(id).isPresent();
+        if (carDAO.findById(id).isEmpty()) {
+            throw new CustomException("Car doesnt exist", HttpStatus.BAD_REQUEST);
+        }
         CarSQL carSQL = carDAO.findById(id).get();
 
         ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
@@ -122,8 +124,27 @@ public class CarsServiceMySQLImpl {
     }
 
     public CarSQL extractById(int id) {
-        assert carDAO.findById(id).isPresent();
+        if (carDAO.findById(id).isEmpty()) {
+            throw new CustomException("Car doesnt exist", HttpStatus.BAD_REQUEST);
+        }
         return carDAO.findById(id).get();
+    }
+
+    public void checkCredentials(HttpServletRequest request, int id) {
+        SellerSQL sellerFromHeader = commonService.extractSellerFromHeader(request);
+        CarSQL carSQL = extractById(id);
+        if (sellerFromHeader != null && sellerFromHeader.getId() != carSQL.getSeller().getId()) {
+            throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    public void isPremium(HttpServletRequest request) {
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+
+        if (sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.BASIC)) {
+            throw new CustomException("Premium plan required", HttpStatus.PAYMENT_REQUIRED);
+        }
+
     }
 
     public ResponseEntity<String> activate(int id) {
@@ -158,8 +179,10 @@ public class CarsServiceMySQLImpl {
         Pageable pageable = PageRequest.of(page, 2);
 
         Page<CarSQL> carsPage = carDAO.findAllBySeller(seller, pageable);
+        System.out.println(carsPage);
 
         Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
+        System.out.println(carResponsesPage);
 
         return new ResponseEntity<>(carResponsesPage, HttpStatus.ACCEPTED);
     }
@@ -168,7 +191,7 @@ public class CarsServiceMySQLImpl {
         return carDAO.findBySeller(seller);
     }
 
-    public ResponseEntity<CarSQL> post(CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
+    public ResponseEntity<CarResponse> post(CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
 
         CarSQL car = CarSQL.builder()
                 .brand(carDTO.getBrand())
@@ -195,37 +218,23 @@ public class CarsServiceMySQLImpl {
 
         CarSQL carSQL = carDAO.save(car);
 
-        return new ResponseEntity<>(carSQL, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(formCarResponse(carSQL), HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<String> deleteById(int id, SellerSQL seller, ManagerSQL manager, AdministratorSQL administrator) {
-        assert carDAO.findById(id).isPresent();
-        CarSQL car = carDAO.findById(id).get();
-
-        if (manager != null || administrator != null) {
-            carDAO.deleteById(id);
-            try {
-                HashMap<String, Object> vars = new HashMap<>();
-                vars.put("name", seller.getName());
-                vars.put("description", car.getDescription());
-
-                mailer.sendEmail(seller.getEmail(), EMail.CAR_BEING_BANNED, vars);
-
-                return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
-            } catch (Exception ignore) {
-            }
-        }
-
-        if (!doesBelongToSeller(seller, car)) {
-            throw new CustomException("Error.Delete_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
-        }
+    public ResponseEntity<String> deleteById(int id) {
+        CarSQL car = extractById(id);
 
         carDAO.deleteById(id);
-        return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
-    }
+        try {
+            HashMap<String, Object> vars = new HashMap<>();
+            vars.put("name", car.getSeller().getName());
+            vars.put("description", car.getDescription());
 
-    public boolean doesBelongToSeller(SellerSQL seller, CarSQL car) {
-        return seller.getId() == car.getSeller().getId();
+            mailer.sendEmail(car.getSeller().getEmail(), EMail.CAR_BEING_BANNED, vars);
+
+        } catch (Exception ignore) {
+        }
+        return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
     }
 
     public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO) throws IllegalAccessException,
@@ -276,6 +285,7 @@ public class CarsServiceMySQLImpl {
         CurrencyConverterResponse converterResponse = currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
 
         return CarResponse.builder()
+                .id(carSQL.getId())
                 .brand(carSQL.getBrand())
                 .powerH(carSQL.getPowerH())
                 .city(carSQL.getCity())

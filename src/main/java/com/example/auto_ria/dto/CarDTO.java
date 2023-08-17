@@ -53,5 +53,4 @@ public class CarDTO {
     private String description;
 
     private boolean isActivated;
-
 }

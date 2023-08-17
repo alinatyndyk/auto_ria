@@ -4,10 +4,7 @@ import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider
 import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.*;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
@@ -15,6 +12,7 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,7 +35,8 @@ public class AuthenticationService {
 
     private SellerAuthenticationProvider sellerAuthenticationManager;
     private ManagerAuthenticationProvider managerAuthenticationManager;
-//    private CommonService commonService;
+    private RegisterKeyDaoSQL registerKeyDaoSQL;
+    //    private CommonService commonService;
     private AdminAuthenticationProvider adminAuthenticationProvider;
     private CustomerAuthenticationProvider customerAuthenticationProvider;
 
@@ -47,7 +46,7 @@ public class AuthenticationService {
     public AuthenticationResponse register(
             @Valid RegisterRequest registerRequest) {
 
-        if(sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
+        if (sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
             throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
         }
 
@@ -78,8 +77,9 @@ public class AuthenticationService {
         variables.put("name", registerRequest.getName());
 
         try {
-        mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
-        } catch (Exception ignore) {}
+            mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
+        } catch (Exception ignore) {
+        }
 
 
         return AuthenticationResponse
@@ -89,7 +89,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse registerManager(RegisterManagerRequest registerRequest) {
+    public AuthenticationResponse registerManager(RegisterManagerRequest registerRequest, String key) {
 
         ManagerSQL manager = ManagerSQL
                 .managerSQLBuilder()
@@ -105,6 +105,8 @@ public class AuthenticationService {
         manager.setRefreshToken(authenticationResponse.getRefreshToken());
 
         managerDaoSQL.save(manager);
+
+        registerKeyDaoSQL.deleteById(registerKeyDaoSQL.findByRegisterKey(key).getId());
 
         mailer.sendWelcomeEmail(manager.getName(), manager.getEmail());
 
@@ -171,7 +173,7 @@ public class AuthenticationService {
     public AuthenticationResponse login(LoginRequest loginRequest) {
         SellerSQL user = sellerDaoSQL.findSellerByEmail(loginRequest.getEmail());
 
-        if(user == null) {
+        if (user == null) {
             throw new CustomException("User not found", HttpStatus.NOT_FOUND);
         }
 
@@ -214,13 +216,17 @@ public class AuthenticationService {
     public AuthenticationResponse loginAdmin(LoginRequest loginRequest) {
         AdministratorSQL administrator = administratorDaoSQL.findByEmail(loginRequest.getEmail());
 
-        adminAuthenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword(),
-                        administrator.getAuthorities()
-                )
-        );
+        try {
+            adminAuthenticationProvider.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword(),
+                            administrator.getAuthorities()
+                    )
+            );
+        } catch (Exception e) {
+            throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
+        }
         AuthenticationResponse tokenPair = jwtService.generateAdminTokenPair(administrator);
 
         administrator.setRefreshToken(tokenPair.getRefreshToken());
@@ -320,5 +326,27 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
     }
 
+    public String checkRegistrationKey(HttpServletRequest request, String email, ERole role) {
+        String authorizationHeader = request.getHeader("Register-key");
+
+        if(authorizationHeader == null) {
+            throw new CustomException("Register key required", HttpStatus.FORBIDDEN);
+        }
+
+        if (registerKeyDaoSQL.findByRegisterKey(authorizationHeader) == null) {
+            throw new CustomException("Key is not valid", HttpStatus.FORBIDDEN);
+        }
+
+        ERole keyRole = ERole.valueOf(jwtService.extractAudience(authorizationHeader));
+        if (keyRole != role) {
+            throw new CustomException("The key is not valid for creation of " + role.name().toLowerCase(), HttpStatus.FORBIDDEN);
+        }
+
+        if (!jwtService.isKeyValid(authorizationHeader, email, role)) {
+            throw new CustomException("Not valid key owner", HttpStatus.FORBIDDEN);
+        }
+
+        return authorizationHeader;
+    }
 
 }

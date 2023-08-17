@@ -1,10 +1,13 @@
 package com.example.auto_ria.controllers;
 
+import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +22,11 @@ import java.io.IOException;
 public class AuthenticationController {
 
     private AuthenticationService authenticationService;
-//    private CommonService commonService;
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private RegisterKeyDaoSQL registerKeyDaoSQL;
 
     @PostMapping("/register-seller/person")
     public ResponseEntity<AuthenticationResponse> register(
-//            @Valid RegisterRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("city") String city,
@@ -33,11 +35,7 @@ public class AuthenticationController {
             @RequestParam("email") String email,
             @RequestParam("number") String number,
             @RequestParam("password") String password
-//            BindingResult result
     ) throws IOException {
-
-//        commonService.validate(result);
-
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterRequest registerRequest = new RegisterRequest(city, region, number, name, lastName, email, fileName, password);
@@ -46,39 +44,39 @@ public class AuthenticationController {
 
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
-//            @Valid RegisterManagerRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password
-//            BindingResult result
+            @RequestParam("password") String password,
+            HttpServletRequest request
     ) throws IOException {
 
-//        commonService.validate(result);
+        String key = authenticationService.checkRegistrationKey(request, email, ERole.MANAGER);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterManagerRequest registerRequest = new RegisterManagerRequest(name, email, fileName, password);
-        return ResponseEntity.ok(authenticationService.registerManager(registerRequest));
+        return ResponseEntity.ok(authenticationService.registerManager(registerRequest, key));
     }
 
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
-//            @Valid RegisterAdminRequest ignoreValid,
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
-            @RequestParam("password") String password
-//            BindingResult result
+            @RequestParam("password") String password,
+            HttpServletRequest request
     ) throws IOException {
 
-//        commonService.validate(result);
+        String key = authenticationService.checkRegistrationKey(request, email, ERole.ADMIN);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
-        return ResponseEntity.ok(authenticationService.registerAdmin(registerRequest));
+        AuthenticationResponse authenticationResponse = authenticationService.registerAdmin(registerRequest);
+        registerKeyDaoSQL.deleteById(registerKeyDaoSQL.findByRegisterKey(key).getId());
+        return ResponseEntity.ok(authenticationResponse);
     }
 
     @PostMapping("/register-customer")

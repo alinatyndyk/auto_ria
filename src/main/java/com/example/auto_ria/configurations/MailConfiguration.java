@@ -19,6 +19,11 @@ public class MailConfiguration {
             put("templateName", "welcome.ftl");
         }});
 
+        emails.put(EMail.REGISTER_KEY, new HashMap<>() {{
+            put("subject", "Register key");
+            put("templateName", "register-key.ftl");
+        }});
+
         emails.put(EMail.PLATFORM_LEAVE, new HashMap<>() {{
             put("subject", "We are sorry to see you leave the platform...");
             put("templateName", "platform-leave.ftl");

@@ -1,10 +1,13 @@
 package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.Person;
+import com.example.auto_ria.models.RegisterKey;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,11 +25,12 @@ import java.lang.reflect.Field;
 public class AdministratorServiceMySQL {
 
     private AdministratorDaoSQL administratorDaoSQL;
+    private JwtService jwtService;
+    private RegisterKeyDaoSQL registerKeyDaoSQL;
 
     public ResponseEntity<Page<AdministratorSQL>> getAll(int page) {
         Pageable pageable = PageRequest.of(page, 2);
         Page<AdministratorSQL> admins = administratorDaoSQL.findAll(pageable);
-        System.out.println(admins);
         return new ResponseEntity<>(admins, HttpStatus.ACCEPTED);
     }
 
@@ -87,6 +91,11 @@ public class AdministratorServiceMySQL {
         administratorSQL.setAvatar(fileName);
 
         administratorDaoSQL.save(administratorSQL);
+    }
+
+    public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
+        String key = jwtService.generateRegisterKey(email, role);
+        return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
     }
 
 }

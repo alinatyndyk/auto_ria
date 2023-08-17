@@ -2,7 +2,6 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.ManagerServiceMySQL;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,7 +20,6 @@ public class ManagerController {
 
     private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
-    private CommonService commonService;
 
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<ManagerSQL>> getAll(

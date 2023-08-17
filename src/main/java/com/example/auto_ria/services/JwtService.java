@@ -37,7 +37,6 @@ public class JwtService {
     @Value("${token.generation.key.customer}")
     private static final String SECRET_KEY_Customer = "404E745266556A586E3272357538782F413F4428472B4B625064536756685970";
 
-
     public String extractUsername(String jwt, ERole role) {
         return extractClaim(jwt, Claims::getSubject, role);
     }
@@ -45,6 +44,10 @@ public class JwtService {
 
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
+    }
+
+    public String extractAudience(String jwt) {
+        return extractClaim(jwt, Claims::getAudience);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsTFunction, ERole role) {
@@ -96,6 +99,38 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public Key getRegisterKey(ERole role) {
+        String key = switch (role) {
+//            case ADMIN -> REGISTER_KEY_Admin;
+//            case MANAGER -> REGISTER_KEY_Manager;
+            case ADMIN -> SECRET_KEY_Admin;
+            case MANAGER -> SECRET_KEY_Manager;
+            default -> null;
+        };
+
+        byte[] keyBytes = Decoders.BASE64.decode(key);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    public String generateRegisterKey(
+            Map<String, Object> extraClaims,
+            String email,
+            ERole role
+    ) {
+        return Jwts
+                .builder()
+                .setClaims(extraClaims)
+                .setSubject(email)
+                .setAudience(role.name())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                .signWith(getRegisterKey(role), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateRegisterKey(String email, ERole role) {
+        return generateRegisterKey(new HashMap<>(), email, role);
+    }
 
     public String generateToken(
             Map<String, Object> extraClaims,
@@ -199,6 +234,11 @@ public class JwtService {
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
         String username = extractUsername(jwt);
         return (username.equals(userDetails.getUsername()) && !isTokenExprired(jwt));
+    }
+
+    public boolean isKeyValid(String jwt, String email, ERole role) {
+        String username = extractUsername(jwt, role);
+        return (username.equals(email) && !isTokenExprired(jwt));
     }
 
     public String extractTokenFromHeader(HttpServletRequest request) {

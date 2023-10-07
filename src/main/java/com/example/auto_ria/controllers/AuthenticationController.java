@@ -57,7 +57,7 @@ public class AuthenticationController {
         claims.put("email", email);
         claims.put("role", ETokenRole.MANAGER_REGISTER.name());
 
-        String code = jwtService.generateAdminCode(claims, email);
+        String code = jwtService.generateManagerCode(claims, email);
 
         return authenticationService.codeManager(email, code);
     }
@@ -105,11 +105,6 @@ public class AuthenticationController {
         claims.put("role", ETokenRole.ADMIN_REGISTER.name());
 
         String code = jwtService.generateAdminCode(claims, email);
-        System.out.println("---------------------------------");
-        System.out.println(jwtService.extractAllClaims(code, ETokenRole.ADMIN_REGISTER));
-        System.out.println("CODE DOWN");
-        System.out.println(code);
-        System.out.println("---------------------------------");
 
         return authenticationService.codeAdmin(email, code);
     }
@@ -128,11 +123,8 @@ public class AuthenticationController {
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
-        System.out.println("after transfer avatar");
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
-        System.out.println(registerRequest);
         AuthenticationResponse authenticationResponse = authenticationService.registerAdmin(registerRequest);
-        System.out.println(authenticationResponse);
         registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
         return ResponseEntity.ok(authenticationResponse);
     }

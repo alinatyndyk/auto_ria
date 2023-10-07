@@ -117,7 +117,7 @@ public class AuthenticationService {
 
         managerDaoSQL.save(manager);
 
-        registerKeyDaoSQL.deleteById(registerKeyDaoSQL.findByRegisterKey(key).getId());
+        registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
 
         mailer.sendWelcomeEmail(manager.getName(), manager.getEmail());
 
@@ -406,10 +406,6 @@ public class AuthenticationService {
             throw new CustomException("Key expired", HttpStatus.FORBIDDEN);
         }
 
-//        ETokenRole keyRole = ETokenRole.valueOf(jwtService.extractIssuer(authorizationHeader));
-        System.out.println(role.name());
-        System.out.println(jwtService.extractIssuer(authorizationHeader));
-        System.out.println(jwtService.extractIssuer(authorizationHeader).equals(role.name()));
         if (!jwtService.extractIssuer(authorizationHeader).equals(role.name())) {
             throw new CustomException("The key is not valid for creation of " + role.name().toLowerCase(), HttpStatus.FORBIDDEN);
         }

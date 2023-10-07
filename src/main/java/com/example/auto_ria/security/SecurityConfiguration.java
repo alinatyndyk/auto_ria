@@ -32,7 +32,11 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(matcherRegistry ->
                                 matcherRegistry
-                                        .requestMatchers("/api/v1/auth/**").permitAll()
+//                                        .requestMatchers("/api/v1/auth/**").permitAll()
+                                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/code-admin").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/code-manager").hasAnyAuthority("ADMIN")
+
+
                                         .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/activate/{id}").hasAnyAuthority("MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/ban/{id}").hasAnyAuthority("MANAGER", "ADMIN")

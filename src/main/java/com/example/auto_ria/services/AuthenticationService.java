@@ -7,21 +7,27 @@ import com.example.auto_ria.configurations.providers.SellerAuthenticationProvide
 import com.example.auto_ria.dao.*;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
+import freemarker.template.TemplateException;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -32,18 +38,18 @@ public class AuthenticationService {
     private ManagerDaoSQL managerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
+    private UserDaoSQL userDaoSQL;
 
     private SellerAuthenticationProvider sellerAuthenticationManager;
     private ManagerAuthenticationProvider managerAuthenticationManager;
     private RegisterKeyDaoSQL registerKeyDaoSQL;
-    //    private CommonService commonService;
     private AdminAuthenticationProvider adminAuthenticationProvider;
     private CustomerAuthenticationProvider customerAuthenticationProvider;
 
     private PasswordEncoder passwordEncoder;
     private FMService mailer;
 
-    public AuthenticationResponse register(
+    public ResponseEntity<String> register(
             @Valid RegisterRequest registerRequest) {
 
         if (sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
@@ -63,18 +69,14 @@ public class AuthenticationService {
                 .lastName(registerRequest.getLastName())
                 .build();
 
-        String accessToken = jwtService.generateToken(seller);
-        String refreshToken = jwtService.generateRefreshToken(seller);
-
-        assert seller != null;
-        seller.setRefreshToken(refreshToken);
-
+        seller.setIsActivated(false);
         sellerDaoSQL.save(seller);
 
-        mailer.sendWelcomeEmail(seller.getName(), seller.getEmail());
+        String activateToken = jwtService.generateRegisterKey(seller.getEmail(), ETokenRole.SELLER_ACTIVATE);
 
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", registerRequest.getName());
+        variables.put("activation-link", "http/web/" + activateToken);
 
         try {
             mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
@@ -82,11 +84,20 @@ public class AuthenticationService {
         }
 
 
-        return AuthenticationResponse
-                .builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return ResponseEntity.ok("Check your email for activation");
+    }
+
+    public ResponseEntity<String> codeManager(String email, String code) throws MessagingException, TemplateException, IOException {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", code);
+        map.put("role", ERole.ADMIN.name());
+
+        mailer.sendEmail(email, EMail.REGISTER_KEY, map);
+
+        registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
+
+        return ResponseEntity.ok("Email sent");
     }
 
     public AuthenticationResponse registerManager(RegisterManagerRequest registerRequest, String key) {
@@ -117,6 +128,23 @@ public class AuthenticationService {
                 .build();
     }
 
+    public ResponseEntity<String> codeAdmin(String email, String code) throws MessagingException, TemplateException, IOException {
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("code", code);
+        map.put("role", ERole.ADMIN.name());
+
+        mailer.sendEmail(email, EMail.REGISTER_KEY, map);
+
+        RegisterKey registerKey = registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
+        System.out.println("SAVED DOWN");
+        System.out.println(registerKey);
+        System.out.println("FIND KEY AFTER SAVED DOWN");
+        System.out.println(registerKeyDaoSQL.findByRegisterKey(code));
+
+        return ResponseEntity.ok("Email sent");
+    }
+
     public AuthenticationResponse registerAdmin(RegisterAdminRequest registerRequest) {
 
         AdministratorSQL administrator = AdministratorSQL
@@ -144,7 +172,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    public AuthenticationResponse registerCustomer(RegisterAdminRequest registerRequest) {
+    public ResponseEntity<String> registerCustomer(RegisterAdminRequest registerRequest) {
 
         CustomerSQL customerSQL = CustomerSQL
                 .customerBuilder()
@@ -160,13 +188,21 @@ public class AuthenticationService {
 
         customerSQL.setRefreshToken(authenticationResponse.getRefreshToken());
 
+        String activateToken = jwtService.generateRegisterKey(customerSQL.getEmail(), ETokenRole.CUSTOMER_ACTIVATE);
+
+        HashMap<String, Object> variables = new HashMap<>();
+        variables.put("name", registerRequest.getName());
+        variables.put("activation-link", "http/web/" + activateToken);
+
+        try {
+            mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
+        } catch (Exception ignore) {
+        }
+
+        customerSQL.setIsActivated(false);
         customerDaoSQL.save(customerSQL);
 
-        return AuthenticationResponse
-                .builder()
-                .accessToken(authenticationResponse.getAccessToken())
-                .refreshToken(authenticationResponse.getRefreshToken())
-                .build();
+        return ResponseEntity.ok("Check your email for activation");
     }
 
 
@@ -176,14 +212,18 @@ public class AuthenticationService {
         if (user == null) {
             throw new CustomException("User not found", HttpStatus.NOT_FOUND);
         }
+        try {
+            sellerAuthenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            loginRequest.getPassword(),
+                            user.getAuthorities()
+                    )
+            );
 
-        sellerAuthenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        loginRequest.getPassword(),
-                        user.getAuthorities()
-                )
-        );
+        } catch (Exception e) {
+            throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
+        }
         String access_token = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         System.out.println(access_token);
@@ -198,13 +238,21 @@ public class AuthenticationService {
     public AuthenticationResponse loginManager(LoginRequest loginRequest) {
         ManagerSQL user = managerDaoSQL.findByEmail(loginRequest.getEmail());
 
-        managerAuthenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        loginRequest.getPassword(),
-                        user.getAuthorities()
-                )
-        );
+        if (user == null) {
+            throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            managerAuthenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            loginRequest.getPassword(),
+                            user.getAuthorities()
+                    )
+            );
+        } catch (Exception e) {
+            throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
+        }
         AuthenticationResponse tokenPair = jwtService.generateManagerTokenPair(user);
 
         user.setRefreshToken(tokenPair.getRefreshToken());
@@ -215,6 +263,10 @@ public class AuthenticationService {
 
     public AuthenticationResponse loginAdmin(LoginRequest loginRequest) {
         AdministratorSQL administrator = administratorDaoSQL.findByEmail(loginRequest.getEmail());
+
+        if (administrator == null) {
+            throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+        }
 
         try {
             adminAuthenticationProvider.authenticate(
@@ -238,13 +290,21 @@ public class AuthenticationService {
     public AuthenticationResponse loginCustomer(LoginRequest loginRequest) {
         CustomerSQL customerSQL = customerDaoSQL.findByEmail(loginRequest.getEmail());
 
-        customerAuthenticationProvider.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword(),
-                        customerSQL.getAuthorities()
-                )
-        );
+        if (customerSQL == null) {
+            throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+        }
+
+        try {
+            customerAuthenticationProvider.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getEmail(),
+                            loginRequest.getPassword(),
+                            customerSQL.getAuthorities()
+                    )
+            );
+        } catch (Exception e) {
+            throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
+        }
         AuthenticationResponse tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
 
         customerSQL.setRefreshToken(tokenPair.getRefreshToken());
@@ -255,7 +315,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse refresh(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken, ERole.SELLER);
+        String username = jwtService.extractUsername(refreshToken, ETokenRole.SELLER);
 
         SellerSQL user = sellerDaoSQL.findSellerByEmail(username);
         String newAccessToken = null;
@@ -274,7 +334,7 @@ public class AuthenticationService {
     public AuthenticationResponse refreshManager(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
 
-        String username = jwtService.extractUsername(refreshToken, ERole.MANAGER);
+        String username = jwtService.extractUsername(refreshToken, ETokenRole.MANAGER);
 
         ManagerSQL user = managerDaoSQL.findByEmail(username);
 
@@ -293,7 +353,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse refreshAdmin(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken, ERole.ADMIN);
+        String username = jwtService.extractUsername(refreshToken, ETokenRole.ADMIN);
         AdministratorSQL administrator = administratorDaoSQL.findByEmail(username);
 
         AuthenticationResponse tokenPair = null;
@@ -310,7 +370,7 @@ public class AuthenticationService {
 
     public AuthenticationResponse refreshCustomer(RefreshRequest refreshRequest) {
         String refreshToken = refreshRequest.getRefreshToken();
-        String username = jwtService.extractUsername(refreshToken, ERole.CUSTOMER);
+        String username = jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER);
 
         CustomerSQL customerSQL = customerDaoSQL.findByEmail(username);
 
@@ -326,27 +386,71 @@ public class AuthenticationService {
         return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
     }
 
-    public String checkRegistrationKey(HttpServletRequest request, String email, ERole role) {
+    public String checkRegistrationKey(HttpServletRequest request, String email, ETokenRole role) {
         String authorizationHeader = request.getHeader("Register-key");
+        System.out.println(authorizationHeader);
+        System.out.println("hedaer ---------------------------");
 
-        if(authorizationHeader == null) {
+        if (authorizationHeader == null) {
             throw new CustomException("Register key required", HttpStatus.FORBIDDEN);
         }
+
+        System.out.println("db ---------------------------");
+        System.out.println(registerKeyDaoSQL.findByRegisterKey(authorizationHeader));
 
         if (registerKeyDaoSQL.findByRegisterKey(authorizationHeader) == null) {
             throw new CustomException("Key is not valid", HttpStatus.FORBIDDEN);
         }
 
-        ERole keyRole = ERole.valueOf(jwtService.extractAudience(authorizationHeader));
-        if (keyRole != role) {
+        if (jwtService.isTokenExprired(authorizationHeader)) {
+            throw new CustomException("Key expired", HttpStatus.FORBIDDEN);
+        }
+
+//        ETokenRole keyRole = ETokenRole.valueOf(jwtService.extractIssuer(authorizationHeader));
+        System.out.println(role.name());
+        System.out.println(jwtService.extractIssuer(authorizationHeader));
+        System.out.println(jwtService.extractIssuer(authorizationHeader).equals(role.name()));
+        if (!jwtService.extractIssuer(authorizationHeader).equals(role.name())) {
             throw new CustomException("The key is not valid for creation of " + role.name().toLowerCase(), HttpStatus.FORBIDDEN);
         }
 
-        if (!jwtService.isKeyValid(authorizationHeader, email, role)) {
+        if (!jwtService.isKeyValid(authorizationHeader, email, ETokenRole.valueOf(role.name()))) {
             throw new CustomException("Not valid key owner", HttpStatus.FORBIDDEN);
         }
 
         return authorizationHeader;
+    }
+
+    public ResponseEntity<AuthenticationResponse> activate(String email, ERole role) {
+        if (role.equals(ERole.SELLER)) {
+            SellerSQL sellerSQL = userDaoSQL.findByEmail(email);
+            sellerSQL.setIsActivated(true);
+            userDaoSQL.save(sellerSQL);
+
+            String accessToken = jwtService.generateToken(sellerSQL);
+            String refreshToken = jwtService.generateRefreshToken(sellerSQL);
+
+            return ResponseEntity.ok(AuthenticationResponse
+                    .builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
+                    .build());
+
+        } else if (role.equals(ERole.CUSTOMER)) {
+            CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
+            customerSQL.setIsActivated(true);
+            customerDaoSQL.save(customerSQL);
+
+            AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
+
+            return ResponseEntity.ok(AuthenticationResponse
+                    .builder()
+                    .accessToken(authenticationResponse.getAccessToken())
+                    .refreshToken(authenticationResponse.getRefreshToken())
+                    .build());
+        }
+
+        return ResponseEntity.ok(AuthenticationResponse.builder().build());
     }
 
 }

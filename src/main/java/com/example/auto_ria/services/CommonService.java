@@ -4,7 +4,7 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
-import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
@@ -39,7 +39,7 @@ public class CommonService {
     }
 
 
-    public String extractEmailFromHeader(HttpServletRequest request, ERole role) {
+    public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
         String bearerToken = jwtService.extractTokenFromHeader(request);
 
         return jwtService.extractUsername(bearerToken, role);
@@ -49,7 +49,7 @@ public class CommonService {
 
         SellerSQL sellerSQL;
         try {
-            sellerSQL = userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ERole.SELLER));
+            sellerSQL = userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ETokenRole.SELLER));
         } catch (Exception e) {
             return null;
         }
@@ -59,7 +59,7 @@ public class CommonService {
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
         ManagerSQL managerSQL;
         try {
-            managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.MANAGER));
+            managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.MANAGER));
         } catch (Exception e) {
             return null;
         }
@@ -69,7 +69,7 @@ public class CommonService {
     public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
         AdministratorSQL administratorSQL;
         try {
-            administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.ADMIN));
+            administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.ADMIN));
         } catch (Exception e) {
             return null;
         }
@@ -77,7 +77,7 @@ public class CommonService {
     }
 
     public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
-        return customerDaoSQL.findByEmail(extractEmailFromHeader(request, ERole.CUSTOMER));
+        return customerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.CUSTOMER));
     }
 
 

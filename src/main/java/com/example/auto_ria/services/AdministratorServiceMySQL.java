@@ -4,6 +4,7 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.Person;
@@ -94,7 +95,7 @@ public class AdministratorServiceMySQL {
     }
 
     public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
-        String key = jwtService.generateRegisterKey(email, role);
+        String key = jwtService.generateRegisterKey(email, ETokenRole.valueOf(role.name()));
         return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
     }
 

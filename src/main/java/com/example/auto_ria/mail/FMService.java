@@ -32,6 +32,9 @@ public class FMService {
         MimeMessageHelper helper = new MimeMessageHelper(message);
 
         helper.setTo(recipientEmail);
+        System.out.println(templateName);
+        System.out.println(recipientEmail);
+        System.out.println(variables.toString());
 
         HashMap<String, String> result = mailConfig.parser(templateName);
 

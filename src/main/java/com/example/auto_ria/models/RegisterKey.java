@@ -1,9 +1,6 @@
 package com.example.auto_ria.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +17,6 @@ public class RegisterKey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(length = 1000)
     private String registerKey;
 }

@@ -3,10 +3,14 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
+import com.example.auto_ria.services.JwtService;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import freemarker.template.TemplateException;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -15,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -24,9 +30,10 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private RegisterKeyDaoSQL registerKeyDaoSQL;
+    private JwtService jwtService;
 
     @PostMapping("/register-seller/person")
-    public ResponseEntity<AuthenticationResponse> register(
+    public ResponseEntity<String> register(
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("city") String city,
@@ -39,7 +46,20 @@ public class AuthenticationController {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterRequest registerRequest = new RegisterRequest(city, region, number, name, lastName, email, fileName, password);
-        return ResponseEntity.ok(authenticationService.register(registerRequest));
+        return authenticationService.register(registerRequest);
+    }
+
+    @PostMapping("/code-manager")
+    public ResponseEntity<String> codeManager(
+            @RequestParam("email") String email
+    ) throws MessagingException, TemplateException, IOException {
+        Map<String, String> claims = new HashMap<>();
+        claims.put("email", email);
+        claims.put("role", ETokenRole.MANAGER_REGISTER.name());
+
+        String code = jwtService.generateAdminCode(claims, email);
+
+        return authenticationService.codeManager(email, code);
     }
 
     @PostMapping("/register-manager")
@@ -51,12 +71,47 @@ public class AuthenticationController {
             HttpServletRequest request
     ) throws IOException {
 
-        String key = authenticationService.checkRegistrationKey(request, email, ERole.MANAGER);
+        String key = authenticationService.checkRegistrationKey(request, email, ETokenRole.MANAGER_REGISTER);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterManagerRequest registerRequest = new RegisterManagerRequest(name, email, fileName, password);
+        registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
         return ResponseEntity.ok(authenticationService.registerManager(registerRequest, key));
+    }
+
+    @PostMapping("/activate-seller")
+    public ResponseEntity<AuthenticationResponse> activateSeller(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("activation-token");
+        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.SELLER_ACTIVATE);
+
+        return authenticationService.activate(email, ERole.SELLER);
+
+    }
+
+    @PostMapping("/activate-customer")
+    public ResponseEntity<AuthenticationResponse> activateCustomer(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("activation-token");
+        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.CUSTOMER_ACTIVATE);
+        return authenticationService.activate(email, ERole.CUSTOMER);
+    }
+
+    @PostMapping("/code-admin")
+    public ResponseEntity<String> codeAdmin(
+            @RequestParam("email") String email
+    ) throws MessagingException, TemplateException, IOException {
+        Map<String, String> claims = new HashMap<>();
+        claims.put("email", email);
+        claims.put("role", ETokenRole.ADMIN_REGISTER.name());
+
+        String code = jwtService.generateAdminCode(claims, email);
+        System.out.println("---------------------------------");
+        System.out.println(jwtService.extractAllClaims(code, ETokenRole.ADMIN_REGISTER));
+        System.out.println("CODE DOWN");
+        System.out.println(code);
+        System.out.println("---------------------------------");
+
+        return authenticationService.codeAdmin(email, code);
     }
 
     @PostMapping("/register-admin")
@@ -69,33 +124,31 @@ public class AuthenticationController {
             HttpServletRequest request
     ) throws IOException {
 
-        String key = authenticationService.checkRegistrationKey(request, email, ERole.ADMIN);
+        String key = authenticationService.checkRegistrationKey(request, email, ETokenRole.ADMIN_REGISTER);
 
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
+        System.out.println("after transfer avatar");
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
+        System.out.println(registerRequest);
         AuthenticationResponse authenticationResponse = authenticationService.registerAdmin(registerRequest);
-        registerKeyDaoSQL.deleteById(registerKeyDaoSQL.findByRegisterKey(key).getId());
+        System.out.println(authenticationResponse);
+        registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
         return ResponseEntity.ok(authenticationResponse);
     }
 
     @PostMapping("/register-customer")
-    public ResponseEntity<AuthenticationResponse> registerCustomer(
-//            @Valid CustomerDTO ignoreValid,
+    public ResponseEntity<String> registerCustomer(
             @RequestParam("name") String name,
             @RequestParam("lastName") String lastName,
             @RequestParam("avatar") MultipartFile picture,
             @RequestParam("email") String email,
             @RequestParam("password") String password
-//            BindingResult result
     ) throws IOException {
-
-//        commonService.validate(result);
-
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
-        return ResponseEntity.ok(authenticationService.registerCustomer(registerRequest));
+        return authenticationService.registerCustomer(registerRequest);
     }
 
     @PostMapping("/authenticate/seller")

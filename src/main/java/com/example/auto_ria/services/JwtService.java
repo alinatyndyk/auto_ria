@@ -192,18 +192,12 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateManagerCode(
+    public String generateRegistrationCode(
             Map<String, String> extraClaims,
-            String userDetails
+            String userDetails,
+            ETokenRole role
     ) {
-        return generateCode(ETokenRole.MANAGER_REGISTER, extraClaims, userDetails);
-    }
-
-    public String generateAdminCode(
-            Map<String, String> extraClaims,
-            String userDetails
-    ) {
-        return generateCode(ETokenRole.ADMIN_REGISTER, extraClaims, userDetails);
+        return generateCode(role, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateTokenPair(

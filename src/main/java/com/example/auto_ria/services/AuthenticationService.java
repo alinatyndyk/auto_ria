@@ -72,19 +72,90 @@ public class AuthenticationService {
         seller.setIsActivated(false);
         sellerDaoSQL.save(seller);
 
-        String activateToken = jwtService.generateRegisterKey(seller.getEmail(), ETokenRole.SELLER_ACTIVATE);
+        String activateToken = jwtService.generateRegistrationCode(new HashMap<>(),
+                seller.getEmail(), ETokenRole.SELLER_ACTIVATE);
+
+        registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
 
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", registerRequest.getName());
-        variables.put("activation-link", "http/web/" + activateToken);
+        variables.put("role", ETokenRole.SELLER);
+        variables.put("code", activateToken);
 
         try {
-            mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
+            mailer.sendEmail(registerRequest.getEmail(), EMail.REGISTER_KEY, variables);
         } catch (Exception ignore) {
+            sellerDaoSQL.delete(seller);
+            throw new CustomException("Something went wrong... Try again later", HttpStatus.CONFLICT);
         }
 
-
         return ResponseEntity.ok("Check your email for activation");
+    }
+
+    public ResponseEntity<AuthenticationResponse> activateSeller(String email, String code) throws MessagingException, TemplateException, IOException {
+
+        SellerSQL sellerSQL = sellerDaoSQL.findByEmail(email);
+        sellerSQL.setIsActivated(true);
+
+        String access = jwtService.generateToken(sellerSQL);
+        String refresh = jwtService.generateRefreshToken(sellerSQL);
+
+
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .accessToken(access)
+                .refreshToken(refresh)
+                .build();
+
+        sellerSQL.setRefreshToken(refresh);
+
+        sellerDaoSQL.save(sellerSQL);
+
+        try {
+            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(code));
+        } catch (Exception e) {
+            throw new CustomException("Key doesnt exist", HttpStatus.FORBIDDEN);
+        }
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("name", sellerSQL.getName());
+
+        mailer.sendEmail(sellerSQL.getEmail(), EMail.WELCOME, vars);
+
+        return ResponseEntity.ok(authenticationResponse);
+
+    }
+
+    public ResponseEntity<AuthenticationResponse> activateCustomer(String email, String code) throws MessagingException, TemplateException, IOException {
+
+        CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
+        customerSQL.setIsActivated(true);
+
+        String access = jwtService.generateToken(customerSQL);
+        String refresh = jwtService.generateRefreshToken(customerSQL);
+
+
+        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
+                .accessToken(access)
+                .refreshToken(refresh)
+                .build();
+
+        customerSQL.setRefreshToken(refresh);
+
+        customerDaoSQL.save(customerSQL);
+
+        try {
+            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(code));
+        } catch (Exception e) {
+            throw new CustomException("Key doesnt exist", HttpStatus.FORBIDDEN);
+        }
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("name", customerSQL.getName());
+
+        mailer.sendEmail(customerSQL.getEmail(), EMail.WELCOME, vars);
+
+        return ResponseEntity.ok(authenticationResponse);
+
     }
 
     public ResponseEntity<String> codeManager(String email, String code) throws MessagingException, TemplateException, IOException {
@@ -189,14 +260,18 @@ public class AuthenticationService {
         customerSQL.setRefreshToken(authenticationResponse.getRefreshToken());
 
         String activateToken = jwtService.generateRegisterKey(customerSQL.getEmail(), ETokenRole.CUSTOMER_ACTIVATE);
+        registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
 
         HashMap<String, Object> variables = new HashMap<>();
         variables.put("name", registerRequest.getName());
-        variables.put("activation-link", "http/web/" + activateToken);
+        variables.put("role", ETokenRole.CUSTOMER);
+        variables.put("code", activateToken);
 
         try {
-            mailer.sendEmail(registerRequest.getEmail(), EMail.WELCOME, variables);
+            mailer.sendEmail(registerRequest.getEmail(), EMail.REGISTER_KEY, variables);
         } catch (Exception ignore) {
+            customerDaoSQL.delete(customerSQL);
+            throw new CustomException("Something went wrong... Try again later", HttpStatus.CONFLICT);
         }
 
         customerSQL.setIsActivated(false);

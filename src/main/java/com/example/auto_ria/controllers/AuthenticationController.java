@@ -4,6 +4,7 @@ import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import com.example.auto_ria.services.AuthenticationService;
@@ -14,6 +15,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +34,7 @@ public class AuthenticationController {
     private RegisterKeyDaoSQL registerKeyDaoSQL;
     private JwtService jwtService;
 
+    // register seller
     @PostMapping("/register-seller/person")
     public ResponseEntity<String> register(
             @RequestParam("name") String name,
@@ -49,6 +52,29 @@ public class AuthenticationController {
         return authenticationService.register(registerRequest);
     }
 
+    //activate seller account
+    @PostMapping("/activate-seller-account")
+    public ResponseEntity<AuthenticationResponse> activateSeller(
+            @RequestParam("code") String code
+    ) throws MessagingException, TemplateException, IOException {
+        if (jwtService.isTokenExprired(code)) {
+            throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
+        }
+        String email = jwtService.extractUsername(code, ETokenRole.SELLER_ACTIVATE);
+        return authenticationService.activateSeller(email, code);
+    }
+
+    // activate seller after banned
+//    @PostMapping("/activate-seller")
+//    public ResponseEntity<AuthenticationResponse> activateSeller(HttpServletRequest request) {
+//        String authorizationHeader = request.getHeader("activation-token");
+//        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.SELLER_ACTIVATE);
+//
+//        return authenticationService.activate(email, ERole.SELLER);
+//
+//    }
+
+    // generate code for manager register
     @PostMapping("/code-manager")
     public ResponseEntity<String> codeManager(
             @RequestParam("email") String email
@@ -57,11 +83,12 @@ public class AuthenticationController {
         claims.put("email", email);
         claims.put("role", ETokenRole.MANAGER_REGISTER.name());
 
-        String code = jwtService.generateManagerCode(claims, email);
+        String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.MANAGER_REGISTER);
 
         return authenticationService.codeManager(email, code);
     }
 
+    //register manager with received code
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
             @RequestParam("name") String name,
@@ -80,22 +107,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.registerManager(registerRequest, key));
     }
 
-    @PostMapping("/activate-seller")
-    public ResponseEntity<AuthenticationResponse> activateSeller(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("activation-token");
-        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.SELLER_ACTIVATE);
-
-        return authenticationService.activate(email, ERole.SELLER);
-
-    }
-
-    @PostMapping("/activate-customer")
-    public ResponseEntity<AuthenticationResponse> activateCustomer(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("activation-token");
-        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.CUSTOMER_ACTIVATE);
-        return authenticationService.activate(email, ERole.CUSTOMER);
-    }
-
+    //generate code for admin register
     @PostMapping("/code-admin")
     public ResponseEntity<String> codeAdmin(
             @RequestParam("email") String email
@@ -104,11 +116,12 @@ public class AuthenticationController {
         claims.put("email", email);
         claims.put("role", ETokenRole.ADMIN_REGISTER.name());
 
-        String code = jwtService.generateAdminCode(claims, email);
+        String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.ADMIN_REGISTER);
 
         return authenticationService.codeAdmin(email, code);
     }
 
+    // register admin with received code
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
             @RequestParam("name") String name,
@@ -129,6 +142,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationResponse);
     }
 
+    //register customer
     @PostMapping("/register-customer")
     public ResponseEntity<String> registerCustomer(
             @RequestParam("name") String name,
@@ -142,6 +156,25 @@ public class AuthenticationController {
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
         return authenticationService.registerCustomer(registerRequest);
     }
+
+    // activate customer account with received code
+    @PostMapping("/activate-customer-account")
+    public ResponseEntity<AuthenticationResponse> activateCustomer(
+            @RequestParam("code") String code
+    ) throws MessagingException, TemplateException, IOException {
+        if (jwtService.isTokenExprired(code)) {
+            throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
+        }
+        String email = jwtService.extractUsername(code, ETokenRole.CUSTOMER_ACTIVATE);
+        return authenticationService.activateCustomer(email, code);
+    }
+
+//    @PostMapping("/activate-customer")
+//    public ResponseEntity<AuthenticationResponse> activateCustomer(HttpServletRequest request) {
+//        String authorizationHeader = request.getHeader("activation-token");
+//        String email = jwtService.extractUsername(authorizationHeader, ETokenRole.CUSTOMER_ACTIVATE);
+//        return authenticationService.activate(email, ERole.CUSTOMER);
+//    }
 
     @PostMapping("/authenticate/seller")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {

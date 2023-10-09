@@ -258,6 +258,7 @@ public class AuthenticationService {
         AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
 
         customerSQL.setRefreshToken(authenticationResponse.getRefreshToken());
+        customerSQL.setIsActivated(false);
 
         String activateToken = jwtService.generateRegisterKey(customerSQL.getEmail(), ETokenRole.CUSTOMER_ACTIVATE);
         registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
@@ -463,15 +464,10 @@ public class AuthenticationService {
 
     public String checkRegistrationKey(HttpServletRequest request, String email, ETokenRole role) {
         String authorizationHeader = request.getHeader("Register-key");
-        System.out.println(authorizationHeader);
-        System.out.println("hedaer ---------------------------");
 
         if (authorizationHeader == null) {
             throw new CustomException("Register key required", HttpStatus.FORBIDDEN);
         }
-
-        System.out.println("db ---------------------------");
-        System.out.println(registerKeyDaoSQL.findByRegisterKey(authorizationHeader));
 
         if (registerKeyDaoSQL.findByRegisterKey(authorizationHeader) == null) {
             throw new CustomException("Key is not valid", HttpStatus.FORBIDDEN);
@@ -492,36 +488,36 @@ public class AuthenticationService {
         return authorizationHeader;
     }
 
-    public ResponseEntity<AuthenticationResponse> activate(String email, ERole role) {
-        if (role.equals(ERole.SELLER)) {
-            SellerSQL sellerSQL = userDaoSQL.findByEmail(email);
-            sellerSQL.setIsActivated(true);
-            userDaoSQL.save(sellerSQL);
-
-            String accessToken = jwtService.generateToken(sellerSQL);
-            String refreshToken = jwtService.generateRefreshToken(sellerSQL);
-
-            return ResponseEntity.ok(AuthenticationResponse
-                    .builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .build());
-
-        } else if (role.equals(ERole.CUSTOMER)) {
-            CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
-            customerSQL.setIsActivated(true);
-            customerDaoSQL.save(customerSQL);
-
-            AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
-
-            return ResponseEntity.ok(AuthenticationResponse
-                    .builder()
-                    .accessToken(authenticationResponse.getAccessToken())
-                    .refreshToken(authenticationResponse.getRefreshToken())
-                    .build());
-        }
-
-        return ResponseEntity.ok(AuthenticationResponse.builder().build());
-    }
+//    public ResponseEntity<AuthenticationResponse> activate(String email, ERole role) {
+//        if (role.equals(ERole.SELLER)) {
+//            SellerSQL sellerSQL = userDaoSQL.findByEmail(email);
+//            sellerSQL.setIsActivated(true);
+//            userDaoSQL.save(sellerSQL);
+//
+//            String accessToken = jwtService.generateToken(sellerSQL);
+//            String refreshToken = jwtService.generateRefreshToken(sellerSQL);
+//
+//            return ResponseEntity.ok(AuthenticationResponse
+//                    .builder()
+//                    .accessToken(accessToken)
+//                    .refreshToken(refreshToken)
+//                    .build());
+//
+//        } else if (role.equals(ERole.CUSTOMER)) {
+//            CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
+//            customerSQL.setIsActivated(true);
+//            customerDaoSQL.save(customerSQL);
+//
+//            AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
+//
+//            return ResponseEntity.ok(AuthenticationResponse
+//                    .builder()
+//                    .accessToken(authenticationResponse.getAccessToken())
+//                    .refreshToken(authenticationResponse.getRefreshToken())
+//                    .build());
+//        }
+//
+//        return ResponseEntity.ok(AuthenticationResponse.builder().build());
+//    }
 
 }

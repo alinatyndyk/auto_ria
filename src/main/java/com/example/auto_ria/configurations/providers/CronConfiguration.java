@@ -1,8 +1,13 @@
 package com.example.auto_ria.configurations.providers;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
+import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.CustomerDaoSQL;
+import com.example.auto_ria.dao.ManagerDaoSQL;
+import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.models.responses.CurrencyResponse;
+import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -10,11 +15,20 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 
 @Configuration
 @EnableScheduling
 @Async
+@AllArgsConstructor
 public class CronConfiguration {
+
+    private UserDaoSQL sellerDaoSQL;
+    private CustomerDaoSQL customerDaoSQL;
+    private ManagerDaoSQL managerDaoSQL;
+    private AdministratorDaoSQL administratorDaoSQL;
+
+
     @PostConstruct
     public void onApplicationStart() {
         getCurrencyRates();
@@ -49,5 +63,16 @@ public class CronConfiguration {
         }
 
         ExchangeRateCache.updateExchangeRates(UsdBuy, UsdSell, EURBuy, EURSell);
+    }
+
+    @Scheduled(cron = "0 0 */2 * *")
+    public void deleteUnactivatedAccounts() {
+// todo
+        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
+        sellerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+        customerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+        administratorDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+        managerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+
     }
 }

@@ -1,4 +1,4 @@
-package com.example.auto_ria.configurations.providers;
+package com.example.auto_ria.configurations;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.dao.AdministratorDaoSQL;
@@ -65,14 +65,14 @@ public class CronConfiguration {
         ExchangeRateCache.updateExchangeRates(UsdBuy, UsdSell, EURBuy, EURSell);
     }
 
-    @Scheduled(cron = "0 0 */2 * *")
-    public void deleteUnactivatedAccounts() {
-// todo
-        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        sellerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-        customerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-        administratorDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-        managerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-
-    }
+//    @Scheduled(cron = "0 0 */2 * *")
+//    public void deleteUnactivatedAccounts() {
+//// todo
+//        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
+//        sellerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+//        customerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+//        administratorDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+//        managerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
+//
+//    }
 }

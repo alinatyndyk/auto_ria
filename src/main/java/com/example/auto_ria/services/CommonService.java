@@ -36,6 +36,9 @@ public class CommonService {
                     .toList();
             throw new CustomException(errors.toString(), HttpStatus.BAD_REQUEST);
         }
+
+        // String errorMessage = bindingResult.getFieldErrors().get(0).getDefaultMessage();
+        //        return ResponseEntity.badRequest().body(errorMessage);
     }
 
 

@@ -15,16 +15,29 @@ import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
 import freemarker.template.TemplateException;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +52,11 @@ public class AuthenticationService {
     private AdministratorDaoSQL administratorDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
     private UserDaoSQL userDaoSQL;
+    private AdministratorServiceMySQL administratorServiceMySQL;
+
+    private CustomersServiceMySQL customersServiceMySQL;
+    private UsersServiceMySQLImpl usersServiceMySQL;
+    private ManagerServiceMySQL managerServiceMySQL;
 
     private SellerAuthenticationProvider sellerAuthenticationManager;
     private ManagerAuthenticationProvider managerAuthenticationManager;
@@ -48,6 +66,7 @@ public class AuthenticationService {
 
     private PasswordEncoder passwordEncoder;
     private FMService mailer;
+
 
     public ResponseEntity<String> register(
             @Valid RegisterRequest registerRequest) {
@@ -461,6 +480,104 @@ public class AuthenticationService {
         assert tokenPair != null;
         return AuthenticationResponse.builder().accessToken(tokenPair.getAccessToken()).refreshToken(tokenPair.getRefreshToken()).build();
     }
+
+    public void forgotPassword(String email) throws MessagingException, TemplateException, IOException {
+
+        String code = jwtService.generateRegisterKey(email, ETokenRole.FORGOT_PASSWORD);
+
+        Map<String, Object> args = new HashMap<>();
+        args.put("email", email);
+        args.put("time", LocalDate.now());
+        args.put("code", code);
+
+        mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
+    }
+
+    public void resetPassword(String email, String owner, String encoded) {
+
+        if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
+            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
+            administratorSQL.setPassword(encoded);
+            administratorSQL.setRefreshToken(null);
+            administratorDaoSQL.save(administratorSQL);
+        } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
+            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
+            managerSQL.setPassword(encoded);
+            managerSQL.setRefreshToken(null);
+            managerDaoSQL.save(managerSQL);
+        } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
+            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(email);
+            sellerSQL.setPassword(encoded);
+            sellerSQL.setRefreshToken(null);
+            userDaoSQL.save(sellerSQL);
+        } else if (ERole.CUSTOMER.equals(ERole.valueOf(owner))) {
+            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(email);
+            customerSQL.setPassword(encoded);
+            customerSQL.setRefreshToken(null);
+            customerDaoSQL.save(customerSQL);
+        } else {
+            throw new CustomException("Token is invalid for current procedure", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    public void signOut(String email, String owner) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getName().equals(email)) {
+            System.out.println(authentication);
+            System.out.println("--------------------------");
+            System.out.println(authentication.getName().equals(email));
+            System.out.println("b ckean");
+            SecurityContextHolder.clearContext();
+            System.out.println(authentication.getName().equals(email));
+            System.out.println("a ckean");
+        }
+
+        if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
+            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
+            administratorSQL.setRefreshToken(null);
+            administratorDaoSQL.save(administratorSQL);
+        } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
+            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
+            managerSQL.setRefreshToken(null);
+            managerDaoSQL.save(managerSQL);
+        } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
+            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(email);
+            sellerSQL.setRefreshToken(null);
+            userDaoSQL.save(sellerSQL);
+        } else if (ERole.CUSTOMER.equals(ERole.valueOf(owner))) {
+            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(email);
+            customerSQL.setRefreshToken(null);
+            customerDaoSQL.save(customerSQL);
+        } else {
+            throw new CustomException("Something went wrong...", HttpStatus.BAD_REQUEST);
+        }
+        System.out.println("a refresh clean");
+    }
+
+    private UserDetailsService userDetailsService;
+
+
+    private AuthenticationManager authManager;
+
+
+    public String logout(String email) {
+        if (StringUtils.isEmpty(email)) {
+            return "Invalid email.";
+        }
+
+        UserDetails user = userDetailsService.loadUserByUsername(email);
+        System.out.println(user);
+        if (user != null) {
+            Authentication auth = new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword(), user.getAuthorities());
+            System.out.println(auth);
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            System.out.println(SecurityContextHolder.getContext());
+            SecurityContextHolder.clearContext();
+        }
+
+        return "Logged out successfully.";
+    }
+
 
     public String checkRegistrationKey(HttpServletRequest request, String email, ETokenRole role) {
         String authorizationHeader = request.getHeader("Register-key");

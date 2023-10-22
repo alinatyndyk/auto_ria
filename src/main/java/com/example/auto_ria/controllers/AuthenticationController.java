@@ -1,22 +1,22 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dao.RegisterKeyDaoSQL;
+import com.example.auto_ria.dao.*;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
-import com.example.auto_ria.services.AuthenticationService;
-import com.example.auto_ria.services.JwtService;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.*;
 import freemarker.template.TemplateException;
+import io.jsonwebtoken.Claims;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,6 +33,7 @@ public class AuthenticationController {
     private UsersServiceMySQLImpl usersServiceMySQL;
     private RegisterKeyDaoSQL registerKeyDaoSQL;
     private JwtService jwtService;
+    private PasswordEncoder passwordEncoder;
 
     // register seller
     @PostMapping("/register-seller/person")
@@ -216,5 +217,97 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
     }
 
+    @PostMapping("/sign-out")
+    public void signOut(
+            HttpServletRequest request) {
+        String access_token = jwtService.extractTokenFromHeader(request);
+
+        Claims claims = jwtService.extractClaimsCycle(access_token);
+        System.out.println(claims);
+        String email = claims.get("sub").toString();
+        String owner = claims.get("iss").toString();
+
+        authenticationService.signOut(email, owner);
+    }
+
     //todo forgot password - reset password
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestParam("newPassword") String newPassword,
+            HttpServletRequest request) {
+
+        if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
+            throw new CustomException("Invalid password. Must contain: " +
+                    "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
+                    HttpStatus.BAD_REQUEST);
+        }
+        String encoded = passwordEncoder.encode(newPassword);
+
+        String accessToken = jwtService.extractTokenFromHeader(request);
+        Claims claims = jwtService.extractClaimsCycle(accessToken);
+
+        String email = claims.get("sub").toString();
+        String owner = claims.get("iss").toString();
+
+        authenticationService.resetPassword(email, owner, encoded);
+
+        return ResponseEntity.ok("The password has been successfully changed");
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestParam("email") String email) throws MessagingException, TemplateException, IOException {
+
+        authenticationService.forgotPassword(email);
+
+        return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{4})", "*"));
+    }
+
+    @PostMapping("/out")
+    public ResponseEntity<String> signout(
+            @RequestParam("email") String email) throws MessagingException, TemplateException, IOException {
+
+        authenticationService.logout(email);
+
+        return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{4})", "*"));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestParam("newPassword") String newPassword,
+            HttpServletRequest request) {
+
+        if (newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
+            throw new CustomException("Invalid password. Must contain: " +
+                    "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
+                    HttpStatus.BAD_REQUEST);
+        }
+        String accessToken = jwtService.extractTokenFromHeader(request);
+        String encoded = passwordEncoder.encode(newPassword);
+
+        Claims claims = jwtService.extractClaimsCycle(accessToken);
+        String email = claims.get("email").toString();
+        String owner = claims.get("iss").toString();
+
+        if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
+            authenticationService.checkRegistrationKey(request, email, ETokenRole.ADMIN);
+        } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
+            authenticationService.checkRegistrationKey(request, email, ETokenRole.MANAGER);
+        } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
+            authenticationService.checkRegistrationKey(request, email, ETokenRole.SELLER);
+        } else if (ERole.CUSTOMER.equals(ERole.valueOf(owner))) {
+            authenticationService.checkRegistrationKey(request, email, ETokenRole.CUSTOMER);
+        } else {
+            throw new CustomException("Token is invalid for current procedure", HttpStatus.FORBIDDEN);
+        }
+
+        authenticationService.resetPassword(email, owner, encoded);
+
+        authenticationService.signOut(email, owner);
+
+        return ResponseEntity.ok("Password has been changed");
+
+    }
+
 }

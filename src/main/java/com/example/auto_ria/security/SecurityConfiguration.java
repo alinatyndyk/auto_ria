@@ -15,6 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 
 @Configuration
 @EnableWebSecurity
@@ -35,8 +36,11 @@ public class SecurityConfiguration {
 //                                        .requestMatchers("/api/v1/auth/**").permitAll()
                                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/code-admin").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/code-manager").hasAnyAuthority("ADMIN")
+                                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-out").hasAnyAuthority("ADMIN", "MANAGER", "SELLER", "CUSTOMER")
+                                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/change-password").hasAnyAuthority("ADMIN", "MANAGER", "SELLER", "CUSTOMER")
 
 
+                                        .requestMatchers(HttpMethod.GET, "/cars").hasAnyAuthority( "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/activate/{id}").hasAnyAuthority("MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/ban/{id}").hasAnyAuthority("MANAGER", "ADMIN")

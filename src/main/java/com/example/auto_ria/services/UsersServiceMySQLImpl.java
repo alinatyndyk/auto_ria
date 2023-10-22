@@ -41,6 +41,10 @@ public class UsersServiceMySQLImpl {
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
+    public SellerSQL getByEmail(String email) {
+        return userDaoSQL.findByEmail(email);
+    }
+
     public SellerSQL getById(int id) {
         if (userDaoSQL.findById(id).isEmpty()) {
             throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);

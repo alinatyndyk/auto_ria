@@ -49,6 +49,7 @@ public class JwtService {
 
     @Value("${token.generation.key.customer}")
     private static final String SELLER_ACTIVATE = "404E745266556A586E3272357538782F413F4428472B4B625064536756685970";
+    private static final String FORGOT_PASSWORD = "404E745266556A586E3272057538782F413F4428495B4B625064536756685979";
 
     public String extractUsername(String jwt, ETokenRole role) {
         return extractClaim(jwt, Claims::getSubject, role);
@@ -56,10 +57,6 @@ public class JwtService {
 
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
-    }
-
-    public String extractAudience(String jwt) {
-        return extractClaim(jwt, Claims::getAudience);
     }
 
     public String extractIssuer(String jwt) {
@@ -87,6 +84,46 @@ public class JwtService {
         return claimsTFunction.apply(claims);
     }
 
+    public Claims extractClaimsCycle(String token) {
+        Claims claims = Jwts.claims();
+        try {
+            for (ETokenRole role : ETokenRole.values()) {
+                Claims result = extractAllClaims(token, role);
+                if (result != null) {
+                    claims.putAll(result);
+                    return claims;
+                }
+            }
+
+        } catch (IllegalArgumentException | SignatureException ignored) {
+        }
+        return claims;
+    }
+
+    public Map<String, Object> extractClaimsCycleWithType(String token) {
+        Claims claims = Jwts.claims();
+        ETokenRole tokenRole;
+        Map<String, Object> args = new HashMap<>();
+        try {
+            for (ETokenRole role : ETokenRole.values()) {
+                Claims result = extractAllClaims(token, role);
+                if (result != null) {
+
+                    claims.putAll(result);
+
+                    tokenRole = role;
+                    args.put("tokenRole", tokenRole);
+                    args.put("claims", claims);
+
+                    return args;
+                }
+            }
+
+        } catch (IllegalArgumentException | SignatureException ignored) {
+        }
+        return claims;
+    }
+
     public Claims extractAllClaims(String token, ETokenRole role) throws JwtException {
         Claims claims = null;
         try {
@@ -112,6 +149,7 @@ public class JwtService {
             case MANAGER_REGISTER -> MANAGER_REGISTER;
             case SELLER_ACTIVATE -> SELLER_ACTIVATE;
             case CUSTOMER_ACTIVATE -> CUSTOMER_ACTIVATE;
+            case FORGOT_PASSWORD -> FORGOT_PASSWORD;
         };
 
         byte[] keyBytes = Decoders.BASE64.decode(key);
@@ -193,11 +231,11 @@ public class JwtService {
     }
 
     public String generateRegistrationCode(
-            Map<String, String> extraClaims,
+            Map<String, String> extraClaims, // todo remove
             String userDetails,
             ETokenRole role
     ) {
-        return generateCode(role, extraClaims, userDetails);
+        return generateCode(role, new HashMap<>(), userDetails);
     }
 
     public AuthenticationResponse generateTokenPair(

@@ -3,6 +3,7 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import io.jsonwebtoken.io.IOException;
@@ -37,6 +38,10 @@ public class CustomersServiceMySQL {
         }
         CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
         return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+    }
+
+    public CustomerSQL getByEmail(String email) {
+        return customerDaoSQL.findByEmail(email);
     }
 
     public void checkCredentials(HttpServletRequest request, int id) {

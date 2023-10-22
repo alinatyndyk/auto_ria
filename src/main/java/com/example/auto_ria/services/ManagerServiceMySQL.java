@@ -3,6 +3,7 @@ package com.example.auto_ria.services;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,10 @@ public class ManagerServiceMySQL {
 
     public List<ManagerSQL> getAll() {
         return managerDaoSQL.findAll();
+    }
+
+    public ManagerSQL getByEmail(String email) {
+        return managerDaoSQL.findByEmail(email);
     }
 
     public ResponseEntity<ManagerSQL> getById(int id) {

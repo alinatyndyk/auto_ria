@@ -44,6 +44,10 @@ public class AdministratorServiceMySQL {
         return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
     }
 
+    public AdministratorSQL getByEmail(String email) {
+        return administratorDaoSQL.findByEmail(email);
+    }
+
     public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
         String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
         File transferDestinationFile = new File(path);

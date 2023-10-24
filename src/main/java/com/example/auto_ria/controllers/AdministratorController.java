@@ -8,6 +8,7 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
@@ -68,6 +69,9 @@ public class AdministratorController {
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }
+
+        commonService.removeAvatar(administratorHeader.getAvatar());
+
         String fileName = avatar.getOriginalFilename();
         administratorServiceMySQL.transferAvatar(avatar, fileName);
         administratorServiceMySQL.updateAvatar(id, fileName);
@@ -75,12 +79,15 @@ public class AdministratorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
+    public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) throws IOException {
         AdministratorSQL administratorHeader = commonService.extractAdminFromHeader(request);
 
         if (administratorHeader.getId() != id) {
             throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
         }
+
+        commonService.removeAvatar(administratorHeader.getAvatar());
+
         return administratorServiceMySQL.deleteById(String.valueOf(id));
     }
 

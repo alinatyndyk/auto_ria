@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
@@ -51,6 +52,9 @@ public class CustomerController {
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
         customersServiceMySQL.checkCredentials(request, id);
+
+        commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(String.valueOf(id)).getBody()).getAvatar());
+
         String fileName = avatar.getOriginalFilename();
         usersServiceMySQL.transferAvatar(avatar, fileName);
         customersServiceMySQL.updateAvatar(id, fileName);
@@ -59,8 +63,10 @@ public class CustomerController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
+    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) throws IOException {
         customersServiceMySQL.checkCredentials(request, Integer.parseInt(id));
+
+        commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(id).getBody()).getAvatar());
 
         return customersServiceMySQL.deleteById(id);
     }

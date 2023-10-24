@@ -26,12 +26,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @RestController
 @AllArgsConstructor
@@ -164,16 +160,16 @@ public class CarController {
 
     @PostMapping()
     public ResponseEntity<CarResponse> post( //todo created updated weg
-                                        @RequestParam("brand") EBrand brand,
-                                        @RequestParam("model") EModel model,
-                                        @RequestParam("power") int power,
-                                        @RequestParam("city") String city,
-                                        @RequestParam("region") ERegion region,
-                                        @RequestParam("price") String price,
-                                        @RequestParam("currency") ECurrency currency,
-                                        @RequestParam("description") String description,
-                                        @RequestParam("pictures[]") MultipartFile[] pictures,
-                                        HttpServletRequest request
+                                             @RequestParam("brand") EBrand brand,
+                                             @RequestParam("model") EModel model,
+                                             @RequestParam("power") int power,
+                                             @RequestParam("city") String city,
+                                             @RequestParam("region") ERegion region,
+                                             @RequestParam("price") String price,
+                                             @RequestParam("currency") ECurrency currency,
+                                             @RequestParam("description") String description,
+                                             @RequestParam("pictures[]") MultipartFile[] pictures,
+                                             HttpServletRequest request
     ) throws IOException {
 
         SellerSQL seller = commonService.extractSellerFromHeader(request);
@@ -233,16 +229,7 @@ public class CarController {
             }
         }
 
-        List<String> names = Arrays.stream(pictures).map(picture -> {
-            String fileName = picture.getOriginalFilename();
-            try {
-                usersServiceMySQL.transferAvatar(picture, fileName);
-            } catch (IOException e) {
-                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
-            }
-            return fileName;
-        }).collect(Collectors.toList());
-        car.setPhoto(names);
+        car.setPhoto(commonService.transferPhotos(pictures));
 
         return carsService.post(car, seller, administratorSQL);
     }
@@ -255,9 +242,60 @@ public class CarController {
         return carsService.update(id, partialCar);
     }
 
+    @PatchMapping("photos/{id}")
+    public ResponseEntity<String> patchPhotos(@PathVariable int id,
+                                              @RequestParam("pictures[]") MultipartFile[] newPictures,
+                                              HttpServletRequest request) throws IOException {
+        carsService.checkCredentials(request, id);
+
+
+        CarSQL carSQL = carsService.extractById(id);
+
+        List<String> newPicNames = new ArrayList<>();
+
+        for (MultipartFile file : newPictures) {
+            newPicNames.add(file.getOriginalFilename());
+        }
+        List<String> alreadyOnServer = new ArrayList<>();
+
+        for (String photoName : carSQL.getPhoto()) {
+            if (!newPicNames.contains(photoName)) {
+                commonService.removeAvatar(photoName);
+            } else {
+                alreadyOnServer.add(photoName);
+            }
+        }
+
+        Arrays.stream(newPictures)
+                .filter(pic -> !alreadyOnServer.contains(pic.getOriginalFilename()))
+                .forEach(pic -> {
+                    try {
+                        commonService.transferAvatar(pic, pic.getOriginalFilename());
+                    } catch (IOException e) {
+                        throw new CustomException("Something went wrong while transporting the files. " +
+                                "Try again later", HttpStatus.CONFLICT);
+                    }
+                });
+
+        carSQL.setPhoto(newPicNames);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         carsService.checkCredentials(request, id);
+
+        List<String> pictures = carsService.extractById(id).getPhoto();
+
+        pictures.forEach(picture -> {
+            try {
+                commonService.removeAvatar(picture);
+            } catch (IOException e) {
+                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
+            }
+        });
+
         return carsService.deleteById(id);
     }
 

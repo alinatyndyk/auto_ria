@@ -16,8 +16,13 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -39,6 +44,32 @@ public class CommonService {
 
         // String errorMessage = bindingResult.getFieldErrors().get(0).getDefaultMessage();
         //        return ResponseEntity.badRequest().body(errorMessage);
+    }
+
+    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
+        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+        File transferDestinationFile = new File(path);
+        picture.transferTo(transferDestinationFile);
+    }
+
+    public List<String> transferPhotos(MultipartFile[] newPictures) {
+        return Arrays.stream(newPictures).map(picture -> {
+            String fileName = picture.getOriginalFilename();
+            try {
+                transferAvatar(picture, fileName);
+            } catch (IOException e) {
+                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
+            }
+            return fileName;
+        }).collect(Collectors.toList());
+    }
+
+    public void removeAvatar(String originalFileName) throws java.io.IOException {
+        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+        File transferDestinationFile = new File(path);
+        if (transferDestinationFile.exists()) {
+            transferDestinationFile.delete();
+        }
     }
 
 

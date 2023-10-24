@@ -60,6 +60,9 @@ public class UserController {
         if (seller.getId() != id || administrator == null) {
             throw new CustomException("Illegal_access_exception. No-permission: check credentials", HttpStatus.FORBIDDEN);
         }
+
+        commonService.removeAvatar(seller.getAvatar());
+
         String fileName = avatar.getOriginalFilename();
         usersServiceMySQL.transferAvatar(avatar, fileName);
         usersServiceMySQL.updateAvatar(id, fileName);
@@ -67,7 +70,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
+    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) throws IOException {
         SellerSQL seller = commonService.extractSellerFromHeader(request);
 
         ManagerSQL manager = commonService.extractManagerFromHeader(request);
@@ -78,6 +81,9 @@ public class UserController {
                 throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
             }
         }
+
+        commonService.removeAvatar(seller.getAvatar());
+
         return usersServiceMySQL.deleteById(id, seller, administrator, manager);
     }
 

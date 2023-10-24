@@ -105,7 +105,7 @@ public class AuthenticationController {
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterManagerRequest registerRequest = new RegisterManagerRequest(name, email, fileName, password);
         registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-        return ResponseEntity.ok(authenticationService.registerManager(registerRequest, key));
+        return authenticationService.registerManager(registerRequest, key);
     }
 
     //generate code for admin register
@@ -138,9 +138,8 @@ public class AuthenticationController {
         String fileName = picture.getOriginalFilename();
         usersServiceMySQL.transferAvatar(picture, fileName);
         RegisterAdminRequest registerRequest = new RegisterAdminRequest(name, lastName, email, fileName, password);
-        AuthenticationResponse authenticationResponse = authenticationService.registerAdmin(registerRequest);
         registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-        return ResponseEntity.ok(authenticationResponse);
+        return authenticationService.registerAdmin(registerRequest);
     }
 
     //register customer
@@ -217,22 +216,22 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
     }
 
-    @PostMapping("/sign-out")
-    public void signOut(
-            HttpServletRequest request) {
-        String access_token = jwtService.extractTokenFromHeader(request);
-
-        Claims claims = jwtService.extractClaimsCycle(access_token);
-        System.out.println(claims);
-        String email = claims.get("sub").toString();
-        String owner = claims.get("iss").toString();
-
-        authenticationService.signOut(email, owner);
-    }
+//    @PostMapping("/sign-out")
+//    public void signOut(
+//            HttpServletRequest request) {
+//        String access_token = jwtService.extractTokenFromHeader(request);
+//
+//        Claims claims = jwtService.extractClaimsCycle(access_token);
+//        System.out.println(claims);
+//        String email = claims.get("sub").toString();
+//        String owner = claims.get("iss").toString();
+//
+//        authenticationService.signOut(email, owner);
+//    }
 
     //todo forgot password - reset password
 
-    @PostMapping("/change-password")
+    @PostMapping("/change-password1")
     public ResponseEntity<String> changePassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
@@ -252,6 +251,7 @@ public class AuthenticationController {
 
         authenticationService.resetPassword(email, owner, encoded);
 
+
         return ResponseEntity.ok("The password has been successfully changed");
     }
 
@@ -264,13 +264,23 @@ public class AuthenticationController {
         return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{4})", "*"));
     }
 
-    @PostMapping("/out")
-    public ResponseEntity<String> signout(
-            @RequestParam("email") String email) throws MessagingException, TemplateException, IOException {
+    @PostMapping("/sign-out")
+    public ResponseEntity<String> signOut(
+            HttpServletRequest request) {
 
-        authenticationService.logout(email);
+        String accessToken = jwtService.extractTokenFromHeader(request);
+        System.out.println(accessToken);
+        System.out.println("accessToken");
+        Claims claims = jwtService.extractClaimsCycle(accessToken);
+        System.out.println(claims);
+        System.out.println("claims");
 
-        return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{4})", "*"));
+        String email = claims.get("sub").toString();
+        String owner = claims.get("iss").toString();
+
+        authenticationService.signOut(email, owner);
+
+        return ResponseEntity.ok("Signed out");
     }
 
     @PostMapping("/reset-password")
@@ -303,8 +313,6 @@ public class AuthenticationController {
         }
 
         authenticationService.resetPassword(email, owner, encoded);
-
-        authenticationService.signOut(email, owner);
 
         return ResponseEntity.ok("Password has been changed");
 

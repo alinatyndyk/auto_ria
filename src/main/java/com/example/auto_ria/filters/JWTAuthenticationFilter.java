@@ -1,9 +1,9 @@
 package com.example.auto_ria.filters;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.authDao.AdminAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.services.JwtService;
@@ -30,11 +30,13 @@ import java.io.IOException;
 public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private JwtService jwtService;
-    private UserDaoSQL userDaoSQL;
-    private ManagerDaoSQL managerDaoSQL;
-    private CustomerDaoSQL customerDaoSQL;
-    private AdministratorDaoSQL administratorDaoSQL;
+
     private UserDetailsServiceImpl userDetailsService;
+
+    private AdminAuthDaoSQL adminAuthDaoSQL;
+    private ManagerAuthDaoSQL managerAuthDaoSQL;
+    private SellerAuthDaoSQL sellerAuthDaoSQL;
+    private CustomerAuthDaoSQL customerAuthDaoSQL;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response,
@@ -54,7 +56,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 if (
                         jwtService.isTokenValid(jwt, userDetails)
                                 &&
-                !isRefresh(userDetails, jwt, userEmail)
+                                !isInDb(userDetails, jwt)
                 ) {
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -77,17 +79,38 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isRefresh(UserDetails userDetails, String jwt, String userEmail) {
-        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))) {
-            return jwt.equals(userDaoSQL.findSellerByEmail(userEmail).getRefreshToken());
+//    private boolean isRefresh(UserDetails userDetails, String jwt, String userEmail) { //todo refresh []
+//        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))) {
+//            return jwt.equals(userDaoSQL.findSellerByEmail(userEmail).getRefreshToken());
+//        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))) {
+//            return jwt.equals(managerDaoSQL.findByEmail(userEmail).getRefreshToken());
+//        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))) {
+//            return jwt.equals(customerDaoSQL.findByEmail(userEmail).getRefreshToken());
+//        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))) {
+//            return jwt.equals(administratorDaoSQL.findByEmail(userEmail).getRefreshToken());
+//        }
+//        return false;
+//    }
+
+    private boolean isInDb(UserDetails userDetails, String jwt) {
+        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))) {
+            if (adminAuthDaoSQL.findByAccessToken(jwt) == null) {
+                throw new CustomException("Token invalid", HttpStatus.FORBIDDEN);
+            }
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))) {
-            return jwt.equals(managerDaoSQL.findByEmail(userEmail).getRefreshToken());
+            if (managerAuthDaoSQL.findByAccessToken(jwt) == null) {
+                throw new CustomException("Token invalid", HttpStatus.FORBIDDEN);
+            }
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))) {
-            return jwt.equals(customerDaoSQL.findByEmail(userEmail).getRefreshToken());
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))) {
-            return jwt.equals(administratorDaoSQL.findByEmail(userEmail).getRefreshToken());
+            if (customerAuthDaoSQL.findByAccessToken(jwt) == null) {
+                throw new CustomException("Token invalid", HttpStatus.FORBIDDEN);
+            }
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))) {
+            if (sellerAuthDaoSQL.findByAccessToken(jwt) == null) {
+                throw new CustomException("Token invalid", HttpStatus.FORBIDDEN);
+            }
         }
-        return false;
+        return true;
     }
 
 

@@ -7,6 +7,7 @@ import com.mixpanel.mixpanelapi.MixpanelAPI;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,10 +23,11 @@ import java.util.Date;
 @AllArgsConstructor
 public class MixpanelService {
 
-    @SneakyThrows
-    public void view(String car_id) {
+    private Environment environment;
 
-        MessageBuilder messageBuilder = new MessageBuilder("d70a01daa5e8be7718fd9b731b77bf1c");
+    public void view(String car_id) throws IOException {
+
+        MessageBuilder messageBuilder = new MessageBuilder(environment.getProperty("maxpanel.project.id"));
 
         JSONObject props = new JSONObject();
         props.put("car_id", car_id);
@@ -66,9 +68,10 @@ public class MixpanelService {
 
     public int extractCarViews(String from_date, String to_date, String carId) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://data-eu.mixpanel.com/api/2.0/export?from_date=" + from_date + "&to_date=" + to_date))
+                .uri(URI.create(environment.getProperty("maxpanel.export.url")+
+                        "?from_date=" + from_date + "&to_date=" + to_date))
                 .header("accept", "text/plain")
-                .header("authorization", "Basic ODUxNmM1ZTUxZWRhZTQxZWY3OTUzYzhiMjJlNzllYTY6YWxpbmFhbm5hMzQw")
+                .header("authorization", environment.getProperty("maxpanel.basic.auth"))
                 .method("GET", HttpRequest.BodyPublishers.noBody())
                 .build();
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());

@@ -12,7 +12,7 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -26,30 +26,7 @@ import java.util.function.Function;
 @AllArgsConstructor
 public class JwtService {
 
-    @Value("${token.generation.key.seller}")
-    private static final String SECRET_KEY = "404E635268556A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.manager}")
-    private static final String SECRET_KEY_Manager = "404E635267556A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.admin}")
-    private static final String SECRET_KEY_Admin = "404E735266557A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.customer}")
-    private static final String SECRET_KEY_Customer = "404E745266556A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.seller}")
-    private static final String ADMIN_REGISTER = "404E635268556A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.manager}")
-    private static final String MANAGER_REGISTER = "404E635267556A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.admin}")
-    private static final String CUSTOMER_ACTIVATE = "404E735266557A586E3272357538782F413F4428472B4B625064536756685970";
-
-    @Value("${token.generation.key.customer}")
-    private static final String SELLER_ACTIVATE = "404E745266556A586E3272357538782F413F4428472B4B625064536756685970";
-    private static final String FORGOT_PASSWORD = "404E745266556A586E3272057538782F413F4428495B4B625064536756685979";
+    private Environment environment;
 
     public String extractUsername(String jwt, ETokenRole role) {
         return extractClaim(jwt, Claims::getSubject, role);
@@ -100,30 +77,6 @@ public class JwtService {
         return claims;
     }
 
-    public Map<String, Object> extractClaimsCycleWithType(String token) {
-        Claims claims = Jwts.claims();
-        ETokenRole tokenRole;
-        Map<String, Object> args = new HashMap<>();
-        try {
-            for (ETokenRole role : ETokenRole.values()) {
-                Claims result = extractAllClaims(token, role);
-                if (result != null) {
-
-                    claims.putAll(result);
-
-                    tokenRole = role;
-                    args.put("tokenRole", tokenRole);
-                    args.put("claims", claims);
-
-                    return args;
-                }
-            }
-
-        } catch (IllegalArgumentException | SignatureException ignored) {
-        }
-        return claims;
-    }
-
     public Claims extractAllClaims(String token, ETokenRole role) throws JwtException {
         Claims claims = null;
         try {
@@ -141,15 +94,15 @@ public class JwtService {
 
     public Key getSigningKey(ETokenRole role) {
         String key = switch (role) {
-            case ADMIN -> SECRET_KEY_Admin;
-            case MANAGER -> SECRET_KEY_Manager;
-            case SELLER -> SECRET_KEY;
-            case CUSTOMER -> SECRET_KEY_Customer;
-            case ADMIN_REGISTER -> ADMIN_REGISTER;
-            case MANAGER_REGISTER -> MANAGER_REGISTER;
-            case SELLER_ACTIVATE -> SELLER_ACTIVATE;
-            case CUSTOMER_ACTIVATE -> CUSTOMER_ACTIVATE;
-            case FORGOT_PASSWORD -> FORGOT_PASSWORD;
+            case ADMIN -> environment.getProperty("token.generation.key.admin");
+            case MANAGER -> environment.getProperty("token.generation.key.manager");
+            case SELLER -> environment.getProperty("token.generation.key.seller");
+            case CUSTOMER -> environment.getProperty("token.generation.key.customer");
+            case ADMIN_REGISTER -> environment.getProperty("token.register.key.admin");
+            case MANAGER_REGISTER -> environment.getProperty("token.register.key.manager");
+            case SELLER_ACTIVATE -> environment.getProperty("token.activate.key.seller");
+            case CUSTOMER_ACTIVATE -> environment.getProperty("token.activate.key.customer");
+            case FORGOT_PASSWORD -> environment.getProperty("token.forgot.pass.key");
         };
 
         byte[] keyBytes = Decoders.BASE64.decode(key);
@@ -231,11 +184,11 @@ public class JwtService {
     }
 
     public String generateRegistrationCode(
-            Map<String, String> extraClaims, // todo remove
+            Map<String, String> extraClaims,
             String userDetails,
             ETokenRole role
     ) {
-        return generateCode(role, new HashMap<>(), userDetails);
+        return generateCode(role, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateTokenPair(

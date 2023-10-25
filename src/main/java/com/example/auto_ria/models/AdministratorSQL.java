@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AdministratorSQL extends Person {  // todo add admin when api starts
+public class AdministratorSQL extends Person {
 
     private String lastName;
 

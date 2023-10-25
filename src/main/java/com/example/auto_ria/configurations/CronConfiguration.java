@@ -5,10 +5,15 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.authDao.AdminAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
+import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.models.responses.CurrencyResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,6 +21,8 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Configuration
 @EnableScheduling
@@ -28,10 +35,17 @@ public class CronConfiguration {
     private ManagerDaoSQL managerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
+    private SellerAuthDaoSQL sellerAuthDaoSQL;
+    private CustomerAuthDaoSQL customerAuthDaoSQL;
+    private ManagerAuthDaoSQL managerAuthDaoSQL;
+    private AdminAuthDaoSQL adminAuthDaoSQL;
+
+    private Environment environment;
 
     @PostConstruct
     public void onApplicationStart() {
         getCurrencyRates();
+        deleteUnactivatedAccounts();
     }
 
     @Scheduled(cron = "0 0 0 * * *")
@@ -39,7 +53,7 @@ public class CronConfiguration {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        String api = "https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5"; //todo to env
+        String api = environment.getProperty("privat.bank.api");
 
         CurrencyResponse[] exchangeRates = restTemplate.getForObject(api, CurrencyResponse[].class);
 
@@ -65,14 +79,27 @@ public class CronConfiguration {
         ExchangeRateCache.updateExchangeRates(UsdBuy, UsdSell, EURBuy, EURSell);
     }
 
-//    @Scheduled(cron = "0 0 */2 * *")
-//    public void deleteUnactivatedAccounts() {
-//// todo
-//        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-//        sellerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-//        customerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-//        administratorDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-//        managerDaoSQL.findByCreatedAtBeforeAndIsActivatedFalse(twoDaysAgo);
-//
-//    }
+    @Scheduled(cron = "0 0 0 */2 * *")
+    public void deleteUnactivatedAccounts() {
+        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
+        LocalDateTime twoDaysAgoDateTime = LocalDateTime.of(twoDaysAgo, LocalTime.MIDNIGHT);
+
+        sellerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+        customerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+        administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+        managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+
+    }
+
+    @Scheduled(cron = "0 0 3 * * *")
+    public void deleteExpiredTokens() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime nowDateTime = LocalDateTime.of(now, LocalTime.now()).minusHours(1);
+
+        sellerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+        customerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+        managerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+        adminAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+
+    }
 }

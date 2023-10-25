@@ -3,6 +3,7 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
+import com.example.auto_ria.dto.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
@@ -17,10 +18,15 @@ import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,7 +84,7 @@ public class CarController {
     @PostMapping("/viewed/{id}")
     public void addView(
             @PathVariable("id") int id
-    ) {
+    ) throws IOException {
         carsService.extractById(id);
         mixpanelService.view(String.valueOf(id));
     }
@@ -159,17 +165,10 @@ public class CarController {
     }
 
     @PostMapping()
-    public ResponseEntity<CarResponse> post( //todo created updated weg
-                                             @RequestParam("brand") EBrand brand,
-                                             @RequestParam("model") EModel model,
-                                             @RequestParam("power") int power,
-                                             @RequestParam("city") String city,
-                                             @RequestParam("region") ERegion region,
-                                             @RequestParam("price") String price,
-                                             @RequestParam("currency") ECurrency currency,
-                                             @RequestParam("description") String description,
-                                             @RequestParam("pictures[]") MultipartFile[] pictures,
-                                             HttpServletRequest request
+    public ResponseEntity<CarResponse> post(
+            @ModelAttribute @Valid CarDTORequest carDTO,
+            @RequestPart("pictures[]") MultipartFile[] pictures,
+            HttpServletRequest request
     ) throws IOException {
 
         SellerSQL seller = commonService.extractSellerFromHeader(request);
@@ -177,25 +176,25 @@ public class CarController {
 
         CarDTO car = CarDTO
                 .builder()
-                .brand(brand)
-                .powerH(power)
-                .city(city)
-                .region(region)
-                .model(model)
-                .price(price)
+                .brand(carDTO.getBrand())
+                .powerH(carDTO.getPowerH())
+                .city(carDTO.getCity())
+                .region(carDTO.getRegion())
+                .model(carDTO.getModel())
+                .price(carDTO.getPrice())
                 .isActivated(true)
-                .currency(currency)
+                .currency(carDTO.getCurrency())
                 .isActivated(true)
-                .description(description)
+                .description(carDTO.getDescription())
                 .build();
 
         if (!carsService.findAllBySeller(seller).isEmpty()) {
             carsService.isPremium(request);
         }
 
-        String filteredText = profanityFilterService.containsProfanity(description);
+        String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
 
-        if (profanityFilterService.containsProfanityBoolean(filteredText, description)) {
+        if (profanityFilterService.containsProfanityBoolean(filteredText, carDTO.getDescription())) {
             int currentCount = validationFailureCounter.incrementAndGet();
             if (currentCount > 3) {
                 car.setActivated(false);
@@ -229,7 +228,15 @@ public class CarController {
             }
         }
 
-        car.setPhoto(commonService.transferPhotos(pictures));
+        commonService.transferPhotos(pictures);
+
+        List<String> names = new ArrayList<>();
+
+        for (MultipartFile file : pictures) {
+            names.add(file.getOriginalFilename());
+        }
+
+        car.setPhoto(names);
 
         return carsService.post(car, seller, administratorSQL);
     }

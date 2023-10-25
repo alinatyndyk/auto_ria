@@ -1,11 +1,12 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.models.SellerSQL;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.PaymentMethod;
 import com.stripe.param.PaymentIntentCreateParams;
+import lombok.AllArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,11 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@AllArgsConstructor
 public class StripeService {
+
+    private Environment environment;
 
     public void createPayment() {
         try {
-            Stripe.apiKey = "sk_test_51Nf481Ae4RILjJWGnrK0ByYfSZcW7FRzMZorxUraOwKjvOJEcejN4W05quGPkXf3AhJ1mtkaYgs5JvmEAonLCcpE00zeZqzgEI";
+            Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
 
             Map<String, Object> paymentMethodParams = new HashMap<>();
             paymentMethodParams.put("type", "card");

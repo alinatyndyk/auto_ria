@@ -1,13 +1,15 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
+import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
-import com.example.auto_ria.services.CommonService;
-import com.example.auto_ria.services.CustomersServiceMySQL;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.models.ManagerSQL;
+import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +25,8 @@ public class CustomerController {
     private CustomersServiceMySQL customersServiceMySQL;
     private CommonService commonService;
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private AdministratorServiceMySQL administratorServiceMySQL;
+    private ManagerServiceMySQL managerServiceMySQL;
 
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<CustomerSQL>> getAll(
@@ -51,7 +55,11 @@ public class CustomerController {
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) throws IOException {
-        customersServiceMySQL.checkCredentials(request, id);
+
+        if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null
+                || managerServiceMySQL.getById(id).getBody() == null) {
+            customersServiceMySQL.checkCredentials(request, id);
+        }
 
         commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(String.valueOf(id)).getBody()).getAvatar());
 
@@ -64,11 +72,20 @@ public class CustomerController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) throws IOException {
-        customersServiceMySQL.checkCredentials(request, Integer.parseInt(id));
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
 
-        commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(id).getBody()).getAvatar());
+        ManagerSQL manager = commonService.extractManagerFromHeader(request);
+        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
 
-        return customersServiceMySQL.deleteById(id);
+        if (administrator == null && manager == null) {
+            if (customerSQL == null || !Integer.valueOf(id).equals(customerSQL.getId())) {
+                throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        commonService.removeAvatar(customerSQL.getAvatar());
+
+        return customersServiceMySQL.deleteById(id, customerSQL, administrator, manager);
     }
 
 }

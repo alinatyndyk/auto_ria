@@ -2,9 +2,12 @@ package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
+import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
+import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Objects;
 
 @Service
@@ -25,6 +29,7 @@ public class CustomersServiceMySQL {
 
     private CustomerDaoSQL customerDaoSQL;
     private CommonService commonService;
+    private FMService mailer;
 
     public ResponseEntity<Page<CustomerSQL>> getAll(int page) {
         Pageable pageable = PageRequest.of(page, 2);
@@ -53,8 +58,25 @@ public class CustomersServiceMySQL {
         }
     }
 
-    public ResponseEntity<String> deleteById(String id) {
+    public ResponseEntity<String> deleteById(String id, CustomerSQL customerSQL, AdministratorSQL administratorSQL, ManagerSQL manager) {
         customerDaoSQL.deleteById(Integer.valueOf(id));
+
+        HashMap<String, Object> vars = new HashMap<>();
+        vars.put("name", customerSQL.getName());
+        vars.put("email", customerSQL.getEmail());
+
+        if (administratorSQL != null || manager != null) {
+            try {
+                mailer.sendEmail(customerSQL.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
+            } catch (Exception ignore) {
+            }
+        }
+
+        try {
+            mailer.sendEmail(customerSQL.getEmail(), EMail.PLATFORM_LEAVE, vars);
+        } catch (Exception ignore) {
+        }
+
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
 

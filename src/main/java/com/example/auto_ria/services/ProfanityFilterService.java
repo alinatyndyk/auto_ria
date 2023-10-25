@@ -2,6 +2,8 @@ package com.example.auto_ria.services;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -12,11 +14,14 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 @Service
+@AllArgsConstructor
 public class ProfanityFilterService {
+
+    private Environment environment;
 
     public String containsProfanity(String text) throws IOException {
 
-        String apiUrl = "https://www.purgomalum.com/service/json?text=" +
+        String apiUrl = environment.getProperty("profanity.filter.api") +
                 URLEncoder.encode(text, StandardCharsets.UTF_8);
 
         URL url = new URL(apiUrl);

@@ -27,7 +27,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -139,36 +138,6 @@ public class AuthenticationService {
 
     }
 
-    public ResponseEntity<AuthenticationResponse> activateCustomer(String email, String code) throws MessagingException, TemplateException, IOException {
-
-        CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
-        customerSQL.setIsActivated(true);
-
-        String access = jwtService.generateToken(customerSQL);
-        String refresh = jwtService.generateRefreshToken(customerSQL);
-
-        customerSQL.setRefreshToken(refresh);
-
-        customerDaoSQL.save(customerSQL);
-
-        customerAuthDaoSQL.save(AuthSQL.builder().
-                personId(customerSQL.getId()).accessToken(access).refreshToken(refresh).build());
-
-
-        registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(code));
-
-        Map<String, Object> vars = new HashMap<>();
-        vars.put("name", customerSQL.getName());
-
-        mailer.sendEmail(customerSQL.getEmail(), EMail.WELCOME, vars);
-
-        return ResponseEntity.ok(AuthenticationResponse.builder()
-                .accessToken(access)
-                .refreshToken(refresh)
-                .build());
-
-    }
-
     public ResponseEntity<String> codeManager(String email, String code) throws MessagingException, TemplateException, IOException {
 
         Map<String, Object> map = new HashMap<>();
@@ -195,6 +164,7 @@ public class AuthenticationService {
 
         AuthenticationResponse authenticationResponse = jwtService.generateManagerTokenPair(manager);
 
+        manager.setIsActivated(true);
         manager.setRefreshToken(authenticationResponse.getRefreshToken());
 
         managerDaoSQL.save(manager);
@@ -239,6 +209,7 @@ public class AuthenticationService {
         AuthenticationResponse authenticationResponse = jwtService.generateAdminTokenPair(administrator);
 
         administrator.setRefreshToken(authenticationResponse.getRefreshToken());
+        administrator.setIsActivated(true);
 
         administratorDaoSQL.save(administrator);
 
@@ -287,6 +258,37 @@ public class AuthenticationService {
         customerDaoSQL.save(customerSQL);
 
         return ResponseEntity.ok("Check your email for activation");
+    }
+
+    public ResponseEntity<AuthenticationResponse> activateCustomer(String email, String code) throws MessagingException, TemplateException, IOException {
+
+        CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
+        customerSQL.setIsActivated(true);
+
+        String access = jwtService.generateToken(customerSQL);
+        String refresh = jwtService.generateRefreshToken(customerSQL);
+
+        customerSQL.setIsActivated(true);
+        customerSQL.setRefreshToken(refresh);
+
+        customerDaoSQL.save(customerSQL);
+
+        customerAuthDaoSQL.save(AuthSQL.builder().
+                personId(customerSQL.getId()).accessToken(access).refreshToken(refresh).build());
+
+
+        registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(code));
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("name", customerSQL.getName());
+
+        mailer.sendEmail(customerSQL.getEmail(), EMail.WELCOME, vars);
+
+        return ResponseEntity.ok(AuthenticationResponse.builder()
+                .accessToken(access)
+                .refreshToken(refresh)
+                .build());
+
     }
 
 
@@ -619,37 +621,4 @@ public class AuthenticationService {
 
         return authorizationHeader;
     }
-
-//    public ResponseEntity<AuthenticationResponse> activate(String email, ERole role) {
-//        if (role.equals(ERole.SELLER)) {
-//            SellerSQL sellerSQL = userDaoSQL.findByEmail(email);
-//            sellerSQL.setIsActivated(true);
-//            userDaoSQL.save(sellerSQL);
-//
-//            String accessToken = jwtService.generateToken(sellerSQL);
-//            String refreshToken = jwtService.generateRefreshToken(sellerSQL);
-//
-//            return ResponseEntity.ok(AuthenticationResponse
-//                    .builder()
-//                    .accessToken(accessToken)
-//                    .refreshToken(refreshToken)
-//                    .build());
-//
-//        } else if (role.equals(ERole.CUSTOMER)) {
-//            CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
-//            customerSQL.setIsActivated(true);
-//            customerDaoSQL.save(customerSQL);
-//
-//            AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
-//
-//            return ResponseEntity.ok(AuthenticationResponse
-//                    .builder()
-//                    .accessToken(authenticationResponse.getAccessToken())
-//                    .refreshToken(authenticationResponse.getRefreshToken())
-//                    .build());
-//        }
-//
-//        return ResponseEntity.ok(AuthenticationResponse.builder().build());
-//    }
-
 }

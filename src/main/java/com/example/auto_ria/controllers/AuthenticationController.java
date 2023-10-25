@@ -53,7 +53,6 @@ public class AuthenticationController {
         return authenticationService.register(registerRequest);
     }
 
-    //activate seller account
     @PostMapping("/activate-seller-account")
     public ResponseEntity<AuthenticationResponse> activateSeller(
             @RequestParam("code") String code
@@ -122,7 +121,6 @@ public class AuthenticationController {
         return authenticationService.codeAdmin(email, code);
     }
 
-    // register admin with received code
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
             @RequestParam("name") String name,
@@ -216,22 +214,7 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
     }
 
-//    @PostMapping("/sign-out")
-//    public void signOut(
-//            HttpServletRequest request) {
-//        String access_token = jwtService.extractTokenFromHeader(request);
-//
-//        Claims claims = jwtService.extractClaimsCycle(access_token);
-//        System.out.println(claims);
-//        String email = claims.get("sub").toString();
-//        String owner = claims.get("iss").toString();
-//
-//        authenticationService.signOut(email, owner);
-//    }
-
-    //todo forgot password - reset password
-
-    @PostMapping("/change-password1")
+    @PostMapping("/change-passwords")
     public ResponseEntity<String> changePassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
@@ -269,11 +252,7 @@ public class AuthenticationController {
             HttpServletRequest request) {
 
         String accessToken = jwtService.extractTokenFromHeader(request);
-        System.out.println(accessToken);
-        System.out.println("accessToken");
         Claims claims = jwtService.extractClaimsCycle(accessToken);
-        System.out.println(claims);
-        System.out.println("claims");
 
         String email = claims.get("sub").toString();
         String owner = claims.get("iss").toString();

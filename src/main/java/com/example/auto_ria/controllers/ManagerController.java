@@ -2,6 +2,7 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.models.ManagerSQL;
+import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.ManagerServiceMySQL;
 import com.example.auto_ria.services.UsersServiceMySQLImpl;
@@ -23,6 +24,7 @@ public class ManagerController {
     private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
+    private AdministratorServiceMySQL administratorServiceMySQL;
 
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<ManagerSQL>> getAll(
@@ -62,7 +64,9 @@ public class ManagerController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id,
                                              HttpServletRequest request) throws IOException {
-        managerServiceMySQL.checkCredentials(request, id);
+        if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null) {
+            managerServiceMySQL.checkCredentials(request, id);
+        }
         commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
         return managerServiceMySQL.deleteById(id);
     }

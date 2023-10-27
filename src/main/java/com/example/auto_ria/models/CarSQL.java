@@ -10,8 +10,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
@@ -25,7 +27,9 @@ public class CarSQL {
     private int id;
 
     private EBrand brand;
-    private Integer powerH;
+
+
+    private int powerH;
     private String city;
 
     @Enumerated(EnumType.STRING)
@@ -61,6 +65,7 @@ public class CarSQL {
                   ECurrency currency, String description, boolean isActivated) {
         this.brand = brand;
         this.model = model;
+        validateEnums();
         validateBrandAndModel();
         this.powerH = powerH;
         this.city = city;
@@ -75,7 +80,17 @@ public class CarSQL {
 
     private void validateBrandAndModel() {
         if (model.getBrand() != brand) {
-            throw new IllegalArgumentException("Invalid model for brand: " + brand);
+            EModel[] fordModels = Arrays.stream(EModel.values())
+                    .filter(m -> m.getBrand() == brand)
+                    .toArray(EModel[]::new);
+            throw new IllegalArgumentException("Invalid model for brand: " + brand +
+                    ". Following" + brand + "models are present: " + Arrays.toString(fordModels));
+        }
+    }
+
+    private void validateEnums() {
+        if (!EnumUtils.isValidEnum(EBrand.class, brand.name())) {
+            throw new IllegalArgumentException("Available brands: " + Arrays.toString(EBrand.values()));
         }
     }
 }

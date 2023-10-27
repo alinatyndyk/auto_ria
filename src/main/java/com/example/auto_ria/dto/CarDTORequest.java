@@ -4,7 +4,6 @@ import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.validators.ValidRole;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -14,8 +13,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class CarDTORequest {
 
@@ -33,12 +32,11 @@ public class CarDTORequest {
 
     private ERegion region;
 
-    @Min(value = 30000, message = "price has to be less than 30000")
+    @Min(value = 100000000, message = "price has to be less than 100 000 000")
     private String price;
 
     private ECurrency currency;
 
     private String description;
 
-    private boolean isActivated;
 }

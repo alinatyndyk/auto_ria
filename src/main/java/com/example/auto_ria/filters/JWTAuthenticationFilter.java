@@ -56,9 +56,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 
             if (
-                    jwtService.isTokenValid(jwt, userDetails)
+                    isInDb(userDetails, jwt)
                             &&
-                            isInDb(userDetails, jwt)
+                            jwtService.isTokenValid(jwt, userDetails)
             ) {
 
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

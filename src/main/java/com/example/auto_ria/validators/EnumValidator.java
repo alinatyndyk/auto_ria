@@ -2,10 +2,10 @@ package com.example.auto_ria.validators;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.valueextraction.ExtractedValue;
+import jakarta.validation.valueextraction.ValueExtractor;
 
-import java.util.Arrays;
-
-public class EnumValidator implements ConstraintValidator<ValidRole, Enum<?>> {
+public class EnumValidator implements ConstraintValidator<ValidRole, String>, ValueExtractor<Object> {
 
     private Class<? extends Enum<?>> enumClass;
 
@@ -15,19 +15,30 @@ public class EnumValidator implements ConstraintValidator<ValidRole, Enum<?>> {
     }
 
     @Override
-    public boolean isValid(Enum<?> value, ConstraintValidatorContext context) {
-
-        // Check if the value is one of the enum values
-        for (Enum<?> enumValue : enumClass.getEnumConstants()) {
-            if (enumValue.equals(value)) {
-                return true;
-            }
+    public boolean isValid(String value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return true; // Null values are considered valid
         }
 
-        // Value does not match any of the enum values, throw an error
-        context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate("Invalid role value. Must be one of " + Arrays.toString(enumClass.getEnumConstants()))
-                .addConstraintViolation();
-        return false;
+        Enum<?>[] enumValues = enumClass.getEnumConstants();
+        for (Enum<?> enumValue : enumValues) {
+            if (enumValue.name().equals(value)) {
+                return true; // Value matches one of the enum constants
+            }
+        }
+        // Throw IllegalArgumentException if value does not match any enum constant
+        throw new IllegalArgumentException("Invalid enum value: " + value);
+    }
+
+    @Override
+    public void extractValues(Object value, ValueReceiver receiver) {
+        if (value instanceof Enum<?> enumValue) {
+            receiver.value(null, enumValue.name());
+        }
+    }
+
+    @ExtractedValue
+    public static Class<?> getValidatedValueType(EnumValidator extractor, ValidRole annotation) {
+        return Enum.class;
     }
 }

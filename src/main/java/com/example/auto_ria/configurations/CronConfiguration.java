@@ -46,6 +46,7 @@ public class CronConfiguration {
     public void onApplicationStart() {
         getCurrencyRates();
         deleteUnactivatedAccounts();
+        deleteExpiredTokens();
     }
 
     @Scheduled(cron = "0 0 0 * * *")

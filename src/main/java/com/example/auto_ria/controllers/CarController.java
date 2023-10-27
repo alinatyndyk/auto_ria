@@ -171,6 +171,9 @@ public class CarController {
             HttpServletRequest request
     ) throws IOException {
 
+        System.out.println(carDTO);
+        System.out.println("carDTO");
+
         SellerSQL seller = commonService.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 

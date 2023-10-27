@@ -8,15 +8,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.FIELD})
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = EnumValidator.class)
 public @interface ValidRole {
-    String message() default "Invalid role. Role must be one of {enumClass}";
-
+    String message() default "Invalid enum value";
     Class<?>[] groups() default {};
-
     Class<? extends Payload>[] payload() default {};
-
     Class<? extends Enum<?>> enumClass();
 }

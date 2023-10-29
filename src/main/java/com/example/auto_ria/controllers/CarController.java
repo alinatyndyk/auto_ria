@@ -5,7 +5,10 @@ import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
-import com.example.auto_ria.enums.*;
+import com.example.auto_ria.enums.EAccountType;
+import com.example.auto_ria.enums.EBrand;
+import com.example.auto_ria.enums.EMail;
+import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
@@ -304,6 +307,18 @@ public class CarController {
         });
 
         return carsService.deleteById(id);
+    }
+
+    @GetMapping("/brands")
+    public ResponseEntity<EBrand[]> getBrands() {
+        return ResponseEntity.ok().body(Arrays.stream(EBrand.values()).toArray(EBrand[]::new));
+    }
+
+    @GetMapping("/brands/{brand}/models")
+    public ResponseEntity<EModel[]> getBrandsModels(@PathVariable("brand") String brand) {
+        return ResponseEntity.ok().body(Arrays.stream(EModel.values())
+                .filter(eModel -> eModel.getBrand().name().matches(brand))
+                .toArray(EModel[]::new));
     }
 
 }

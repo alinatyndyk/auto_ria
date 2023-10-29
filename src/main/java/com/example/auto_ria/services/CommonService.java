@@ -4,6 +4,7 @@ import com.example.auto_ria.dao.AdministratorDaoSQL;
 import com.example.auto_ria.dao.CustomerDaoSQL;
 import com.example.auto_ria.dao.ManagerDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
@@ -118,5 +119,17 @@ public class CommonService {
         return customerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.CUSTOMER));
     }
 
+    public ERole findRoleByEmail(String email) {
+        if (administratorDaoSQL.findByEmail(email) != null) {
+            return ERole.ADMIN;
+        } else if (managerDaoSQL.findByEmail(email) != null) {
+            return ERole.MANAGER;
+        } else if (userDaoSQL.findSellerByEmail(email) != null) {
+            return ERole.SELLER;
+        } else if (customerDaoSQL.findByEmail(email) != null) {
+            return ERole.CUSTOMER;
+        }
+        return null;
+    }
 
 }

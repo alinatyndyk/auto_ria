@@ -121,13 +121,13 @@ public class AdministratorServiceMySQL {
         }
     }
 
-    public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
-        try {
-        String key = jwtService.generateRegisterKey(email, ETokenRole.valueOf(role.name()));
-        return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
-        } catch (Exception e) {
-            throw new CustomException("Error while generating admin key", HttpStatus.EXPECTATION_FAILED);
-        }
-    }
+//    public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
+//        try {
+//        String key = jwtService.generateRegisterKey(email, ETokenRole.valueOf(role.name()));
+//        return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
+//        } catch (Exception e) {
+//            throw new CustomException("Error while generating admin key", HttpStatus.EXPECTATION_FAILED);
+//        }
+//    }
 
 }

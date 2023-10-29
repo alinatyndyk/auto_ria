@@ -22,7 +22,6 @@ import com.example.auto_ria.models.auth.AuthSQL;
 import com.example.auto_ria.models.auth.RegisterKey;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +47,7 @@ public class AuthenticationService {
     private CustomerDaoSQL customerDaoSQL;
     private UserDaoSQL userDaoSQL;
     private AdministratorServiceMySQL administratorServiceMySQL;
+    private CommonService commonService;
 
     private CustomersServiceMySQL customersServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
@@ -95,8 +95,8 @@ public class AuthenticationService {
         seller.setIsActivated(false);
         sellerDaoSQL.save(seller);
 
-        String activateToken = jwtService.generateRegistrationCode(new HashMap<>(),
-                seller.getEmail(), ETokenRole.SELLER_ACTIVATE);
+        String activateToken = jwtService.generateRegisterKey(
+                seller.getEmail(), ERole.SELLER, ETokenRole.SELLER_ACTIVATE);
 
         registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
 
@@ -228,7 +228,10 @@ public class AuthenticationService {
                 personId(administrator.getId()).accessToken(authenticationResponse.getAccessToken())
                 .refreshToken(authenticationResponse.getRefreshToken()).build());
 
-        mailer.sendEmail(administrator.getEmail(), EMail.WELCOME, new HashMap<>()); //todo add variables
+        Map<String, Object> args = new HashMap<>();
+        args.put("name", administrator.getName() + " " + administrator.getLastName());
+
+        mailer.sendEmail(administrator.getEmail(), EMail.WELCOME, args);
 
         return ResponseEntity.ok(authenticationResponse);
     }
@@ -249,7 +252,7 @@ public class AuthenticationService {
 
         customerSQL.setIsActivated(false);
 
-        String activateToken = jwtService.generateRegisterKey(customerSQL.getEmail(), ETokenRole.CUSTOMER_ACTIVATE);
+        String activateToken = jwtService.generateRegisterKey(customerSQL.getEmail(), ERole.CUSTOMER, ETokenRole.CUSTOMER_ACTIVATE);
         registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
 
         HashMap<String, Object> variables = new HashMap<>();
@@ -557,14 +560,18 @@ public class AuthenticationService {
 
     public void forgotPassword(String email) {
         try {
-            String code = jwtService.generateRegisterKey(email, ETokenRole.FORGOT_PASSWORD);
+
+            ERole role = commonService.findRoleByEmail(email);
+
+            String code = jwtService.generateRegisterKey(email, role, ETokenRole.FORGOT_PASSWORD);
+            registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
 
             Map<String, Object> args = new HashMap<>();
             args.put("email", email);
-            args.put("time", LocalDate.now());
+            args.put("time", LocalDateTime.now());
             args.put("code", code);
-
             mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
+
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
@@ -625,21 +632,39 @@ public class AuthenticationService {
         }
     }
 
-
-    public String checkRegistrationKey(HttpServletRequest request, String email, ETokenRole role) {
-        String authorizationHeader = request.getHeader("Register-key");
+    private void checkKey(String authorizationHeader,
+                          ETokenRole tokenRecognition,
+                          ETokenRole funcRecognition) {
 
         if (authorizationHeader == null) {
             throw new CustomException("Register key required", HttpStatus.FORBIDDEN);
         }
 
-        if (registerKeyDaoSQL.findByRegisterKey(authorizationHeader) == null) {
+        RegisterKey registerKey = registerKeyDaoSQL.findByRegisterKey(authorizationHeader);
+        System.out.println(registerKey);
+        System.out.println("registerKey");
+
+        if (registerKey == null) {
             throw new CustomException("Key is not valid", HttpStatus.FORBIDDEN);
+        }
+
+        if (!funcRecognition.equals(tokenRecognition)) {
+            throw new CustomException("Invalid key recognition", HttpStatus.FORBIDDEN);
         }
 
         if (jwtService.isTokenExprired(authorizationHeader)) {
             throw new CustomException("Key expired", HttpStatus.FORBIDDEN);
         }
+    }
+
+
+    public String checkRegistrationKey(String authorizationHeader,
+                                       String email,
+                                       ERole role,
+                                       ETokenRole tokenRecognition,
+                                       ETokenRole funcRecognition) {
+
+        checkKey(authorizationHeader, tokenRecognition, funcRecognition);
 
         if (!jwtService.extractIssuer(authorizationHeader).equals(role.name())) {
             throw new CustomException("The key is not valid for creation of " + role.name().toLowerCase(), HttpStatus.FORBIDDEN);
@@ -650,5 +675,12 @@ public class AuthenticationService {
         }
 
         return authorizationHeader;
+    }
+
+    public void checkForgotKey(String authorizationHeader,
+                               ETokenRole tokenRecognition,
+                               ETokenRole funcRecognition) {
+
+        checkKey(authorizationHeader, tokenRecognition, funcRecognition);
     }
 }

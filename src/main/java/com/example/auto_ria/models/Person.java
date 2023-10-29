@@ -49,9 +49,9 @@ public class Person implements UserDetails { //todo remove annotations
 
     private String avatar = null;
 
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$",
-            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number. " +
-                    "At least 8 characters long")
+//    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$",
+//            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
+//                    "At least 8 characters long")
     private String password;
 
     @ElementCollection

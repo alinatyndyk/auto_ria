@@ -9,7 +9,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
-@AllArgsConstructor
+//@AllArgsConstructor
 @NoArgsConstructor
 public class AdministratorSQL extends Person {
 
@@ -18,9 +18,9 @@ public class AdministratorSQL extends Person {
         super(name, lastName, email, avatar, password, roles);
     }
 
-    @Builder(builderMethodName = "adminCredentialsBuilder")
-    public AdministratorSQL(String email, String password, List<ERole> roles) {
-        super(email, password, roles);
-    }
+//    @Builder(builderMethodName = "adminCredentialsBuilder")
+//    public AdministratorSQL(String email, String password, List<ERole> roles) {
+//        super(email, password, roles);
+//    }
 
 }

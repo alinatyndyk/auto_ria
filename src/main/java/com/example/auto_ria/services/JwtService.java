@@ -125,8 +125,11 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRegisterKey(String email, ETokenRole role) {
-        return generateRegisterKey(new HashMap<>(), email, role);
+    public String generateRegisterKey(String email, ERole roleModel, ETokenRole role) {
+        Map<String, Object> args = new HashMap<>();
+        args.put("role", roleModel);
+        args.put("recognition", role);
+        return generateRegisterKey(args, email, role);
     }
 
     public String generateToken(

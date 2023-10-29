@@ -54,6 +54,11 @@ public class MailConfiguration {
             put("templateName", "check-announcement.ftl");
         }});
 
+        emails.put(EMail.FORGOT_PASSWORD, new HashMap<>() {{
+            put("subject", "Password restore");
+            put("templateName", "forgot-password.ftl");
+        }});
+
         return emails.get(templateName);
 
     }

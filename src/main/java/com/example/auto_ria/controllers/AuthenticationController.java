@@ -3,17 +3,14 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.dao.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
-import com.example.auto_ria.dto.requests.RegisterRequestSellerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
+import com.example.auto_ria.dto.requests.RegisterRequestSellerDTO;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
-import com.example.auto_ria.services.AuthenticationService;
-import com.example.auto_ria.services.CitiesService;
-import com.example.auto_ria.services.JwtService;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.*;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -33,7 +30,9 @@ import java.util.Map;
 public class AuthenticationController {
 
     private AuthenticationService authenticationService;
+
     private UsersServiceMySQLImpl usersServiceMySQL;
+
     private RegisterKeyDaoSQL registerKeyDaoSQL;
     private JwtService jwtService;
     private PasswordEncoder passwordEncoder;
@@ -104,8 +103,17 @@ public class AuthenticationController {
             HttpServletRequest request
     ) {
         try {
-            String key = authenticationService.checkRegistrationKey(request,
-                    registerRequestDTO.getEmail(), ETokenRole.MANAGER_REGISTER);
+            String code = request.getHeader("Register-key");
+
+            Claims claims = jwtService.extractClaimsCycle(code);
+            String tokenType = claims.get("recognition").toString();
+
+            String key = authenticationService.checkRegistrationKey(
+                    code,
+                    registerRequestDTO.getEmail(),
+                    ERole.MANAGER,
+                    ETokenRole.valueOf(tokenType),
+                    ETokenRole.MANAGER_REGISTER);
 
             String fileName = picture.getOriginalFilename();
             usersServiceMySQL.transferAvatar(picture, fileName);
@@ -148,8 +156,17 @@ public class AuthenticationController {
             HttpServletRequest request
     ) {
         try {
-            String key = authenticationService.checkRegistrationKey(request,
-                    registerRequestDTO.getEmail(), ETokenRole.ADMIN_REGISTER);
+            String code = request.getHeader("Register-key");
+
+            Claims claims = jwtService.extractClaimsCycle(code);
+            String tokenType = claims.get("recognition").toString();
+
+            String key = authenticationService.checkRegistrationKey(
+                    code,
+                    registerRequestDTO.getEmail(),
+                    ERole.ADMIN,
+                    ETokenRole.valueOf(tokenType),
+                    ETokenRole.ADMIN_REGISTER);
 
             String fileName = picture.getOriginalFilename();
             usersServiceMySQL.transferAvatar(picture, fileName);
@@ -342,29 +359,25 @@ public class AuthenticationController {
             HttpServletRequest request) {
         try {
 
-            if (newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
+            if (newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
-            String accessToken = jwtService.extractTokenFromHeader(request);
+            String code = request.getHeader("Register-key");
             String encoded = passwordEncoder.encode(newPassword);
 
-            Claims claims = jwtService.extractClaimsCycle(accessToken);
-            String email = claims.get("email").toString();
-            String owner = claims.get("iss").toString();
+            Claims claims = jwtService.extractClaimsCycle(code);
+            String email = claims.get("sub").toString();
+            String owner = claims.get("role").toString();
+            String tokenType = claims.get("recognition").toString();
 
-            if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
-                authenticationService.checkRegistrationKey(request, email, ETokenRole.ADMIN);
-            } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
-                authenticationService.checkRegistrationKey(request, email, ETokenRole.MANAGER);
-            } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
-                authenticationService.checkRegistrationKey(request, email, ETokenRole.SELLER);
-            } else if (ERole.CUSTOMER.equals(ERole.valueOf(owner))) {
-                authenticationService.checkRegistrationKey(request, email, ETokenRole.CUSTOMER);
-            } else {
-                throw new CustomException("Token is invalid for current procedure", HttpStatus.FORBIDDEN);
-            }
+            authenticationService.checkForgotKey(
+                    code,
+                    ETokenRole.valueOf(tokenType),
+                    ETokenRole.FORGOT_PASSWORD);
+
+            System.out.println("after check");
 
             authenticationService.resetPassword(email, owner, encoded);
 

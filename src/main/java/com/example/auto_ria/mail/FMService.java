@@ -5,8 +5,6 @@ import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,7 +13,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,16 +44,6 @@ public class FMService {
             javaMailSender.send(message);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
-        }
-    }
-
-    public void sendWelcomeEmail(String name, String email) {
-        HashMap<String, Object> variables = new HashMap<>();
-        variables.put("name", name);
-
-        try {
-            sendEmail(email, EMail.WELCOME, variables);
-        } catch (Exception ignore) {
         }
     }
 }

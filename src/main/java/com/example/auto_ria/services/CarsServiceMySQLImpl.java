@@ -43,7 +43,7 @@ public class CarsServiceMySQLImpl {
         return new ResponseEntity<>(carDAO.findAll(), httpHeaders, HttpStatus.ACCEPTED);
     }
 
-    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EBrand brand, ERegion region) {
+    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EBrand brand, String region) {
 
         double totalInUSD = 0.00;
         double totalInUAH = 0.00;

@@ -30,9 +30,9 @@ public class CarDTORequest {
     @Size(max = 20, message = "City has to be less than 20")
     private String city;
 
-    private ERegion region;
+    private String region;
 
-    @Min(value = 100000000, message = "price has to be less than 100 000 000")
+    @Max(value = 100000000, message = "price has to be less than 100 000 000")
     private String price;
 
     private ECurrency currency;

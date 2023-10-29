@@ -31,7 +31,7 @@ public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificat
 
     long count();
 
-    long countByBrandAndRegion(EBrand brand, ERegion region);
+    long countByBrandAndRegion(EBrand brand, String region);
 
     @Override
     <S extends CarSQL> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable);

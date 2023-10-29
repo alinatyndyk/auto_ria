@@ -32,8 +32,8 @@ public class CarSQL {
     private int powerH;
     private String city;
 
-    @Enumerated(EnumType.STRING)
-    private ERegion region;
+//    @Enumerated(EnumType.STRING)
+    private String region;
 
     private EModel model;
 
@@ -60,7 +60,7 @@ public class CarSQL {
 
     @Builder
     @SuppressWarnings("unused")
-    public CarSQL(EBrand brand, Integer powerH, String city, ERegion region,
+    public CarSQL(EBrand brand, Integer powerH, String city, String region,
                   EModel model, List<String> photo, SellerSQL seller, String price,
                   ECurrency currency, String description, boolean isActivated) {
         this.brand = brand;
@@ -93,4 +93,6 @@ public class CarSQL {
             throw new IllegalArgumentException("Available brands: " + Arrays.toString(EBrand.values()));
         }
     }
+
+
 }

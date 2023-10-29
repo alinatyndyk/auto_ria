@@ -19,14 +19,10 @@ import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import org.hibernate.validator.constraints.Length;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -49,6 +45,8 @@ public class CarController {
     private StripeService stripeService;
     private FMService mailer;
     private ManagerServiceMySQL managerServiceMySQL;
+    private CitiesService citiesService;
+
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
     @GetMapping("page/{page}")
@@ -67,7 +65,6 @@ public class CarController {
                 field.setAccessible(true);
                 if (fieldValue != null) {
                     switch (fieldName) {
-                        case "region" -> field.set(carQueryParams, ERegion.valueOf(fieldValue));
                         case "brand" -> field.set(carQueryParams, EBrand.valueOf(fieldValue));
                         case "model" -> field.set(carQueryParams, EModel.valueOf(fieldValue));
                         default -> field.set(carQueryParams, fieldValue);
@@ -171,11 +168,10 @@ public class CarController {
             HttpServletRequest request
     ) throws IOException {
 
-        System.out.println(carDTO);
-        System.out.println("carDTO");
-
         SellerSQL seller = commonService.extractSellerFromHeader(request);
         AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+
+        citiesService.isValidUkrainianCity(carDTO);
 
         CarDTO car = CarDTO
                 .builder()
@@ -190,6 +186,7 @@ public class CarController {
                 .isActivated(true)
                 .description(carDTO.getDescription())
                 .build();
+
 
         if (!carsService.findAllBySeller(seller).isEmpty()) {
             carsService.isPremium(request);

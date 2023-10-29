@@ -4,6 +4,7 @@ import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.enums.ERegion;
+import com.example.auto_ria.services.CitiesService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,15 +13,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
+import org.springframework.core.env.Environment;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
 public class CarDTO {
-
 
     @NotBlank(message = "brand cant be empty")
     @Size(min = 3, message = "brand must have more than 3 characters")
@@ -41,7 +42,7 @@ public class CarDTO {
     private String city;
 
     @NotBlank(message = "region cant be empty")
-    private ERegion region;
+    private String region;
 
     @NotBlank(message = "price cant be empty")
     private String price;
@@ -54,4 +55,43 @@ public class CarDTO {
     private String description;
 
     private boolean isActivated;
+
+    @Builder
+    public CarDTO(EBrand brand, EModel model, int powerH, String city, String region, String price, ECurrency currency, List<String> photo, String description, boolean isActivated) {
+
+        this.brand = brand;
+        validateEnums();
+
+        this.model = model;
+        validateBrandAndModel();
+
+        this.powerH = powerH;
+        this.city = city;
+//        validateCity(environment);
+
+        this.region = region;
+        this.price = price;
+        this.currency = currency;
+        this.photo = photo;
+        this.description = description;
+        this.isActivated = isActivated;
+    }
+
+
+
+    private void validateBrandAndModel() {
+        if (model.getBrand() != brand) {
+            EModel[] fordModels = Arrays.stream(EModel.values())
+                    .filter(m -> m.getBrand() == brand)
+                    .toArray(EModel[]::new);
+            throw new IllegalArgumentException("Invalid model for brand: " + brand +
+                    ". Following" + brand + "models are present: " + Arrays.toString(fordModels));
+        }
+    }
+
+    private void validateEnums() {
+        if (!EnumUtils.isValidEnum(EBrand.class, brand.name())) {
+            throw new IllegalArgumentException("Available brands: " + Arrays.toString(EBrand.values()));
+        }
+    }
 }

@@ -41,7 +41,7 @@ public class UsersServiceMySQLImpl {
     }
 
     public SellerSQL getByEmail(String email) {
-        return userDaoSQL.findByEmail(email);
+        return userDaoSQL.findSellerByEmail(email);
     }
 
     public SellerSQL getById(int id) {

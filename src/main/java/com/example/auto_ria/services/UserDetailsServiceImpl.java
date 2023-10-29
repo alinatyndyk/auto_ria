@@ -38,7 +38,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         }
 
-        SellerSQL seller = sellerDao.findByEmail(email);
+        SellerSQL seller = sellerDao.findSellerByEmail(email);
         if (seller != null) {
             System.out.println(seller.getRoles());
 

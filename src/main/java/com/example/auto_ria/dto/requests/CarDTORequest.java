@@ -1,12 +1,11 @@
-package com.example.auto_ria.dto;
+package com.example.auto_ria.dto.requests;
 
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.enums.ERegion;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,10 +25,10 @@ public class CarDTORequest {
     @Max(value = 3000, message = "Power has to be less than 3000")
     private int powerH;
 
-    @Size(min = 2, message = "City has to be more than 2")
-    @Size(max = 20, message = "City has to be less than 20")
+    @NotEmpty(message = "City cannot be empty")
     private String city;
 
+    @NotEmpty(message = "Region cannot be empty")
     private String region;
 
     @Max(value = 100000000, message = "price has to be less than 100 000 000")
@@ -37,6 +36,7 @@ public class CarDTORequest {
 
     private ECurrency currency;
 
+    @NotEmpty(message = "Description cannot be empty")
     private String description;
 
 }

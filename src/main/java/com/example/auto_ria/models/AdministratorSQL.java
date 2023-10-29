@@ -13,12 +13,9 @@ import java.util.List;
 @NoArgsConstructor
 public class AdministratorSQL extends Person {
 
-    private String lastName;
-
     @Builder(builderMethodName = "adminBuilder")
     public AdministratorSQL(String name, String lastName, String email, String avatar, String password, List<ERole> roles) {
-        super(name, email, avatar, password, roles);
-        this.lastName = lastName;
+        super(name, lastName, email, avatar, password, roles);
     }
 
     @Builder(builderMethodName = "adminCredentialsBuilder")

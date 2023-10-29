@@ -1,4 +1,4 @@
-package com.example.auto_ria.models;
+package com.example.auto_ria.models.auth;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

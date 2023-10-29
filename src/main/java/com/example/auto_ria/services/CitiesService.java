@@ -1,6 +1,5 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dto.CarDTORequest;
 import com.example.auto_ria.exceptions.CustomException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,19 +20,19 @@ public class CitiesService {
 
     private Environment environment;
 
-    public void isValidUkrainianCity(CarDTORequest carDTO) {
+    public void isValidUkrainianCity(String carRegion, String carCity) {
         try {
+            System.out.println(carCity);
+            System.out.println(carRegion);
             int limit = 10;
             int offset = 0;
-            String cityPrefix = carDTO.getRegion();
-            String cityPrefixUrl = cityPrefix.replaceAll(" ", "%20");
+            String cityPrefixUrl = carRegion.replaceAll(" ", "%20");
 
             JsonNode region = null;
 
             while (region == null) {
                 String findRegion =
-                        "http://geodb-free-service.wirefreethought.com" +
-                                "/v1/geo/countries/UA/regions?limit=" + limit +
+                        environment.getProperty("geodb.api") + "/countries/UA/regions?limit=" + limit +
                                 "&offset=" + offset + "&namePrefix=" + cityPrefixUrl;
 
                 URL urlRegion = new URL(findRegion);
@@ -50,7 +49,7 @@ public class CitiesService {
                 if (dataNode.isArray() && dataNode.size() > 0) {
                     for (JsonNode objNode : dataNode) {
                         String name = objNode.get("name").asText();
-                        if (name.equals(cityPrefix)) {
+                        if (name.equals(carRegion)) {
                             region = objNode;
                             break;
                         }
@@ -70,8 +69,8 @@ public class CitiesService {
 
             int regionCode = region.get("isoCode").asInt();
 
-            String findCity = "http://geodb-free-service.wirefreethought.com" +
-                    "/v1/geo/countries/UA/" +
+            String findCity = environment.getProperty("geodb.api") +
+                    "/countries/UA/" +
                     "regions/" + regionCode + "/places?" +
                     "limit=10&offset=0";
 
@@ -87,16 +86,18 @@ public class CitiesService {
 
             JsonNode cityDataNode = rootCity.get("data");
 
+            String cityMatch = null;
             if (cityDataNode.isArray() && cityDataNode.size() > 0) {
                 for (JsonNode objNode : cityDataNode) {
                     String name = objNode.get("name").asText();
-                    if (name.equals(carDTO.getCity())) {
+                    if (name.equals(carCity)) {
+                        cityMatch = name;
                         break;
                     }
                 }
             }
 
-            if (cityDataNode.isEmpty()) {
+            if (cityDataNode.isEmpty() || cityMatch == null) {
                 List<String> validCities = new ArrayList<>();
                 for (JsonNode objNode : cityDataNode) {
                     validCities.add(objNode.get("name").asText());

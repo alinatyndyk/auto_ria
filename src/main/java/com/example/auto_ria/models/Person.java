@@ -25,16 +25,21 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Person implements UserDetails {
+public class Person implements UserDetails { //todo remove annotations
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @NotBlank(message = "name is required")
-    @Size(min = 3, message = "name must have more than 3 characters")
-    @Size(max = 255, message = "name must have less than 255 characters")
+    @Size(min = 2, message = "name must have more than 2 characters")
+    @Size(max = 30, message = "name must have less than 30 characters")
     private String name;
+
+    @NotBlank(message = "last name is required")
+    @Size(min = 2, message = "last name must have more than 2 characters")
+    @Size(max = 30, message = "last name must have less than 30 characters")
+    private String lastName;
 
     @Column(unique = true)
     @Size(min = 3, message = "email must have more than 3 characters")
@@ -44,15 +49,13 @@ public class Person implements UserDetails {
 
     private String avatar = null;
 
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$",
+            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number. " +
                     "At least 8 characters long")
     private String password;
 
     @ElementCollection
     private List<ERole> roles = new ArrayList<>();
-
-    private String refreshToken; // todo schedule cron isAccountNonLocked;
 
     private Boolean isActivated = false;
 
@@ -66,8 +69,9 @@ public class Person implements UserDetails {
     private LocalDateTime updatedAt;
 
     @Builder
-    public Person(String name, String email, String avatar, String password, List<ERole> roles) {
+    public Person(String name, String lastName, String email, String avatar, String password, List<ERole> roles) {
         this.name = name;
+        this.lastName = lastName;
         this.email = email;
         this.avatar = avatar;
         this.password = password;
@@ -80,9 +84,10 @@ public class Person implements UserDetails {
         this.roles = roles;
     }
 
-    public Person(int id, String name, List<ERole> roles) {
+    public Person(int id, String name, String lastName, List<ERole> roles) {
         this.id = id;
         this.name = name;
+        this.lastName = lastName;
         this.roles = roles;
     }
 

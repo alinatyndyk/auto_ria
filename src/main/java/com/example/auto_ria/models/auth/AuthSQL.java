@@ -1,4 +1,4 @@
-package com.example.auto_ria.models;
+package com.example.auto_ria.models.auth;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;

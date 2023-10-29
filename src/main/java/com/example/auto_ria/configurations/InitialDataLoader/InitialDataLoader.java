@@ -1,6 +1,7 @@
 package com.example.auto_ria.configurations.InitialDataLoader;
 
 import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.RegisterAdminRequest;
 import com.example.auto_ria.services.AuthenticationService;
 import lombok.AllArgsConstructor;
@@ -19,15 +20,20 @@ public class InitialDataLoader {
 
     @PostConstruct
     public void loadInitialData() {
-        if (administratorDaoSQL.count() == 0) {
+        try {
+            if (administratorDaoSQL.count() == 0) {
 
-            RegisterAdminRequest request = RegisterAdminRequest.builder()
-                    .name(environment.getProperty("initial.admin.name"))
-                    .email(environment.getProperty("initial.admin.email"))
-                    .password(environment.getProperty("initial.admin.pass"))
-                    .build();
+                RegisterAdminRequest request = RegisterAdminRequest.builder()
+                        .name(environment.getProperty("initial.admin.name"))
+                        .lastName(environment.getProperty("initial.admin.lastName"))
+                        .email(environment.getProperty("initial.admin.email"))
+                        .password(environment.getProperty("initial.admin.pass"))
+                        .build();
 
-            authenticationService.registerAdmin(request);
+                authenticationService.registerAdmin(request);
+            }
+        } catch (CustomException e) {
+            throw new CustomException("Error while loading initial data" + e.getMessage(), e.getStatus());
         }
     }
 }

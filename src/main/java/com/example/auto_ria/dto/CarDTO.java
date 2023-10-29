@@ -5,10 +5,7 @@ import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.services.CitiesService;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,6 +49,7 @@ public class CarDTO {
 
     private List<String> photo;
 
+    @NotEmpty(message = "currency cant be empty")
     private String description;
 
     private boolean isActivated;
@@ -67,7 +65,6 @@ public class CarDTO {
 
         this.powerH = powerH;
         this.city = city;
-//        validateCity(environment);
 
         this.region = region;
         this.price = price;

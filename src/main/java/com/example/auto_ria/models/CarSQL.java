@@ -28,11 +28,10 @@ public class CarSQL {
 
     private EBrand brand;
 
-
     private int powerH;
+
     private String city;
 
-//    @Enumerated(EnumType.STRING)
     private String region;
 
     private EModel model;

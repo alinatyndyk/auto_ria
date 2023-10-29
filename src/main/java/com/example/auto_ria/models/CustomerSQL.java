@@ -14,11 +14,14 @@ import java.util.List;
 
 public class CustomerSQL extends Person {
 
-    private String lastName;
+    private String region;
+    private String city;
 
     @Builder(builderMethodName = "customerBuilder")
-    public CustomerSQL(String name, String lastName, String email, String avatar, String password, List<ERole> roles) {
-        super(name, email, avatar, password, roles);
-        this.lastName = lastName;
+    public CustomerSQL(String name, String lastName, String email, String avatar, String password, List<ERole> roles,
+                       String region, String city) {
+        super(name, lastName, email, avatar, password, roles);
+        this.region = region;
+        this.city = city;
     }
 }

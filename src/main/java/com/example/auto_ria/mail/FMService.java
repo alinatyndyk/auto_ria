@@ -2,12 +2,14 @@ package com.example.auto_ria.mail;
 
 import com.example.auto_ria.configurations.MailConfiguration;
 import com.example.auto_ria.enums.EMail;
+import com.example.auto_ria.exceptions.CustomException;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -26,26 +28,26 @@ public class FMService {
     private MailConfiguration mailConfig;
 
 
-    public void sendEmail(String recipientEmail, EMail templateName, Map<String, Object> variables) throws MessagingException, IOException, TemplateException {
+    public void sendEmail(String recipientEmail, EMail templateName, Map<String, Object> variables) {
+        try {
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message);
 
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
+            helper.setTo(recipientEmail);
 
-        helper.setTo(recipientEmail);
-        System.out.println(templateName);
-        System.out.println(recipientEmail);
-        System.out.println(variables.toString());
+            HashMap<String, String> result = mailConfig.parser(templateName);
 
-        HashMap<String, String> result = mailConfig.parser(templateName);
+            helper.setSubject(result.get("subject"));
 
-        helper.setSubject(result.get("subject"));
+            Template template = freemarkerConfig.getTemplate(result.get("templateName"));
+            String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, variables);
 
-        Template template = freemarkerConfig.getTemplate(result.get("templateName"));
-        String html = FreeMarkerTemplateUtils.processTemplateIntoString(template, variables);
+            helper.setText(html, true);
 
-        helper.setText(html, true);
-
-        javaMailSender.send(message);
+            javaMailSender.send(message);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     public void sendWelcomeEmail(String name, String email) {

@@ -10,10 +10,12 @@ import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
 import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ECurrency;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.CurrencyResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,56 +53,73 @@ public class CronConfiguration {
 
     @Scheduled(cron = "0 0 0 * * *")
     public void getCurrencyRates() {
+        try {
 
-        RestTemplate restTemplate = new RestTemplate();
+            RestTemplate restTemplate = new RestTemplate();
 
-        String api = environment.getProperty("privat.bank.api");
+            String api = environment.getProperty("privat.bank.api");
 
-        CurrencyResponse[] exchangeRates = restTemplate.getForObject(api, CurrencyResponse[].class);
-
-        Double UsdBuy = null;
-        Double UsdSell = null;
-        Double EURBuy = null;
-        Double EURSell = null;
-
-
-        assert exchangeRates != null;
-        for (CurrencyResponse rate : exchangeRates) {
-
-            if (rate.getCcy() == ECurrency.USD) {
-                UsdBuy = rate.getBuy();
-                UsdSell = rate.getSale();
-            } else if (rate.getCcy() == ECurrency.EUR) {
-                EURBuy = rate.getBuy();
-                EURSell = rate.getSale();
+            CurrencyResponse[] exchangeRates;
+            if (api != null) {
+                exchangeRates = restTemplate.getForObject(api, CurrencyResponse[].class);
+            } else {
+                throw new NullPointerException("Privatbank api could not be accessed. URL is null");
             }
 
-        }
+            Double UsdBuy = null;
+            Double UsdSell = null;
+            Double EURBuy = null;
+            Double EURSell = null;
 
-        ExchangeRateCache.updateExchangeRates(UsdBuy, UsdSell, EURBuy, EURSell);
+
+            assert exchangeRates != null;
+            for (CurrencyResponse rate : exchangeRates) {
+
+                if (rate.getCcy() == ECurrency.USD) {
+                    UsdBuy = rate.getBuy();
+                    UsdSell = rate.getSale();
+                } else if (rate.getCcy() == ECurrency.EUR) {
+                    EURBuy = rate.getBuy();
+                    EURSell = rate.getSale();
+                }
+
+            }
+
+            ExchangeRateCache.updateExchangeRates(UsdBuy, UsdSell, EURBuy, EURSell);
+        } catch (Exception e) {
+            throw new CustomException("Error while getting exchange rates", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     @Scheduled(cron = "0 0 0 */2 * *")
     public void deleteUnactivatedAccounts() {
-        LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
-        LocalDateTime twoDaysAgoDateTime = LocalDateTime.of(twoDaysAgo, LocalTime.MIDNIGHT);
+        try {
+            LocalDate twoDaysAgo = LocalDate.now().minusDays(2);
+            LocalDateTime twoDaysAgoDateTime = LocalDateTime.of(twoDaysAgo, LocalTime.MIDNIGHT);
 
-        sellerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-        customerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-        administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-        managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            sellerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            customerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 
     @Scheduled(cron = "0 0 3 * * *")
     public void deleteExpiredTokens() {
-        LocalDate now = LocalDate.now();
-        LocalDateTime nowDateTime = LocalDateTime.of(now, LocalTime.now()).minusHours(1);
+        try {
+            LocalDate now = LocalDate.now();
+            LocalDateTime nowDateTime = LocalDateTime.of(now, LocalTime.now()).minusHours(24);
 
-        sellerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
-        customerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
-        managerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
-        adminAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+            sellerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+            customerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+            managerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+            adminAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
     }
 }

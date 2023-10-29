@@ -8,7 +8,6 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import io.jsonwebtoken.io.IOException;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,10 +51,14 @@ public class UsersServiceMySQLImpl {
         return userDaoSQL.findById(id).get();
     }
 
-    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
-        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
-        File transferDestinationFile = new File(path);
-        picture.transferTo(transferDestinationFile);
+    public void transferAvatar(MultipartFile picture, String originalFileName) {
+        try {
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            File transferDestinationFile = new File(path);
+            picture.transferTo(transferDestinationFile);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     public ResponseEntity<String> deleteById(String id, SellerSQL seller, AdministratorSQL administratorSQL, ManagerSQL manager) {
@@ -84,36 +87,40 @@ public class UsersServiceMySQLImpl {
         return seller.getId() == seller1.getId();
     }
 
-    public ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller)
-            throws IllegalAccessException, IOException, NoSuchFieldException {
+    public ResponseEntity<SellerSQL> update(int id, UserUpdateDTO userDTO, SellerSQL seller) {
+        try {
+            SellerSQL seller1 = getById(String.valueOf(id)).getBody();
 
-        SellerSQL seller1 = getById(String.valueOf(id)).getBody();
+            assert seller1 != null;
+            if (doesBelongToSeller(seller, seller1)) {
 
-        assert seller1 != null;
-        if (doesBelongToSeller(seller, seller1)) {
+                Class<?> carDTOClass = userDTO.getClass();
+                Field[] fields = carDTOClass.getDeclaredFields();
 
-            Class<?> carDTOClass = userDTO.getClass();
-            Field[] fields = carDTOClass.getDeclaredFields();
+                for (Field field : fields) {
 
-            for (Field field : fields) {
+                    field.setAccessible(true);
 
-                field.setAccessible(true);
+                    String fieldName = field.getName();
+                    Object fieldValue = field.get(userDTO);
 
-                String fieldName = field.getName();
-                Object fieldValue = field.get(userDTO);
+                    if (fieldValue != null) {
 
-                if (fieldValue != null) {
+                        Field carField = SellerSQL.class.getDeclaredField(fieldName);
 
-                    Field carField = SellerSQL.class.getDeclaredField(fieldName);
-
-                    carField.setAccessible(true);
-                    carField.set(seller1, fieldValue);
+                        carField.setAccessible(true);
+                        carField.set(seller1, fieldValue);
+                    }
                 }
+            } else {
+                throw new IllegalAccessException("Error.Update_fail: The car does not belong to seller");
             }
-        } else {
-            throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(userDaoSQL.save(seller1), HttpStatus.ACCEPTED);
+        } catch (IllegalAccessException e) {
+            throw new CustomException(e.getMessage(), HttpStatus.FORBIDDEN);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
-        return new ResponseEntity<>(userDaoSQL.save(seller1), HttpStatus.ACCEPTED);
     }
 
     public void updateAvatar(int id, String fileName) {

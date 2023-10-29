@@ -14,12 +14,9 @@ import java.util.List;
 @ToString
 public class ManagerSQL extends Person {
 
-    private String permissions;
-
     @Builder(builderMethodName = "managerSQLBuilder")
-    public ManagerSQL(String name, String email, String avatar, String password, List<ERole> roles, String permissions) {
-        super(name, email, avatar, password, roles);
-        this.permissions = permissions;
+    public ManagerSQL(String name, String email, String avatar, String password, List<ERole> roles, String lastName) {
+        super(name, lastName, email, avatar, password, roles);
     }
 
     @Builder(builderMethodName = "managerSQLBuilderUpload")

@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Objects;
 
 @RestController
@@ -32,60 +31,78 @@ public class CustomerController {
     public ResponseEntity<Page<CustomerSQL>> getAll(
             @PathVariable("page") int page
     ) {
-        return customersServiceMySQL.getAll(page);
+        try {
+            return customersServiceMySQL.getAll(page);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<CustomerSQL> getById(@PathVariable("id") int id) {
-        return customersServiceMySQL.getById(String.valueOf(id));
+        try {
+            return customersServiceMySQL.getById(String.valueOf(id));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CustomerSQL> patchCustomer(@PathVariable int id,
                                                      @ModelAttribute CustomerUpdateDTO partialUser,
-                                                     HttpServletRequest request) throws NoSuchFieldException,
-            IllegalAccessException {
-        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
-        customersServiceMySQL.checkCredentials(request, id);
+                                                     HttpServletRequest request) {
+        try {
+            CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+            customersServiceMySQL.checkCredentials(request, id);
 
-        return customersServiceMySQL.update(id, partialUser, customerSQL);
+            return customersServiceMySQL.update(id, partialUser, customerSQL);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PatchMapping("/change-avatar/{id}")
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
-                                              HttpServletRequest request) throws IOException {
+                                              HttpServletRequest request) {
+        try {
+            if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null
+                    || managerServiceMySQL.getById(id).getBody() == null) {
+                customersServiceMySQL.checkCredentials(request, id);
+            }
 
-        if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null
-                || managerServiceMySQL.getById(id).getBody() == null) {
-            customersServiceMySQL.checkCredentials(request, id);
+            commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(String.valueOf(id)).getBody()).getAvatar());
+
+            String fileName = avatar.getOriginalFilename();
+            usersServiceMySQL.transferAvatar(avatar, fileName);
+            customersServiceMySQL.updateAvatar(id, fileName);
+            return ResponseEntity.ok("Success. Avatar_updated");
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-
-        commonService.removeAvatar(Objects.requireNonNull(customersServiceMySQL.getById(String.valueOf(id)).getBody()).getAvatar());
-
-        String fileName = avatar.getOriginalFilename();
-        usersServiceMySQL.transferAvatar(avatar, fileName);
-        customersServiceMySQL.updateAvatar(id, fileName);
-        return ResponseEntity.ok("Success. Avatar_updated");
     }
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) throws IOException {
-        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+    public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
+        try {
+            CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
 
-        ManagerSQL manager = commonService.extractManagerFromHeader(request);
-        AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
+            ManagerSQL manager = commonService.extractManagerFromHeader(request);
+            AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
 
-        if (administrator == null && manager == null) {
-            if (customerSQL == null || !Integer.valueOf(id).equals(customerSQL.getId())) {
-                throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+            if (administrator == null && manager == null) {
+                if (customerSQL == null || !Integer.valueOf(id).equals(customerSQL.getId())) {
+                    throw new CustomException("Illegal_access_exception. No-permission", HttpStatus.FORBIDDEN);
+                }
             }
+
+            commonService.removeAvatar(customerSQL.getAvatar());
+
+            return customersServiceMySQL.deleteById(id, customerSQL, administrator, manager);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-
-        commonService.removeAvatar(customerSQL.getAvatar());
-
-        return customersServiceMySQL.deleteById(id, customerSQL, administrator, manager);
     }
 
 }

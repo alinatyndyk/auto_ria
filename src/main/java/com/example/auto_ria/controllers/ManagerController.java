@@ -1,6 +1,7 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
@@ -13,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.Objects;
 
 @RestController
@@ -30,45 +30,65 @@ public class ManagerController {
     public ResponseEntity<Page<ManagerSQL>> getAll(
             @PathVariable("page") int page
     ) {
-        return managerServiceMySQL.getAll(page);
+        try {
+            return managerServiceMySQL.getAll(page);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ManagerSQL> getById(@PathVariable("id") int id) {
-        return managerServiceMySQL.getById(id);
+        try {
+            return managerServiceMySQL.getById(id);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ManagerSQL> patch(
             HttpServletRequest request,
             @PathVariable int id,
-            @RequestBody ManagerUpdateDTO partial) throws NoSuchFieldException, IllegalAccessException {
-        managerServiceMySQL.checkCredentials(request, id);
-        return managerServiceMySQL.update(id, partial);
+            @RequestBody ManagerUpdateDTO partial) {
+        try {
+            managerServiceMySQL.checkCredentials(request, id);
+            return managerServiceMySQL.update(id, partial);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PatchMapping("/change-avatar/{id}")
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
                                               @RequestParam("avatar") MultipartFile avatar,
-                                              HttpServletRequest request) throws IOException {
-        managerServiceMySQL.checkCredentials(request, id);
+                                              HttpServletRequest request) {
+        try {
+            managerServiceMySQL.checkCredentials(request, id);
 
-        commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
+            commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
 
-        String fileName = avatar.getOriginalFilename();
-        usersServiceMySQL.transferAvatar(avatar, fileName);
-        managerServiceMySQL.updateAvatar(id, fileName);
-        return ResponseEntity.ok("Success. Avatar_updated");
+            String fileName = avatar.getOriginalFilename();
+            usersServiceMySQL.transferAvatar(avatar, fileName);
+            managerServiceMySQL.updateAvatar(id, fileName);
+            return ResponseEntity.ok("Success. Avatar_updated");
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id,
-                                             HttpServletRequest request) throws IOException {
-        if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null) {
-            managerServiceMySQL.checkCredentials(request, id);
+                                             HttpServletRequest request) {
+        try {
+            if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null) {
+                managerServiceMySQL.checkCredentials(request, id);
+            }
+            commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
+            return managerServiceMySQL.deleteById(id);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-        commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
-        return managerServiceMySQL.deleteById(id);
     }
 
 }

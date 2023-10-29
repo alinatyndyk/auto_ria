@@ -64,11 +64,15 @@ public class CommonService {
         }).collect(Collectors.toList());
     }
 
-    public void removeAvatar(String originalFileName) throws java.io.IOException {
-        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
-        File transferDestinationFile = new File(path);
-        if (transferDestinationFile.exists()) {
-            transferDestinationFile.delete();
+    public void removeAvatar(String originalFileName) {
+        try {
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            File transferDestinationFile = new File(path);
+            if (transferDestinationFile.exists()) {
+                transferDestinationFile.delete();
+            }
+        } catch (Exception e) {
+            throw new CustomException("Error while handling avatars: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }
 

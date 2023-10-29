@@ -7,8 +7,8 @@ import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.services.JwtService;
 import com.example.auto_ria.services.UserDetailsServiceImpl;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotNull;
@@ -38,47 +38,56 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private CustomerAuthDaoSQL customerAuthDaoSQL;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, @NotNull HttpServletResponse response,
-                                    @NotNull FilterChain filterChain) throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
+    protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
+                                    @NotNull FilterChain filterChain) throws IOException {
+        try {
+            String authorizationHeader = request.getHeader("Authorization");
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        String jwt = authorizationHeader.substring(7);
-
-        String userEmail = jwtService.extractUsername(jwt);
-
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-
-
-            if (
-                    isInDb(userDetails, jwt)
-                            &&
-                            jwtService.isTokenValid(jwt, userDetails)
-            ) {
-
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder
-                        .getContext()
-                        .setAuthentication(authenticationToken);
-            } else {
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                response.getWriter().write("Token invalid");
+            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
                 return;
             }
+
+            String jwt = authorizationHeader.substring(7);
+
+            String userEmail = jwtService.extractUsername(jwt);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+
+                if (
+                        jwtService.isTokenValid(jwt, userDetails)
+                ) {
+                    if (!isInDb(userDetails, jwt)) {
+                        throw new IllegalAccessException("Token invalid");
+                    }
+
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+
+                    authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder
+                            .getContext()
+                            .setAuthentication(authenticationToken);
+                }
+            }
+
+            filterChain.doFilter(request, response);
+        } catch (ExpiredJwtException e) {
+            response.getWriter().write("Jwt expired");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        } catch (IllegalAccessException e) {
+            response.getWriter().write("Jwt invalid");
+            response.setStatus(HttpStatus.FORBIDDEN.value());
+        } catch (Exception e) {
+            response.getWriter().write(e.getMessage());
+            response.setStatus(HttpStatus.EXPECTATION_FAILED.value());
         }
-        filterChain.doFilter(request, response);
     }
 
     private boolean isInDb(UserDetails userDetails, String jwt) {

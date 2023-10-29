@@ -2,7 +2,9 @@ package com.example.auto_ria.dto.updateDTO;
 
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.ERegion;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,18 +17,15 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CarUpdateDTO {
 
-    @NotBlank(message = "city cant be empty")
-    @Size(min = 2, message = "City has to be more than 2")
-    @Size(max = 20, message = "City has to be less than 20")
     private String city;
 
-    @NotBlank(message = "region cant be empty")
-    private ERegion region;
+    private String region;
 
-    @NotBlank(message = "price cant be empty")
+    @Max(value = 100000000, message = "price has to be less than 100 000 000")
     private String price;
 
-    @NotBlank(message = "currency cant be empty")
     private ECurrency currency;
+
+    private String description;
 
 }

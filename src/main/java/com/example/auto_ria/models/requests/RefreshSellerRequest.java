@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RefreshRequest {
+public class RefreshSellerRequest {
     @NotBlank(message = "Refresh cant be empty")
     private String refreshToken;
 }

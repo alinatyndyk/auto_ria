@@ -1,17 +1,15 @@
 package com.example.auto_ria.exceptions;
 
-import com.example.auto_ria.dto.CarDTORequest;
-import com.example.auto_ria.enums.EBrand;
-import com.example.auto_ria.enums.EModel;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.Objects;
+import java.util.List;
 
 @RestControllerAdvice
 public class CustomExceptionHandler {
@@ -22,10 +20,22 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(errorResponse);
     }
 
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+        List<String> errorMessages = ex.getConstraintViolations()
+                .stream()
+                .map(ConstraintViolation::getMessage)
+                .toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(errorMessages.toString(), HttpStatus.BAD_REQUEST));
+    }
+
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationException(MethodArgumentNotValidException ex) {
-        ErrorResponse errorResponse = new ErrorResponse(Objects.requireNonNull(ex.getFieldError()).getDefaultMessage(), HttpStatus.CONFLICT);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
+        List<String> errorMessages = ex.getBindingResult().getFieldErrors().stream()
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .toList();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(errorMessages.toString(), HttpStatus.BAD_REQUEST));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

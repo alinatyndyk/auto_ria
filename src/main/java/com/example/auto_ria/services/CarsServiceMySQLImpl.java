@@ -14,9 +14,10 @@ import com.example.auto_ria.models.responses.CarResponse;
 import com.example.auto_ria.models.responses.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.SellerResponse;
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,8 @@ public class CarsServiceMySQLImpl {
     private CommonService commonService;
     private FMService mailer;
     private CurrencyConverterService currencyConverterService;
+
+    private Environment environment;
 
 
     public ResponseEntity<List<CarSQL>> getAll() {
@@ -191,7 +194,7 @@ public class CarsServiceMySQLImpl {
         return carDAO.findBySeller(seller);
     }
 
-    public ResponseEntity<CarResponse> post(CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
+    public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
 
         CarSQL car = CarSQL.builder()
                 .brand(carDTO.getBrand())
@@ -210,7 +213,10 @@ public class CarsServiceMySQLImpl {
             car.setSeller(SellerSQL.adminBuilder().name("Auto.Ria Services")
                     .id(administratorSQL.getId())
                     .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
-                    .name("Auto.Ria Services")
+                    .name(environment.getProperty("office.name"))
+                    .number(environment.getProperty("office.number"))
+                    .region(environment.getProperty("office.region"))
+                    .city(environment.getProperty("office.city"))
                     .build());
         } else {
             car.setSeller(seller);
@@ -237,15 +243,12 @@ public class CarsServiceMySQLImpl {
         return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
     }
 
-    public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO) throws IllegalAccessException,
-            IOException, NoSuchFieldException {
-
-        CarSQL car = extractById(id);
-        CarResponse carResponse;
-
-        assert car != null;
-
+    public ResponseEntity<CarResponse> update(int id, CarUpdateDTO carDTO) {
         try {
+            CarSQL car = extractById(id);
+            CarResponse carResponse;
+
+            assert car != null;
             Class<?> carDTOClass = carDTO.getClass();
             Field[] fields = carDTOClass.getDeclaredFields();
 
@@ -262,8 +265,6 @@ public class CarsServiceMySQLImpl {
                     if (fieldName.equals("currency")) {
 
                         carField.set(car, ECurrency.valueOf(fieldValue.toString()));
-                    } else if (fieldName.equals("region")) {
-                        carField.set(car, ERegion.valueOf(fieldValue.toString()));
                     }
 
                     carField.set(car, fieldValue);
@@ -274,10 +275,10 @@ public class CarsServiceMySQLImpl {
 
             carResponse = formCarResponse(carSQL);
 
+            return ResponseEntity.ok(carResponse);
         } catch (Exception e) {
-            throw new CustomException("Error.Update_fail", HttpStatus.FORBIDDEN);
+            throw new CustomException("Error.Update_fail: " + e.getMessage(), HttpStatus.FORBIDDEN);
         }
-        return ResponseEntity.ok(carResponse);
     }
 
     private CarResponse formCarResponse(CarSQL carSQL) {

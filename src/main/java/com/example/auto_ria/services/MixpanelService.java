@@ -1,5 +1,6 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.mixpanel.mixpanelapi.ClientDelivery;
 import com.mixpanel.mixpanelapi.MessageBuilder;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,21 +27,25 @@ public class MixpanelService {
 
     private Environment environment;
 
-    public void view(String car_id) throws IOException {
+    public void view(String car_id) {
+        try {
 
-        MessageBuilder messageBuilder = new MessageBuilder(environment.getProperty("maxpanel.project.id"));
+            MessageBuilder messageBuilder = new MessageBuilder(environment.getProperty("maxpanel.project.id"));
 
-        JSONObject props = new JSONObject();
-        props.put("car_id", car_id);
-        JSONObject sentEvent =
-                messageBuilder.event(new Date().toString(), "carView", props);
+            JSONObject props = new JSONObject();
+            props.put("car_id", car_id);
+            JSONObject sentEvent =
+                    messageBuilder.event(new Date().toString(), "carView", props);
 
 
-        ClientDelivery delivery = new ClientDelivery();
-        delivery.addMessage(sentEvent);
+            ClientDelivery delivery = new ClientDelivery();
+            delivery.addMessage(sentEvent);
 
-        MixpanelAPI mixpanel = new MixpanelAPI();
-        mixpanel.deliver(delivery);
+            MixpanelAPI mixpanel = new MixpanelAPI();
+            mixpanel.deliver(delivery);
+        } catch (Exception e) {
+            throw new CustomException("Error while sending viewCar event: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
 
     }
 
@@ -68,7 +74,7 @@ public class MixpanelService {
 
     public int extractCarViews(String from_date, String to_date, String carId) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(environment.getProperty("maxpanel.export.url")+
+                .uri(URI.create(environment.getProperty("maxpanel.export.url") +
                         "?from_date=" + from_date + "&to_date=" + to_date))
                 .header("accept", "text/plain")
                 .header("authorization", environment.getProperty("maxpanel.basic.auth"))

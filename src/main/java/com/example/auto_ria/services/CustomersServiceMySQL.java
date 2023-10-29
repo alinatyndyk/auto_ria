@@ -84,36 +84,38 @@ public class CustomersServiceMySQL {
         return customerToUpdate.getId() == customerFromHeader.getId();
     }
 
-    public ResponseEntity<CustomerSQL> update(int id, CustomerUpdateDTO customerUpdateDTO, CustomerSQL customer)
-            throws IllegalAccessException, IOException, NoSuchFieldException {
+    public ResponseEntity<CustomerSQL> update(int id, CustomerUpdateDTO customerUpdateDTO, CustomerSQL customer) {
+        try {
+            CustomerSQL customerSQL = getById(String.valueOf(id)).getBody();
 
-        CustomerSQL customerSQL = getById(String.valueOf(id)).getBody();
+            assert customerSQL != null;
+            if (doesBelongToCustomer(customerSQL, customer)) {
 
-        assert customerSQL != null;
-        if (doesBelongToCustomer(customerSQL, customer)) {
+                Class<?> customerDtoClass = customerUpdateDTO.getClass();
+                Field[] fields = customerDtoClass.getDeclaredFields();
 
-            Class<?> customerDtoClass = customerUpdateDTO.getClass();
-            Field[] fields = customerDtoClass.getDeclaredFields();
+                for (Field field : fields) {
 
-            for (Field field : fields) {
+                    field.setAccessible(true);
 
-                field.setAccessible(true);
+                    String fieldName = field.getName();
+                    Object fieldValue = field.get(customerUpdateDTO);
 
-                String fieldName = field.getName();
-                Object fieldValue = field.get(customerUpdateDTO);
+                    if (fieldValue != null) {
 
-                if (fieldValue != null) {
+                        Field carField = SellerSQL.class.getDeclaredField(fieldName);
 
-                    Field carField = SellerSQL.class.getDeclaredField(fieldName);
-
-                    carField.setAccessible(true);
-                    carField.set(customerSQL, fieldValue);
+                        carField.setAccessible(true);
+                        carField.set(customerSQL, fieldValue);
+                    }
                 }
+            } else {
+                throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
             }
-        } else {
-            throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(customerDaoSQL.save(customerSQL), HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
-        return new ResponseEntity<>(customerDaoSQL.save(customerSQL), HttpStatus.ACCEPTED);
     }
 
     public void updateAvatar(int id, String fileName) {

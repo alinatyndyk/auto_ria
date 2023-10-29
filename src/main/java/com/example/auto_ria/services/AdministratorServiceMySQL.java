@@ -8,7 +8,7 @@ import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.Person;
-import com.example.auto_ria.models.RegisterKey;
+import com.example.auto_ria.models.auth.RegisterKey;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,36 +30,56 @@ public class AdministratorServiceMySQL {
     private RegisterKeyDaoSQL registerKeyDaoSQL;
 
     public ResponseEntity<Page<AdministratorSQL>> getAll(int page) {
-        Pageable pageable = PageRequest.of(page, 2);
-        Page<AdministratorSQL> admins = administratorDaoSQL.findAll(pageable);
-        return new ResponseEntity<>(admins, HttpStatus.ACCEPTED);
+        try {
+            Pageable pageable = PageRequest.of(page, 2);
+            Page<AdministratorSQL> admins = administratorDaoSQL.findAll(pageable);
+            return new ResponseEntity<>(admins, HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
 
     public ResponseEntity<AdministratorSQL> getById(String id) {
-        if (administratorDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
-            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+        try {
+            if (administratorDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
+                throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+            }
+            AdministratorSQL administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
+            return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
-        AdministratorSQL administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
-        return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
     }
 
     public AdministratorSQL getByEmail(String email) {
-        return administratorDaoSQL.findByEmail(email);
+        try {
+            return administratorDaoSQL.findByEmail(email);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
-    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
-        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
-        File transferDestinationFile = new File(path);
-        picture.transferTo(transferDestinationFile);
+    public void transferAvatar(MultipartFile picture, String originalFileName) {
+        try {
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            File transferDestinationFile = new File(path);
+            picture.transferTo(transferDestinationFile);
+        } catch (Exception e) {
+            throw new CustomException("Error while transferring avatar", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     public ResponseEntity<String> deleteById(String id) {
-        administratorDaoSQL.deleteById(Integer.valueOf(id));
-        return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
+        try {
+            administratorDaoSQL.deleteById(Integer.valueOf(id));
+            return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
-    public ResponseEntity<AdministratorSQL> update(AdministratorUpdateDTO administratorUpdateDTO, AdministratorSQL administratorSQL) throws IllegalAccessException, NoSuchFieldException {
+    public ResponseEntity<AdministratorSQL> update(AdministratorUpdateDTO administratorUpdateDTO, AdministratorSQL administratorSQL) {
         try {
 
             Class<?> adminDtoClass = administratorUpdateDTO.getClass();
@@ -90,17 +110,24 @@ public class AdministratorServiceMySQL {
     }
 
     public void updateAvatar(int id, String fileName) {
+        try {
+            AdministratorSQL administratorSQL = getById(String.valueOf(id)).getBody();
+            assert administratorSQL != null;
+            administratorSQL.setAvatar(fileName);
 
-        AdministratorSQL administratorSQL = getById(String.valueOf(id)).getBody();
-        assert administratorSQL != null;
-        administratorSQL.setAvatar(fileName);
-
-        administratorDaoSQL.save(administratorSQL);
+            administratorDaoSQL.save(administratorSQL);
+        } catch (Exception e) {
+            throw new CustomException("Error while updating avatar. Try again later", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
+        try {
         String key = jwtService.generateRegisterKey(email, ETokenRole.valueOf(role.name()));
         return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
+        } catch (Exception e) {
+            throw new CustomException("Error while generating admin key", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
 }

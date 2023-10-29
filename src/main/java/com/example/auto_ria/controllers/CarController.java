@@ -3,7 +3,7 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
-import com.example.auto_ria.dto.CarDTORequest;
+import com.example.auto_ria.dto.requests.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EBrand;
@@ -37,6 +37,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "cars")
+//todo everything in try catch
+// todo validation
+//todo premium bought monthly
+//todo check isActivated without permissions
+
+//todo check ban/activate car
+//todo show only not banned cars
+//todo ban/activate users
+//todo chat
 public class CarController {
 
     private CarsServiceMySQLImpl carsService;
@@ -57,64 +66,84 @@ public class CarController {
             @PathVariable("page") int page,
             @RequestParam Map<String, String> queryParams
     ) {
-        CarSQL carQueryParams = new CarSQL();
+        try {
+            CarSQL carQueryParams = new CarSQL();
 
-        for (Map.Entry<String, String> entry : queryParams.entrySet()) {
-            String fieldName = entry.getKey();
-            String fieldValue = entry.getValue();
+            for (Map.Entry<String, String> entry : queryParams.entrySet()) {
+                String fieldName = entry.getKey();
+                String fieldValue = entry.getValue();
 
-            try {
-                Field field = CarSQL.class.getDeclaredField(fieldName);
-                field.setAccessible(true);
-                if (fieldValue != null) {
-                    switch (fieldName) {
-                        case "brand" -> field.set(carQueryParams, EBrand.valueOf(fieldValue));
-                        case "model" -> field.set(carQueryParams, EModel.valueOf(fieldValue));
-                        default -> field.set(carQueryParams, fieldValue);
+                try {
+                    Field field = CarSQL.class.getDeclaredField(fieldName);
+                    field.setAccessible(true);
+                    if (fieldValue != null) {
+                        switch (fieldName) {
+                            case "brand" -> field.set(carQueryParams, EBrand.valueOf(fieldValue));
+                            case "model" -> field.set(carQueryParams, EModel.valueOf(fieldValue));
+                            default -> field.set(carQueryParams, fieldValue);
+                        }
                     }
+                } catch (NoSuchFieldException | IllegalAccessException e) {
+                    throw new CustomException("Forbidden query params found", HttpStatus.FORBIDDEN);
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                throw new CustomException("Forbidden query params found", HttpStatus.FORBIDDEN);
             }
+            return carsService.getAll(page, carQueryParams);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-        return carsService.getAll(page, carQueryParams);
     }
 
 
     @PostMapping("/viewed/{id}")
     public void addView(
             @PathVariable("id") int id
-    ) throws IOException {
-        carsService.extractById(id);
-        mixpanelService.view(String.valueOf(id));
+    ) {
+        try {
+            carsService.extractById(id);
+            mixpanelService.view(String.valueOf(id));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PostMapping("/buy-premium")
     public ResponseEntity<String> getPremium(
             HttpServletRequest request
     ) {
-        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
-        if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-            throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
+        try {
+            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
+            }
+            stripeService.createPayment();
+            sellerSQL.setAccountType(EAccountType.PREMIUM);
+            userDaoSQL.save(sellerSQL);
+            return ResponseEntity.ok("Premium bought successfully");
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-        stripeService.createPayment();
-        sellerSQL.setAccountType(EAccountType.PREMIUM);
-        userDaoSQL.save(sellerSQL);
-        return ResponseEntity.ok("Premium bought successfully");
     }
 
     @PostMapping("/activate/{id}")
     public ResponseEntity<String> activate(
             @PathVariable("id") int id
     ) {
-        return carsService.activate(id);
+        try {
+            return carsService.activate(id);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PostMapping("/ban/{id}")
     public ResponseEntity<String> banCar(
             @PathVariable("id") int id
     ) {
-        return carsService.ban(id);
+        try {
+            return carsService.ban(id);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/middle/{id}")
@@ -122,10 +151,14 @@ public class CarController {
             @PathVariable("id") int id,
             HttpServletRequest request
     ) {
-        carsService.isPremium(request);
-        CarSQL carSQL = carsService.extractById(id);
-        carsService.checkCredentials(request, id);
-        return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
+        try {
+            carsService.isPremium(request);
+            CarSQL carSQL = carsService.extractById(id);
+            carsService.checkCredentials(request, id);
+            return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/by-seller/page/{page}")
@@ -133,17 +166,25 @@ public class CarController {
             @PathVariable("page") int page,
             @RequestParam("id") int id
     ) {
-        SellerSQL sellerSQL = usersServiceMySQL.getById(id);
-        return carsService.getBySeller(sellerSQL, page);
+        try {
+            SellerSQL sellerSQL = usersServiceMySQL.getById(id);
+            return carsService.getBySeller(sellerSQL, page);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/statistics/{id}")
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
             HttpServletRequest request) {
-        carsService.isPremium(request);
-        carsService.extractById(id);
-        return ResponseEntity.ok(mixpanelService.getCarViewsStatistics(String.valueOf(id)));
+        try {
+            carsService.isPremium(request);
+            carsService.extractById(id);
+            return ResponseEntity.ok(mixpanelService.getCarViewsStatistics(String.valueOf(id)));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
 
     }
 
@@ -151,17 +192,25 @@ public class CarController {
     public ResponseEntity<CarResponse> getById(
             HttpServletRequest request,
             @PathVariable("id") int id) {
-        return carsService.getById(id, request);
+        try {
+            return carsService.getById(id, request);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/currency-rates")
     public ResponseEntity<ExchangeRateResponse> getCurrencyRates() {
-        return ResponseEntity.ok(ExchangeRateResponse.builder()
-                .eurBuy(ExchangeRateCache.getEurBuy())
-                .eurSell(ExchangeRateCache.getEurSell())
-                .usdBuy(ExchangeRateCache.getUsdBuy())
-                .usdSell(ExchangeRateCache.getUsdSell())
-                .build());
+        try {
+            return ResponseEntity.ok(ExchangeRateResponse.builder()
+                    .eurBuy(ExchangeRateCache.getEurBuy())
+                    .eurSell(ExchangeRateCache.getEurSell())
+                    .usdBuy(ExchangeRateCache.getUsdBuy())
+                    .usdSell(ExchangeRateCache.getUsdSell())
+                    .build());
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PostMapping()
@@ -169,156 +218,178 @@ public class CarController {
             @ModelAttribute @Valid CarDTORequest carDTO,
             @RequestPart("pictures[]") MultipartFile[] pictures,
             HttpServletRequest request
-    ) throws IOException {
+    ) {
+        try {
+            SellerSQL seller = commonService.extractSellerFromHeader(request);
+            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
-        SellerSQL seller = commonService.extractSellerFromHeader(request);
-        AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+            citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
-        citiesService.isValidUkrainianCity(carDTO);
-
-        CarDTO car = CarDTO
-                .builder()
-                .brand(carDTO.getBrand())
-                .powerH(carDTO.getPowerH())
-                .city(carDTO.getCity())
-                .region(carDTO.getRegion())
-                .model(carDTO.getModel())
-                .price(carDTO.getPrice())
-                .isActivated(true)
-                .currency(carDTO.getCurrency())
-                .isActivated(true)
-                .description(carDTO.getDescription())
-                .build();
+            CarDTO car = CarDTO
+                    .builder()
+                    .brand(carDTO.getBrand())
+                    .powerH(carDTO.getPowerH())
+                    .city(carDTO.getCity())
+                    .region(carDTO.getRegion())
+                    .model(carDTO.getModel())
+                    .price(carDTO.getPrice())
+                    .isActivated(true)
+                    .currency(carDTO.getCurrency())
+                    .isActivated(true)
+                    .description(carDTO.getDescription())
+                    .build();
 
 
-        if (!carsService.findAllBySeller(seller).isEmpty()) {
-            carsService.isPremium(request);
-        }
-
-        String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
-
-        if (profanityFilterService.containsProfanityBoolean(filteredText, carDTO.getDescription())) {
-            int currentCount = validationFailureCounter.incrementAndGet();
-            if (currentCount > 3) {
-                car.setActivated(false);
-                try {
-                    HashMap<String, Object> vars = new HashMap<>();
-                    List<ManagerSQL> managers = managerServiceMySQL.getAll();
-
-                    String email;
-
-                    if (seller != null) {
-                        vars.put("name", seller.getName());
-                        email = seller.getEmail();
-                    } else {
-                        vars.put("name", administratorSQL.getName());
-                        email = administratorSQL.getEmail();
-                    }
-                    vars.put("description", car.getDescription());
-
-                    managers.forEach(managerSQL -> {
-                        try {
-                            mailer.sendEmail(managerSQL.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
-                        } catch (Exception ignore) {
-                        }
-                    });
-                    mailer.sendEmail(email, EMail.CAR_BEING_CHECKED, vars);
-                } catch (Exception ignore) {
-                }
-            } else {
-                int attemptsLeft = 4 - currentCount;
-                throw new CustomException("Consider editing your description. Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
+            if (!carsService.findAllBySeller(seller).isEmpty()) {
+                carsService.isPremium(request);
             }
+
+            String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
+
+            if (profanityFilterService.containsProfanityBoolean(filteredText, carDTO.getDescription())) {
+                int currentCount = validationFailureCounter.incrementAndGet();
+                if (currentCount > 3) {
+                    car.setActivated(false);
+                    try {
+                        HashMap<String, Object> vars = new HashMap<>();
+                        List<ManagerSQL> managers = managerServiceMySQL.getAll();
+
+                        String email;
+
+                        if (seller != null) {
+                            vars.put("name", seller.getName());
+                            email = seller.getEmail();
+                        } else if (administratorSQL != null) {
+                            vars.put("name", administratorSQL.getName());
+                            email = administratorSQL.getEmail();
+                        } else {
+                            throw new CustomException("Invalid token user", HttpStatus.FORBIDDEN);
+                        }
+                        vars.put("description", car.getDescription());
+
+                        managers.forEach(managerSQLItem -> {
+                            try {
+                                mailer.sendEmail(managerSQLItem.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
+                            } catch (Exception ignore) {
+                            }
+                        });
+                        mailer.sendEmail(email, EMail.CAR_BEING_CHECKED, vars);
+                    } catch (Exception e) {
+                        throw new CustomException("Error sending emails", HttpStatus.EXPECTATION_FAILED);
+                    }
+                } else {
+                    int attemptsLeft = 4 - currentCount;
+                    throw new CustomException("Consider editing your description. " +
+                            "Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            commonService.transferPhotos(pictures);
+
+            List<String> names = new ArrayList<>();
+
+            for (MultipartFile file : pictures) {
+                names.add(file.getOriginalFilename());
+            }
+
+            car.setPhoto(names);
+
+            return carsService.post(car, seller, administratorSQL);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-
-        commonService.transferPhotos(pictures);
-
-        List<String> names = new ArrayList<>();
-
-        for (MultipartFile file : pictures) {
-            names.add(file.getOriginalFilename());
-        }
-
-        car.setPhoto(names);
-
-        return carsService.post(car, seller, administratorSQL);
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<CarResponse> patchCar(@PathVariable int id,
-                                                @RequestBody CarUpdateDTO partialCar,
-                                                HttpServletRequest request) throws NoSuchFieldException, IllegalAccessException {
-        carsService.checkCredentials(request, id);
-        return carsService.update(id, partialCar);
+                                                @RequestBody @Valid CarUpdateDTO partialCar,
+                                                HttpServletRequest request) {
+        try {
+            carsService.checkCredentials(request, id);
+            citiesService.isValidUkrainianCity(partialCar.getRegion(), partialCar.getCity());
+            return carsService.update(id, partialCar);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @PatchMapping("photos/{id}")
     public ResponseEntity<String> patchPhotos(@PathVariable int id,
                                               @RequestParam("pictures[]") MultipartFile[] newPictures,
-                                              HttpServletRequest request) throws IOException {
-        carsService.checkCredentials(request, id);
+                                              HttpServletRequest request) {
+        try {
+            carsService.checkCredentials(request, id);
 
 
-        CarSQL carSQL = carsService.extractById(id);
+            CarSQL carSQL = carsService.extractById(id);
 
-        List<String> newPicNames = new ArrayList<>();
+            List<String> newPicNames = new ArrayList<>();
 
-        for (MultipartFile file : newPictures) {
-            newPicNames.add(file.getOriginalFilename());
-        }
-        List<String> alreadyOnServer = new ArrayList<>();
-
-        for (String photoName : carSQL.getPhoto()) {
-            if (!newPicNames.contains(photoName)) {
-                commonService.removeAvatar(photoName);
-            } else {
-                alreadyOnServer.add(photoName);
+            for (MultipartFile file : newPictures) {
+                newPicNames.add(file.getOriginalFilename());
             }
+            List<String> alreadyOnServer = new ArrayList<>();
+
+            for (String photoName : carSQL.getPhoto()) {
+                if (!newPicNames.contains(photoName)) {
+                    commonService.removeAvatar(photoName);
+                } else {
+                    alreadyOnServer.add(photoName);
+                }
+            }
+
+            Arrays.stream(newPictures)
+                    .filter(pic -> !alreadyOnServer.contains(pic.getOriginalFilename()))
+                    .forEach(pic -> {
+                        try {
+                            commonService.transferAvatar(pic, pic.getOriginalFilename());
+                        } catch (IOException e) {
+                            throw new CustomException("Something went wrong while transporting the files. " +
+                                    "Try again later", HttpStatus.CONFLICT);
+                        }
+                    });
+
+            carSQL.setPhoto(newPicNames);
+
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
         }
-
-        Arrays.stream(newPictures)
-                .filter(pic -> !alreadyOnServer.contains(pic.getOriginalFilename()))
-                .forEach(pic -> {
-                    try {
-                        commonService.transferAvatar(pic, pic.getOriginalFilename());
-                    } catch (IOException e) {
-                        throw new CustomException("Something went wrong while transporting the files. " +
-                                "Try again later", HttpStatus.CONFLICT);
-                    }
-                });
-
-        carSQL.setPhoto(newPicNames);
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
-        carsService.checkCredentials(request, id);
+        try {
+            carsService.checkCredentials(request, id);
 
-        List<String> pictures = carsService.extractById(id).getPhoto();
+            List<String> pictures = carsService.extractById(id).getPhoto();
 
-        pictures.forEach(picture -> {
-            try {
-                commonService.removeAvatar(picture);
-            } catch (IOException e) {
-                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
-            }
-        });
+            pictures.forEach(picture -> commonService.removeAvatar(picture));
 
-        return carsService.deleteById(id);
+            return carsService.deleteById(id);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/brands")
     public ResponseEntity<EBrand[]> getBrands() {
-        return ResponseEntity.ok().body(Arrays.stream(EBrand.values()).toArray(EBrand[]::new));
+        try {
+            return ResponseEntity.ok().body(Arrays.stream(EBrand.values()).toArray(EBrand[]::new));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
     @GetMapping("/brands/{brand}/models")
     public ResponseEntity<EModel[]> getBrandsModels(@PathVariable("brand") String brand) {
-        return ResponseEntity.ok().body(Arrays.stream(EModel.values())
-                .filter(eModel -> eModel.getBrand().name().matches(brand))
-                .toArray(EModel[]::new));
+        try {
+            return ResponseEntity.ok().body(Arrays.stream(EModel.values())
+                    .filter(eModel -> eModel.getBrand().name().matches(brand))
+                    .toArray(EModel[]::new));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
     }
 
 }

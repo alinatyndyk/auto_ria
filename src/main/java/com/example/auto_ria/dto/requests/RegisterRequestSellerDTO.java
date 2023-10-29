@@ -1,6 +1,5 @@
-package com.example.auto_ria.models.requests;
+package com.example.auto_ria.dto.requests;
 
-import com.example.auto_ria.enums.ERegion;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -13,12 +12,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterRequest {
+public class RegisterRequestSellerDTO {
+
     @NotBlank(message = "city cant be empty")
     private String city;
 
     @NotBlank(message = "region cant be empty")
-    private ERegion region;
+    private String region;
 
     @Size(min = 9, message = "number must have less than 9 characters")
     @Size(max = 12, message = "name must have more than 12 characters")
@@ -38,8 +38,6 @@ public class RegisterRequest {
     @NotBlank(message = "email cant be empty")
     @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
     private String email;
-
-    private String avatar = null;
 
     @NotBlank(message = "password cant be empty")
     @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",

@@ -69,8 +69,7 @@ public class ManagerServiceMySQL {
         }
     }
 
-    public ResponseEntity<ManagerSQL> update(int id, ManagerUpdateDTO managerUpdateDTO)
-            throws IllegalAccessException, IOException, NoSuchFieldException {
+    public ResponseEntity<ManagerSQL> update(int id, ManagerUpdateDTO managerUpdateDTO) {
         try {
 
             ManagerSQL manager = getById(id).getBody();
@@ -95,8 +94,8 @@ public class ManagerServiceMySQL {
                 }
             }
             return new ResponseEntity<>(managerDaoSQL.save(manager), HttpStatus.ACCEPTED);
-        } catch (Exception exception) {
-            throw new CustomException("Fail_update", HttpStatus.CONFLICT);
+        } catch (Exception e) {
+            throw new CustomException("Fail_update: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 

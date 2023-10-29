@@ -1,7 +1,6 @@
 package com.example.auto_ria.models;
 
 import com.example.auto_ria.enums.EAccountType;
-import com.example.auto_ria.enums.ERegion;
 import com.example.auto_ria.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,13 +18,10 @@ import java.util.List;
 public class SellerSQL extends Person {
 
     private String city;
-
-    @Enumerated(EnumType.STRING)
-    private ERegion region;
+    private String region;
 
     @Column(unique = true)
     private String number;
-
 
     @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL)
@@ -47,10 +43,11 @@ public class SellerSQL extends Person {
             String password,
             List<ERole> roles,
             String city,
-            ERegion region,
-            String number) {
+            String region,
+            String number,
+            String lastName) {
 
-        super(name, email, avatar, password, roles);
+        super(name, lastName, email, avatar, password, roles);
         this.city = city;
         this.region = region;
         this.number = number;
@@ -59,9 +56,16 @@ public class SellerSQL extends Person {
     @Builder(builderMethodName = "adminBuilder")
     public SellerSQL(
             @JsonProperty("name") String name,
+            @JsonProperty("region") String region,
+            @JsonProperty("city") String city,
+            @JsonProperty("number") String number,
             @JsonProperty("roles") List<ERole> roles,
-            @JsonProperty("id") int id
+            @JsonProperty("id") int id,
+            @JsonProperty("lastName") String lastName
     ) {
-        super(id, name, roles);
+        super(id, name, lastName, roles);
+        this.number = number;
+        this.region = region;
+        this.city = city;
     }
 }

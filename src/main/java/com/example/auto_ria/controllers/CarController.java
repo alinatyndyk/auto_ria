@@ -341,12 +341,7 @@ public class CarController {
             Arrays.stream(newPictures)
                     .filter(pic -> !alreadyOnServer.contains(pic.getOriginalFilename()))
                     .forEach(pic -> {
-                        try {
-                            commonService.transferAvatar(pic, pic.getOriginalFilename());
-                        } catch (IOException e) {
-                            throw new CustomException("Something went wrong while transporting the files. " +
-                                    "Try again later", HttpStatus.CONFLICT);
-                        }
+                        commonService.transferAvatar(pic, pic.getOriginalFilename());
                     });
 
             carSQL.setPhoto(newPicNames);

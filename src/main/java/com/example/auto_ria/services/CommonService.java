@@ -13,14 +13,11 @@ import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,34 +32,30 @@ public class CommonService {
     private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
-    public void validate(BindingResult result) {
-        if (result.hasErrors()) {
-            List<String> errors = result.getAllErrors().stream()
-                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                    .toList();
-            throw new CustomException(errors.toString(), HttpStatus.BAD_REQUEST);
+    public void transferAvatar(MultipartFile picture, String originalFileName) {
+        try {
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            File transferDestinationFile = new File(path);
+            picture.transferTo(transferDestinationFile);
+        } catch (CustomException e) {
+            throw new CustomException("Failed to transfer avatar: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed to transfer avatar: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-
-        // String errorMessage = bindingResult.getFieldErrors().get(0).getDefaultMessage();
-        //        return ResponseEntity.badRequest().body(errorMessage);
-    }
-
-    public void transferAvatar(MultipartFile picture, String originalFileName) throws java.io.IOException {
-        String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
-        File transferDestinationFile = new File(path);
-        picture.transferTo(transferDestinationFile);
     }
 
     public List<String> transferPhotos(MultipartFile[] newPictures) {
-        return Arrays.stream(newPictures).map(picture -> {
-            String fileName = picture.getOriginalFilename();
-            try {
+        try {
+            return Arrays.stream(newPictures).map(picture -> {
+                String fileName = picture.getOriginalFilename();
                 transferAvatar(picture, fileName);
-            } catch (IOException e) {
-                throw new CustomException("Failed: Transfer_photos. Try again later", HttpStatus.EXPECTATION_FAILED);
-            }
-            return fileName;
-        }).collect(Collectors.toList());
+                return fileName;
+            }).collect(Collectors.toList());
+        } catch (CustomException e) {
+            throw new CustomException("Failed to transfer photos: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed to transfer photos: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     public void removeAvatar(String originalFileName) {
@@ -79,9 +72,13 @@ public class CommonService {
 
 
     public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
-        String bearerToken = jwtService.extractTokenFromHeader(request);
+        try {
+            String bearerToken = jwtService.extractTokenFromHeader(request);
 
-        return jwtService.extractUsername(bearerToken, role);
+            return jwtService.extractUsername(bearerToken, role);
+        } catch (Exception e) {
+            throw new CustomException("Failed to get email: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
@@ -120,16 +117,20 @@ public class CommonService {
     }
 
     public ERole findRoleByEmail(String email) {
-        if (administratorDaoSQL.findByEmail(email) != null) {
-            return ERole.ADMIN;
-        } else if (managerDaoSQL.findByEmail(email) != null) {
-            return ERole.MANAGER;
-        } else if (userDaoSQL.findSellerByEmail(email) != null) {
-            return ERole.SELLER;
-        } else if (customerDaoSQL.findByEmail(email) != null) {
-            return ERole.CUSTOMER;
+        try {
+            if (administratorDaoSQL.findByEmail(email) != null) {
+                return ERole.ADMIN;
+            } else if (managerDaoSQL.findByEmail(email) != null) {
+                return ERole.MANAGER;
+            } else if (userDaoSQL.findSellerByEmail(email) != null) {
+                return ERole.SELLER;
+            } else if (customerDaoSQL.findByEmail(email) != null) {
+                return ERole.CUSTOMER;
+            }
+            return null;
+        } catch (Exception e) {
+            throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-        return null;
     }
 
 }

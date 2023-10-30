@@ -22,8 +22,7 @@ public class CitiesService {
 
     public void isValidUkrainianCity(String carRegion, String carCity) {
         try {
-            System.out.println(carCity);
-            System.out.println(carRegion);
+
             int limit = 10;
             int offset = 0;
             String cityPrefixUrl = carRegion.replaceAll(" ", "%20");
@@ -106,8 +105,10 @@ public class CitiesService {
                         region.get("name") + " Valid options: " + validCities, HttpStatus.BAD_REQUEST);
             }
 
+        } catch (CustomException e) {
+            throw new CustomException("Failed location setting: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
-            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+            throw new CustomException("Failed location setting: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 

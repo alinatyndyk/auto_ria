@@ -47,8 +47,10 @@ public class AdministratorServiceMySQL {
             }
             AdministratorSQL administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
             return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
-            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
@@ -121,13 +123,5 @@ public class AdministratorServiceMySQL {
         }
     }
 
-//    public ResponseEntity<RegisterKey> generateAuthKey(String email, ERole role) {
-//        try {
-//        String key = jwtService.generateRegisterKey(email, ETokenRole.valueOf(role.name()));
-//        return ResponseEntity.ok(registerKeyDaoSQL.save(RegisterKey.builder().registerKey(key).build()));
-//        } catch (Exception e) {
-//            throw new CustomException("Error while generating admin key", HttpStatus.EXPECTATION_FAILED);
-//        }
-//    }
 
 }

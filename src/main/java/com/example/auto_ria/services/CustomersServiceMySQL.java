@@ -9,7 +9,6 @@ import com.example.auto_ria.models.AdministratorSQL;
 import com.example.auto_ria.models.CustomerSQL;
 import com.example.auto_ria.models.ManagerSQL;
 import com.example.auto_ria.models.SellerSQL;
-import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,52 +31,82 @@ public class CustomersServiceMySQL {
     private FMService mailer;
 
     public ResponseEntity<Page<CustomerSQL>> getAll(int page) {
-        Pageable pageable = PageRequest.of(page, 2);
-        return new ResponseEntity<>(customerDaoSQL.findAll(pageable), HttpStatus.ACCEPTED);
+        try {
+            Pageable pageable = PageRequest.of(page, 2);
+            return new ResponseEntity<>(customerDaoSQL.findAll(pageable), HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
 
     public ResponseEntity<CustomerSQL> getById(String id) {
-        if (customerDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
-            throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+        try {
+            if (customerDaoSQL.findById(Integer.parseInt(id)).isEmpty()) {
+                throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+            }
+            CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
+            return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-        CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
-        return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
     }
 
     public CustomerSQL getByEmail(String email) {
-        return customerDaoSQL.findByEmail(email);
+        try {
+            return customerDaoSQL.findByEmail(email);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     public void checkCredentials(HttpServletRequest request, int id) {
-        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
-        CustomerSQL customerById = getById(String.valueOf(id)).getBody();
+        try {
+            CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+            CustomerSQL customerById = getById(String.valueOf(id)).getBody();
 
-        if (customerSQL != null && customerSQL.getId() != Objects.requireNonNull(customerById).getId()) {
-            throw new CustomException("Failed. Check credentials", HttpStatus.FORBIDDEN);
+            if (customerSQL != null && customerSQL.getId() != Objects.requireNonNull(customerById).getId()) {
+                throw new CustomException("Check credentials", HttpStatus.FORBIDDEN);
+            }
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     public ResponseEntity<String> deleteById(String id, CustomerSQL customerSQL, AdministratorSQL administratorSQL, ManagerSQL manager) {
-        customerDaoSQL.deleteById(Integer.valueOf(id));
+        try {
+            customerDaoSQL.deleteById(Integer.valueOf(id));
 
-        HashMap<String, Object> vars = new HashMap<>();
-        vars.put("name", customerSQL.getName());
-        vars.put("email", customerSQL.getEmail());
+            HashMap<String, Object> vars = new HashMap<>();
+            vars.put("name", customerSQL.getName());
+            vars.put("email", customerSQL.getEmail());
 
-        if (administratorSQL != null || manager != null) {
+            if (administratorSQL != null || manager != null) {
+                try {
+                    mailer.sendEmail(customerSQL.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
+                } catch (Exception ignore) {
+                }
+            }
+
             try {
-                mailer.sendEmail(customerSQL.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
+                mailer.sendEmail(customerSQL.getEmail(), EMail.PLATFORM_LEAVE, vars);
             } catch (Exception ignore) {
             }
-        }
 
-        try {
-            mailer.sendEmail(customerSQL.getEmail(), EMail.PLATFORM_LEAVE, vars);
-        } catch (Exception ignore) {
+            return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
+        } catch (CustomException e) {
+            throw new CustomException("Failed delete: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed delete: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-
-        return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
 
     public boolean doesBelongToCustomer(CustomerSQL customerToUpdate, CustomerSQL customerFromHeader) {
@@ -113,18 +142,25 @@ public class CustomersServiceMySQL {
                 throw new CustomException("Error.Update_fail: The car does not belong to seller", HttpStatus.FORBIDDEN);
             }
             return new ResponseEntity<>(customerDaoSQL.save(customerSQL), HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed update: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
-            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+            throw new CustomException("Failed update: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
     public void updateAvatar(int id, String fileName) {
+        try {
+            CustomerSQL customerSQL = getById(String.valueOf(id)).getBody();
+            assert customerSQL != null;
+            customerSQL.setAvatar(fileName);
 
-        CustomerSQL customerSQL = getById(String.valueOf(id)).getBody();
-        assert customerSQL != null;
-        customerSQL.setAvatar(fileName);
-
-        customerDaoSQL.save(customerSQL);
+            customerDaoSQL.save(customerSQL);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
 }

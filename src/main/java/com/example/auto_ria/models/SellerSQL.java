@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.core.env.Environment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +18,11 @@ import java.util.List;
 @NoArgsConstructor
 public class SellerSQL extends Person {
 
+//    private Environment environment;
+
     private String city;
     private String region;
 
-    @Column(unique = true)
     private String number;
 
     @JsonBackReference

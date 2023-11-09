@@ -1,9 +1,9 @@
 package com.example.auto_ria.models;
 
+import com.example.auto_ria.dto.SellerOfCarDTO;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.enums.ERegion;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,9 @@ public class CarSQL {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Enumerated(EnumType.STRING)
     private EBrand brand;
+    //todo through api
 
     private int powerH;
 

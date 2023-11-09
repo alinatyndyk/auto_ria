@@ -6,10 +6,7 @@ import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.CarSQL;
-import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.responses.CarResponse;
 import com.example.auto_ria.models.responses.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.MiddlePriceResponse;
@@ -97,10 +94,11 @@ public class CarsServiceMySQLImpl {
     public ResponseEntity<Page<CarResponse>> getAll(int page, CarSQL params) {
         try {
             ExampleMatcher matcher = ExampleMatcher.matchingAll()
+                    .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
                     .withIgnoreNullValues()
+                    .withIgnorePaths("powerH")
                     .withIgnorePaths("id")
-                    .withIgnorePaths("photo")
-                    .withIgnorePaths("isActivated");
+                    .withIgnorePaths("photo");
 
             Example<CarSQL> example = Example.of(params, matcher);
 
@@ -243,6 +241,7 @@ public class CarsServiceMySQLImpl {
 
     public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
         try {
+            //todo seller response
             CarSQL car = CarSQL.builder()
                     .brand(carDTO.getBrand())
                     .powerH(carDTO.getPowerH())
@@ -257,11 +256,10 @@ public class CarsServiceMySQLImpl {
                     .build();
 
             if (administratorSQL != null) {
-                car.setSeller(SellerSQL.adminBuilder().name("Auto.Ria Services")
+                car.setSeller(SellerSQL.adminBuilder()
                         .id(administratorSQL.getId())
                         .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
                         .name(environment.getProperty("office.name"))
-                        .number(environment.getProperty("office.number"))
                         .region(environment.getProperty("office.region"))
                         .city(environment.getProperty("office.city"))
                         .build());
@@ -353,6 +351,7 @@ public class CarsServiceMySQLImpl {
                     .seller(SellerResponse.builder()
                             .id(carSQL.getSeller().getId())
                             .name(carSQL.getSeller().getName())
+                            .lastName(carSQL.getSeller().getLastName())
                             .avatar(carSQL.getSeller().getAvatar())
                             .city(carSQL.getSeller().getCity())
                             .region(carSQL.getSeller().getRegion())

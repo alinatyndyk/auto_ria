@@ -3,15 +3,11 @@ package com.example.auto_ria.dto;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.services.CitiesService;
 import jakarta.validation.constraints.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
-import org.springframework.core.env.Environment;
 
 import java.util.Arrays;
 import java.util.List;

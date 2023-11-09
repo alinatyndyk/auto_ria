@@ -29,7 +29,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,14 +37,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AllArgsConstructor
 @RequestMapping(value = "cars")
 //todo everything in try catch
-// todo validation
 //todo premium bought monthly
-//todo check isActivated without permissions
-
-//todo check ban/activate car
-//todo show only not banned cars
 //todo ban/activate users
 //todo chat
+
+// ! todo validation
+// ! todo check ban/activate car
+// ! todo check isActivated without permissions
+// ! todo show only not banned cars
 public class CarController {
 
     private CarsServiceMySQLImpl carsService;
@@ -80,6 +79,7 @@ public class CarController {
                         switch (fieldName) {
                             case "brand" -> field.set(carQueryParams, EBrand.valueOf(fieldValue));
                             case "model" -> field.set(carQueryParams, EModel.valueOf(fieldValue));
+                            case "powerH" -> field.set(carQueryParams, Integer.valueOf(fieldValue));
                             default -> field.set(carQueryParams, fieldValue);
                         }
                     }
@@ -87,6 +87,8 @@ public class CarController {
                     throw new CustomException("Forbidden query params found", HttpStatus.FORBIDDEN);
                 }
             }
+
+            carQueryParams.setActivated(true);
             return carsService.getAll(page, carQueryParams);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

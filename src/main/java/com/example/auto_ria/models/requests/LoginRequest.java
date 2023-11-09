@@ -13,8 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class LoginRequest {
 
-    @NotBlank(message = "name cant be empty")
-    @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
+    @NotBlank(message = "email cant be empty")
     private String email;
 
     @NotBlank(message = "password cant be empty")

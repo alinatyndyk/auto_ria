@@ -23,17 +23,22 @@ import java.util.Map;
 public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL>, QueryByExampleExecutor<CarSQL> {
 
     List<CarSQL> findBySeller(SellerSQL sellerSQL);
+//    List<CarSQL> findByIsActivatedIsFalse();
+
+    @Query("SELECT c FROM CarSQL c WHERE c.isActivated = true")
+    List<CarSQL> findByIsActivatedIsTrue();
 
     Page<CarSQL> findAllBySeller(SellerSQL sellerSQL, Pageable pageable);
 
-    @Query("SELECT new map(c.currency as currency, c.price as price) FROM CarSQL c WHERE c.brand = :#{#params['brand']} AND c.region = :#{#params['region']}")
+    @Query("SELECT new map(c.currency as currency, c.price as price) " +
+            "FROM CarSQL c WHERE c.brand = :#{#params['brand']} AND c.region = :#{#params['region']}")
     List<Map<String, Object>> findPricesByBrandAndRegion(@Param("params") HashMap<String, Object> params);
-
+//todo look though model
     long count();
 
     long countByBrandAndRegion(EBrand brand, String region);
 
-    @Override
-    <S extends CarSQL> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable);
+//    @Override
+//    <S extends CarSQL> @NotNull Page<S> findAll(@NotNull Example<S> example, @NotNull Pageable pageable);
 
 }

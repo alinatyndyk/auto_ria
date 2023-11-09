@@ -33,12 +33,10 @@ public class PersonRequest {
 
     @NotBlank(message = "name is required")
     @Size(min = 3, message = "name must have more than 3 characters")
-    @Size(max = 255, message = "name must have less than 255 characters")
+    @Size(max = 30, message = "name must have less than 30 characters")
     private String name;
 
     @Column(unique = true)
-    @Size(min = 3, message = "email must have more than 3 characters")
-    @Size(max = 255, message = "email must have less than 255 characters")
     @Pattern(regexp = "^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email")
     private String email;
 

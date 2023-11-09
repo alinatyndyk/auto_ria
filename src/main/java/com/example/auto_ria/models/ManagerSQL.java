@@ -10,7 +10,6 @@ import java.util.List;
 @Entity
 @Data
 @NoArgsConstructor
-//@AllArgsConstructor
 @ToString
 public class ManagerSQL extends Person {
 

@@ -5,8 +5,7 @@ import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
 import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.services.JwtService;
-import com.example.auto_ria.services.UserDetailsServiceImpl;
+import com.example.auto_ria.services.*;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,6 +36,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private SellerAuthDaoSQL sellerAuthDaoSQL;
     private CustomerAuthDaoSQL customerAuthDaoSQL;
 
+    private AdministratorServiceMySQL administratorServiceMySQL;
+    private ManagerServiceMySQL managerServiceMySQL;
+    private UsersServiceMySQLImpl usersServiceMySQL;
+    private CustomersServiceMySQL customersServiceMySQL;
+
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain) throws IOException {
@@ -55,11 +59,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
 
-
                 if (
                         jwtService.isTokenValid(jwt, userDetails)
                 ) {
-                    if (!isInDb(userDetails, jwt)) {
+                    if (!isInDbAndActivated(userDetails, jwt)) {
                         throw new IllegalAccessException("Token invalid");
                     }
 
@@ -90,14 +93,18 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private boolean isInDb(UserDetails userDetails, String jwt) {
-        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))) {
+    private boolean isInDbAndActivated(UserDetails userDetails, String jwt) {
+        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))
+                && administratorServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return adminAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))) {
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))
+                && managerServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return managerAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))) {
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))
+                && customersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return customerAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))) {
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))
+                && usersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return sellerAuthDaoSQL.findByAccessToken(jwt) != null;
         }
         return false;

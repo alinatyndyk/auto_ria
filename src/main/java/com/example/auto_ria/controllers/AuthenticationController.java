@@ -32,6 +32,9 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     private UsersServiceMySQLImpl usersServiceMySQL;
+    private AdministratorServiceMySQL administratorServiceMySQL;
+    private CustomersServiceMySQL customersServiceMySQL;
+    private ManagerServiceMySQL managerServiceMySQL;
 
     private RegisterKeyDaoSQL registerKeyDaoSQL;
     private JwtService jwtService;
@@ -72,9 +75,12 @@ public class AuthenticationController {
             if (jwtService.isTokenExprired(code)) {
                 throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
             }
+            System.out.println("78");
             String email = jwtService.extractUsername(code, ETokenRole.SELLER_ACTIVATE);
+            System.out.println("80");
             return authenticationService.activateSeller(email, code);
         } catch (CustomException e) {
+            System.out.println("83");
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
@@ -226,6 +232,9 @@ public class AuthenticationController {
     @PostMapping("/authenticate/seller")
     public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
         try {
+            if (!usersServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
             return ResponseEntity.ok(authenticationService.login(loginRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -235,6 +244,9 @@ public class AuthenticationController {
     @PostMapping("/authenticate/manager")
     public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody LoginRequest loginRequest) {
         try {
+            if (!managerServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
             return ResponseEntity.ok(authenticationService.loginManager(loginRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -244,6 +256,11 @@ public class AuthenticationController {
     @PostMapping("/authenticate/admin")
     public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
         try {
+            System.out.println("256");
+            if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
+            System.out.println("260");
             return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -253,6 +270,9 @@ public class AuthenticationController {
     @PostMapping("/authenticate/customer")
     public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody LoginRequest loginRequest) {
         try {
+            if (!customersServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
             return ResponseEntity.ok(authenticationService.loginCustomer(loginRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

@@ -127,7 +127,7 @@ public class AuthenticationService {
             String access = jwtService.generateToken(sellerSQL);
             String refresh = jwtService.generateRefreshToken(sellerSQL);
 
-            sellerDaoSQL.save(sellerSQL);
+            sellerDaoSQL.save(sellerSQL); //todo authorize !!!!!!!!!!!!
 
             sellerAuthDaoSQL.save(AuthSQL.builder().
                     personId(sellerSQL.getId()).accessToken(access).refreshToken(refresh).build());
@@ -416,12 +416,14 @@ public class AuthenticationService {
             try {
                 adminAuthenticationProvider.authenticate(
                         new UsernamePasswordAuthenticationToken(
-                                loginRequest.getEmail(),
+                                administrator.getEmail(),
                                 loginRequest.getPassword(),
                                 administrator.getAuthorities()
                         )
                 );
             } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println(e);
                 throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
             }
 
@@ -494,6 +496,10 @@ public class AuthenticationService {
             String refreshToken = refreshRequest.getRefreshToken();
             String username = jwtService.extractUsername(refreshToken, ETokenRole.SELLER);
 
+            if (!usersServiceMySQL.getByEmail(username).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
+
             SellerSQL user = sellerDaoSQL.findSellerByEmail(username);
 
             if (!user.getIsActivated()) {
@@ -533,6 +539,10 @@ public class AuthenticationService {
 
             ManagerSQL user = managerDaoSQL.findByEmail(username);
 
+            if (!user.getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
+
             if (!user.getIsActivated()) {
                 throw new CustomException("Activate your account to access secured endpoints", HttpStatus.FORBIDDEN);
             }
@@ -568,6 +578,10 @@ public class AuthenticationService {
             String username = jwtService.extractUsername(refreshToken, ETokenRole.ADMIN);
             AdministratorSQL administrator = administratorDaoSQL.findByEmail(username);
 
+            if (!administrator.getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
+
             if (!administrator.getIsActivated()) {
                 throw new CustomException("Activate your account to access secured endpoints", HttpStatus.FORBIDDEN);
             }
@@ -601,6 +615,10 @@ public class AuthenticationService {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
             String username = jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER);
+
+            if (!customersServiceMySQL.getByEmail(username).getIsActivated().equals(true)) {
+                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
+            }
 
             CustomerSQL customerSQL = customerDaoSQL.findByEmail(username);
 

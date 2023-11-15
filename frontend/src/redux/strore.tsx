@@ -1,10 +1,8 @@
 import {combineReducers, configureStore} from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
-import {carReducer} from "./slices/car.slice";
-
 const rootReducer = combineReducers({
-    cars: carReducer
+    // cars: carReducer
 })
 
 

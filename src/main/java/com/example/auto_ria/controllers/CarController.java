@@ -110,20 +110,28 @@ public class CarController {
 
     @PostMapping("/buy-premium")
     public ResponseEntity<String> getPremium(
+            @RequestParam("token") Object token,
+            @RequestParam("amount") int amount,
             HttpServletRequest request
     ) {
-        try {
-            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
-            if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
-            }
-            stripeService.createPayment();
-            sellerSQL.setAccountType(EAccountType.PREMIUM);
-            userDaoSQL.save(sellerSQL);
+        System.out.println(token);
+        System.out.println("token");
+        System.out.println(amount);
+        System.out.println("amount");
+
+
+//        try {
+//            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+//            if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+//                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
+//            }
+            stripeService.createPayment(token.toString());
+//            sellerSQL.setAccountType(EAccountType.PREMIUM);
+//            userDaoSQL.save(sellerSQL);
             return ResponseEntity.ok("Premium bought successfully");
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
+//        } catch (CustomException e) {
+//            throw new CustomException(e.getMessage(), e.getStatus());
+//        }
     }
 
     @PostMapping("/activate/{id}")

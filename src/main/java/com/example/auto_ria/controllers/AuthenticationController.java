@@ -55,10 +55,10 @@ public class AuthenticationController {
             RegisterSellerRequest registerRequest = new RegisterSellerRequest(
                     registerRequestDTO.getCity(),
                     registerRequestDTO.getRegion(),
-                    registerRequestDTO.getNumber(),
                     registerRequestDTO.getName(),
                     registerRequestDTO.getLastName(),
                     registerRequestDTO.getEmail(),
+                    registerRequestDTO.getNumber(),
                     fileName,
                     registerRequestDTO.getPassword());
             return authenticationService.register(registerRequest);

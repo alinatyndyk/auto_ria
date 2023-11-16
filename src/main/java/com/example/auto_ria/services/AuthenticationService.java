@@ -70,6 +70,8 @@ public class AuthenticationService {
 
     public ResponseEntity<String> register(RegisterSellerRequest registerRequest) {
         try {
+            System.out.println(registerRequest);
+            System.out.println("registerRequest");
             if (sellerDaoSQL.findSellerByEmail(registerRequest.getEmail()) != null) {
                 throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
             }
@@ -106,7 +108,9 @@ public class AuthenticationService {
 
             try {
                 mailer.sendEmail(registerRequest.getEmail(), EMail.REGISTER_KEY, variables);
-            } catch (Exception ignore) {
+            } catch (Exception e) {
+                System.out.println(e);
+                System.out.println(e.getMessage());
                 sellerDaoSQL.delete(seller);
                 throw new CustomException("Something went wrong... Try again later", HttpStatus.CONFLICT);
             }

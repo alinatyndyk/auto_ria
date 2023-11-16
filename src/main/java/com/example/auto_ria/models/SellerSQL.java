@@ -18,12 +18,14 @@ import java.util.List;
 @NoArgsConstructor
 public class SellerSQL extends Person {
 
-//    private Environment environment;
-
     private String city;
     private String region;
-
     private String number;
+
+    private String paymentSource;
+    private boolean isPaymentSourcePresent;
+
+    private Boolean hasDefaultCard;
 
     @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL)

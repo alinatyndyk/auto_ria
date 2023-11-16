@@ -59,6 +59,26 @@ public class CronConfiguration {
     public void onApplicationStart() {
 
         Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
+
+        Customer stripeCustomer = Customer.retrieve("cus_P0TXHOkBLbkHcg");
+
+//        Map<String, Object> paramCharge = new HashMap<>();
+//        paramCharge.put("amount", 5000);
+//        paramCharge.put("currency", "usd");
+//        paramCharge.put("customer", stripeCustomer.getId());
+        System.out.println(stripeCustomer.getInvoiceSettings().getDefaultPaymentMethod());
+        System.out.println(stripeCustomer.getDefaultSource());
+
+        PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
+                .setAmount(Long.parseLong("90000"))
+                .setCurrency("usd")
+                .setDescription("From Customer")
+                .setCustomer(stripeCustomer.getId())
+                .setPaymentMethod(stripeCustomer.getInvoiceSettings().getDefaultPaymentMethod())
+                .setConfirm(true)
+                .build();
+
+        PaymentIntent paymentIntent = PaymentIntent.create(createParams);
 //
 //        Map<String, Object> cardParams = new HashMap<String, Object>();
 //        cardParams.put("number", "4242424242424242");
@@ -106,25 +126,38 @@ public class CronConfiguration {
 //        );
 
 
-        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-
-        Map<String, Object> paymentMethodParams = new HashMap<>();
-        paymentMethodParams.put("type", "card");
-        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
-
-        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
-
-        PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
-                .setAmount(Long.parseLong("8000"))
-                .setCurrency("usd")
-                .setDescription("from front")
-                .setPaymentMethod(paymentMethod.getId())
-                .setConfirm(true)
-                .build();
-
-        PaymentIntent paymentIntent = PaymentIntent.create(createParams);
+//        Map<String, Object> paymentMethodParams = new HashMap<>();
+//        paymentMethodParams.put("type", "card");
+//        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
+//
+//        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+//
+//        PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
+//                .setAmount(Long.parseLong("8000"))
+//                .setCurrency("usd")
+//                .setDescription("from front")
+//                .setPaymentMethod(paymentMethod.getId())
+//                .setConfirm(true)
+//                .build();
+//
+//
+//        PaymentIntent paymentIntent = PaymentIntent.create(createParams);
 
         // todo save customer id
+        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
+
+//        List<Object> events = new ArrayList<Object>();
+//        events.add("invoice.payment_failed");
+//
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("enabled_events", events);
+////        params.put("url", "https://webhook.site/e038300e-b72e-49f5-8b67-14c80d1ea5eb");
+//        params.put("url", "http://localhost:8080/cars/webhooks/stripe");
+//
+//        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
+//
+//        System.out.println(webhookEndpoint);
+//        System.out.println("webhookEndpoint");
 
         getCurrencyRates();
         deleteUnactivatedAccounts();

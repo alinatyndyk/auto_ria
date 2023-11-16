@@ -9,13 +9,15 @@ export default function CheckoutComponent() {
         console.log("xxxxxxxxxxxxxxxxxxx");
         try {
             const response =
-                await axios.post("http://localhost:8080/cars/buy-premium", {
+                // await axios.post("http://localhost:8080/cars/buy-premium", {
+                await axios.post("http://localhost:8080/cars/add-payment-source", {
                     amount: 1000,
+                    id: "2",
                     token: token.id
                 }, {
-                    headers: {
-                        'Content-type': 'multipart/form-data'
-                    }
+                    // headers: {
+                    //     'Content-type': 'multipart/form-data'
+                    // }
                 })
             if (response.status === 200) {
                 console.log('Your payment was successful');
@@ -34,6 +36,7 @@ export default function CheckoutComponent() {
         <div className={'checkout-form-insides'}>
             <h2>Checkout Form</h2>
             <div>
+                <input type={"checkbox"} name={"Would you like to make this your account's card?"}/>
                 <StripeCheckout
                     stripeKey={stripeKeyPublish}
                     label='Pay now'
@@ -44,7 +47,6 @@ export default function CheckoutComponent() {
                     description={`Your total is...`}
                     token={payNow}
                 />
-
             </div>
         </div>
     )

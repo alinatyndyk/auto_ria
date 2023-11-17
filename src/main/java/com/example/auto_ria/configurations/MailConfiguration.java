@@ -19,9 +19,19 @@ public class MailConfiguration {
             put("templateName", "welcome.ftl");
         }});
 
+        emails.put(EMail.PREMIUM_END, new HashMap<>() {{
+            put("subject", "Premium end!");
+            put("templateName", "premium-end.ftl");
+        }});
+
         emails.put(EMail.REGISTER_KEY, new HashMap<>() {{
             put("subject", "Register key");
             put("templateName", "register-key.ftl");
+        }});
+
+        emails.put(EMail.PAYMENT_FAILED, new HashMap<>() {{
+            put("subject", "Subscription suspended");
+            put("templateName", "payment-failed.ftl");
         }});
 
         emails.put(EMail.PLATFORM_LEAVE, new HashMap<>() {{

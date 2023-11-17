@@ -17,4 +17,5 @@ public class SetPaymentSourceRequest { //todo dto
 
     private boolean useDefaultCard;
     private boolean setAsDefaultCard;
+    private boolean autoPay;
 }

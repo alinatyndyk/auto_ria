@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public interface UserDaoSQL extends JpaRepository<SellerSQL, Integer> {
     SellerSQL findSellerByEmail(String email);
+    SellerSQL findByPaymentSource(String paymentSource);
 
     SellerSQL findSellerByNumber(String number);
 

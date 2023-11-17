@@ -1,10 +1,12 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
+import com.example.auto_ria.dao.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.requests.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.EModel;
@@ -20,12 +22,6 @@ import com.example.auto_ria.models.responses.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.StatisticsResponse;
 import com.example.auto_ria.services.*;
-import com.stripe.Stripe;
-import com.stripe.model.Customer;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.PaymentMethod;
-import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.PaymentIntentCreateParams;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -65,6 +61,8 @@ public class CarController {
     private FMService mailer;
     private ManagerServiceMySQL managerServiceMySQL;
     private CitiesService citiesService;
+
+    private PremiumPlanDaoSQL premiumPlanDaoSQL;
 
     private Environment environment;
 
@@ -113,172 +111,6 @@ public class CarController {
         try {
             carsService.extractById(id);
             mixpanelService.view(String.valueOf(id));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @SneakyThrows
-    @PostMapping("/buy-premium")
-    public ResponseEntity<String> getPremium(
-            @RequestBody SetPaymentSourceRequest body,
-            HttpServletRequest request
-    ) {
-
-        try {
-//            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
-            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
-
-
-//            if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-//                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
-//            }
-
-
-            stripeService.createPayment(body, sellerSQL);
-
-//            sellerSQL.setAccountType(EAccountType.PREMIUM);
-//            userDaoSQL.save(sellerSQL);
-            return ResponseEntity.ok("Premium bought successfully");
-        } catch (CustomException e) {
-            System.out.println(e.getMessage());
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @SneakyThrows
-    @PostMapping("/xxx")
-    public ResponseEntity<String> addPaymentSource1(
-            @RequestBody SetPaymentSourceRequest body
-    ) {
-        try {
-
-
-            SellerSQL sellerSQL = usersServiceMySQL.getById(Integer.parseInt(body.getId()));
-
-//            Map<String, Object> paymentMethodParams = new HashMap<>();
-//            paymentMethodParams.put("type", "card");
-//            paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
-//
-//            PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
-
-//            PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
-//                    .setAmount(Long.parseLong("6000"))
-//                    .setCurrency("usd")
-//                    .setDescription("from front")
-////                    .setPaymentMethod(paymentMethod.getId())
-//                    .setCustomer("cus_P0n1iHMoLXpAqP")
-//                    .setConfirm(true)
-//                    .build();
-//
-//            PaymentIntent paymentIntent = PaymentIntent.create(createParams); //todo
-//
-//            if (paymentToken != null) {
-//                PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
-//                        .setAmount(Long.parseLong("8000"))
-//                        .setCurrency("usd")
-//                        .setDescription("from front")
-//                        .setPaymentMethod(paymentToken)
-//                        .setConfirm(true)
-//                        .build();
-//
-//                PaymentIntent.create(createParams);
-//            } else {
-//                throw new CustomException("Source attachment fail: credentials provided is null or invalid", HttpStatus.BAD_REQUEST);
-//            }
-
-            Customer customer = Customer.create(
-                            CustomerCreateParams.builder()
-                                    .setName(sellerSQL.getName() + " " + sellerSQL.getLastName())
-                                    .setEmail(sellerSQL.getEmail())
-                                    .setSource(body.getToken())
-                                    .build()
-                    );
-
-            System.out.println("CREATED CUSTOMER");
-
-            return ResponseEntity.ok("Premium bought successfully");
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PostMapping("/webhooks/stripe")
-    public void handleInvoicePaymentFailedWebhook(@RequestBody Map<String, Object> event) {
-        System.out.println("WEBHOOK !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        String secretKey = (String) event.get("whsec_OkSN4Pl56ZXbgiKldWtiUDg6VwA7SncB");
-        String type = (String) event.get("type");
-
-        System.out.println(type);
-        System.out.println("type");
-
-        if (type.equals("invoice.payment_failed")) {
-            // Suspend the subscription and send an email to the customer
-            // ...
-
-            System.out.println("invoice.payment_failed--------------------------");
-
-        } if (type.equals("customer.created")) {
-
-            System.out.println("created.payment_failed--------------------------");
-        }
-    }
-
-    @SneakyThrows
-    @PostMapping("/add-payment-source")
-    public ResponseEntity<String> addPaymentSource(
-            @RequestBody SetPaymentSourceRequest body
-    ) {
-        try {
-            System.out.println(body.getToken());
-            Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-
-            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
-
-            boolean sourcePresent = sellerSQL.isPaymentSourcePresent();
-            String paymentToken = body.getToken();
-
-//todo add path to security
-            if (!sourcePresent) {
-                Customer customer = Customer.create(
-                        CustomerCreateParams.builder()
-                                .setName(sellerSQL.getName() + sellerSQL.getLastName())
-                                .setEmail(sellerSQL.getEmail())
-                                .setSource(paymentToken)
-                                .build()
-                );
-
-                sellerSQL.setPaymentSource(customer.getId()); //change to payment method
-                sellerSQL.setPaymentSourcePresent(true);
-                userDaoSQL.save(sellerSQL);
-
-            } else {
-                String paymentSource = sellerSQL.getPaymentSource();
-                Customer stripeCustomer = Customer.retrieve(paymentSource);
-                String defaultMethod = stripeCustomer.getInvoiceSettings().getDefaultPaymentMethod();
-
-                Map<String, Object> params = new HashMap<>();
-                params.put("source", paymentToken);
-                stripeCustomer.update(params);
-            }
-
-//            if (paymentToken != null) {
-//                PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
-//                        .setAmount(Long.parseLong("8000"))
-//                        .setCurrency("usd")
-//                        .setDescription("from front")
-//                        .setPaymentMethod(paymentToken)
-//                        .setConfirm(true)
-//                        .build();
-//
-//                PaymentIntent.create(createParams);
-//            } else {
-//                throw new CustomException("Source attachment fail: credentials provided is null or invalid", HttpStatus.BAD_REQUEST);
-//            }
-
-
-//            return ResponseEntity.ok("Premium bought successfully");
-            return ResponseEntity.ok("Card attached successfully");
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

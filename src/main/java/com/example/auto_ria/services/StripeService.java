@@ -1,6 +1,7 @@
 package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.PremiumPlanDaoSQL;
+import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
@@ -11,9 +12,7 @@ import com.stripe.model.Customer;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.Price;
 import com.stripe.model.Subscription;
-import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.PaymentIntentCreateParams;
-import com.stripe.param.SubscriptionListParams;
+import com.stripe.param.*;
 import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -92,7 +91,6 @@ public class StripeService {
 
                 }
 
-
                 if (!stripePresent && !body.isSetAsDefaultCard()) {
                     System.out.println("first3");
                     Customer customer = Customer.create(
@@ -121,7 +119,7 @@ public class StripeService {
                 throw new CustomException("Please check your parameters", HttpStatus.CONFLICT);
 
             }
-//
+
             if (paymentToken != null && customerId != null) {
 
                 if (body.isAutoPay()) {
@@ -136,19 +134,34 @@ public class StripeService {
                     params1.put("customer", customerId);
                     params1.put("items", items);
                     params1.put("collection_method", SubscriptionListParams.CollectionMethod.CHARGE_AUTOMATICALLY);
+
                     Subscription subscription = Subscription.create(params1);
                     System.out.println(subscription);
                     System.out.println("subscription----------------------------");
+                    //todo cron delete long expired subscriptions
 
-                    premiumPlanDaoSQL.save(PremiumPlan.builder()
-                            .autoPayments(body.isAutoPay())
-                            .startDate(LocalDate.now())
-                            .endDate(LocalDate.now().plusMonths(1))
-                            .sellerId(sellerSQL.getId())
-                            .customerId(customerId)
-                            .subId(subscription.getId())
-                            .isActive(true)
-                            .build());
+                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+
+                    if (premiumPlan != null) {
+                        premiumPlan.setAutoPayments(body.isAutoPay());
+                        premiumPlan.setStartDate(LocalDate.now());
+                        premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
+                        premiumPlan.setSubId(subscription.getId());
+                        premiumPlan.setActive(true);
+
+                    } else {
+                        premiumPlanDaoSQL.save(PremiumPlan.builder()
+                                .autoPayments(body.isAutoPay())
+                                .startDate(LocalDate.now())
+                                .endDate(LocalDate.now().plusMonths(1))
+                                .sellerId(sellerSQL.getId())
+                                .customerId(customerId)
+                                .subId(subscription.getId())
+                                .isActive(true)
+                                .build());
+                    }
+
+                    sellerSQL.setAccountType(EAccountType.PREMIUM);
 
                 } else {
                     Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
@@ -164,15 +177,26 @@ public class StripeService {
 
                     PaymentIntent.create(createParams);
 
-                    premiumPlanDaoSQL.save(PremiumPlan.builder()
-                            .autoPayments(body.isAutoPay())
-                            .startDate(LocalDate.now())
-                            .endDate(LocalDate.now().plusMonths(1))
-                            .sellerId(sellerSQL.getId())
-                            .customerId(customerId)
-                            .subId(null)
-                            .isActive(true)
-                            .build());
+                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+                    if (premiumPlan != null) {
+                        premiumPlan.setAutoPayments(body.isAutoPay());
+                        premiumPlan.setStartDate(LocalDate.now());
+                        premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
+                        premiumPlan.setSubId(null);
+                        premiumPlan.setActive(true);
+                    } else {
+                        premiumPlanDaoSQL.save(PremiumPlan.builder()
+                                .autoPayments(body.isAutoPay())
+                                .startDate(LocalDate.now())
+                                .endDate(LocalDate.now().plusMonths(1))
+                                .sellerId(sellerSQL.getId())
+                                .customerId(customerId)
+                                .subId(null)
+                                .isActive(true)
+                                .build());
+                    }
+
+                    sellerSQL.setAccountType(EAccountType.PREMIUM);
                 }
 
 
@@ -184,5 +208,23 @@ public class StripeService {
             return;
         }
         ResponseEntity.ok(Map.of("message", "Payment completed successfully"));
+    }
+
+    public void cancelSubscription(PremiumPlan premiumPlan) {
+        try {
+            Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
+
+            Customer customer = Customer.retrieve(premiumPlan.getCustomerId());
+            Subscription subscription = customer.getSubscriptions().getData().get(0);
+
+            SubscriptionUpdateParams params = new SubscriptionUpdateParams.Builder()
+                    .setCancelAt(premiumPlan.getEndDate().toEpochDay())
+                    .build();
+
+            subscription.update(params);
+
+        } catch (Exception e) {
+            throw new CustomException("Could not cancel subscription", HttpStatus.EXPECTATION_FAILED);
+        }
     }
 }

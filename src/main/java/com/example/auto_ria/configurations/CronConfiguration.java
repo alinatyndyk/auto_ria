@@ -161,6 +161,17 @@ public class CronConfiguration {
 
     }
 
+    @Scheduled(cron = "0 0 0 */3 * *")
+    public void deleteLongNonPayedSubscriptions() {
+        try {
+            LocalDate minusThreeMonths = LocalDate.now().minusMonths(3);
+            premiumPlanDaoSQL.deleteByEndDateBefore(minusThreeMonths);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
     @Scheduled(cron = "0 0 3 * * *")
     public void deleteExpiredTokens() {
         try {

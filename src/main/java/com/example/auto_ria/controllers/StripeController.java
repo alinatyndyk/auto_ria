@@ -146,4 +146,31 @@ public class StripeController {
         }
     }
 
+    @SneakyThrows
+    @PostMapping("/cancel-subscription")
+    public ResponseEntity<String> cancel(
+            @RequestBody SetPaymentSourceRequest body,
+            HttpServletRequest request
+    ) {
+
+        try {
+            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+//            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
+
+            if (!sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+                throw new CustomException("Account with no subscription", HttpStatus.BAD_REQUEST);
+            }
+
+            PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+
+            stripeService.cancelSubscription(premiumPlan);
+
+            return ResponseEntity.ok("Subscription canceled. " +
+                    "Current subscription's expiry date: " + premiumPlan.getEndDate());
+        } catch (CustomException e) {
+            System.out.println(e.getMessage());
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
 }

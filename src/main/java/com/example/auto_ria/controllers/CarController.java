@@ -41,10 +41,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AllArgsConstructor
 @RequestMapping(value = "cars")
 //todo everything in try catch
-//todo premium bought monthly
+//todo cancel sub premium
 //todo ban/activate users
 //todo chat
 
+// ! todo premium bought monthly
 // ! todo validation
 // ! todo check ban/activate car
 // ! todo check isActivated without permissions

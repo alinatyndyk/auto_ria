@@ -1,6 +1,6 @@
 package com.example.auto_ria.configurations.InitialDataLoader;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.RegisterAdminRequest;
 import com.example.auto_ria.services.AuthenticationService;

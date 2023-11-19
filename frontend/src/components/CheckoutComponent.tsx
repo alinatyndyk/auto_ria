@@ -4,7 +4,7 @@ import axios from "axios";
 export default function CheckoutComponent() {
 
     const payNow = async (token: any) => {
-        console.log("yyyyyyyyyyyyy");
+        console.log("yyyyyyyyyyyy");
         console.log(token);
         console.log("xxxxxxxxxxxxxxxxxxx");
         try {

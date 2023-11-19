@@ -1,16 +1,16 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
+import com.example.auto_ria.dao.user.ManagerDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.CustomerSQL;
-import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,9 +1,9 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.PremiumPlanDaoSQL;
+import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.stripe.Stripe;

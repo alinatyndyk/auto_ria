@@ -1,8 +1,10 @@
 package com.example.auto_ria.models.socket;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,14 +18,23 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Chat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "chat_id")  // Use a join column to map the relationship
-    private List<Message> messages = new ArrayList<>();
+    @JsonBackReference
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "chat_message",
+            joinColumns = @JoinColumn(name = "chat_id"),
+            inverseJoinColumns = @JoinColumn(name = "message_id")
+    )
+    private List<MessageClass> messages = new ArrayList<>();
+
+    private int sellerId;
+    private int customerId;
 
     @Column(updatable = false)
     @CreationTimestamp
@@ -37,7 +48,7 @@ public class Chat {
     // No need for createdAt and updatedAt fields here
 
     // Add a method to add a message to the chat
-    public void addMessage(Message message) {
+    public void addMessage(MessageClass message) {
         messages.add(message);
     }
 }

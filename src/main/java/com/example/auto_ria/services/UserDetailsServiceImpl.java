@@ -1,11 +1,11 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
+import com.example.auto_ria.dao.user.ManagerDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.*;
+import com.example.auto_ria.models.user.*;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;

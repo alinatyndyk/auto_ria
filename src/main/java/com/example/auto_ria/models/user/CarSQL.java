@@ -1,6 +1,5 @@
-package com.example.auto_ria.models;
+package com.example.auto_ria.models.user;
 
-import com.example.auto_ria.dto.SellerOfCarDTO;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;

@@ -1,11 +1,8 @@
-package com.example.auto_ria.dao;
+package com.example.auto_ria.dao.user;
 
 import com.example.auto_ria.enums.EBrand;
-import com.example.auto_ria.enums.ERegion;
-import com.example.auto_ria.models.CarSQL;
-import com.example.auto_ria.models.SellerSQL;
-import jakarta.validation.constraints.NotNull;
-import org.springframework.data.domain.Example;
+import com.example.auto_ria.models.user.CarSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

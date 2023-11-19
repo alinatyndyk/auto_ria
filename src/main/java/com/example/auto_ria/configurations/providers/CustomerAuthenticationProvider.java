@@ -1,7 +1,7 @@
 package com.example.auto_ria.configurations.providers;
 
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.models.CustomerSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

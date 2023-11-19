@@ -1,6 +1,6 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dao.RegisterKeyDaoSQL;
+import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;

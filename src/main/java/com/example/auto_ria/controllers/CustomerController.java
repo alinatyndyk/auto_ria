@@ -2,9 +2,9 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.CustomerSQL;
-import com.example.auto_ria.models.ManagerSQL;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.services.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;

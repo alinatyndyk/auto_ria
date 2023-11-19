@@ -1,9 +1,9 @@
 package com.example.auto_ria.filters;
 
-import com.example.auto_ria.dao.authDao.AdminAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
+import com.example.auto_ria.dao.auth.CustomerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.services.*;
 import io.jsonwebtoken.ExpiredJwtException;

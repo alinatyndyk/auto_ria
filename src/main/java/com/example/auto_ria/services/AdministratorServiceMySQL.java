@@ -1,14 +1,11 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.RegisterKeyDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
-import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.Person;
-import com.example.auto_ria.models.auth.RegisterKey;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.Person;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

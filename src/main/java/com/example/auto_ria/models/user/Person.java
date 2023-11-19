@@ -1,4 +1,4 @@
-package com.example.auto_ria.models;
+package com.example.auto_ria.models.user;
 
 import com.example.auto_ria.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonFormat;

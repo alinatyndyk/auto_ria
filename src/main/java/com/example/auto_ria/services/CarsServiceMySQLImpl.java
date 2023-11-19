@@ -1,16 +1,19 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.CarDaoSQL;
+import com.example.auto_ria.dao.user.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.*;
 import com.example.auto_ria.models.responses.CarResponse;
 import com.example.auto_ria.models.responses.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.SellerResponse;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.CarSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

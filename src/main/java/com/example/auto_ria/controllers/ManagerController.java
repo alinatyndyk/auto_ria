@@ -2,7 +2,7 @@ package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.ManagerSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.services.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.ManagerServiceMySQL;

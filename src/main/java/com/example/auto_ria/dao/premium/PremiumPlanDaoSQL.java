@@ -1,4 +1,4 @@
-package com.example.auto_ria.dao;
+package com.example.auto_ria.dao.premium;
 
 import com.example.auto_ria.models.premium.PremiumPlan;
 import org.springframework.data.jpa.repository.JpaRepository;

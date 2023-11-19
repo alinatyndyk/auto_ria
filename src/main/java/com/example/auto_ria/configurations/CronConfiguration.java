@@ -1,17 +1,21 @@
 package com.example.auto_ria.configurations;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
-import com.example.auto_ria.dao.*;
-import com.example.auto_ria.dao.authDao.AdminAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.CustomerAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.ManagerAuthDaoSQL;
-import com.example.auto_ria.dao.authDao.SellerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
+import com.example.auto_ria.dao.auth.CustomerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
+import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
+import com.example.auto_ria.dao.user.ManagerDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.responses.CurrencyResponse;
 import lombok.AllArgsConstructor;

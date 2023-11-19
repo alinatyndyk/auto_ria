@@ -1,6 +1,6 @@
-package com.example.auto_ria.dao;
+package com.example.auto_ria.dao.user;
 
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 

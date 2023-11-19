@@ -1,4 +1,4 @@
-package com.example.auto_ria.dao;
+package com.example.auto_ria.dao.auth;
 
 import com.example.auto_ria.models.auth.RegisterKey;
 import org.springframework.data.jpa.repository.JpaRepository;

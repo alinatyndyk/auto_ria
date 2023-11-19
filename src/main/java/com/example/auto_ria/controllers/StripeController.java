@@ -1,12 +1,12 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dao.PremiumPlanDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.example.auto_ria.services.CommonService;

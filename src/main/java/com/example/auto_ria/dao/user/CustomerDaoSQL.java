@@ -1,13 +1,10 @@
-package com.example.auto_ria.dao;
+package com.example.auto_ria.dao.user;
 
-import com.example.auto_ria.models.CustomerSQL;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 
 public interface CustomerDaoSQL extends JpaRepository<CustomerSQL, Integer> {
     CustomerSQL findByEmail(String email);

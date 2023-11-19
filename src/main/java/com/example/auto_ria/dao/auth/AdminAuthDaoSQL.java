@@ -1,4 +1,4 @@
-package com.example.auto_ria.dao.authDao;
+package com.example.auto_ria.dao.auth;
 
 import com.example.auto_ria.models.auth.AuthSQL;
 import org.springframework.data.jpa.repository.JpaRepository;

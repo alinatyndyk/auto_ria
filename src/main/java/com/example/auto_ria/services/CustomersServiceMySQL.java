@@ -1,14 +1,14 @@
 package com.example.auto_ria.services;
 
-import com.example.auto_ria.dao.CustomerDaoSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.AdministratorSQL;
-import com.example.auto_ria.models.CustomerSQL;
-import com.example.auto_ria.models.ManagerSQL;
-import com.example.auto_ria.models.SellerSQL;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;

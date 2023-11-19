@@ -4,10 +4,10 @@ import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider
 import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
-import com.example.auto_ria.dao.AdministratorDaoSQL;
-import com.example.auto_ria.dao.CustomerDaoSQL;
-import com.example.auto_ria.dao.ManagerDaoSQL;
-import com.example.auto_ria.dao.UserDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.CustomerDaoSQL;
+import com.example.auto_ria.dao.user.ManagerDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

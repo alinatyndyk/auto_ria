@@ -2,8 +2,10 @@ package com.example.auto_ria.configurations.socket;
 
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.socket.MessageDaoSQL;
+import com.example.auto_ria.dao.socket.SessionDaoSQL;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
+import com.example.auto_ria.models.socket.Session;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.socket.CloseStatus;
@@ -17,22 +19,13 @@ import java.util.*;
 
 public class WebSocketConnection extends TextWebSocketHandler {
 
-    private Map<String, WebSocketSession> sessionMap = new HashMap<>();
-    private Map<String, Object> userToRoomMap = new HashMap<>();
     private ChatDaoSQL chatDaoSQL;
     private MessageDaoSQL messageDaoSQL;
+    private SessionDaoSQL sessionDaoSQL;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
-        // todo inform if 2 entered chat
-        System.out.println("connection established" + session.getId());
-        sessionMap.put(session.getId(), session);
-    }
-
-
-    @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
 //        String uri = session.getUri().toString();
 //
 //        MultiValueMap<String, String> queryParams =
@@ -41,35 +34,58 @@ public class WebSocketConnection extends TextWebSocketHandler {
 //        String customerId = queryParams.getFirst("customer");
 //        String sellerId = queryParams.getFirst("seller");
 //        String state = queryParams.getFirst("state"); // todo transform to token
+
+        System.out.println("connection established" + session.getId());
+
+//        Session session1 = Session.builder()
+//                .sessionId(session.getId())
+//                .build();
 //
-//        System.out.println(customerId + " " + sellerId);
-//        System.out.println("customer_Id + + seller_Id");
-//
-//        //--------------------------------------------------- id retrieve
-//
-//        String roomKey = null;
-//        String checkIfPresentRoomKey = getRoomKey(customerId, sellerId);
-//
-//        if (userToRoomMap.containsKey(checkIfPresentRoomKey)) {
-//            roomKey = checkIfPresentRoomKey;
-//
-//        } else {
-//            //todo to ;isten all the time
-//            if (state.equals("customer")) {
-//                roomKey = createChatRoom(customerId, sellerId, session.getId(), null, state);
-//            } else if (state.equals("seller")) {
-//                roomKey = createChatRoom(customerId, sellerId, null, session.getId(), state);
-//            }
+//        if (state.equals("customer")) { // todo remove state do tough token
+//            session1.setUserId(customerId);
+//        } else if (state.equals("seller")) {
+//            session1.setUserId(sellerId);
 //        }
 //
-//        System.out.println(roomKey);
-//        System.out.println("roomKey");
-//
-//        System.out.println(userToRoomMap.get(roomKey));
-//        System.out.println("userToRoomMap.get(roomKey)");
-//
-//        System.out.println(userToRoomMap.containsKey(roomKey));
-//        System.out.println("userToRoomMap.containsKey(roomKey)");
+//        sessionDaoSQL.save(session1);
+
+//        sessionMap.put(session.getId(), session);
+    }
+
+
+    @Override
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+        String uri = session.getUri().toString();
+
+        MultiValueMap<String, String> queryParams =
+                UriComponentsBuilder.fromUriString(uri).build().getQueryParams();
+
+        String customerId = queryParams.getFirst("customer");
+        String sellerId = queryParams.getFirst("seller");
+        String state = queryParams.getFirst("state"); // todo transform to token
+        //прийде токен та айді кому будемо писати
+        //знайти токен кастомер чи селлер в базі
+
+        System.out.println(customerId + " " + sellerId);
+        System.out.println("customer_Id + + seller_Id");
+
+        //--------------------------------------------------- id retrieve
+
+        String roomKey = null;
+        String checkIfPresentRoomKey = getRoomKey(customerId, sellerId);
+
+
+        if (chatDaoSQL.getByRoomKey(checkIfPresentRoomKey) != null) {
+            roomKey = checkIfPresentRoomKey; //якшо кімната вже існує та чат вже почато в минулому
+
+        } else {
+            //todo to listen all the time
+            if (state.equals("customer")) { //todo enum
+                roomKey = createChatRoom(customerId, sellerId, session.getId(), null, state);
+            } else if (state.equals("seller")) {
+                roomKey = createChatRoom(customerId, sellerId, null, session.getId(), state);
+            }
+        }
 //
 //        List<String> sessionIds = (ArrayList<String>) userToRoomMap.get(roomKey);
 //        for (String sessionId : sessionIds) {
@@ -92,14 +108,14 @@ public class WebSocketConnection extends TextWebSocketHandler {
 //
 //                System.out.println(targetSession);
 //                System.out.println("targetSession");
-                    sessionMap.forEach((s, session1) -> {
-                        try {
-                            session1.sendMessage(new TextMessage(message.getPayload() + " " + new Date(System.currentTimeMillis())));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                    });
+//        sessionMap.forEach((s, session1) -> {
+//            try {
+//                session1.sendMessage(new TextMessage(message.getPayload() + " " + new Date(System.currentTimeMillis())));
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//        });
 //            }
 //        }
     }
@@ -110,13 +126,11 @@ public class WebSocketConnection extends TextWebSocketHandler {
         chatDaoSQL.save(Chat.builder() // todo check if ids exist in db
                 .sellerId(Integer.parseInt(sellerId))
                 .customerId(Integer.parseInt(customerId))
+                //sessions
+                .sellerSessionId(sellerSessionId)
+                .customerSessionId(customerSessionId)
                 .build());
 
-
-        List<String> sessionIds = new ArrayList<>();
-        sessionIds.add(customerSessionId);
-        sessionIds.add(sellerSessionId);
-        userToRoomMap.put(roomKey, sessionIds); // Add the room to the userToRoomMap
         return roomKey;
     }
 
@@ -127,7 +141,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         System.out.println("connection closed" + session.getId());
-        sessionMap.remove(session.getId());
+//        sessionMap.remove(session.getId());
 //        super.afterConnectionClosed(session, status);
     }
 }

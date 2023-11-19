@@ -18,6 +18,11 @@ public class RabbitMQConfiguration {
     private Environment environment;
 
     @Bean
+    public RabbitMQMessageRetriever messageRetriever() {
+        return new RabbitMQMessageRetriever();
+    }
+
+    @Bean
     public Queue queue() {
         return new Queue(environment.getProperty("rabbitmq.queue.name"));
     }

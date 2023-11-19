@@ -36,6 +36,11 @@ public class Chat {
     private int sellerId;
     private int customerId;
 
+    private String sellerSessionId;
+    private String customerSessionId;
+
+    private String roomKey;
+
     @Column(updatable = false)
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")

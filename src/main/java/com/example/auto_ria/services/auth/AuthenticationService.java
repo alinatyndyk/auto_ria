@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.auth;
 
 import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
@@ -22,6 +22,11 @@ import com.example.auto_ria.models.auth.AuthSQL;
 import com.example.auto_ria.models.auth.RegisterKey;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.AuthenticationResponse;
+import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.user.AdministratorServiceMySQL;
+import com.example.auto_ria.services.user.CustomersServiceMySQL;
+import com.example.auto_ria.services.user.ManagerServiceMySQL;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

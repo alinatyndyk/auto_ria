@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.auth;
 
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;

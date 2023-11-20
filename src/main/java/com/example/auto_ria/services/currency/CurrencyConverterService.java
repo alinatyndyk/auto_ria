@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.currency;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.enums.ECurrency;

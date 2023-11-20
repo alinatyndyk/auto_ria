@@ -1,7 +1,6 @@
 package com.example.auto_ria.models.socket;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,8 +25,9 @@ public class MessageClass {
     private String content;
     private String senderId;
     private String receiverId;
-    private int chatId;
 
+    private int chatId;
+    
     private Boolean isEdited = false;
 
     @UpdateTimestamp()

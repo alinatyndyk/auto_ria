@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.auth;
 
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.dao.user.CustomerDaoSQL;

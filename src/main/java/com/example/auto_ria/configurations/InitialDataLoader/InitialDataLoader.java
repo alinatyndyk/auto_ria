@@ -3,7 +3,7 @@ package com.example.auto_ria.configurations.InitialDataLoader;
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.RegisterAdminRequest;
-import com.example.auto_ria.services.AuthenticationService;
+import com.example.auto_ria.services.auth.AuthenticationService;
 import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;

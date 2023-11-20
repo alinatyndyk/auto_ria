@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.car;
 
 import com.example.auto_ria.dao.user.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
@@ -14,6 +14,8 @@ import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CarSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.currency.CurrencyConverterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;

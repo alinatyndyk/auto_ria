@@ -6,7 +6,7 @@ import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;

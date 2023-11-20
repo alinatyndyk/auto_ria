@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.otherApi;
 
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.StatisticsResponse;

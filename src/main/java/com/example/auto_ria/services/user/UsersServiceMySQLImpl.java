@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.user;
 
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;

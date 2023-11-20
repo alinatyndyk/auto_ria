@@ -1,46 +1,68 @@
 package com.example.auto_ria.controllers;
 
+import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.socket.Chat;
+import com.example.auto_ria.models.socket.MessageClass;
 import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.chat.ChatServiceMySQL;
+import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping(value = "managers")
-public class ManagerController {
+@RequestMapping(value = "chats")
+public class ChatController {
 
     private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
     private AdministratorServiceMySQL administratorServiceMySQL;
+    private ChatServiceMySQL chatServiceMySQL;
+    private ChatDaoSQL chatDaoSQL;
 
-    @GetMapping("/page/{page}")
-    public ResponseEntity<Page<ManagerSQL>> getAll(
-            @PathVariable("page") int page
+    @GetMapping("chat")
+    public ResponseEntity<Chat> getChat(
+            @RequestParam("sellerId") String sellerId,
+            @RequestParam("customerId") String customerId
     ) {
         try {
-            return managerServiceMySQL.getAll(page);
+            String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
+
+            Chat chat = chatServiceMySQL.getByRoomKey(roomKey);
+            System.out.println(chat);
+            return ResponseEntity.ok(chat);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ManagerSQL> getById(@PathVariable("id") int id) {
+    @GetMapping("/page/{page}")
+    public ResponseEntity<Page<MessageClass>> getChatMessages(
+            @PathVariable("page") int page,
+            @RequestParam("sellerId") String sellerId,
+            @RequestParam("customerId") String customerId
+    ) {
         try {
-            return managerServiceMySQL.getById(id);
+            String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
+
+            Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);
+            System.out.println(messageClasses);
+
+            return ResponseEntity.ok(messageClasses);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -54,24 +76,6 @@ public class ManagerController {
         try {
             managerServiceMySQL.checkCredentials(request, id);
             return managerServiceMySQL.update(id, partial);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PatchMapping("/change-avatar/{id}")
-    public ResponseEntity<String> patchAvatar(@PathVariable int id,
-                                              @RequestParam("avatar") MultipartFile avatar,
-                                              HttpServletRequest request) {
-        try {
-            managerServiceMySQL.checkCredentials(request, id);
-
-            commonService.removeAvatar(Objects.requireNonNull(managerServiceMySQL.getById(id).getBody()).getAvatar());
-
-            String fileName = avatar.getOriginalFilename();
-            usersServiceMySQL.transferAvatar(avatar, fileName);
-            managerServiceMySQL.updateAvatar(id, fileName);
-            return ResponseEntity.ok("Success. Avatar_updated");
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

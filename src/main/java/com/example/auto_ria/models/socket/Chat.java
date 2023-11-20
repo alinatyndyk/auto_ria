@@ -19,13 +19,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Chat {
+public class Chat { // TODO ADD REACT COMPONENTS!
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @JsonBackReference
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "chat_message",
             joinColumns = @JoinColumn(name = "chat_id"),
@@ -38,6 +38,9 @@ public class Chat {
 
     private String sellerSessionId;
     private String customerSessionId;
+
+//    private int notSeenSeller;
+//    private int notSeenCustomer;
 
     private String roomKey;
 

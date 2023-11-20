@@ -7,6 +7,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
 import com.example.auto_ria.models.socket.Session;
+import com.example.auto_ria.services.chat.ChatServiceMySQL;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
     private MessageDaoSQL messageDaoSQL;
     @Autowired
     private SessionDaoSQL sessionDaoSQL;
+    @Autowired
+    private ChatServiceMySQL chatServiceMySQL;
 
     private static Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
@@ -51,6 +54,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
             String customerId = queryParams.getFirst("customer");
             String sellerId = queryParams.getFirst("seller");
             String state = queryParams.getFirst("state"); // todo transform to token
+
+//            String auth = queryParams.getFirst("auth"); // todo transform to token
 
             System.out.println("connection established" + session.getId());
 
@@ -112,7 +117,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
             //--------------------------------------------------- id retrieve
 
             String roomKey = null;
-            String checkIfPresentRoomKey = getRoomKey(customerId, sellerId);
+            String checkIfPresentRoomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
             System.out.println(checkIfPresentRoomKey + "checkIfPresentRoomKey");
 
             Chat chat = chatDaoSQL.getByRoomKey(checkIfPresentRoomKey);
@@ -125,13 +130,13 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             } else if (state.equals("customer")) {
                 System.out.println(110);
-                roomKey = createChatRoom(customerId, sellerId, session.getId(), null, state);
+                roomKey = chatServiceMySQL.createChatRoom(customerId, sellerId, session.getId(), null, state);
                 chat = chatDaoSQL.getByRoomKey(roomKey);
                 System.out.println(chat);
                 System.out.println("chat");
             } else if (state.equals("seller")) {
                 System.out.println(114);
-                roomKey = createChatRoom(customerId, sellerId, null, session.getId(), state);
+                roomKey = chatServiceMySQL.createChatRoom(customerId, sellerId, null, session.getId(), state);
                 System.out.println(roomKey + "room key");
                 chat = chatDaoSQL.getByRoomKey(roomKey);
                 System.out.println(chat.getId() + "chat" + chat.getCustomerSessionId() + chat.getSellerSessionId());
@@ -161,7 +166,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
             }  //if so, collect unread messages
 
             MessageClass messageClass = MessageClass.builder()
-                    .content(message.getPayload()) //todo set chat!!
+                    .content(message.getPayload())
                     .chatId(chat.getId())
                     .build();
 
@@ -179,6 +184,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             MessageClass newMessage = messageDaoSQL.save(messageClass);
             chat.addMessage(newMessage);
+            chatDaoSQL.save(chat);
 
             System.out.println("after message save");
             System.out.println(sessionMap.get(sellerSessionId)); //no session fix
@@ -204,24 +210,6 @@ public class WebSocketConnection extends TextWebSocketHandler {
     //todo seen message function
     // TODO rabbitMq storage + permanent!!!
 
-    private String createChatRoom(String customerId, String sellerId, String customerSessionId, String sellerSessionId, String state) {
-        String roomKey = getRoomKey(customerId, sellerId);
-
-        chatDaoSQL.save(Chat.builder() // todo check if ids exist in db
-                .sellerId(Integer.parseInt(sellerId))
-                .customerId(Integer.parseInt(customerId))
-                //sessions
-                .sellerSessionId(sellerSessionId)
-                .customerSessionId(customerSessionId)
-                .roomKey(roomKey)
-                .build());
-
-        return roomKey;
-    }
-
-    private String getRoomKey(String customerId, String sellerId) {
-        return customerId + "-" + sellerId;
-    }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {

@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.user;
 
 import com.example.auto_ria.dao.user.CustomerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
@@ -9,6 +9,7 @@ import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.services.CommonService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;

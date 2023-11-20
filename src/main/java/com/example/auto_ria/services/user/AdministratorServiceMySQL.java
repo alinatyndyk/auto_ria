@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.user;
 
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
@@ -6,6 +6,7 @@ import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.Person;
+import com.example.auto_ria.services.auth.JwtService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

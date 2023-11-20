@@ -19,8 +19,8 @@ public class CustomerSQL extends Person {
     private String region;
     private String city;
 
-    @ElementCollection
-    private List<String> sessions = new ArrayList<>();
+//    @ElementCollection
+//    private List<String> sessions = new ArrayList<>();
 
     @Builder(builderMethodName = "customerBuilder")
     public CustomerSQL(String name, String lastName, String email, String avatar, String password, List<ERole> roles,

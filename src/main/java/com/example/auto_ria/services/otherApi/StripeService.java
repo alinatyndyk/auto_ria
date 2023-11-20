@@ -1,4 +1,4 @@
-package com.example.auto_ria.services;
+package com.example.auto_ria.services.otherApi;
 
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.enums.EAccountType;

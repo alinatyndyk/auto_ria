@@ -11,6 +11,7 @@ import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.services.auth.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;

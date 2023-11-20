@@ -1,22 +1,16 @@
 package com.example.auto_ria.configurations.rabbitMq;
 
-import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.user.CustomerSQL;
-import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
-import com.example.auto_ria.services.CustomersServiceMySQL;
-import com.example.auto_ria.services.UsersServiceMySQLImpl;
+import com.example.auto_ria.services.user.CustomersServiceMySQL;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")

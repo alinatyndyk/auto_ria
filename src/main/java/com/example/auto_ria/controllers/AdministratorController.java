@@ -3,7 +3,7 @@ package com.example.auto_ria.controllers;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.services.AdministratorServiceMySQL;
+import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;

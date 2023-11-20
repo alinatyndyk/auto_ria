@@ -1,4 +1,4 @@
-package com.example.auto_ria.controllers;
+package com.example.auto_ria.controllers.user;
 
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;

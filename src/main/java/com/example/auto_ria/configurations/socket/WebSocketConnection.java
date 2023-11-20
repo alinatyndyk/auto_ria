@@ -204,11 +204,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
             System.out.println(e.getMessage());
         }
     }
-
-    //todo get chat by id
-    // todo get msg by id, delete, update
     //todo seen message function
-    // TODO rabbitMq storage + permanent!!!
 
 
     @Override

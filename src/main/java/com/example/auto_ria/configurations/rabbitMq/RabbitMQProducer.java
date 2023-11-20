@@ -52,9 +52,13 @@ public class RabbitMQProducer {
                 getExchange(customerID, sellerID),
                 getRoutingKey(customerID, sellerID));
 
-        rabbitTemplate.convertAndSend(getExchange(customerID, sellerID),
+        MessageProperties properties = new MessageProperties();
+        properties.setDeliveryMode(MessageDeliveryMode.PERSISTENT);
+        Message amqpMessage = new Message(message.getBytes(), properties);
+
+        rabbitTemplate.send(getExchange(customerID, sellerID),
                 getRoutingKey(customerID, sellerID),
-                message);
+                amqpMessage); //rabbitMq storage + permanent!!!
     }
 
     private String getRoutingKey(int customerId, int sellerId) {

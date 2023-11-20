@@ -1,11 +1,9 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
-import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.chat.ChatServiceMySQL;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
@@ -14,12 +12,9 @@ import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Objects;
 
 @RestController
@@ -68,14 +63,15 @@ public class ChatController {
         }
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<ManagerSQL> patch(
-            HttpServletRequest request,
+    @PatchMapping("/message/{id}")
+    public ResponseEntity<MessageClass> patch(
+//            HttpServletRequest request,
             @PathVariable int id,
-            @RequestBody ManagerUpdateDTO partial) {
+            @RequestParam("content") String content) {
         try {
-            managerServiceMySQL.checkCredentials(request, id);
-            return managerServiceMySQL.update(id, partial);
+//            managerServiceMySQL.checkCredentials(request, id);
+
+            return ResponseEntity.ok(chatServiceMySQL.patchMessage(id, content));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

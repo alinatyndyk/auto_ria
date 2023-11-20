@@ -42,6 +42,14 @@ public class ChatServiceMySQL {
         return messageDaoSQL.getByChatId(getByRoomKey(roomKey).getId(), pageable);
     }
 
+    public MessageClass patchMessage(int id, String content) {
+        MessageClass messageClass = messageDaoSQL.findById(id).get();
+        messageClass.setContent(content);
+        messageClass.setIsEdited(true);
+        messageDaoSQL.save(messageClass);
+        return messageClass;
+    } // react like carForUpdate
+
     public Chat getByRoomKey(String roomKey) {
         return chatDaoSQL.getByRoomKey(roomKey);
     }

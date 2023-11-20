@@ -28,37 +28,37 @@ function RabbitMQConsumer() {
     }
 
 
-    // useEffect(() => {
-    //     const socket = new WebSocket('ws://localhost:8080/chat?customer=3&seller=7&state=seller'); // Replace with your actual WebSocket endpoint
-    //
-    //
-    //     socket.onopen = () => {
-    //         console.log('WebSocket connected');
-    //     };
-    //
-    //     socket.onmessage = (event) => {
-    //         const message = event.data;
-    //         console.log('Received message:', message);
-    //         messages.push(message);
-    //         // @ts-ignore
-    //         setMsg(messages);
-    //         // @ts-ignore
-    //         setOpen(true);
-    //         // @ts-ignore
-    //         // setMsg(prevMsg => [...prevMsg, message]);
-    //         // Process the received message as needed
-    //     };
-    //     console.log(msg)
-    //     console.log("msg")
-    //
-    //     socket.onclose = () => {
-    //         console.log('WebSocket disconnected');
-    //     };
+    useEffect(() => {
+        const socket = new WebSocket('ws://localhost:8080/chat?customer=3&seller=7&state=seller'); // Replace with your actual WebSocket endpoint
 
-    // return () => {
-    //     socket.close();
-    // };
-    // }, [msg]);
+
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+
+        socket.onmessage = (event) => {
+            const message = event.data;
+            console.log('Received message:', message);
+            messages.push(message);
+            // @ts-ignore
+            setMsg(messages);
+            // @ts-ignore
+            setOpen(true);
+            // @ts-ignore
+            // setMsg(prevMsg => [...prevMsg, message]);
+            // Process the received message as needed
+        };
+        console.log(msg)
+        console.log("msg")
+
+        socket.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+
+    return () => {
+        socket.close();
+    };
+    }, [msg]);
 
     return (
         <div>
@@ -66,9 +66,9 @@ function RabbitMQConsumer() {
             <div>THE CHAT</div>
             <div>{JSON.stringify(chat)}</div>
             <div>SOCKET</div>
-            {/*{chat.map((message, index) => (*/}
-            {/*    <div key={index}>{message}</div>*/}
-            {/*))}*/}
+            {msg.map((message, index) => (
+                <div key={index}>{message}</div>
+            ))}
 
             <button onClick={getChat}>get chat</button>
 

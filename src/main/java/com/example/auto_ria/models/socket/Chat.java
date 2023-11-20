@@ -25,7 +25,7 @@ public class Chat {
     private int id;
 
     @JsonBackReference
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "chat_message",
             joinColumns = @JoinColumn(name = "chat_id"),

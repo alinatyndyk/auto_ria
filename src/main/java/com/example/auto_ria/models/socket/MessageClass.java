@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -25,15 +26,13 @@ public class MessageClass {
     private String content;
     private String senderId;
     private String receiverId;
+    private int chatId;
 
-    @JsonManagedReference
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "chat_message",
-            joinColumns = @JoinColumn(name = "message_id"),
-            inverseJoinColumns = @JoinColumn(name = "chat_id")
-    )
-    private Chat chat;
+    private Boolean isEdited = false;
+
+    @UpdateTimestamp()
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
+    private LocalDateTime updatedAt;
 
     @Column(updatable = false)
     @CreationTimestamp

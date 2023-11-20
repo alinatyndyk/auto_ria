@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 //todo get messages by page
 
 public interface SessionDaoSQL extends JpaRepository<Session, Integer> {
-
+    Session getBySessionId(String sessionId);
 }

@@ -9,8 +9,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.web.socket.WebSocketSession;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Data
@@ -30,15 +33,25 @@ public class Session {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime disconnectedAt;
 
+    private String userType;
+
+    private Boolean isOnline;
+
     @Column(updatable = false)
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime createdAt;
 
     @Builder
-    public Session(String sessionId, String userId, LocalDateTime disconnectedAt) {
+    public Session(String sessionId, String userId, LocalDateTime disconnectedAt, String userType, Boolean isOnline) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.disconnectedAt = disconnectedAt;
+        this.userType = userType;
+        this.isOnline = isOnline;
+    }
+
+    public void setOnline(boolean isOnline) {
+        this.isOnline = isOnline;
     }
 }

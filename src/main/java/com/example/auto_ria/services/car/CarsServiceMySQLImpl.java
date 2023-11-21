@@ -1,17 +1,17 @@
 package com.example.auto_ria.services.car;
 
-import com.example.auto_ria.dao.user.CarDaoSQL;
+import com.example.auto_ria.dao.CarDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.*;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.responses.CarResponse;
-import com.example.auto_ria.models.responses.CurrencyConverterResponse;
-import com.example.auto_ria.models.responses.MiddlePriceResponse;
-import com.example.auto_ria.models.responses.SellerResponse;
+import com.example.auto_ria.models.CarSQL;
+import com.example.auto_ria.models.responses.car.CarResponse;
+import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
+import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
+import com.example.auto_ria.models.responses.user.SellerCarResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.CarSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
@@ -103,7 +103,7 @@ public class CarsServiceMySQLImpl {
                     .withIgnoreNullValues()
                     .withIgnorePaths("powerH")
                     .withIgnorePaths("id")
-                    .withIgnorePaths("photo");
+                    .withIgnorePaths("photo"); //todo price bigger than - smaller than
 
             Example<CarSQL> example = Example.of(params, matcher);
 
@@ -353,7 +353,7 @@ public class CarsServiceMySQLImpl {
                     .price(carSQL.getPrice())
                     .currency(carSQL.getCurrency())
                     .photo(carSQL.getPhoto())
-                    .seller(SellerResponse.builder()
+                    .seller(SellerCarResponse.builder()
                             .id(carSQL.getSeller().getId())
                             .name(carSQL.getSeller().getName())
                             .lastName(carSQL.getSeller().getLastName())

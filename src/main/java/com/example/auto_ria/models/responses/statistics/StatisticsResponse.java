@@ -1,4 +1,4 @@
-package com.example.auto_ria.models.responses;
+package com.example.auto_ria.models.responses.statistics;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -12,7 +12,7 @@ public interface AdminAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     AuthSQL findByAccessToken(String accessToken);
     AuthSQL findByRefreshToken(String refreshToken);
     void deleteAllByCreatedAtBefore(LocalDateTime before);
-    @Transactional
-    long countByCreatedAtBefore(LocalDateTime before);
+
+    void deleteAllByRefreshToken(String refreshToken); //todo all or not
     long count();
 }

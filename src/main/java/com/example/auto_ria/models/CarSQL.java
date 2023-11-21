@@ -1,8 +1,9 @@
-package com.example.auto_ria.models.user;
+package com.example.auto_ria.models;
 
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

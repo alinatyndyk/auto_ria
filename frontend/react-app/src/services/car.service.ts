@@ -8,7 +8,7 @@ const carService = {
     create: (car: ICreateCar): IRes<ICar> => axiosService.post(urls.cars.cars, car, {
         headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MDA1MjY0MjcsImlzcyI6IkFETUlOIiwiZXhwIjoxNzAwNTMwMDI3fQ.yfPgwDFJV-u8ewQc7LSFFT_OhzwBIIL_xq8FZrxGsY8'
+            // Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MDA1Njc5NzEsImlzcyI6IkFETUlOIiwiZXhwIjoxNzAwNTcxNTcxfQ.Vzl_YoRw_pJZoVLYzuqI0jbciHpWoWk0PhdVdQjEErQ'
         }
     }),
     updateById: (id: number, car: ICar): IRes<ICar> => axiosService.put(urls.cars.byId(id), car), //todo add headers token

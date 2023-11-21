@@ -2,6 +2,7 @@ package com.example.auto_ria.controllers.user;
 
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.SellerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
@@ -24,7 +25,7 @@ public class UserController {
     private CommonService commonService;
 
     @GetMapping("/page/{page}")
-    public ResponseEntity<Page<SellerSQL>> getAll(
+    public ResponseEntity<Page<SellerResponse>> getAll(
             @PathVariable("page") int page
     ) {
         try {
@@ -35,9 +36,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<SellerSQL> getById(@PathVariable("id") int id) {
+    public ResponseEntity<SellerResponse> getById(@PathVariable("id") int id) {
         try {
-            return usersServiceMySQL.getById(String.valueOf(id));
+            return usersServiceMySQL.getByIdAsResponse(id);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

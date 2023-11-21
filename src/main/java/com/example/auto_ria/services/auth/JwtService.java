@@ -2,7 +2,7 @@ package com.example.auto_ria.services.auth;
 
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
-import com.example.auto_ria.models.responses.AuthenticationResponse;
+import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

@@ -7,6 +7,10 @@ import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.AdminResponse;
+import com.example.auto_ria.models.responses.user.CustomerResponse;
+import com.example.auto_ria.models.responses.user.ManagerResponse;
+import com.example.auto_ria.models.responses.user.SellerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
@@ -28,6 +32,7 @@ import java.util.stream.Collectors;
 public class CommonService {
 
     private JwtService jwtService;
+
     private UserDaoSQL userDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
@@ -131,6 +136,76 @@ public class CommonService {
             return null;
         } catch (Exception e) {
             throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
+    } //todo
+
+    public CustomerResponse createCustomerResponse(CustomerSQL customer) {
+        try {
+            // todo add last online only for sellers and customers
+
+//            Session session = sessionDaoSQL.findLatestSessionByUserId(customer.getId());
+
+            return CustomerResponse.builder()
+                    .id(customer.getId())
+                    .name(customer.getName())
+                    .lastName(customer.getLastName())
+                    .region(customer.getRegion())
+                    .city(customer.getCity())
+                    .avatar(customer.getAvatar())
+                    .createdAt(customer.getCreatedAt()) //todo on autoria since...
+                    .build();
+
+        } catch (Exception e) {
+            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+        }
+    }
+
+    public ManagerResponse createManagerResponse(ManagerSQL manager) {
+        try {
+            return ManagerResponse.builder()
+                    .id(manager.getId())
+                    .name(manager.getName())
+                    .lastName(manager.getLastName())
+                    .avatar(manager.getAvatar())
+                    .createdAt(manager.getCreatedAt())
+                    .build();
+
+        } catch (Exception e) {
+            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+        }
+    }
+
+    public AdminResponse createAdminResponse(AdministratorSQL administratorSQL) {
+        try {
+            return AdminResponse.builder()
+                    .id(administratorSQL.getId())
+                    .name(administratorSQL.getName())
+                    .lastName(administratorSQL.getLastName())
+                    .avatar(administratorSQL.getAvatar())
+                    .createdAt(administratorSQL.getCreatedAt())
+                    .build();
+
+        } catch (Exception e) {
+            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+        }
+    }
+
+    public SellerResponse createSellerResponse(SellerSQL sellerSQL) {
+        try {
+
+            return SellerResponse.builder()
+                    .id(sellerSQL.getId())
+                    .name(sellerSQL.getName())
+                    .lastName(sellerSQL.getLastName())
+                    .region(sellerSQL.getRegion())
+                    .city(sellerSQL.getCity())
+                    .avatar(sellerSQL.getAvatar())
+                    .createdAt(sellerSQL.getCreatedAt())
+                    .accountType(sellerSQL.getAccountType())
+                    .build();
+
+        } catch (Exception e) {
+            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
         }
     }
 

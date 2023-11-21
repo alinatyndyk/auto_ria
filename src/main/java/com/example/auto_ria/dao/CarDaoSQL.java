@@ -1,7 +1,7 @@
-package com.example.auto_ria.dao.user;
+package com.example.auto_ria.dao;
 
 import com.example.auto_ria.enums.EBrand;
-import com.example.auto_ria.models.user.CarSQL;
+import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.user.SellerSQL;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,7 +23,7 @@ public interface CarDaoSQL extends JpaRepository<CarSQL, Integer>, JpaSpecificat
 //    List<CarSQL> findByIsActivatedIsFalse();
 
     @Query("SELECT c FROM CarSQL c WHERE c.isActivated = true")
-    List<CarSQL> findByIsActivatedIsTrue();
+    List<CarSQL> findByIsActivatedIsTrue(); //todo !!!!!!!!!!
 
     Page<CarSQL> findAllBySeller(SellerSQL sellerSQL, Pageable pageable);
 

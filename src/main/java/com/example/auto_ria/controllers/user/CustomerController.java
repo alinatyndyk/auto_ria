@@ -2,6 +2,7 @@ package com.example.auto_ria.controllers.user;
 
 import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.CustomerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
@@ -32,7 +33,7 @@ public class CustomerController {
     private ManagerServiceMySQL managerServiceMySQL;
 
     @GetMapping("/page/{page}")
-    public ResponseEntity<Page<CustomerSQL>> getAll(
+    public ResponseEntity<Page<CustomerResponse>> getAll(
             @PathVariable("page") int page
     ) {
         try {
@@ -43,9 +44,9 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CustomerSQL> getById(@PathVariable("id") int id) {
+    public ResponseEntity<CustomerResponse> getById(@PathVariable("id") int id) {
         try {
-            return customersServiceMySQL.getById(String.valueOf(id));
+            return customersServiceMySQL.getByIdAsResponse(id);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

@@ -7,7 +7,7 @@ export interface ICreateCar {
     price: string;
     description: string;
     currency: string; //e
-    pictures: FormData;
+    pictures: File[];
 }
 
 export interface ICreateInputCar {

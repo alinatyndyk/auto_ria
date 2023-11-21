@@ -3,7 +3,7 @@ package com.example.auto_ria.services.currency;
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.responses.CurrencyConverterResponse;
+import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

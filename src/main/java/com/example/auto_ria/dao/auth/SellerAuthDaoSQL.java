@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 
 public interface SellerAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     void deleteAllByPersonId(int personId);
+
+    void deleteAllByRefreshToken(String refreshToken);
     AuthSQL findByAccessToken(String accessToken);
     AuthSQL findByRefreshToken(String refreshToken);
     @Transactional

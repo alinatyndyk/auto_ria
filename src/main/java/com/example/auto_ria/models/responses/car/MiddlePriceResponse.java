@@ -1,4 +1,4 @@
-package com.example.auto_ria.models.responses;
+package com.example.auto_ria.models.responses.car;
 
 import lombok.Builder;
 import lombok.Data;

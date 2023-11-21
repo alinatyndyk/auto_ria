@@ -1,4 +1,4 @@
-package com.example.auto_ria.models.responses;
+package com.example.auto_ria.models.responses.user;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,14 +7,11 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class SellerResponse {
+public class ManagerResponse {
 
     private int id;
     private String name;
     private String lastName;
-    private String city;
-    private String region;
-    private String number;
     private String avatar;
     private LocalDateTime createdAt;
 }

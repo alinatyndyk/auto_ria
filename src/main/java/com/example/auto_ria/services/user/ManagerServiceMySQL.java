@@ -3,6 +3,9 @@ package com.example.auto_ria.services.user;
 import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.AdminResponse;
+import com.example.auto_ria.models.responses.user.ManagerResponse;
+import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.services.CommonService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -25,10 +29,14 @@ public class ManagerServiceMySQL {
     private ManagerDaoSQL managerDaoSQL;
     private CommonService commonService;
 
-    public ResponseEntity<Page<ManagerSQL>> getAll(int page) {
-        HttpHeaders httpHeaders = new HttpHeaders();
+    public ResponseEntity<Page<ManagerResponse>> getAll(int page) {
         Pageable pageable = PageRequest.of(page, 2);
-        return new ResponseEntity<>(managerDaoSQL.findAll(pageable), httpHeaders, HttpStatus.ACCEPTED);
+
+        Page<ManagerSQL> managerSQLPage = managerDaoSQL.findAll(pageable);
+        Page<ManagerResponse> managerResponsePage = managerSQLPage.map(managerSQL ->
+                commonService.createManagerResponse(managerSQL));
+
+        return new ResponseEntity<>(managerResponsePage, HttpStatus.OK);
     }
 
     public List<ManagerSQL> getAll() {
@@ -45,6 +53,21 @@ public class ManagerServiceMySQL {
         }
 
         return new ResponseEntity<>(managerDaoSQL.findById(id).get(), HttpStatus.ACCEPTED);
+    }
+
+    public ResponseEntity<ManagerResponse> getByIdAsResponse(int id) {
+        try {
+            Optional<ManagerSQL> managerSQL = managerDaoSQL.findById(id);
+            if (managerSQL.isPresent()) {
+                throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+            }
+
+            return new ResponseEntity<>(commonService.createManagerResponse(managerSQL.get()), HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
     }
 
     public ResponseEntity<String> deleteById(int id) {

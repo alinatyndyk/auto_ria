@@ -17,7 +17,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
-import com.example.auto_ria.models.responses.CurrencyResponse;
+import com.example.auto_ria.models.responses.currency.CurrencyResponse;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Configuration;
@@ -124,7 +124,6 @@ public class CronConfiguration {
             List<PremiumPlan> premiumPlans = premiumPlanDaoSQL.findAll();
             premiumPlans.forEach(premiumPlan -> {
                 if (premiumPlan.getEndDate().isAfter(LocalDate.now())) {
-                    System.out.println(premiumPlan.getEndDate().isAfter(LocalDate.now()));
 
                     premiumPlan.setActive(false);
                     premiumPlanDaoSQL.save(premiumPlan);

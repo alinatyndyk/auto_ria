@@ -4,7 +4,6 @@ import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.socket.MessageDaoSQL;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
-import com.example.auto_ria.models.user.CarSQL;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

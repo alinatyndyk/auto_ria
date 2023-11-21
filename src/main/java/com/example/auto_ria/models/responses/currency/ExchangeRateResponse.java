@@ -1,4 +1,4 @@
-package com.example.auto_ria.models.responses;
+package com.example.auto_ria.models.responses.currency;
 
 import lombok.Builder;
 import lombok.Data;

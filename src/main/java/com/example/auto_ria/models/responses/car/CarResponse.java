@@ -1,8 +1,9 @@
-package com.example.auto_ria.models.responses;
+package com.example.auto_ria.models.responses.car;
 
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
+import com.example.auto_ria.models.responses.user.SellerCarResponse;
 import lombok.Builder;
 import lombok.Data;
 
@@ -21,7 +22,7 @@ public class CarResponse {
     private ECurrency currency;
     private List<String> photo;
     private String description;
-    private SellerResponse seller;
+    private SellerCarResponse seller;
 
     private double priceUAH;
     private double priceEUR;
@@ -30,7 +31,7 @@ public class CarResponse {
     @Builder
     public CarResponse(int id, EBrand brand, EModel model, int powerH, String city,
                        String region, String price, ECurrency currency,
-                       List<String> photo, String description, SellerResponse seller,
+                       List<String> photo, String description, SellerCarResponse seller,
                        double priceUAH, double priceEUR, double priceUSD) {
         this.id = id;
         this.brand = brand;

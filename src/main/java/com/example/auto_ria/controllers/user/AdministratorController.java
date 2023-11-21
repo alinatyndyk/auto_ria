@@ -2,6 +2,7 @@ package com.example.auto_ria.controllers.user;
 
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.CommonService;
@@ -25,7 +26,7 @@ public class AdministratorController {
     private CommonService commonService;
 
     @GetMapping("/page/{page}")
-    public ResponseEntity<Page<AdministratorSQL>> getAll(
+    public ResponseEntity<Page<AdminResponse>> getAll(
             @PathVariable("page") int page
     ) {
         try {
@@ -36,9 +37,9 @@ public class AdministratorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AdministratorSQL> getById(@PathVariable("id") int id) {
+    public ResponseEntity<AdminResponse> getById(@PathVariable("id") int id) {
         try {
-            return administratorServiceMySQL.getById(String.valueOf(id));
+            return administratorServiceMySQL.getByIdAsResponse(id);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

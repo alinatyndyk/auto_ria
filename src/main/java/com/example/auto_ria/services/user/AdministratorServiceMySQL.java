@@ -1,12 +1,12 @@
 package com.example.auto_ria.services.user;
 
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.updateDTO.AdministratorUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.Person;
-import com.example.auto_ria.services.auth.JwtService;
+import com.example.auto_ria.services.CommonService;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,20 +18,24 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
 public class AdministratorServiceMySQL {
 
     private AdministratorDaoSQL administratorDaoSQL;
-    private JwtService jwtService;
-    private RegisterKeyDaoSQL registerKeyDaoSQL;
+    private CommonService commonService;
 
-    public ResponseEntity<Page<AdministratorSQL>> getAll(int page) {
+    public ResponseEntity<Page<AdminResponse>> getAll(int page) {
         try {
             Pageable pageable = PageRequest.of(page, 2);
             Page<AdministratorSQL> admins = administratorDaoSQL.findAll(pageable);
-            return new ResponseEntity<>(admins, HttpStatus.ACCEPTED);
+
+            Page<AdminResponse> adminResponsePage =
+                    admins.map(administratorSQL -> commonService.createAdminResponse(administratorSQL));
+
+            return new ResponseEntity<>(adminResponsePage, HttpStatus.OK);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
@@ -45,6 +49,21 @@ public class AdministratorServiceMySQL {
             }
             AdministratorSQL administratorSQL = administratorDaoSQL.findById(Integer.parseInt(id)).get();
             return new ResponseEntity<>(administratorSQL, HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    public ResponseEntity<AdminResponse> getByIdAsResponse(int id) {
+        try {
+            Optional<AdministratorSQL> administratorSQL = administratorDaoSQL.findById(id);
+            if (administratorSQL.isPresent()) {
+                throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+            }
+
+            return new ResponseEntity<>(commonService.createAdminResponse(administratorSQL.get()), HttpStatus.ACCEPTED);
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {

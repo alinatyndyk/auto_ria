@@ -21,7 +21,7 @@ import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.auth.AuthSQL;
 import com.example.auto_ria.models.auth.RegisterKey;
 import com.example.auto_ria.models.requests.*;
-import com.example.auto_ria.models.responses.AuthenticationResponse;
+import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.user.CustomersServiceMySQL;
@@ -500,7 +500,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse refresh(RefreshSellerRequest refreshRequest) {
+    public AuthenticationResponse refresh(RefreshRequest refreshRequest) {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
             String username = jwtService.extractUsername(refreshToken, ETokenRole.SELLER);
@@ -540,7 +540,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse refreshManager(RefreshSellerRequest refreshRequest) {
+    public AuthenticationResponse refreshManager(RefreshRequest refreshRequest) {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
 
@@ -581,7 +581,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse refreshAdmin(RefreshSellerRequest refreshRequest) {
+    public AuthenticationResponse refreshAdmin(RefreshRequest refreshRequest) {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
             String username = jwtService.extractUsername(refreshToken, ETokenRole.ADMIN);
@@ -620,7 +620,7 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse refreshCustomer(RefreshSellerRequest refreshRequest) {
+    public AuthenticationResponse refreshCustomer(RefreshRequest refreshRequest) {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
             String username = jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER);
@@ -649,6 +649,80 @@ public class AuthenticationService {
             customerAuthDaoSQL.save(AuthSQL.builder().
                     personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
+
+            return AuthenticationResponse.builder()
+                    .accessToken(tokenPair.getAccessToken())
+                    .refreshToken(tokenPair.getRefreshToken()).build();
+        } catch (CustomException e) {
+            throw new CustomException("Failed refresh: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed refresh: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    public AuthenticationResponse refreshAll(RefreshRequest refreshRequest) {
+        try {
+            String refreshToken = refreshRequest.getRefreshToken();
+            if (jwtService.isTokenExprired(refreshToken)) {
+                throw new CustomException("Token expired", HttpStatus.FORBIDDEN); //todo to response as in filter
+            }
+            String usernameCustomer = jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER);
+            String usernameSeller = jwtService.extractUsername(refreshToken, ETokenRole.SELLER); //todo return null if not found
+            String usernameAdmin = jwtService.extractUsername(refreshToken, ETokenRole.ADMIN);
+            String usernameManager = jwtService.extractUsername(refreshToken, ETokenRole.MANAGER);
+            System.out.println(usernameManager);
+            System.out.println("usernameManager");
+
+            AuthenticationResponse tokenPair = null;
+
+            if (usernameCustomer != null &&
+                    customerAuthDaoSQL.findByRefreshToken(refreshToken) != null //todo check
+            ) {
+                CustomerSQL customerSQL = customerDaoSQL.findByEmail(usernameCustomer);
+                if (customerSQL != null) {
+                    tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
+                    customerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+//                    customerDaoSQL.save(customerSQL);
+                    customerAuthDaoSQL.save(AuthSQL.builder().
+                            personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
+                            .refreshToken(tokenPair.getRefreshToken()).build());
+                }
+            } else if (usernameSeller != null &&
+                    sellerAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
+                SellerSQL sellerSQL = sellerDaoSQL.findSellerByEmail(usernameSeller);
+                if (sellerSQL != null) {
+                    tokenPair = AuthenticationResponse.builder()
+                            .accessToken(jwtService.generateToken(sellerSQL)) //todo generate userdetails uploadUsername from user details service not db
+                            .refreshToken(jwtService.generateRefreshToken(sellerSQL))
+                            .build();
+                    sellerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+                    sellerAuthDaoSQL.save(AuthSQL.builder().
+                            personId(sellerSQL.getId()).accessToken(tokenPair.getAccessToken())
+                            .refreshToken(tokenPair.getRefreshToken()).build());
+                }
+            } else if (usernameAdmin != null &&
+                    adminAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
+                AdministratorSQL administratorSQL = administratorDaoSQL.findByEmail(usernameAdmin);
+                if (administratorSQL != null) {
+                    tokenPair = jwtService.generateAdminTokenPair(administratorSQL);
+                    adminAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+                    adminAuthDaoSQL.save(AuthSQL.builder().
+                            personId(administratorSQL.getId()).accessToken(tokenPair.getAccessToken())
+                            .refreshToken(tokenPair.getRefreshToken()).build());
+                }
+            } else if (usernameManager != null &&
+                    managerAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
+                ManagerSQL managerSQL = managerDaoSQL.findByEmail(usernameManager);
+                if (managerSQL != null) {
+                    tokenPair = jwtService.generateManagerTokenPair(managerSQL);
+                    managerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+                    managerAuthDaoSQL.save(AuthSQL.builder().
+                            personId(managerSQL.getId()).accessToken(tokenPair.getAccessToken())
+                            .refreshToken(tokenPair.getRefreshToken()).build());
+                }
+            } else {
+                throw new CustomException("Token is invalid", HttpStatus.FORBIDDEN);
+            }
 
             return AuthenticationResponse.builder()
                     .accessToken(tokenPair.getAccessToken())

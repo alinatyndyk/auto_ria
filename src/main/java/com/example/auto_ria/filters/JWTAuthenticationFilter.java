@@ -91,7 +91,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } catch (IllegalAccessException e) {
             response.getWriter().write("Jwt invalid");
-            response.setStatus(HttpStatus.FORBIDDEN.value());
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } catch (Exception e) {
             response.getWriter().write(e.getMessage());
             response.setStatus(HttpStatus.EXPECTATION_FAILED.value());

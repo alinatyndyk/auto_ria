@@ -1,7 +1,6 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
-import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.requests.CarDTORequest;
@@ -11,15 +10,15 @@ import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
+import com.example.auto_ria.models.CarSQL;
+import com.example.auto_ria.models.responses.car.CarResponse;
+import com.example.auto_ria.models.responses.currency.ExchangeRateResponse;
+import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
+import com.example.auto_ria.models.responses.statistics.StatisticsResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.CarSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
-import com.example.auto_ria.models.responses.CarResponse;
-import com.example.auto_ria.models.responses.ExchangeRateResponse;
-import com.example.auto_ria.models.responses.MiddlePriceResponse;
-import com.example.auto_ria.models.responses.StatisticsResponse;
-import com.example.auto_ria.services.*;
+import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.car.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.otherApi.MixpanelService;
@@ -30,7 +29,6 @@ import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,10 +43,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @AllArgsConstructor
 @RequestMapping(value = "cars")
 //todo everything in try catch
-//todo cancel sub premium
 //todo ban/activate users
 //todo chat
 
+// ! todo cancel sub premium
 // ! todo premium bought monthly
 // ! todo validation
 // ! todo check ban/activate car
@@ -66,10 +64,6 @@ public class CarController {
     private FMService mailer;
     private ManagerServiceMySQL managerServiceMySQL;
     private CitiesService citiesService;
-
-    private PremiumPlanDaoSQL premiumPlanDaoSQL;
-
-    private Environment environment;
 
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
 
@@ -213,12 +207,8 @@ public class CarController {
     @PostMapping()
     public ResponseEntity<CarResponse> post(
             @ModelAttribute @Valid CarDTORequest carDTO,
-//            @ModelAttribute CarDTORequest carDTO,
-//            @RequestPart("pictures") MultipartFile[] pictures,
             HttpServletRequest request
     ) {
-        System.out.println(carDTO);
-        System.out.println("carDTO");
         try {
             SellerSQL seller = commonService.extractSellerFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);

@@ -9,7 +9,9 @@ import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.*;
-import com.example.auto_ria.models.responses.AuthenticationResponse;
+import com.example.auto_ria.models.responses.auth.AuthenticationInfoResponse;
+import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
+import com.example.auto_ria.models.user.*;
 import com.example.auto_ria.services.auth.AuthenticationService;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.otherApi.CitiesService;
@@ -259,10 +261,73 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/authenticate/admin")
+    @PostMapping("/authenticate")
+    public ResponseEntity<AuthenticationInfoResponse> loginAll(@RequestBody LoginRequest loginRequest) {
+        try {
+
+            AuthenticationInfoResponse authenticationInfoResponse = AuthenticationInfoResponse.builder().build();
+            AuthenticationResponse authenticationResponse;
+
+            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
+            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
+            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
+            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
+
+            if (customerSQL != null && managerSQL != null && administratorSQL != null && sellerSQL != null) {
+                throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
+            }
+            if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (customerSQL != null && customerSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginCustomer(loginRequest);
+
+                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
+                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
+                authenticationInfoResponse.setId(customerSQL.getId());
+            }
+
+            if (managerSQL != null && !managerSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (managerSQL != null && managerSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginManager(loginRequest);
+
+                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
+                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
+                authenticationInfoResponse.setId(managerSQL.getId());
+            }
+
+            if (administratorSQL != null && !administratorSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (administratorSQL != null && administratorSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginAdmin(loginRequest);
+
+                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
+                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
+                authenticationInfoResponse.setId(administratorSQL.getId());
+            }
+
+            if (sellerSQL != null && !sellerSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (sellerSQL != null && sellerSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.login(loginRequest);
+
+                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
+                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
+                authenticationInfoResponse.setId(sellerSQL.getId());
+            }
+
+            return ResponseEntity.ok(authenticationInfoResponse);
+        } catch (
+                CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+
+    }
+
+    @PostMapping("/authenticate/admin") //TODO REMOVE OTHER SEPARATE
     public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
         try {
-            System.out.println("256");
+            //todo check if user even exists indb
             if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
                 throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
             }
@@ -286,7 +351,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh/seller")
-    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody @Valid RefreshSellerRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
             return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
         } catch (CustomException e) {
@@ -295,7 +360,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh/manager")
-    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody @Valid RefreshSellerRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
             return ResponseEntity.ok(authenticationService.refreshManager(refreshRequest));
         } catch (CustomException e) {
@@ -304,7 +369,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh/admin")
-    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody @Valid RefreshSellerRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
             return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
         } catch (CustomException e) {
@@ -313,8 +378,22 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh/customer")
-    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody @Valid RefreshSellerRequest refreshRequest) {
+    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
+            return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthenticationResponse> refreshAll(@RequestBody @Valid RefreshRequest refreshRequest) {
+        try {
+
+            // todo check if in db
+
+
+
             return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

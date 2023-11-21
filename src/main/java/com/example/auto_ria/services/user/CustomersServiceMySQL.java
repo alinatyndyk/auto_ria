@@ -5,6 +5,8 @@ import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
+import com.example.auto_ria.models.responses.user.AdminResponse;
+import com.example.auto_ria.models.responses.user.CustomerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -31,10 +34,13 @@ public class CustomersServiceMySQL {
     private CommonService commonService;
     private FMService mailer;
 
-    public ResponseEntity<Page<CustomerSQL>> getAll(int page) {
+    public ResponseEntity<Page<CustomerResponse>> getAll(int page) {
         try {
             Pageable pageable = PageRequest.of(page, 2);
-            return new ResponseEntity<>(customerDaoSQL.findAll(pageable), HttpStatus.ACCEPTED);
+            Page<CustomerSQL> customerSQLPage = customerDaoSQL.findAll(pageable);
+            Page<CustomerResponse> customerResponsePage = customerSQLPage.map(customerSQL ->
+                    commonService.createCustomerResponse(customerSQL));
+            return new ResponseEntity<>(customerResponsePage, HttpStatus.OK);
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
@@ -50,6 +56,21 @@ public class CustomersServiceMySQL {
             }
             CustomerSQL user = customerDaoSQL.findById(Integer.parseInt(id)).get();
             return new ResponseEntity<>(user, HttpStatus.ACCEPTED);
+        } catch (CustomException e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    public ResponseEntity<CustomerResponse> getByIdAsResponse(int id) {
+        try {
+            Optional<CustomerSQL> customerSQL = customerDaoSQL.findById(id);
+            if (customerSQL.isPresent()) {
+                throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
+            }
+
+            return new ResponseEntity<>(commonService.createCustomerResponse(customerSQL.get()), HttpStatus.ACCEPTED);
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {

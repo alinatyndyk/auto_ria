@@ -2,6 +2,7 @@ package com.example.auto_ria.models.user;
 
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.models.CarSQL;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;

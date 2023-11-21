@@ -213,9 +213,12 @@ public class CarController {
     @PostMapping()
     public ResponseEntity<CarResponse> post(
             @ModelAttribute @Valid CarDTORequest carDTO,
-            @RequestPart("pictures[]") MultipartFile[] pictures,
+//            @ModelAttribute CarDTORequest carDTO,
+//            @RequestPart("pictures") MultipartFile[] pictures,
             HttpServletRequest request
     ) {
+        System.out.println(carDTO);
+        System.out.println("carDTO");
         try {
             SellerSQL seller = commonService.extractSellerFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
@@ -281,11 +284,11 @@ public class CarController {
                 }
             }
 
-            commonService.transferPhotos(pictures);
+            commonService.transferPhotos(carDTO.getPictures());
 
             List<String> names = new ArrayList<>();
 
-            for (MultipartFile file : pictures) {
+            for (MultipartFile file : carDTO.getPictures()) {
                 names.add(file.getOriginalFilename());
             }
 

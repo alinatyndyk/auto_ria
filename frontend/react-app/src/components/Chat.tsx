@@ -14,7 +14,7 @@ function RabbitMQConsumer() {
         try {
             const response =
                 // await axios.get("http://localhost:8080/cars/page/0")
-                await axios.get("http://localhost:8080/chats/page/0?sellerId=7&customerId=3")
+                await axios.get("http://localhost:8080/chats/page/2?sellerId=7&customerId=3")
             console.log(response);
             console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             setChat(response.data);

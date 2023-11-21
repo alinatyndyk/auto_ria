@@ -1,5 +1,6 @@
 package com.example.auto_ria.configurations.socket;
 
+import com.example.auto_ria.configurations.rabbitMq.RabbitMQProducer;
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.socket.MessageDaoSQL;
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
@@ -8,7 +9,7 @@ import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
 import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.services.chat.ChatServiceMySQL;
-import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
@@ -18,7 +19,6 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,6 +36,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
     private SessionDaoSQL sessionDaoSQL;
     @Autowired
     private ChatServiceMySQL chatServiceMySQL;
+    @Autowired
+    private RabbitMQProducer rabbitMQProducer;
 
     private static Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
@@ -53,7 +55,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             String customerId = queryParams.getFirst("customer");
             String sellerId = queryParams.getFirst("seller");
-            String state = queryParams.getFirst("state"); // todo transform to token
+            String state = queryParams.getFirst("state");
 
 //            String auth = queryParams.getFirst("auth"); // todo transform to token
 
@@ -186,26 +188,23 @@ public class WebSocketConnection extends TextWebSocketHandler {
             chat.addMessage(newMessage);
             chatDaoSQL.save(chat);
 
-            System.out.println("after message save");
-            System.out.println(sessionMap.get(sellerSessionId)); //no session fix
-            System.out.println(sessionMap.get(customerSessionId));
+            sendTextMessageIfSessionExists(sellerSessionId, message.getPayload());
+            sendTextMessageIfSessionExists(customerSessionId, message.getPayload());
 
-            try {
-                sessionMap.get(sellerSessionId).sendMessage(new TextMessage(message.getPayload() + " " + new Date(System.currentTimeMillis())));
-
-                sessionMap.get(customerSessionId).sendMessage(new TextMessage(message.getPayload() + " " + new Date(System.currentTimeMillis())));
-
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-                throw new RuntimeException(e);
-            } //todo SessionConnectException
+            rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
+                    Integer.parseInt(sellerId), Integer.parseInt(customerId));
 
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
-    //todo seen message function
 
+    @SneakyThrows
+    public void sendTextMessageIfSessionExists(String sessionId, String text) {
+        if (sessionMap.containsKey(sessionId)) {
+            sessionMap.get(sessionId).sendMessage(new TextMessage(text + " " + new Date(System.currentTimeMillis())));
+        }
+    }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {

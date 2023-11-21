@@ -16,12 +16,9 @@ public class RabbitMQProducer {
     private static final Logger LOGGER = LoggerFactory.getLogger(RabbitMQProducer.class);
 
     private final RabbitTemplate rabbitTemplate;
-    private RabbitMQMessageRetriever messageRetriever;
-
-    public RabbitMQProducer(Environment environment, RabbitTemplate rabbitTemplate, RabbitMQMessageRetriever messageRetriever) {
+    public RabbitMQProducer(Environment environment, RabbitTemplate rabbitTemplate) {
         this.environment = environment;
         this.rabbitTemplate = rabbitTemplate;
-        this.messageRetriever = messageRetriever;
     }
 
     public void declareQueueExchangeBinding(String queueName, String exchangeName, String routingKey) {

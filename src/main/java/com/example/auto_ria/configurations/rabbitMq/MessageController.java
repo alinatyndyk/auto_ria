@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class MessageController {
 
     private final RabbitMQProducer producer;
-    private RabbitMQMessageRetriever messageRetriever;
     private CommonService commonService;
     private CustomersServiceMySQL customersServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;

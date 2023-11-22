@@ -22,8 +22,6 @@ export interface ICreateInputCar {
     pictures: File[];
 }
 
-///-----------------------------
-
 export interface ICar {
     id: number;
     brand: string;

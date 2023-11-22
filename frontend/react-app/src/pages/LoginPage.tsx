@@ -1,14 +1,14 @@
 import React, {FC} from 'react';
-import {CarForm, Cars} from "../components/cars";
-import {useAppSelector} from "../hooks";
 import {LoginForm} from "../forms";
+import {LogOutForm} from "../forms/auth/LogOutForm";
 
-const CarPage: FC = () => {
+const LoginPage: FC = () => {
     return (
         <div>
             <LoginForm/>
+            <LogOutForm/>
         </div>
     );
 };
 
-export default CarPage;
+export {LoginPage};

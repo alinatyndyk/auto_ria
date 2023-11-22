@@ -11,7 +11,10 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.*;
 import com.example.auto_ria.models.responses.auth.AuthenticationInfoResponse;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
-import com.example.auto_ria.models.user.*;
+import com.example.auto_ria.models.user.AdministratorSQL;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.ManagerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.auth.AuthenticationService;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.otherApi.CitiesService;
@@ -27,7 +30,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,14 +53,16 @@ public class AuthenticationController {
 
     @PostMapping("/register-seller/person")
     public ResponseEntity<String> register(
-            @ModelAttribute @Valid RegisterRequestSellerDTO registerRequestDTO,
-            @RequestPart("avatar") MultipartFile picture
+            @ModelAttribute @Valid RegisterRequestSellerDTO registerRequestDTO
     ) {
         try {
             citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(), registerRequestDTO.getCity());
 
-            String fileName = picture.getOriginalFilename();
-            usersServiceMySQL.transferAvatar(picture, fileName);
+            String fileName = null;
+            if (registerRequestDTO.getAvatar() != null) {
+                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            }
 
             RegisterSellerRequest registerRequest = new RegisterSellerRequest(
                     registerRequestDTO.getCity(),
@@ -113,7 +117,6 @@ public class AuthenticationController {
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
             @ModelAttribute @Valid RegisterRequestManagerDTO registerRequestDTO,
-            @RequestPart("avatar") MultipartFile picture,
             HttpServletRequest request
     ) {
         try {
@@ -129,8 +132,8 @@ public class AuthenticationController {
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.MANAGER_REGISTER);
 
-            String fileName = picture.getOriginalFilename();
-            usersServiceMySQL.transferAvatar(picture, fileName);
+            String fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+            usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
 
             RegisterManagerRequest registerRequest = new RegisterManagerRequest(
                     registerRequestDTO.getName(),
@@ -166,7 +169,6 @@ public class AuthenticationController {
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
             @ModelAttribute @Valid RegisterRequestAdminDTO registerRequestDTO,
-            @RequestPart("avatar") MultipartFile picture,
             HttpServletRequest request
     ) {
         try {
@@ -182,8 +184,8 @@ public class AuthenticationController {
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.ADMIN_REGISTER);
 
-            String fileName = picture.getOriginalFilename();
-            usersServiceMySQL.transferAvatar(picture, fileName);
+            String fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+            usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
 
             RegisterAdminRequest registerRequest = new RegisterAdminRequest(
                     registerRequestDTO.getName(),
@@ -202,12 +204,17 @@ public class AuthenticationController {
 
     @PostMapping("/register-customer")
     public ResponseEntity<String> registerCustomer(
-            @ModelAttribute @Valid RegisterRequestCustomerDTO registerRequestDTO,
-            @RequestPart("avatar") MultipartFile picture
+            @ModelAttribute @Valid RegisterRequestCustomerDTO registerRequestDTO
     ) {
         try {
-            String fileName = picture.getOriginalFilename();
-            usersServiceMySQL.transferAvatar(picture, fileName);
+
+            String fileName = null;
+
+            if (registerRequestDTO.getAvatar() != null) {
+                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            }
+
             RegisterCustomerRequest registerRequest = new RegisterCustomerRequest(
                     registerRequestDTO.getCity(),
                     registerRequestDTO.getRegion(),
@@ -327,7 +334,6 @@ public class AuthenticationController {
     @PostMapping("/authenticate/admin") //TODO REMOVE OTHER SEPARATE
     public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
         try {
-            //todo check if user even exists indb
             if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
                 throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
             }
@@ -389,19 +395,14 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refreshAll(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
-
-            // todo check if in db
-
-
-
-            return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
+            return ResponseEntity.ok(authenticationService.refreshAll(refreshRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
 
     @PostMapping("/change-passwords")
-    public ResponseEntity<String> changePassword(
+    public ResponseEntity<AuthenticationInfoResponse> changePassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
@@ -418,10 +419,7 @@ public class AuthenticationController {
             String email = claims.get("sub").toString();
             String owner = claims.get("iss").toString();
 
-            authenticationService.resetPassword(email, owner, encoded);
-
-
-            return ResponseEntity.ok("The password has been successfully changed");
+            return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -459,7 +457,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(
+    public ResponseEntity<AuthenticationInfoResponse> resetPassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
@@ -482,11 +480,8 @@ public class AuthenticationController {
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.FORGOT_PASSWORD);
 
-            System.out.println("after check");
 
-            authenticationService.resetPassword(email, owner, encoded);
-
-            return ResponseEntity.ok("Password has been changed");
+            return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

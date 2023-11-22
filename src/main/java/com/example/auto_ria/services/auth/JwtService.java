@@ -29,7 +29,13 @@ public class JwtService {
     private Environment environment;
 
     public String extractUsername(String jwt, ETokenRole role) {
-        return extractClaim(jwt, Claims::getSubject, role);
+        String claim;
+        try {
+            claim = extractClaim(jwt, Claims::getSubject, role);
+        } catch (NullPointerException e) {
+            return null;
+        }
+        return claim;
     }
 
     public String extractUsername(String jwt) {

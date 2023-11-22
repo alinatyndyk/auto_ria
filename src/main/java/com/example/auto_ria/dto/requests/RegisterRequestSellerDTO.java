@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor
@@ -44,4 +45,6 @@ public class RegisterRequestSellerDTO {
             message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
                     "At least 8 characters long")
     private String password;
+
+    private MultipartFile avatar = null;
 }

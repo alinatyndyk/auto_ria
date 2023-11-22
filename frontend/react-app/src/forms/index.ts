@@ -1,2 +1,2 @@
-export * from '../forms/CarForm';
-export * from '../forms/LoginForm';
+export * from './car/CarForm';
+export * from './auth/LoginForm';

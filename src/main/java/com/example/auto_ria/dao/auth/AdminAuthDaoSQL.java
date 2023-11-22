@@ -13,6 +13,7 @@ public interface AdminAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     AuthSQL findByRefreshToken(String refreshToken);
     void deleteAllByCreatedAtBefore(LocalDateTime before);
 
+    @Transactional
     void deleteAllByRefreshToken(String refreshToken); //todo all or not
     long count();
 }

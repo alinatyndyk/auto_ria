@@ -1,8 +1,8 @@
 import React, {FC} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
-import {ICar, ICreateCar, ICreateInputCar} from "../interfaces";
-import {useAppDispatch} from "../hooks";
-import {carActions} from "../redux/slices";
+import {ICar, ICreateCar, ICreateInputCar} from "../../interfaces";
+import {useAppDispatch} from "../../hooks";
+import {carActions} from "../../redux/slices";
 
 const CarForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<ICreateInputCar>();

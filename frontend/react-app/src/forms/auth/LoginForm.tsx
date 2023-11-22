@@ -1,8 +1,8 @@
 import React, {FC} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
-import {IAuthRequest} from "../interfaces";
-import {useAppDispatch} from "../hooks";
-import {authActions} from "../redux/slices";
+import {IAuthRequest} from "../../interfaces";
+import {useAppDispatch} from "../../hooks";
+import {authActions} from "../../redux/slices";
 
 const LoginForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAuthRequest>();

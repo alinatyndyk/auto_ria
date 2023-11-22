@@ -25,8 +25,6 @@ public class SellerSQL extends Person {
     private String paymentSource;
     private boolean isPaymentSourcePresent;
 
-    private Boolean hasDefaultCard;
-
     @JsonBackReference
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(
@@ -37,7 +35,7 @@ public class SellerSQL extends Person {
     private List<CarSQL> cars = new ArrayList<>();
 
     @ElementCollection
-    private List<String> sessions =  new ArrayList<>();
+    private List<String> sessions = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     private EAccountType accountType = EAccountType.BASIC;

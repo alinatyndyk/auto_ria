@@ -1,4 +1,4 @@
 export interface IError{
-    detail?: string[]
-    brand?: string[]
-} //todo create
+    message?: string
+    statusCode?: number
+}

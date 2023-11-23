@@ -32,6 +32,19 @@ const getById = createAsyncThunk<ISellerResponse, number>(
     }
 );
 
+const getByToken = createAsyncThunk<any, string>(
+    'sellerSlice/getByToken',
+    async (token: string, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getByToken(token);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const slice = createSlice({
     name: 'sellerSlice',
     initialState,
@@ -39,6 +52,9 @@ const slice = createSlice({
     extraReducers: builder =>
         builder
             .addCase(getById.fulfilled, (state, action) => {
+                state.user = action.payload;
+            })
+            .addCase(getByToken.fulfilled, (state, action) => {
                 state.user = action.payload;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
@@ -51,7 +67,8 @@ const {actions, reducer: sellerReducer} = slice;
 
 const sellerActions = {
     ...actions,
-    getById
+    getById,
+    getByToken
 }
 
 export {

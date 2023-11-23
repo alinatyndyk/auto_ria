@@ -13,9 +13,19 @@ import java.io.File;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
-    @Override //TODO only 3000
+//    @Override //TODO only 3000
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**").allowedOrigins("**");
+//    }
+
+    @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**").allowedOrigins("**");
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000")
+                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     @Override

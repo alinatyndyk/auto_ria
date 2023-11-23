@@ -34,7 +34,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+
 @RestController
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RequestMapping("/api/v1/auth")
 @AllArgsConstructor
 public class AuthenticationController {
@@ -89,7 +91,6 @@ public class AuthenticationController {
             }
             System.out.println("78");
             String email = jwtService.extractUsername(code, ETokenRole.SELLER_ACTIVATE);
-            System.out.println("80");
             return authenticationService.activateSeller(email, code);
         } catch (CustomException e) {
             System.out.println("83");

@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @AllArgsConstructor
 @RequestMapping(value = "cars")
 //todo everything in try catch

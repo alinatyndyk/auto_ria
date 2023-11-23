@@ -1,14 +1,11 @@
 import React, {FC} from 'react';
-import {LoginForm} from "../forms";
-import {LogOutForm} from "../forms/auth/LogOutForm";
 import {RegisterSellerForm} from "../forms/auth/register/RegisterSellerForm";
 import {RegisterCustomerForm} from "../forms/auth/register/RegisterCustomerForm";
-import {ActivateSellerForm} from "../forms/auth/activate/ActivateSellerForm";
-import {ActivateCustomerForm} from "../forms/auth/activate/ActivateCustomerForm";
 import {GenerateManagerForm} from "../forms/auth/codes/GenerateManagerForm";
 import {GenerateAdminForm} from "../forms/auth/codes/GenerateAdminForm";
 import {RegisterManagerForm} from "../forms/auth/register/RegisterManagerForm";
 import {RegisterAdminForm} from "../forms/auth/register/RegisterAdminForm";
+import {ActivateForm} from "../forms/auth/activate/ActivateForm";
 
 const RegisterPage: FC = () => {
     return (
@@ -23,10 +20,8 @@ const RegisterPage: FC = () => {
 
 
             <hr/>
-            <ActivateSellerForm/>
+            <ActivateForm/>
             <br/>
-            <ActivateCustomerForm/>
-
 
             <hr/>
             <GenerateManagerForm/>

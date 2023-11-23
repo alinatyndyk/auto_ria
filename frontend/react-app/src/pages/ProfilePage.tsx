@@ -13,7 +13,10 @@ import {ManagerProfile} from "../components/profiles/ManagerProfile";
 
 const ProfilePage: FC = () => {
 
-    const {user, trigger} = useAppSelector(state => state.sellerReducer);
+    // const {user, trigger} = useAppSelector(state => state.sellerReducer);
+
+    const location = useLocation();
+    const user = location.state;
 
     const navigate = useAppNavigate();
     const dispatch = useAppDispatch();
@@ -22,9 +25,6 @@ const ProfilePage: FC = () => {
     useEffect(() => {
         dispatch(sellerActions.getById(Number(id)));
     }, [dispatch])
-
-    console.log(user instanceof SellerResponse, "seller");
-    console.log(user instanceof CustomerResponse, "customer");
 
     let userComponent;
 

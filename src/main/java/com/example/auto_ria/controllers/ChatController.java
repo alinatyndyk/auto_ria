@@ -19,6 +19,7 @@ import java.util.Objects;
 
 @RestController
 @AllArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @RequestMapping(value = "chats")
 public class ChatController {
 

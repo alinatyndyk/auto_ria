@@ -7,6 +7,8 @@ interface IProps {
 
 const SellerProfile: FC<IProps> = ({seller}) => {
 
+    //todo add cars and pagination
+
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
     } = seller;

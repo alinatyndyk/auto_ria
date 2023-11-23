@@ -36,6 +36,7 @@ const urls = {
     users: {
         common,
         getById: (id: number): string => `${common}/users/${id}`,
+        getByToken: (): string => `${common}/users`,
 
     },
 

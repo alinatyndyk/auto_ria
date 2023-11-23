@@ -2,7 +2,7 @@ import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
-import {IManagerInput} from "../../../interfaces/manager.interface";
+import {IManagerInput} from "../../../interfaces/user/manager.interface";
 import {useParams} from "react-router";
 
 

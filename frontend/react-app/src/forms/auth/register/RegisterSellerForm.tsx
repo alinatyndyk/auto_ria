@@ -1,7 +1,7 @@
 import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../../../hooks";
-import {ISellerInput} from "../../../interfaces/seller.interface";
+import {ISellerInput} from "../../../interfaces/user/seller.interface";
 import {authActions} from "../../../redux/slices";
 
 const RegisterSellerForm: FC = () => {

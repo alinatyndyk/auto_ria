@@ -54,12 +54,13 @@ public class UsersServiceMySQLImpl {
 
     public ResponseEntity<SellerResponse> getByIdAsResponse(int id) {
         try {
-            Optional<SellerSQL> sellerSQL = userDaoSQL.findById(id);
-            if (sellerSQL.isPresent()) {
+            SellerSQL sellerSQL = userDaoSQL.findById(id).orElse(null);
+
+            if (sellerSQL == null) {
                 throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
             }
 
-            return new ResponseEntity<>(commonService.createSellerResponse(sellerSQL.get()), HttpStatus.ACCEPTED);
+            return new ResponseEntity<>(commonService.createSellerResponse(sellerSQL), HttpStatus.ACCEPTED);
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {

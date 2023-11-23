@@ -17,6 +17,7 @@ import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.statistics.StatisticsResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
+import com.example.auto_ria.models.user.Person;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.car.CarsServiceMySQLImpl;

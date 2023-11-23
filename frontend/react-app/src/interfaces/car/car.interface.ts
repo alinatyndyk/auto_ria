@@ -1,3 +1,5 @@
+import {Pageable, Sort} from "../pagable.interface";
+
 export interface ICreateCar {
     brand: string;
     model: string;
@@ -45,22 +47,7 @@ export interface ICar {
     };
     priceUAH: number;
     priceEUR: number;
-    priceUSD: number;
-}
-
-interface Sort {
-    empty: boolean;
-    sorted: boolean;
-    unsorted: boolean;
-}
-
-interface Pageable {
-    sort: Sort;
-    offset: number;
-    pageSize: number;
-    pageNumber: number;
-    unpaged: boolean;
-    paged: boolean;
+    priceUSD: number; //add created at todo, when car was posted
 }
 
 export interface ICarResponse {

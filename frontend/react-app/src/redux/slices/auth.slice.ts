@@ -1,7 +1,8 @@
 import {
     IActivationCode,
     IAuthRequest,
-    IAuthResponse, IChangePassword,
+    IAuthResponse,
+    IChangePassword,
     IError,
     IForgotPassword,
     IGenerateCode,
@@ -10,21 +11,23 @@ import {
 import {createAsyncThunk, createSlice, isRejectedWithValue} from "@reduxjs/toolkit";
 import {authService} from "../../services";
 import {AxiosError} from "axios";
-import {ISellerInput} from "../../interfaces/seller.interface";
-import {ICustomerInput} from "../../interfaces/customer.interface";
-import {RegisterManagerPayload} from "../../interfaces/manager.interface";
-import {RegisterAdminPayload} from "../../interfaces/admin.interface";
+import {ISellerInput} from "../../interfaces/user/seller.interface";
+import {ICustomerInput} from "../../interfaces/user/customer.interface";
+import {RegisterManagerPayload} from "../../interfaces/user/manager.interface";
+import {RegisterAdminPayload} from "../../interfaces/user/admin.interface";
 
 interface IState {
     errors: IError | null,
     trigger: boolean,
-    isAuth: boolean
+    isAuth: boolean,
+    authId: number
 }
 
 const initialState: IState = {
     isAuth: false,
     errors: null,
-    trigger: false
+    trigger: false,
+    authId: 0
 }
 
 const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
@@ -191,7 +194,7 @@ const forgotPassword = createAsyncThunk<string, IForgotPassword>(
 );
 
 const resetPassword = createAsyncThunk<IAuthResponse, IChangePassword>(
-    'authSlice/changePassword',
+    'authSlice/resetPassword',
     async (info, {rejectWithValue}) => {
         try {
             const {data} = await authService.resetPassword(info);
@@ -212,15 +215,17 @@ const slice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
+                state.authId = action.payload.id;
                 authService.setTokens({...action.payload});
                 window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
-                state.isAuth = true;
+                state.isAuth = false;
                 authService.setTokens({...action.payload});
                 window.location.reload();
             })
@@ -232,21 +237,25 @@ const slice = createSlice({
             .addCase(activateCustomer.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(activateSeller.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(registerManager.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {

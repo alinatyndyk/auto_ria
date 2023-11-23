@@ -2,8 +2,8 @@ import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
-import {ICustomerInput} from "../../../interfaces/customer.interface";
-import {IAdminInput} from "../../../interfaces/admin.interface";
+import {ICustomerInput} from "../../../interfaces/user/customer.interface";
+import {IAdminInput} from "../../../interfaces/user/admin.interface";
 import {useParams} from "react-router";
 
 const RegisterAdminForm: FC = () => {

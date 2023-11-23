@@ -13,10 +13,10 @@ import {
 } from "../interfaces";
 import {axiosService} from "./axios.service";
 import {urls} from "../constants";
-import {ISellerInput} from "../interfaces/seller.interface";
-import {ICustomerInput} from "../interfaces/customer.interface";
-import {IManagerInput} from "../interfaces/manager.interface";
-import {IAdminInput} from "../interfaces/admin.interface";
+import {ISellerInput} from "../interfaces/user/seller.interface";
+import {ICustomerInput} from "../interfaces/user/customer.interface";
+import {IManagerInput} from "../interfaces/user/manager.interface";
+import {IAdminInput} from "../interfaces/user/admin.interface";
 
 const _accessTokenKey: string = 'access_token'
 const _refreshTokenKey: string = 'refresh_token'

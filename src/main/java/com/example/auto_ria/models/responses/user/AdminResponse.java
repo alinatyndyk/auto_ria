@@ -13,6 +13,7 @@ public class AdminResponse {
     private int id;
     private String name;
     private String lastName;
+    private String email;
     private String avatar;
-    private LocalDateTime createdAt;
+    private LocalDateTime createdAt; //todo add email
 }

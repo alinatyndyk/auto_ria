@@ -199,6 +199,7 @@ public class CommonService {
                     .lastName(sellerSQL.getLastName())
                     .region(sellerSQL.getRegion())
                     .city(sellerSQL.getCity())
+                    .number(sellerSQL.getNumber())
                     .avatar(sellerSQL.getAvatar())
                     .createdAt(sellerSQL.getCreatedAt())
                     .accountType(sellerSQL.getAccountType())

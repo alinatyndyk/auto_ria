@@ -1,6 +1,7 @@
 export interface IAuthResponse {
     accessToken: string,
     refreshToken: string,
+    id: number
 }
 
 export interface IAuthRequest {

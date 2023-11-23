@@ -1,6 +1,7 @@
 import React, {FC} from 'react';
 import {CarForm, Cars} from "../components/cars";
 import {useAppNavigate} from "../hooks";
+import {useParams} from "react-router";
 
 const CarPage: FC = () => {
 

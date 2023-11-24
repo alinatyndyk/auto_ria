@@ -1,11 +1,15 @@
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {ICar, ICreateCar, ICreateInputCar} from "../../interfaces";
-import {useAppDispatch} from "../../hooks";
+import {useAppDispatch, useAppSelector} from "../../hooks";
 import {carActions} from "../../redux/slices";
 
 const CarForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<ICreateInputCar>();
+    const {errors} = useAppSelector(state => state.carReducer);
+    const [getResponse, setResponse] = useState('');
+
+
     const dispatch = useAppDispatch();
     const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
         let photos = [];
@@ -18,14 +22,15 @@ const CarForm: FC = () => {
             pictures: photos
         };
 
-        await dispatch(carActions.create(updatedCar))
+        const {payload} = await dispatch(carActions.create(updatedCar))
+        setResponse(String(payload));
 
         // reset();
     }
     return (
         <div>
             car form
-
+            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
                     <input type="text" placeholder={'brand'} {...register('brand')}/>

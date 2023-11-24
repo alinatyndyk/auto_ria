@@ -152,6 +152,7 @@ public class CommonService {
                     .region(customer.getRegion())
                     .city(customer.getCity())
                     .avatar(customer.getAvatar())
+                    .role(ERole.CUSTOMER)
                     .createdAt(customer.getCreatedAt()) //todo on autoria since...
                     .build();
 
@@ -167,6 +168,7 @@ public class CommonService {
                     .name(manager.getName())
                     .lastName(manager.getLastName())
                     .avatar(manager.getAvatar())
+                    .role(ERole.MANAGER)
                     .createdAt(manager.getCreatedAt())
                     .build();
 
@@ -182,6 +184,7 @@ public class CommonService {
                     .name(administratorSQL.getName())
                     .lastName(administratorSQL.getLastName())
                     .avatar(administratorSQL.getAvatar())
+                    .role(ERole.ADMIN)
                     .createdAt(administratorSQL.getCreatedAt())
                     .build();
 
@@ -203,6 +206,8 @@ public class CommonService {
                     .avatar(sellerSQL.getAvatar())
                     .createdAt(sellerSQL.getCreatedAt())
                     .accountType(sellerSQL.getAccountType())
+                    .role(ERole.SELLER)
+                    .isPaymentSourcePresent(sellerSQL.isPaymentSourcePresent())
                     .build();
 
         } catch (Exception e) {

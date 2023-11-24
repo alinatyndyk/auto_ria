@@ -20,7 +20,7 @@ const AdminProfile: FC<IProps> = ({seller}) => {
             columnGap: "10px"
         }}>
             <div>
-                Seller
+                Admin
                 <div>id: {id}</div>
                 <div>{name} {lastName}</div>
                 <div>{email}</div>

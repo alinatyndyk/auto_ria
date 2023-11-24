@@ -13,6 +13,7 @@ const carService = {
     }),
     updateById: (id: number, car: ICar): IRes<ICar> => axiosService.put(urls.cars.byId(id), car), //todo add headers token
     deleteById: (id: number): IRes<void> => axiosService.delete(urls.cars.byId(id)),
+    getBySeller: (id: number, page: number): IRes<ICarResponse> => axiosService.get(urls.cars.bySeller(id, page)),
 }
 
 export {

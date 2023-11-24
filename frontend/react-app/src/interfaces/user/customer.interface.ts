@@ -15,6 +15,7 @@ export interface ICustomerResponse {
     name: string,
     lastName: string,
     email: string,
+    role: string,
     avatar: File | null
 }
 

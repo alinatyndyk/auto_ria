@@ -15,17 +15,16 @@ axiosService.interceptors.request.use((config) => {
 });
 
 let isRefreshing = false;
-axiosService.interceptors.response.use((config) => {
-        return config
+axiosService.interceptors.response.use((response) => {
+        return response
     }, async (error) => {
         const refresh_token = authService.getRefreshToken();
-        if (error.response?.status === 401 && refresh_token && !isRefreshing) { //todo 401 only for refresh!!!
+        if (refresh_token && !isRefreshing) { //todo 401 only for refresh!!! //error.response?.status === 401 &&
+            console.log("HELLO1");
             isRefreshing = true;
             console.log("is refresh");
             try {
-
                 const refresh: IRefreshRequest = {refreshToken: refresh_token}
-
                 const {data} = await authService.refresh(refresh);
                 authService.setTokens(data);
             } catch (e) {
@@ -35,7 +34,7 @@ axiosService.interceptors.response.use((config) => {
             isRefreshing = false;
             console.log("refreshed");
             return axiosService(error.config);
-        } else if (error.response?.status === 401 && !refresh_token) {
+        } else if (!refresh_token) { //error.response?.status === 401 &&
             throw error
         }
         return Promise.reject(error);

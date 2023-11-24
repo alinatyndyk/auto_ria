@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class SetPaymentSourceRequest { //todo dto
 
-    private String id;
+    private String id; //todo remove and do though token
     private String token;
 
     private boolean useDefaultCard;

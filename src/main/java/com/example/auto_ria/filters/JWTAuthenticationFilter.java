@@ -87,8 +87,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            response.getWriter().write("Jwt expired");
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setStatus(HttpStatus.LOCKED.value());
+            response.getWriter().write("{\"error\": \"Jwt invalid\", \"status\": 423}");
         } catch (IllegalAccessException e) {
             response.getWriter().write("Jwt invalid");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());

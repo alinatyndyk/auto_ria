@@ -20,7 +20,7 @@ const ManagerProfile: FC<IProps> = ({seller}) => {
             columnGap: "10px"
         }}>
             <div>
-                Seller
+                Manager
                 <div>id: {id}</div>
                 <div>{name} {lastName}</div>
                 <img style={{height: "80px"}} src={`http://localhost:8080/users/avatar/${avatar}`} alt="Avatar"/>

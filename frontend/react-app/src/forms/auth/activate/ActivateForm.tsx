@@ -40,6 +40,9 @@ const ActivateForm: FC = () => {
             user: payload
         };
 
+        console.log(payload, "43 payload af");
+        console.log(data, "44 user af");
+
         navigate('/profile', {state: data})
     }
     return (

@@ -20,8 +20,11 @@ export interface ISellerResponse {
     number: string;
     avatar: string;
     accountType: string;
+    role: string,
+    isPaymentResourcePresent: boolean,
     createdAt: number[];
 }
+
 export interface ISellerPageResponse {
     content: ISellerResponse[];
     pageable: Pageable;

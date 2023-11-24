@@ -32,12 +32,12 @@ const getById = createAsyncThunk<ISellerResponse, number>(
     }
 );
 
-const getByToken = createAsyncThunk<any, string>(
+const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     'sellerSlice/getByToken',
-    async (token: string, {rejectWithValue}) => {
+    async (_, {rejectWithValue}) => {
         try {
-            const {data} = await sellerService.getByToken(token);
-            return data;
+            const {data} = await sellerService.getByToken();
+            return data.body;
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -55,7 +55,10 @@ const slice = createSlice({
                 state.user = action.payload;
             })
             .addCase(getByToken.fulfilled, (state, action) => {
+                console.log(action.payload, "load");
                 state.user = action.payload;
+                console.log(state.user);
+                state.trigger = !state.trigger;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 state.errors = action.payload as IError;

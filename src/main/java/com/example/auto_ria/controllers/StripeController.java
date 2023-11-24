@@ -6,9 +6,9 @@ import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.otherApi.StripeService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
@@ -125,10 +125,12 @@ public class StripeController {
             @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request
     ) {
-
         try {
+            Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
             SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
 //            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
+            System.out.println(sellerSQL);
+            System.out.println("sellerSQL");
 
             if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
                 throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);

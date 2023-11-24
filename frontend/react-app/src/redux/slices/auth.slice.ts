@@ -216,7 +216,7 @@ const slice = createSlice({
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
                 state.authId = action.payload.id;
-                window.location.reload();
+                // window.location.reload();
             })
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;

@@ -5,6 +5,8 @@ import {useAppDispatch, useAppSelector} from "../../hooks";
 import {authActions} from "../../redux/slices";
 import {useNavigate} from "react-router";
 import {auth} from "../../constants";
+import {sellerActions} from "../../redux/slices/seller.slice";
+import {authService} from "../../services";
 
 const LoginForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAuthRequest>();
@@ -16,10 +18,7 @@ const LoginForm: FC = () => {
 
         await dispatch(authActions.login(info));
 
-        if (isAuth) {
-            reset();
-            navigate(`/profile/${authId}`); //todo
-        }
+        navigate('/profile')
 
     }
 

@@ -1,5 +1,6 @@
 package com.example.auto_ria.models.responses.user;
 
+import com.example.auto_ria.enums.ERole;
 import lombok.Builder;
 import lombok.Data;
 
@@ -13,5 +14,6 @@ public class ManagerResponse {
     private String name;
     private String lastName;
     private String avatar;
+    private ERole role;
     private LocalDateTime createdAt;
 }

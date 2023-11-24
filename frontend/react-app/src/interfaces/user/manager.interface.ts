@@ -18,6 +18,7 @@ export interface IManagerResponse {
     name: string,
     lastName: string,
     email: string,
+    role: string,
     avatar: File | null
 }
 

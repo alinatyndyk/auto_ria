@@ -154,10 +154,10 @@ public class CarController {
         }
     }
 
-    @GetMapping("/by-seller/page/{page}")
+    @GetMapping("/by-seller/{id}/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
-            @RequestParam("id") int id
+            @PathVariable("id") int id
     ) {
         try {
             SellerSQL sellerSQL = usersServiceMySQL.getById(id);

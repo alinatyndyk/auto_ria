@@ -34,7 +34,9 @@ const authService = {
             Authorization: localStorage.getItem(_refreshTokenKey),
         }
     }),
-    refresh: (refresh: IRefreshRequest) => axiosService.post(`${urls.auth.refresh}`, refresh),
+    refresh: (refresh: IRefreshRequest) => axiosService.post(urls.auth.refresh(), {
+        refreshToken: refresh.refreshToken
+    }),//todo refresh
     registerSeller: (info: ISellerInput) => axiosService.post(urls.auth.registerSeller(), info, {
         headers: {
             "Content-Type": "multipart/form-data",

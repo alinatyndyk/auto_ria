@@ -59,7 +59,7 @@ public class AdministratorServiceMySQL {
     public ResponseEntity<AdminResponse> getByIdAsResponse(int id) {
         try {
             Optional<AdministratorSQL> administratorSQL = administratorDaoSQL.findById(id);
-            if (administratorSQL.isPresent()) {
+            if (administratorSQL.isEmpty()) {
                 throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
             }
 

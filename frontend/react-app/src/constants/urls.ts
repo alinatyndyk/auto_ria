@@ -10,6 +10,7 @@ const urls = {
         cars,
         all: (page: number): string => `${cars}/page/${page}`,
         byId: (id: number): string => `${cars}/${id}`,
+        bySeller: (id: number, page: number): string => `${cars}/by-seller/${id}/page/${page}`,
     },
     auth: {
         auth,
@@ -36,7 +37,7 @@ const urls = {
     users: {
         common,
         getById: (id: number): string => `${common}/users/${id}`,
-        getByToken: (): string => `${common}/users`,
+        getByToken: (): string => `${common}/users/by-token`,
 
     },
 

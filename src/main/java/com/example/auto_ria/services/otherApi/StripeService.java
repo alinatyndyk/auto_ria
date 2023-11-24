@@ -8,10 +8,7 @@ import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Customer;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Price;
-import com.stripe.model.Subscription;
+import com.stripe.model.*;
 import com.stripe.param.*;
 import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
@@ -20,10 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -66,7 +60,7 @@ public class StripeService {
                     System.out.println("first");
                     paymentToken = payer.getDefaultSource();
                     customerId = stripeId;
-                    System.out.println(paymentToken);
+                    System.out.println(paymentToken); //todo front remove checkout if default card use
                     System.out.println(customerId);
                 }
 
@@ -114,11 +108,19 @@ public class StripeService {
                     );
                     paymentToken = body.getToken();
                     customerId = customer.getId();
-                }
+                } //todo if else error
             } catch (Exception e) {
                 throw new CustomException("Please check your parameters", HttpStatus.CONFLICT);
 
             }
+            System.out.println(paymentToken);
+            System.out.println(customerId);
+
+            Map<String, Object> paymentMethodParams = new HashMap<>();
+            paymentMethodParams.put("type", "card");
+            paymentMethodParams.put("card", Collections.singletonMap("token", paymentToken));
+            PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+
 
             if (paymentToken != null && customerId != null) {
 
@@ -170,7 +172,7 @@ public class StripeService {
                             .setAmount(price.getUnitAmount())
                             .setCurrency("usd")
                             .setDescription("Premium bought")
-                            .setPaymentMethod(paymentToken)
+                            .setPaymentMethod(paymentMethod.getId())
                             .setCustomer(customerId)
                             .setConfirm(true)
                             .build();

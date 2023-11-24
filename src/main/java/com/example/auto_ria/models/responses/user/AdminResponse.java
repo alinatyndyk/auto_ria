@@ -1,6 +1,7 @@
 package com.example.auto_ria.models.responses.user;
 
 import com.example.auto_ria.enums.EAccountType;
+import com.example.auto_ria.enums.ERole;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,5 +16,6 @@ public class AdminResponse {
     private String lastName;
     private String email;
     private String avatar;
+    private ERole role;
     private LocalDateTime createdAt; //todo add email
 }

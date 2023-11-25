@@ -30,6 +30,7 @@ const SellerProfile: FC<IProps> = ({seller}) => {
                 <div>id: {id}</div>
                 <div>{name} {lastName}</div>
                 <div>{number}</div>
+                <div>type: {accountType}</div>
                 <div style={{fontSize: "9px"}}>{region}, {city}</div>
 
             </div>

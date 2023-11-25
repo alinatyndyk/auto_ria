@@ -18,6 +18,10 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.responses.currency.CurrencyResponse;
+import com.stripe.Stripe;
+import com.stripe.model.*;
+import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.SubscriptionCreateParams;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Configuration;
@@ -32,10 +36,7 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Configuration
 @EnableScheduling
@@ -72,6 +73,53 @@ public class CronConfiguration {
 //        params.put("url", "https://webhook.site/e038300e-b72e-49f5-8b67-14c80d1ea5eb");
 //
 //        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
+
+        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
+
+        Map<String, Object> paymentMethodParams = new HashMap<>();
+        paymentMethodParams.put("type", "card");
+        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
+        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+
+        System.out.println("paymentMethod");
+        System.out.println(paymentMethod);
+        System.out.println("paymentMethod");
+
+        Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
+
+        System.out.println("price");
+        System.out.println(price);
+        System.out.println("price");
+
+        Customer customer = Customer.create(CustomerCreateParams.builder()
+                .setEmail("some-emsil@test.com")
+                .setSource("tok_mastercard")
+                .build());
+
+        System.out.println("customer");
+        System.out.println(customer);
+        System.out.println("customer");
+
+        Customer customer1 = Customer.retrieve(customer.getId());
+        System.out.println(customer1);
+        System.out.println("customer1");
+
+
+//        Map<String, Object> updateParams = new HashMap<>();
+//        updateParams.put("source", "tok_visa");
+//
+//        customer1.getSources().create(updateParams);
+
+//        Subscription subscription = Subscription.create(SubscriptionCreateParams.builder()
+//                .setCustomer(customer.getId())
+////                .setDefaultPaymentMethod(paymentMethod.getId())
+//                .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
+//                .build());
+//
+//        System.out.println("subscription-------------");
+//        System.out.println(subscription);
+//        System.out.println("subscription-------------");
+
 
         invoiceExpiredPremiumAccounts();
         getCurrencyRates();

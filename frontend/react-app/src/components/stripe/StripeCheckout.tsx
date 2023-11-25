@@ -2,6 +2,7 @@ import React, {FC, useState} from 'react';
 import axios from "axios";
 import Stripe from "react-stripe-checkout";
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
+import {authService} from "../../services";
 
 interface IProps {
     seller: ISellerResponse
@@ -26,9 +27,10 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
                     setAsDefaultCard: getAsDefaultCard,
                     autoPay: autoPay
                 }, {
-                    // headers: {
-                    //     'Content-type': 'multipart/form-data'
-                    // }
+                    headers: {
+                        // 'Content-type': 'multipart/form-data'
+                        Authorization: `Bearer ${authService.getAccessToken()}`
+                    }
                 })
             if (response.status === 200) {
                 console.log('Your payment was successful');

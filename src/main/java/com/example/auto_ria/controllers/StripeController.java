@@ -4,6 +4,7 @@ import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EMail;
+import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.premium.PremiumPlan;
@@ -127,14 +128,15 @@ public class StripeController {
     ) {
         try {
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
-//            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
-            System.out.println(sellerSQL);
-            System.out.println("sellerSQL");
+            String email = commonService.extractEmailFromHeader(request, ETokenRole.SELLER);
 
-            if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
-            }
+            SellerSQL sellerSQL = userDaoSQL.findSellerByEmail(email);
+
+//            if (sellerSQL == null) {
+//                throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
+//            } else if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+//                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
+//            }
 
             stripeService.createPayment(body, sellerSQL);
 

@@ -19,6 +19,7 @@ import com.example.auto_ria.services.auth.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -34,6 +35,7 @@ public class CommonService {
     private JwtService jwtService;
 
     private UserDaoSQL userDaoSQL;
+    private UserDetailsService userDetailsService;
     private ManagerDaoSQL managerDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
@@ -78,25 +80,32 @@ public class CommonService {
 
 
     public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
+        System.out.println(81);
         try {
+            System.out.println(83);
             String bearerToken = jwtService.extractTokenFromHeader(request);
+            System.out.println(bearerToken + " 85");
 
-            return jwtService.extractUsername(bearerToken, role);
+            String email = jwtService.extractUsername(bearerToken, role);
+            System.out.println(email + "  email");
+            return email;
         } catch (Exception e) {
-            throw new CustomException("Failed to get email: " + e.getMessage(), HttpStatus.CONFLICT);
+            throw new CustomException("Please sign in", HttpStatus.UNAUTHORIZED);
         }
+
     }
 
     public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
-
-        SellerSQL sellerSQL;
+        SellerSQL sellerSQL = null;
         try {
-            sellerSQL = userDaoSQL.findSellerByEmail(extractEmailFromHeader(request, ETokenRole.SELLER));
+            String email = extractEmailFromHeader(request, ETokenRole.SELLER);
+            sellerSQL = userDaoSQL.findSellerByEmail(email);
         } catch (Exception e) {
-            return null;
+            System.out.println(e.getMessage() + " exception");
         }
         return sellerSQL;
     }
+
 
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
         ManagerSQL managerSQL;

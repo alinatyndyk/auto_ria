@@ -275,6 +275,7 @@ public class JwtService {
         String bearerToken = null;
 
         String authorizationHeader = request.getHeader("Authorization");
+        System.out.println(authorizationHeader + "auth header");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             bearerToken = authorizationHeader.substring(7);
         }

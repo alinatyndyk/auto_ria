@@ -3,7 +3,6 @@ import {useAppDispatch, useAppSelector} from "../hooks";
 import {sellerActions} from "../redux/slices/seller.slice";
 import {IMessage} from "./cars";
 import {authService} from "../services";
-import {SubmitHandler, useForm} from "react-hook-form";
 
 interface INewMessage {
     content: string;
@@ -13,10 +12,9 @@ function Chat() {
 
     const {messages} = useAppSelector(state => state.sellerReducer);
     const dispatch = useAppDispatch();
-    const {reset, handleSubmit, register} = useForm<INewMessage>();
 
     const [inputValue, setInputValue] = useState('');
-
+    const [getChatMessages, setChatMessages] = useState<IMessage[]>([]);
     const sendMessage = (message: INewMessage) => {
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(message.content);
@@ -33,12 +31,13 @@ function Chat() {
         const page: number = 0;
         dispatch(sellerActions.getChatMessages(page)); //todo 20 for element, when more -load another page
         //add to array [new messages + prev.state]
+        setChatMessages(messages);
+        console.log(getChatMessages)
+        console.log("def 0")
     }, [])
 
     const [msg, setMsg] = useState([]);
-    // const auth: string = `Bearer ` + authService.getAccessToken();
     const auth = authService.getAccessToken();
-    console.log(auth);
     const receiver: number = 3; //from url params
 
     const socket = useMemo(() =>
@@ -48,7 +47,6 @@ function Chat() {
 
         socket.onopen = () => {
             console.log('WebSocket connected');
-            socket.send("hello 27") //trigger
         };
 
         socket.onmessage = (event) => {
@@ -68,27 +66,31 @@ function Chat() {
             }
         };
 
-
     }, []);
+    const getMore = (page: number) => {
+        console.log("get more");
+        dispatch(sellerActions.getChatMessages(page));
+    }
 
-    const send: SubmitHandler<INewMessage> = (message: INewMessage) => {
-        socket.send(message.content);
-    };
+    useEffect(() => {
+        setChatMessages(prevState => [...messages, ...prevState]);
+    }, [messages]);
 
     return (
         <div>
             <div>Chat</div>
-            {messages.map((message: IMessage, index) => (
+
+            <button onClick={() => getMore(1)}>show more</button>
+            {getChatMessages.map((message: IMessage, index) => (
                 <div key={index}>{message.content}</div>
             ))}
+            {/*<div>changes of message state</div>*/}
+            {/*{messages.map((message: IMessage, index) => (*/}
+            {/*    <div key={index}>{message.content}</div>*/}
+            {/*))}*/}
             {msg.map((message, index) => (
                 <div key={index}>{message}</div>
             ))}
-            {/*<form onSubmit={handleSubmit(send)}>*/}
-            {/*    <input type="text" placeholder={"Write a message..."}/>*/}
-            {/*    <button>send</button>*/}
-            {/*</form>*/}
-
             <form onSubmit={handleFormSubmit}>
                 <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}/>
                 <button type="submit">Send</button>

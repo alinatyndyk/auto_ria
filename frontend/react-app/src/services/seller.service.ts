@@ -18,7 +18,7 @@ const sellerService = {
     }),
 
     getChatMessages: (page: number): IRes<any> => axiosService.post(urls.chats.getChatMessages(page), {
-        sellerId: 7,
+        sellerId: 4,
         customerId: 3
     }, {
         headers: {

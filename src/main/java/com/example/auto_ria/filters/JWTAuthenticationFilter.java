@@ -65,17 +65,12 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            if (authorizationParam != null && !authorizationParam.startsWith("Bearer ")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             String jwt;
 
             if (authorizationHeader != null) {
                 jwt = authorizationHeader.substring(7);
             } else {
-                jwt = authorizationParam.substring(9);
+                jwt = authorizationParam;
             }
 
 

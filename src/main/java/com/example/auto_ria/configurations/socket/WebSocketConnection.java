@@ -52,7 +52,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         try {
-            System.out.println(55);
+            System.out.println(55 + "//////////////////////////////////////////");
 
             sessionMap.put(session.getId(), session);
 
@@ -62,8 +62,10 @@ public class WebSocketConnection extends TextWebSocketHandler {
                     UriComponentsBuilder.fromUriString(uri).build().getQueryParams();
 
             String token = queryParams.getFirst("auth");
+            System.out.println(token);
 
-            AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token.substring(11)); //todo align substring with filter
+//            AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token.substring(11)); //todo align substring with filter
+            AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token);
 
             if (authSQL == null) {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
@@ -146,6 +148,10 @@ public class WebSocketConnection extends TextWebSocketHandler {
                         HttpStatus.UNAUTHORIZED);
             }
 
+            System.out.println(checkIfPresentRoomKey);
+            System.out.println("checkIfPresentRoomKey");
+
+
             Chat chat = chatDaoSQL.getByRoomKey(checkIfPresentRoomKey);
 
             String roomKey;
@@ -161,6 +167,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
             } else {
                 throw new CustomException("Invalid params", HttpStatus.BAD_REQUEST);
             }
+            System.out.println(roomKey);
+            System.out.println("roomKey");
 
             String sellerSessionId = chat.getSellerSessionId();
             String customerSessionId = chat.getCustomerSessionId();

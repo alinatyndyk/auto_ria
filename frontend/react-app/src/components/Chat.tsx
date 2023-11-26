@@ -10,7 +10,7 @@ interface INewMessage {
 
 function Chat() {
 
-    const {messages} = useAppSelector(state => state.sellerReducer);
+    const {messages, chatPage} = useAppSelector(state => state.sellerReducer);
     const dispatch = useAppDispatch();
 
     const [inputValue, setInputValue] = useState('');
@@ -30,10 +30,7 @@ function Chat() {
     useEffect(() => {
         const page: number = 0;
         dispatch(sellerActions.getChatMessages(page)); //todo 20 for element, when more -load another page
-        //add to array [new messages + prev.state]
         setChatMessages(messages);
-        console.log(getChatMessages)
-        console.log("def 0")
     }, [])
 
     const [msg, setMsg] = useState([]);
@@ -67,8 +64,8 @@ function Chat() {
         };
 
     }, []);
-    const getMore = (page: number) => {
-        console.log("get more");
+    const getMore = () => {
+        const page = chatPage + 1;
         dispatch(sellerActions.getChatMessages(page));
     }
 
@@ -80,14 +77,10 @@ function Chat() {
         <div>
             <div>Chat</div>
 
-            <button onClick={() => getMore(1)}>show more</button>
+            <button onClick={() => getMore()}>show more</button>
             {getChatMessages.map((message: IMessage, index) => (
                 <div key={index}>{message.content}</div>
             ))}
-            {/*<div>changes of message state</div>*/}
-            {/*{messages.map((message: IMessage, index) => (*/}
-            {/*    <div key={index}>{message.content}</div>*/}
-            {/*))}*/}
             {msg.map((message, index) => (
                 <div key={index}>{message}</div>
             ))}

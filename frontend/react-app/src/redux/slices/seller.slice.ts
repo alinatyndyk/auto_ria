@@ -7,11 +7,13 @@ import {ICustomerResponse} from "../../interfaces/user/customer.interface";
 import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
 import {IMessage} from "../../components/cars";
+import {IMessagePageResponse} from "../../interfaces/message.interface";
 
 interface IState {
     errors: IError | null,
     trigger: boolean,
     messages: IMessage[],
+    chatPage: number,
     user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
 }
 
@@ -19,6 +21,7 @@ const initialState: IState = {
     errors: null,
     trigger: false,
     messages: [],
+    chatPage: 0,
     user: null
 }
 
@@ -48,12 +51,12 @@ const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     }
 );
 
-const getChatMessages = createAsyncThunk<IMessage[], number>(
+const getChatMessages = createAsyncThunk<IMessagePageResponse, number>(
     'sellerSlice/getChatMessages',
     async (page: number, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getChatMessages(page);
-            return data.content;
+            return data; //todo return page
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -71,7 +74,8 @@ const slice = createSlice({
                 state.user = action.payload;
             })
             .addCase(getChatMessages.fulfilled, (state, action) => {
-                state.messages = action.payload;
+                state.messages = action.payload.content;
+                state.chatPage = action.payload.pageable.pageNumber; //todo set page size if smaller stop fetching
             })
             .addCase(getByToken.fulfilled, (state, action) => {
                 console.log(action.payload, "load");

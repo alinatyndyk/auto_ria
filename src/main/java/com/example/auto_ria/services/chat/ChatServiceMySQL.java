@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -37,7 +38,7 @@ public class ChatServiceMySQL {
     }
 
     public Page<MessageClass> getMessagesPage(String roomKey, int page) {
-        Pageable pageable = PageRequest.of(page, 2);
+        Pageable pageable = PageRequest.of(page, 2, Sort.by("id").descending()); //todo desc
         int chatId = getByRoomKey(roomKey).getId();
         return messageDaoSQL.getByChatId(chatId, pageable);
     }

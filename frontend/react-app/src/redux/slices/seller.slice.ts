@@ -6,16 +6,19 @@ import {sellerService} from "../../services/seller.service";
 import {ICustomerResponse} from "../../interfaces/user/customer.interface";
 import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
+import {IMessage} from "../../components/cars";
 
 interface IState {
     errors: IError | null,
     trigger: boolean,
+    messages: IMessage[],
     user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
 }
 
 const initialState: IState = {
     errors: null,
     trigger: false,
+    messages: [],
     user: null
 }
 
@@ -45,6 +48,19 @@ const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     }
 );
 
+const getChatMessages = createAsyncThunk<IMessage[], number>(
+    'sellerSlice/getChatMessages',
+    async (page: number, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getChatMessages(page);
+            return data.content;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const slice = createSlice({
     name: 'sellerSlice',
     initialState,
@@ -53,6 +69,9 @@ const slice = createSlice({
         builder
             .addCase(getById.fulfilled, (state, action) => {
                 state.user = action.payload;
+            })
+            .addCase(getChatMessages.fulfilled, (state, action) => {
+                state.messages = action.payload;
             })
             .addCase(getByToken.fulfilled, (state, action) => {
                 console.log(action.payload, "load");
@@ -71,7 +90,8 @@ const {actions, reducer: sellerReducer} = slice;
 const sellerActions = {
     ...actions,
     getById,
-    getByToken
+    getByToken,
+    getChatMessages
 }
 
 export {

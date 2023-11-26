@@ -6,6 +6,7 @@ import {AdminProfile} from "../components/profiles/AdminProfile";
 import {ManagerProfile} from "../components/profiles/ManagerProfile";
 import {SellerProfile} from "../components/profiles/SellerProfile";
 import {sellerService} from "../services/seller.service";
+import {ChatPage} from "./ChatPage";
 
 const ProfilePage: FC = () => {
 
@@ -40,6 +41,7 @@ const ProfilePage: FC = () => {
         <div>
             <h1>Profile</h1>
             {userComponent}
+            <ChatPage/>
         </div>
     );
 };

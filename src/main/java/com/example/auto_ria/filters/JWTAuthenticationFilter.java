@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -51,14 +52,34 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                                     @NotNull FilterChain filterChain) throws IOException {
         try {
             String authorizationHeader = request.getHeader("Authorization");
+            String authorizationParam = request.getParameter("auth"); //for react socket
 
-            if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+
+            if (authorizationHeader == null && authorizationParam == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
 
-            String jwt = authorizationHeader.substring(7);
+            if (authorizationHeader != null && !authorizationHeader.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
+            if (authorizationParam != null && !authorizationParam.startsWith("Bearer ")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            String jwt;
+
+            if (authorizationHeader != null) {
+                jwt = authorizationHeader.substring(7);
+            } else {
+                jwt = authorizationParam.substring(9);
+            }
+
+
+            System.out.println(jwt);
             String userEmail = jwtService.extractUsername(jwt);
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {

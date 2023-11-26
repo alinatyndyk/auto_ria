@@ -16,8 +16,6 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     const payNow = async (token: any) => {
         try {
-            console.log("HELLOOOOOOOOOOOOOOOOOOOOOOOOO")
-            console.log(token);
             const response =
                 await axios.post("http://localhost:8080/payments/buy-premium", {
                     // await axios.post("http://localhost:8080/payments/add-payment-source", {
@@ -44,7 +42,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     const handleIsAutoPay = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
-            setAutoPay(true);
+            setAutoPay(true); /// todo if auto on then default on
         } else {
             setAutoPay(false);
         }

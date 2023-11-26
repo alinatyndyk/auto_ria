@@ -46,7 +46,7 @@ public class ChatController {
         }
     }
 
-    @GetMapping("/page/{page}")
+    @PostMapping("/page/{page}") // todo change to get
     public ResponseEntity<Page<MessageClass>> getChatMessages(
             @PathVariable("page") int page,
             @RequestParam("sellerId") String sellerId,
@@ -56,7 +56,6 @@ public class ChatController {
             String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
 
             Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);
-            System.out.println(messageClasses);
 
             return ResponseEntity.ok(messageClasses);
         } catch (CustomException e) {

@@ -1,15 +1,20 @@
 package com.example.auto_ria.services.otherApi;
 
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
-import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.*;
-import com.stripe.param.*;
+import com.stripe.model.Customer;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.Price;
+import com.stripe.model.Subscription;
+import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.param.SubscriptionCreateParams;
+import com.stripe.param.SubscriptionUpdateParams;
 import lombok.AllArgsConstructor;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
@@ -17,7 +22,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -115,29 +122,22 @@ public class StripeService {
                     throw new CustomException("Payment params invalid", HttpStatus.BAD_REQUEST);
                 }
             } catch (Exception e) {
-                System.out.println(e.getMessage());
                 throw new CustomException("Please check your parameters" + e.getMessage(), HttpStatus.CONFLICT);
 
             }
 
             if (paymentToken != null && customerId != null) {
-                System.out.println("inside");
                 if (body.isAutoPay()) {
 
-                    System.out.println("inside2 auto pay");
                     Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
 
                     System.out.println(price + "price");
-                    try {
-                        Subscription subscription = Subscription.create(SubscriptionCreateParams.builder()
-                                .setCustomer(customerId)
-                                .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
-                                .build());
+                    Subscription subscription = Subscription.create(SubscriptionCreateParams.builder()
+                            .setCustomer(customerId)
+                            .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
+                            .build());
                     System.out.println(subscription);
                     System.out.println("subscription----------------------------");
-                    }catch (Exception e){
-                        throw new CustomException(e.getMessage() + " message", HttpStatus.BAD_REQUEST);
-                    }
 
                     //todo cron delete long expired subscriptions
 
@@ -147,8 +147,9 @@ public class StripeService {
                         premiumPlan.setAutoPayments(body.isAutoPay());
                         premiumPlan.setStartDate(LocalDate.now());
                         premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
-//                        premiumPlan.setSubId(subscription.getId()); todo renew
+                        premiumPlan.setSubId(subscription.getId());
                         premiumPlan.setActive(true); //todo save
+                        premiumPlanDaoSQL.save(premiumPlan);
 
                     } else {
                         premiumPlanDaoSQL.save(PremiumPlan.builder()
@@ -157,39 +158,28 @@ public class StripeService {
                                 .endDate(LocalDate.now().plusMonths(1))
                                 .sellerId(sellerSQL.getId())
                                 .customerId(customerId)
-//                                .subId(subscription.getId()) renew
+                                .subId(subscription.getId())
                                 .isActive(true)
                                 .build());
                     }
 
-                    sellerSQL.setAccountType(EAccountType.PREMIUM);
-
                 } else {
                     Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
 
-                    System.out.println("else");
-
-                    System.out.println(paymentToken + " payment token");
-
                     Map<String, Object> paymentMethodParams = new HashMap<>();
                     paymentMethodParams.put("type", "card");
-//                    paymentMethodParams.put("card", Collections.singletonMap("token", paymentToken));
-                    paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa")); //problem with token
+//                    paymentMethodParams.put("card", Collections.singletonMap("token", body.getToken())); //todo
+                    paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
                     PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
-                    System.out.println(paymentMethod + "payment method");
 
                     PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
                             .setAmount(price.getUnitAmount())
                             .setCurrency("usd")
                             .setDescription("Premium 1m bought")
                             .setPaymentMethod(paymentMethod.getId())
-//                            .setCustomer(customerId)
+                            .setCustomer(customerId)
                             .setConfirm(true)
                             .build();
-                    System.out.println(createParams + "payment params");
-
-                    PaymentIntent.create(createParams);
-                    System.out.println("created");
 
                     PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
                     if (premiumPlan != null) {
@@ -198,6 +188,7 @@ public class StripeService {
                         premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
                         premiumPlan.setSubId(null);
                         premiumPlan.setActive(true);
+                        premiumPlanDaoSQL.save(premiumPlan);
                     } else {
                         premiumPlanDaoSQL.save(PremiumPlan.builder()
                                 .autoPayments(body.isAutoPay())
@@ -209,10 +200,7 @@ public class StripeService {
                                 .isActive(true)
                                 .build());
                     }
-
-                    sellerSQL.setAccountType(EAccountType.PREMIUM); //todo
                 }
-
 
             } else {
                 throw new CustomException("Source attachment fail: credential provided is null or invalid", HttpStatus.BAD_REQUEST);

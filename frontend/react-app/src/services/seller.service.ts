@@ -16,6 +16,17 @@ const sellerService = {
             Authorization: `Bearer ${authService.getAccessToken()}`
         }
     }),
+
+    getChatMessages: (page: number): IRes<any> => axiosService.post(urls.chats.getChatMessages(page), {
+        sellerId: 7,
+        customerId: 3
+    }, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJpYXQiOjE3MDEwMTQ2ODUsImlzcyI6IlNFTExFUiIsImV4cCI6MTcwMTAxODI4NX0.Oc3HQy2SKRm2FH5rgMrm-rBTBy2Pqc5Zhhh5atD7F7k"
+        }
+    }),
+
     isSellerResponse(obj: any): obj is ISellerResponse {
         return (
             typeof obj.id === 'number' &&

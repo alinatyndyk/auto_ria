@@ -58,6 +58,7 @@ public class AuthenticationController {
             @ModelAttribute @Valid RegisterRequestSellerDTO registerRequestDTO
     ) {
         try {
+            System.out.println(61);
             citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(), registerRequestDTO.getCity());
 
             String fileName = null;
@@ -75,8 +76,10 @@ public class AuthenticationController {
                     registerRequestDTO.getNumber(),
                     fileName,
                     registerRequestDTO.getPassword());
+            System.out.println(79);
             return authenticationService.register(registerRequest);
         } catch (CustomException e) {
+            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
@@ -281,7 +284,12 @@ public class AuthenticationController {
             AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
             SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
 
-            if (customerSQL != null && managerSQL != null && administratorSQL != null && sellerSQL != null) {
+            System.out.println(customerSQL);
+            System.out.println(managerSQL);
+            System.out.println(administratorSQL);
+            System.out.println(sellerSQL);
+
+            if (customerSQL == null && managerSQL == null && administratorSQL == null && sellerSQL == null) {
                 throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
             }
             if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {

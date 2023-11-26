@@ -74,35 +74,35 @@ public class CronConfiguration {
 //
 //        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
 
-        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-
-        Map<String, Object> paymentMethodParams = new HashMap<>();
-        paymentMethodParams.put("type", "card");
-        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
-        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
-
-        System.out.println("paymentMethod");
-        System.out.println(paymentMethod);
-        System.out.println("paymentMethod");
-
-        Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
-
-        System.out.println("price");
-        System.out.println(price);
-        System.out.println("price");
-
-        Customer customer = Customer.create(CustomerCreateParams.builder()
-                .setEmail("some-emsil@test.com")
-                .setSource("tok_mastercard")
-                .build());
-
-        System.out.println("customer");
-        System.out.println(customer);
-        System.out.println("customer");
-
-        Customer customer1 = Customer.retrieve(customer.getId());
-        System.out.println(customer1);
-        System.out.println("customer1");
+//        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
+//
+//        Map<String, Object> paymentMethodParams = new HashMap<>();
+//        paymentMethodParams.put("type", "card");
+//        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
+//        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+//
+//        System.out.println("paymentMethod");
+//        System.out.println(paymentMethod);
+//        System.out.println("paymentMethod");
+//
+//        Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
+//
+//        System.out.println("price");
+//        System.out.println(price);
+//        System.out.println("price");
+//
+//        Customer customer = Customer.create(CustomerCreateParams.builder()
+//                .setEmail("some-emsil@test.com")
+//                .setSource("tok_mastercard")
+//                .build());
+//
+//        System.out.println("customer");
+//        System.out.println(customer);
+//        System.out.println("customer");
+//
+//        Customer customer1 = Customer.retrieve(customer.getId());
+//        System.out.println(customer1);
+//        System.out.println("customer1");
 
 
 //        Map<String, Object> updateParams = new HashMap<>();

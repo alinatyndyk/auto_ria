@@ -78,9 +78,7 @@ public class AuthenticationService {
 
     public ResponseEntity<String> register(RegisterSellerRequest registerRequest) {
         try {
-
-            citiesService.isValidUkrainianCity(registerRequest.getRegion(), registerRequest.getCity());
-
+            System.out.println(81);
             if (sellerDaoSQL.findSellerByNumber(registerRequest.getNumber()) != null) {
                 throw new CustomException("User with this number already exists", HttpStatus.BAD_REQUEST);
             }
@@ -89,6 +87,7 @@ public class AuthenticationService {
                 throw new CustomException("User with this number already exists", HttpStatus.BAD_REQUEST);
             }
 
+            System.out.println(90);
             SellerSQL seller = SellerSQL
                     .sellerBuilder()
                     .name(registerRequest.getName())
@@ -105,9 +104,11 @@ public class AuthenticationService {
             seller.setIsActivated(false);
             sellerDaoSQL.save(seller);
 
+            System.out.println(107);
             String activateToken = jwtService.generateRegisterKey(
                     seller.getEmail(), ERole.SELLER, ETokenRole.SELLER_ACTIVATE);
 
+            System.out.println(107 + activateToken);
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
 
             HashMap<String, Object> variables = new HashMap<>();
@@ -139,8 +140,8 @@ public class AuthenticationService {
 
             sellerDaoSQL.save(sellerSQL);
 
-            sellerAuthDaoSQL.save(AuthSQL.builder().
-                    personId(sellerSQL.getId()).accessToken(access).refreshToken(refresh).build());
+            sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER)
+                    .personId(sellerSQL.getId()).accessToken(access).refreshToken(refresh).build());
 
             registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(code));
 
@@ -192,7 +193,7 @@ public class AuthenticationService {
 
             managerDaoSQL.save(manager);
 
-            managerAuthDaoSQL.save(AuthSQL.builder().
+            managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).
                     personId(manager.getId()).accessToken(authenticationResponse.getAccessToken())
                     .refreshToken(authenticationResponse.getRefreshToken()).build());
 
@@ -241,7 +242,7 @@ public class AuthenticationService {
 
             administratorDaoSQL.save(administrator);
 
-            adminAuthDaoSQL.save(AuthSQL.builder().
+            adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).
                     personId(administrator.getId()).accessToken(authenticationResponse.getAccessToken())
                     .refreshToken(authenticationResponse.getRefreshToken()).build());
 
@@ -317,7 +318,7 @@ public class AuthenticationService {
 
             customerDaoSQL.save(customerSQL);
 
-            customerAuthDaoSQL.save(AuthSQL.builder().
+            customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER).
                     personId(customerSQL.getId()).accessToken(access).refreshToken(refresh).build());
 
 
@@ -366,7 +367,7 @@ public class AuthenticationService {
             String access_token = jwtService.generateToken(user);
             String refreshToken = jwtService.generateRefreshToken(user);
 
-            sellerAuthDaoSQL.save(AuthSQL.builder().
+            sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER).
                     personId(user.getId()).accessToken(access_token)
                     .refreshToken(refreshToken).build());
 
@@ -406,7 +407,7 @@ public class AuthenticationService {
 
             AuthenticationResponse tokenPair = jwtService.generateManagerTokenPair(user);
 
-            managerAuthDaoSQL.save(AuthSQL.builder().
+            managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).
                     personId(user.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -450,7 +451,7 @@ public class AuthenticationService {
 
             AuthenticationResponse tokenPair = jwtService.generateAdminTokenPair(administrator);
 
-            adminAuthDaoSQL.save(AuthSQL.builder().
+            adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).
                     personId(administrator.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -492,7 +493,7 @@ public class AuthenticationService {
 
             AuthenticationResponse tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
 
-            customerAuthDaoSQL.save(AuthSQL.builder().
+            customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER).
                     personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -536,7 +537,7 @@ public class AuthenticationService {
 
             sellerAuthDaoSQL.delete(sellerAuthDaoSQL.findByRefreshToken(refreshToken));
 
-            sellerAuthDaoSQL.save(AuthSQL.builder().
+            sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER).
                     personId(user.getId()).accessToken(newAccessToken)
                     .refreshToken(newRefreshToken).build());
 
@@ -575,7 +576,7 @@ public class AuthenticationService {
 
             managerAuthDaoSQL.delete(managerAuthDaoSQL.findByRefreshToken(refreshToken));
 
-            managerAuthDaoSQL.save(AuthSQL.builder().
+            managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).
                     personId(user.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -614,7 +615,7 @@ public class AuthenticationService {
 
             adminAuthDaoSQL.delete(adminAuthDaoSQL.findByRefreshToken(refreshToken));
 
-            adminAuthDaoSQL.save(AuthSQL.builder().
+            adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).
                     personId(administrator.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -654,7 +655,7 @@ public class AuthenticationService {
 
             customerAuthDaoSQL.delete(customerAuthDaoSQL.findByRefreshToken(refreshToken));
 
-            customerAuthDaoSQL.save(AuthSQL.builder().
+            customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER).
                     personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build());
 
@@ -686,7 +687,7 @@ public class AuthenticationService {
                 if (customerSQL != null) {
                     tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
                     customerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    customerAuthDaoSQL.save(AuthSQL.builder().
+                    customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER).
                             personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken()).build());
                 }
@@ -702,7 +703,7 @@ public class AuthenticationService {
                             .refreshToken(jwtService.generateRefreshToken(sellerSQL))
                             .build();
                     sellerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    sellerAuthDaoSQL.save(AuthSQL.builder().
+                    sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER).
                             personId(sellerSQL.getId()).accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken()).build());
                 }
@@ -713,7 +714,7 @@ public class AuthenticationService {
                 if (administratorSQL != null) {
                     tokenPair = jwtService.generateAdminTokenPair(administratorSQL);
                     adminAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    adminAuthDaoSQL.save(AuthSQL.builder().
+                    adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).
                             personId(administratorSQL.getId()).accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken()).build());
                 }
@@ -724,7 +725,7 @@ public class AuthenticationService {
                 if (managerSQL != null) {
                     tokenPair = jwtService.generateManagerTokenPair(managerSQL);
                     managerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    managerAuthDaoSQL.save(AuthSQL.builder().
+                    managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).
                             personId(managerSQL.getId()).
                             accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken())
@@ -776,7 +777,7 @@ public class AuthenticationService {
                 administratorDaoSQL.save(administratorSQL);
                 adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
                 AuthenticationResponse authenticationResponse = jwtService.generateAdminTokenPair(administratorSQL);
-                adminAuthDaoSQL.save(AuthSQL.builder()
+                adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN)
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(administratorSQL.getId())
@@ -793,7 +794,7 @@ public class AuthenticationService {
                 managerDaoSQL.save(managerSQL);
                 managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
                 AuthenticationResponse authenticationResponse = jwtService.generateManagerTokenPair(managerSQL);
-                managerAuthDaoSQL.save(AuthSQL.builder()
+                managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER)
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(managerSQL.getId())
@@ -814,7 +815,7 @@ public class AuthenticationService {
                         .refreshToken(jwtService.generateRefreshToken(sellerSQL))
                         .build();
 
-                sellerAuthDaoSQL.save(AuthSQL.builder()
+                sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER)
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(sellerSQL.getId())
@@ -832,7 +833,7 @@ public class AuthenticationService {
                 customerDaoSQL.save(customerSQL);
                 customerAuthDaoSQL.deleteAllByPersonId(customerSQL.getId());
                 AuthenticationResponse authenticationResponse = jwtService.generateCustomerTokenPair(customerSQL);
-                customerAuthDaoSQL.save(AuthSQL.builder()
+                customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER)
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(customerSQL.getId())

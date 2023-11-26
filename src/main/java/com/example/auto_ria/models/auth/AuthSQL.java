@@ -1,5 +1,6 @@
 package com.example.auto_ria.models.auth;
 
+import com.example.auto_ria.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,7 @@ public class AuthSQL {
     private int id;
 
     private int personId;
+    private ERole role; //todo add roles every creation
 
     private String accessToken;
     private String refreshToken;

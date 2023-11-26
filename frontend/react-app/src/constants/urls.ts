@@ -4,6 +4,7 @@ const cars = 'cars';
 const auth = 'auth';
 const sellers = 'sellers';
 const common = 'common';
+const chats = 'chats';
 
 const urls = {
     cars: {
@@ -45,6 +46,11 @@ const urls = {
         sellers,
         all: (page: number): string => `${sellers}/page/${page}`,
         getById: (id: number): string => `${sellers}/${id}`,
+    },
+
+    chats: {
+        chats,
+        getChatMessages: (page: number): string => `${chats}/page/${page}`,
     }
 };
 
@@ -54,5 +60,6 @@ export {
     cars,
     auth,
     sellers,
+    chats,
     urls
 };

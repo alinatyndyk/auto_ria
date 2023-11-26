@@ -132,11 +132,11 @@ public class StripeController {
 
             SellerSQL sellerSQL = userDaoSQL.findSellerByEmail(email);
 
-//            if (sellerSQL == null) {
-//                throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
-//            } else if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
-//                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
-//            }
+            if (sellerSQL == null) {
+                throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
+            } else if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
+                throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
+            }
 
             stripeService.createPayment(body, sellerSQL);
 

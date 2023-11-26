@@ -12,6 +12,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.messaging.MessageSecurityMetadataSourceRegistry;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -38,8 +39,7 @@ public class SecurityConfiguration {
                                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/change-passwords").hasAnyAuthority("ADMIN", "MANAGER", "SELLER", "CUSTOMER")
                                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/sign-out").hasAnyAuthority("ADMIN", "MANAGER", "SELLER", "CUSTOMER")
 
-
-                                        .requestMatchers(HttpMethod.GET, "/cars").hasAnyAuthority( "ADMIN")
+                                        .requestMatchers(HttpMethod.GET, "/cars").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars").hasAnyAuthority("SELLER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/activate/{id}").hasAnyAuthority("MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.POST, "/cars/ban/{id}").hasAnyAuthority("MANAGER", "ADMIN")
@@ -67,6 +67,9 @@ public class SecurityConfiguration {
                                         .requestMatchers(HttpMethod.GET, "/customers").hasAnyAuthority("ADMIN")
                                         .requestMatchers(HttpMethod.DELETE, "/customers/**").hasAnyAuthority("CUSTOMER", "MANAGER", "ADMIN")
                                         .requestMatchers(HttpMethod.PATCH, "/customers/**").hasAnyAuthority("ADMIN", "CUSTOMER")
+
+                                        .requestMatchers(HttpMethod.PATCH, "/chats/**").hasAnyAuthority("SELLER", "CUSTOMER", "MANAGER", "ADMIN")
+                                        .requestMatchers("/chat/**").hasAnyAuthority("SELLER", "CUSTOMER", "MANAGER", "ADMIN")
 
 //                                .authenticated()
                                         .anyRequest()

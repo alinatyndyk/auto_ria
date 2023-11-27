@@ -140,5 +140,13 @@ public class AdministratorServiceMySQL {
         }
     }
 
+    public boolean isAdminByEmailPresent(String email) {
+
+        if (administratorDaoSQL.findByEmail(email) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
 }

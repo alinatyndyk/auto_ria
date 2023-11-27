@@ -17,5 +17,5 @@ public class AdminResponse {
     private String email;
     private String avatar;
     private ERole role;
-    private LocalDateTime createdAt; //todo add email
+    private LocalDateTime createdAt;
 }

@@ -17,5 +17,7 @@ public class CustomerResponse {
     private String region;
     private String avatar;
     private ERole role;
+
+    private LocalDateTime lastOnline;
     private LocalDateTime createdAt;
 }

@@ -58,8 +58,16 @@ public class AuthenticationController {
             @ModelAttribute @Valid RegisterRequestSellerDTO registerRequestDTO
     ) {
         try {
-            System.out.println(61);
+
             citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(), registerRequestDTO.getCity());
+
+            if (usersServiceMySQL.isSellerByNumberPresent(registerRequestDTO.getNumber())) {
+                throw new CustomException("User with this number already exists", HttpStatus.BAD_REQUEST);
+            }
+
+            if (usersServiceMySQL.isSellerByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+            }
 
             String fileName = null;
             if (registerRequestDTO.getAvatar() != null) {
@@ -76,7 +84,6 @@ public class AuthenticationController {
                     registerRequestDTO.getNumber(),
                     fileName,
                     registerRequestDTO.getPassword());
-            System.out.println(79);
             return authenticationService.register(registerRequest);
         } catch (CustomException e) {
             System.out.println(e.getMessage());
@@ -125,6 +132,14 @@ public class AuthenticationController {
     ) {
         try {
             String code = request.getHeader("Register-key");
+
+            if(code == null) {
+                throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
+            }
+
+            if (managerServiceMySQL.isManagerByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+            }
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String tokenType = claims.get("recognition").toString();
@@ -178,6 +193,14 @@ public class AuthenticationController {
         try {
             String code = request.getHeader("Register-key");
 
+            if(code == null) {
+                throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
+            }
+
+            if (administratorServiceMySQL.isAdminByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+            }
+
             Claims claims = jwtService.extractClaimsCycle(code);
             String tokenType = claims.get("recognition").toString();
 
@@ -211,6 +234,10 @@ public class AuthenticationController {
             @ModelAttribute @Valid RegisterRequestCustomerDTO registerRequestDTO
     ) {
         try {
+
+            if (usersServiceMySQL.isSellerByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+            }
 
             String fileName = null;
 
@@ -340,7 +367,7 @@ public class AuthenticationController {
 
     }
 
-    @PostMapping("/authenticate/admin") //TODO REMOVE OTHER SEPARATE
+    @PostMapping("/authenticate/admin")
     public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
         try {
             if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
@@ -470,13 +497,13 @@ public class AuthenticationController {
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
+            String code = request.getHeader("Register-key");
 
             if (newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
-            String code = request.getHeader("Register-key");
             String encoded = passwordEncoder.encode(newPassword);
 
             Claims claims = jwtService.extractClaimsCycle(code);

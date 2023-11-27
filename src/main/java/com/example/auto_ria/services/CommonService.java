@@ -1,5 +1,6 @@
 package com.example.auto_ria.services;
 
+import com.example.auto_ria.dao.socket.SessionDaoSQL;
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.dao.user.CustomerDaoSQL;
 import com.example.auto_ria.dao.user.ManagerDaoSQL;
@@ -11,6 +12,7 @@ import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.responses.user.CustomerResponse;
 import com.example.auto_ria.models.responses.user.ManagerResponse;
 import com.example.auto_ria.models.responses.user.SellerResponse;
+import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
@@ -19,7 +21,6 @@ import com.example.auto_ria.services.auth.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -35,7 +36,7 @@ public class CommonService {
     private JwtService jwtService;
 
     private UserDaoSQL userDaoSQL;
-    private UserDetailsService userDetailsService;
+    private SessionDaoSQL sessionDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
@@ -80,16 +81,10 @@ public class CommonService {
 
 
     public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
-        System.out.println(81);
         try {
-            System.out.println(83);
             String bearerToken = jwtService.extractTokenFromHeader(request);
-            System.out.println(bearerToken + " 85");
-
-            String email = jwtService.extractUsername(bearerToken, role);
-            System.out.println(email + "  email");
-            return email;
-        } catch (Exception e) {
+            return jwtService.extractUsername(bearerToken, role);
+        } catch (Exception ignore) {
             throw new CustomException("Please sign in", HttpStatus.UNAUTHORIZED);
         }
 
@@ -100,8 +95,7 @@ public class CommonService {
         try {
             String email = extractEmailFromHeader(request, ETokenRole.SELLER);
             sellerSQL = userDaoSQL.findSellerByEmail(email);
-        } catch (Exception e) {
-            System.out.println(e.getMessage() + " exception");
+        } catch (Exception ignore) {
         }
         return sellerSQL;
     }
@@ -146,13 +140,12 @@ public class CommonService {
         } catch (Exception e) {
             throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-    } //todo
+    }
 
     public CustomerResponse createCustomerResponse(CustomerSQL customer) {
         try {
-            // todo add last online only for sellers and customers
 
-//            Session session = sessionDaoSQL.findLatestSessionByUserId(customer.getId());
+            Session session = sessionDaoSQL.findLatestSessionByUserId(customer.getId());
 
             return CustomerResponse.builder()
                     .id(customer.getId())
@@ -162,6 +155,7 @@ public class CommonService {
                     .city(customer.getCity())
                     .avatar(customer.getAvatar())
                     .role(ERole.CUSTOMER)
+                    .lastOnline(session.getDisconnectedAt())
                     .createdAt(customer.getCreatedAt()) //todo on autoria since...
                     .build();
 
@@ -205,6 +199,8 @@ public class CommonService {
     public SellerResponse createSellerResponse(SellerSQL sellerSQL) {
         try {
 
+            Session session = sessionDaoSQL.findLatestSessionByUserId(sellerSQL.getId());
+
             return SellerResponse.builder()
                     .id(sellerSQL.getId())
                     .name(sellerSQL.getName())
@@ -216,6 +212,7 @@ public class CommonService {
                     .createdAt(sellerSQL.getCreatedAt())
                     .accountType(sellerSQL.getAccountType())
                     .role(ERole.SELLER)
+                    .lastOnline(session.getDisconnectedAt())
                     .isPaymentSourcePresent(sellerSQL.isPaymentSourcePresent())
                     .build();
 

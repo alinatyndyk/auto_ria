@@ -18,8 +18,10 @@ public class SellerResponse {
     private String region;
     private String number;
     private String avatar;
-    private EAccountType accountType;  //todo refactor all
+    private EAccountType accountType;
     private ERole role;
     private boolean isPaymentSourcePresent;
+
+    private LocalDateTime lastOnline;
     private LocalDateTime createdAt;
 }

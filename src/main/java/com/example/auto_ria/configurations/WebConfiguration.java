@@ -13,11 +13,6 @@ import java.io.File;
 @Configuration
 public class WebConfiguration implements WebMvcConfigurer {
 
-//    @Override //TODO only 3000
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**").allowedOrigins("**");
-//    }
-
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")

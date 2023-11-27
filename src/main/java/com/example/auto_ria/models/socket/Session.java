@@ -1,6 +1,7 @@
 package com.example.auto_ria.models.socket;
 
 
+import com.example.auto_ria.enums.ERole;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -28,12 +29,12 @@ public class Session {
     private String sessionId;
 
     @Column(updatable = false)
-    private String userId;
+    private int userId;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime disconnectedAt;
 
-    private String userType;
+    private ERole userType;
 
     private Boolean isOnline;
 
@@ -43,7 +44,7 @@ public class Session {
     private LocalDateTime createdAt;
 
     @Builder
-    public Session(String sessionId, String userId, LocalDateTime disconnectedAt, String userType, Boolean isOnline) {
+    public Session(String sessionId, int userId, LocalDateTime disconnectedAt, ERole userType, Boolean isOnline) {
         this.sessionId = sessionId;
         this.userId = userId;
         this.disconnectedAt = disconnectedAt;

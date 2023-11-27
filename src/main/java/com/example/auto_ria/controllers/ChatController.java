@@ -1,9 +1,12 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.chat.ChatServiceMySQL;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
@@ -12,6 +15,7 @@ import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,15 +50,45 @@ public class ChatController {
         }
     }
 
-    @PostMapping("/page/{page}") // todo change to get
+    @GetMapping("/of-user/page/{page}")
+    public ResponseEntity<Page<Chat>> getChatsByUser(
+            HttpServletRequest request,
+            @PathVariable("page") int page) {
+        try {
+
+            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+
+            int id;
+            ERole role;
+
+            if (sellerSQL != null) {
+                id = sellerSQL.getId();
+                role = ERole.SELLER;
+            } else if (customerSQL != null) {
+                id = customerSQL.getId();
+                role = ERole.CUSTOMER;
+            } else {
+                throw new CustomException("For now chat function is available for seller and customers only",
+                        HttpStatus.FORBIDDEN);
+            }
+
+            return ResponseEntity.ok(chatServiceMySQL.getChatsByUserId(id, role, page));
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
+    @PostMapping("/page/{page}") // todo change to get CHANGE FRONT
     public ResponseEntity<Page<MessageClass>> getChatMessages(
-            @PathVariable("page") int page,
-            @RequestParam("sellerId") String sellerId,
-            @RequestParam("customerId") String customerId
+            HttpServletRequest request,
+            @PathVariable("page") int page
     ) {
         try {
-            String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
+            String sellerId = request.getParameter("sellerId");
+            String customerId = request.getParameter("customerId");
 
+            String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
             Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);
 
             return ResponseEntity.ok(messageClasses);

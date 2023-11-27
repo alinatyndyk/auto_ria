@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public interface CustomerAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     void deleteAllByPersonId(int personId);
     @Transactional
-    void deleteAllByRefreshToken(String refreshToken); //todo all or not
+    void deleteAllByRefreshToken(String refreshToken);
     AuthSQL findByAccessToken(String accessToken);
     AuthSQL findByRefreshToken(String refreshToken);
 

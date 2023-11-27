@@ -1,7 +1,6 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
-import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.requests.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
@@ -12,19 +11,17 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.responses.car.CarResponse;
-import com.example.auto_ria.models.responses.currency.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
+import com.example.auto_ria.models.responses.currency.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.statistics.StatisticsResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.models.user.Person;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.car.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.otherApi.MixpanelService;
 import com.example.auto_ria.services.otherApi.ProfanityFilterService;
-import com.example.auto_ria.services.otherApi.StripeService;
 import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import jakarta.servlet.http.HttpServletRequest;
@@ -44,25 +41,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
 @AllArgsConstructor
 @RequestMapping(value = "cars")
-//todo everything in try catch
-//todo ban/activate users
-//todo chat
+//todo everything in try catch w/o server messages!
 
-// ! todo cancel sub premium
-// ! todo premium bought monthly
-// ! todo validation
-// ! todo check ban/activate car
-// ! todo check isActivated without permissions
-// ! todo show only not banned cars
 public class CarController {
 
     private CarsServiceMySQLImpl carsService;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
-    private UserDaoSQL userDaoSQL;
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
-    private StripeService stripeService;
     private FMService mailer;
     private ManagerServiceMySQL managerServiceMySQL;
     private CitiesService citiesService;
@@ -110,7 +97,10 @@ public class CarController {
             @PathVariable("id") int id
     ) {
         try {
-            carsService.extractById(id);
+            CarSQL carSQL = carsService.extractById(id);
+            if (!carSQL.isActivated()) {
+                throw new CustomException("The car is temporally banned", HttpStatus.FORBIDDEN);
+            }
             mixpanelService.view(String.valueOf(id));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -122,7 +112,14 @@ public class CarController {
             @PathVariable("id") int id
     ) {
         try {
-            return carsService.activate(id);
+
+            CarSQL carSQL = carsService.extractById(id);
+
+            if (carSQL.isActivated()) {
+                throw new CustomException("The car is already active", HttpStatus.FORBIDDEN);
+            }
+
+            return carsService.activate(carSQL);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -133,7 +130,14 @@ public class CarController {
             @PathVariable("id") int id
     ) {
         try {
-            return carsService.ban(id);
+
+            CarSQL carSQL = carsService.extractById(id);
+
+            if (!carSQL.isActivated()) {
+                throw new CustomException("The car is already banned", HttpStatus.FORBIDDEN);
+            }
+
+            return carsService.ban(carSQL);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -147,8 +151,13 @@ public class CarController {
         try {
             carsService.isPremium(request);
             CarSQL carSQL = carsService.extractById(id);
+
+            if (!carSQL.isActivated()) {
+                throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
+            }
+
             carsService.checkCredentials(request, id);
-            return carsService.getMiddlePrice(carSQL.getBrand(), carSQL.getRegion());
+            return carsService.getMiddlePrice(carSQL.getModel(), carSQL.getRegion());
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -157,11 +166,20 @@ public class CarController {
     @GetMapping("/by-seller/{id}/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
-            @PathVariable("id") int id
+            @PathVariable("id") int id,
+            HttpServletRequest request
     ) {
         try {
             SellerSQL sellerSQL = usersServiceMySQL.getById(id);
-            return carsService.getBySeller(sellerSQL, page);
+
+            if (commonService.extractManagerFromHeader(request) != null ||
+                    commonService.extractAdminFromHeader(request) != null ||
+                    commonService.extractSellerFromHeader(request).getId() == id) {
+                return carsService.getBySeller(sellerSQL, page);
+            } else {
+                return carsService.getBySellerActivatedOnly(sellerSQL, page);
+            }
+
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -173,7 +191,12 @@ public class CarController {
             HttpServletRequest request) {
         try {
             carsService.isPremium(request);
-            carsService.extractById(id);
+            CarSQL carSQL = carsService.extractById(id);
+
+            if (carSQL.isActivated()) {
+                throw new CustomException("The car is already banned", HttpStatus.FORBIDDEN);
+            }
+
             return ResponseEntity.ok(mixpanelService.getCarViewsStatistics(String.valueOf(id)));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -231,8 +254,7 @@ public class CarController {
                     .description(carDTO.getDescription())
                     .build();
 
-
-            if (!carsService.findAllBySeller(seller).isEmpty()) {
+            if (carsService.findAllBySeller(seller).isEmpty()) {
                 carsService.isPremium(request);
             }
 
@@ -297,7 +319,10 @@ public class CarController {
                                                 @RequestBody @Valid CarUpdateDTO partialCar,
                                                 HttpServletRequest request) {
         try {
+            carsService.extractById(id);
+
             carsService.checkCredentials(request, id);
+
             citiesService.isValidUkrainianCity(partialCar.getRegion(), partialCar.getCity());
             return carsService.update(id, partialCar);
         } catch (CustomException e) {
@@ -330,11 +355,11 @@ public class CarController {
                 }
             }
 
-            Arrays.stream(newPictures)
-                    .filter(pic -> !alreadyOnServer.contains(pic.getOriginalFilename()))
-                    .forEach(pic -> {
-                        commonService.transferAvatar(pic, pic.getOriginalFilename());
-                    });
+            for (MultipartFile pic : newPictures) {
+                if (!alreadyOnServer.contains(pic.getOriginalFilename())) {
+                    commonService.transferAvatar(pic, pic.getOriginalFilename());
+                }
+            }
 
             carSQL.setPhoto(newPicNames);
 
@@ -347,9 +372,9 @@ public class CarController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         try {
-            carsService.checkCredentials(request, id);
-
             List<String> pictures = carsService.extractById(id).getPhoto();
+
+            carsService.checkCredentials(request, id);
 
             pictures.forEach(picture -> commonService.removeAvatar(picture));
 

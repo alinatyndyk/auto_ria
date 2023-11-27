@@ -74,52 +74,6 @@ public class CronConfiguration {
 //
 //        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
 
-//        Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-//
-//        Map<String, Object> paymentMethodParams = new HashMap<>();
-//        paymentMethodParams.put("type", "card");
-//        paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
-//        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
-//
-//        System.out.println("paymentMethod");
-//        System.out.println(paymentMethod);
-//        System.out.println("paymentMethod");
-//
-//        Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
-//
-//        System.out.println("price");
-//        System.out.println(price);
-//        System.out.println("price");
-//
-//        Customer customer = Customer.create(CustomerCreateParams.builder()
-//                .setEmail("some-emsil@test.com")
-//                .setSource("tok_mastercard")
-//                .build());
-//
-//        System.out.println("customer");
-//        System.out.println(customer);
-//        System.out.println("customer");
-//
-//        Customer customer1 = Customer.retrieve(customer.getId());
-//        System.out.println(customer1);
-//        System.out.println("customer1");
-
-
-//        Map<String, Object> updateParams = new HashMap<>();
-//        updateParams.put("source", "tok_visa");
-//
-//        customer1.getSources().create(updateParams);
-
-//        Subscription subscription = Subscription.create(SubscriptionCreateParams.builder()
-//                .setCustomer(customer.getId())
-////                .setDefaultPaymentMethod(paymentMethod.getId())
-//                .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
-//                .build());
-//
-//        System.out.println("subscription-------------");
-//        System.out.println(subscription);
-//        System.out.println("subscription-------------");
-
 
         invoiceExpiredPremiumAccounts();
         getCurrencyRates();
@@ -166,7 +120,7 @@ public class CronConfiguration {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *") //todo nicht am ersten tag
     public void invoiceExpiredPremiumAccounts() {
         try {
             List<PremiumPlan> premiumPlans = premiumPlanDaoSQL.findAll();
@@ -223,6 +177,9 @@ public class CronConfiguration {
 
     }
 
+    //todo delete old sessions
+
+//todo delete messages in chat older than 2 years
     @Scheduled(cron = "0 0 3 * * *")
     public void deleteExpiredTokens() {
         try {
@@ -236,6 +193,5 @@ public class CronConfiguration {
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
     }
 }

@@ -8,11 +8,10 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.responses.car.CarResponse;
-import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
+import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.user.SellerCarResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.currency.CurrencyConverterService;
@@ -52,7 +51,7 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EBrand brand, String region) {
+    public ResponseEntity<MiddlePriceResponse> getMiddlePrice(EModel model, String region) {
         try {
 
             double totalInUSD = 0.00;
@@ -64,7 +63,7 @@ public class CarsServiceMySQLImpl {
             double middleInEUR = 0.00;
 
             HashMap<String, Object> params = new HashMap<>();
-            params.put("brand", brand);
+            params.put("model", model);
             params.put("region", region);
 
             List<Map<String, Object>> pricesAndCurrencies = carDAO.findPricesByBrandAndRegion(params);
@@ -80,9 +79,9 @@ public class CarsServiceMySQLImpl {
                 totalInEUR = totalInEUR + response.getCurrencyHashMap().get(ECurrency.EUR);
                 totalInUSD = totalInUSD + response.getCurrencyHashMap().get(ECurrency.USD);
 
-                middleInUAH = totalInUAH / carDAO.countByBrandAndRegion(brand, region);
-                middleInUSD = totalInUSD / carDAO.countByBrandAndRegion(brand, region);
-                middleInEUR = totalInEUR / carDAO.countByBrandAndRegion(brand, region);
+                middleInUAH = totalInUAH / carDAO.countByModelAndRegion(model, region);
+                middleInUSD = totalInUSD / carDAO.countByModelAndRegion(model, region);
+                middleInEUR = totalInEUR / carDAO.countByModelAndRegion(model, region);
 
             }
 
@@ -103,7 +102,7 @@ public class CarsServiceMySQLImpl {
                     .withIgnoreNullValues()
                     .withIgnorePaths("powerH")
                     .withIgnorePaths("id")
-                    .withIgnorePaths("photo"); //todo price bigger than - smaller than
+                    .withIgnorePaths("photo");
 
             Example<CarSQL> example = Example.of(params, matcher);
 
@@ -114,7 +113,7 @@ public class CarsServiceMySQLImpl {
 
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(carResponsesPage);
         } catch (Exception e) {
-            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+            throw new CustomException("Failed fetch", HttpStatus.EXPECTATION_FAILED);
         }
     }
 
@@ -125,13 +124,14 @@ public class CarsServiceMySQLImpl {
             }
             CarSQL carSQL = carDAO.findById(id).get();
 
-            ManagerSQL managerSQL = commonService.extractManagerFromHeader(request);
-            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+            if (!carSQL.isActivated() &&
+                    commonService.extractManagerFromHeader(request) == null &&
+                    commonService.extractAdminFromHeader(request) == null
+            ) {
+                SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
 
-            if (!carSQL.isActivated()) {
-                if (managerSQL == null
-                        && administratorSQL == null) {
-                    throw new CustomException("The announcement is not activated", HttpStatus.FORBIDDEN);
+                if (sellerSQL == null || sellerSQL.getId() != carSQL.getSeller().getId()) {
+                    throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
                 }
             }
 
@@ -141,7 +141,7 @@ public class CarsServiceMySQLImpl {
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
-            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+            throw new CustomException("Failed fetch", HttpStatus.EXPECTATION_FAILED);
         }
     }
 
@@ -154,7 +154,7 @@ public class CarsServiceMySQLImpl {
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
-            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+            throw new CustomException("Failed fetch", HttpStatus.EXPECTATION_FAILED);
         }
     }
 
@@ -186,9 +186,8 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<String> activate(int id) {
+    public ResponseEntity<String> activate(CarSQL carSQL) {
         try {
-            CarSQL carSQL = extractById(id);
             carSQL.setActivated(true);
             carDAO.save(carSQL);
             try {
@@ -204,9 +203,8 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<String> ban(int id) {
+    public ResponseEntity<String> ban(CarSQL carSQL) {
         try {
-            CarSQL carSQL = extractById(id);
             carSQL.setActivated(false);
             carDAO.save(carSQL);
             try {
@@ -224,15 +222,29 @@ public class CarsServiceMySQLImpl {
 
     public ResponseEntity<Page<CarResponse>> getBySeller(SellerSQL seller, int page) {
         try {
-            Pageable pageable = PageRequest.of(page, 2);
 
+            Pageable pageable = PageRequest.of(page, 2);
             Page<CarSQL> carsPage = carDAO.findAllBySeller(seller, pageable);
 
             Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 
             return new ResponseEntity<>(carResponsesPage, HttpStatus.ACCEPTED);
         } catch (Exception e) {
-            throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
+            throw new CustomException("Failed fetch", HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    public ResponseEntity<Page<CarResponse>> getBySellerActivatedOnly(SellerSQL seller, int page) {
+        try {
+
+            Pageable pageable = PageRequest.of(page, 2);
+            Page<CarSQL> carsPage = carDAO.findAllBySellerAndActivatedTrue(seller, pageable);
+
+            Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
+
+            return new ResponseEntity<>(carResponsesPage, HttpStatus.ACCEPTED);
+        } catch (Exception e) {
+            throw new CustomException("Failed fetch" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }
 
@@ -246,7 +258,6 @@ public class CarsServiceMySQLImpl {
 
     public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
         try {
-            //todo seller response
             CarSQL car = CarSQL.builder()
                     .brand(carDTO.getBrand())
                     .powerH(carDTO.getPowerH())

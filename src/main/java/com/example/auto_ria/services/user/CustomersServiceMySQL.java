@@ -185,4 +185,13 @@ public class CustomersServiceMySQL {
         }
     }
 
+    public boolean isCustomerByEmailPresent(String email) {
+
+        if (customerDaoSQL.findByEmail(email) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

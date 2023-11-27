@@ -31,7 +31,6 @@ import java.util.Optional;
 public class UsersServiceMySQLImpl {
 
     private UserDaoSQL userDaoSQL;
-
     private CommonService commonService;
     private FMService mailer;
 
@@ -158,6 +157,24 @@ public class UsersServiceMySQLImpl {
         seller.setAvatar(fileName);
 
         userDaoSQL.save(seller);
+    }
+
+    public boolean isSellerByNumberPresent(String number) {
+
+        if (userDaoSQL.findSellerByNumber(number) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isSellerByEmailPresent(String email) {
+
+        if (userDaoSQL.findSellerByEmail(email) != null) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
 }

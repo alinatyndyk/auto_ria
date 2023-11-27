@@ -77,7 +77,7 @@ public class StripeService {
                     System.out.println("first");
                     paymentToken = defaultSource;
                     customerId = stripeId;
-                } else if (stripePresent && !body.isUseDefaultCard() && !body.isSetAsDefaultCard()) { //todo
+                } else if (stripePresent && !body.isUseDefaultCard() && !body.isSetAsDefaultCard()) {
                     System.out.println("first1");
                     paymentToken = body.getToken();
                     customerId = stripeId;
@@ -86,7 +86,6 @@ public class StripeService {
                     System.out.println("first2");
                     Customer stripeCustomer = Customer.retrieve(stripeId);
 
-                    //todo check if adds
                     Map<String, Object> params = new HashMap<>();
                     params.put("source", body.getToken());
 
@@ -136,10 +135,6 @@ public class StripeService {
                             .setCustomer(customerId)
                             .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
                             .build());
-                    System.out.println(subscription);
-                    System.out.println("subscription----------------------------");
-
-                    //todo cron delete long expired subscriptions
 
                     PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
 
@@ -148,7 +143,7 @@ public class StripeService {
                         premiumPlan.setStartDate(LocalDate.now());
                         premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
                         premiumPlan.setSubId(subscription.getId());
-                        premiumPlan.setActive(true); //todo save
+                        premiumPlan.setActive(true);
                         premiumPlanDaoSQL.save(premiumPlan);
 
                     } else {
@@ -172,7 +167,7 @@ public class StripeService {
                     paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
                     PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 
-                    PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
+                    PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder() /// TODO
                             .setAmount(price.getUnitAmount())
                             .setCurrency("usd")
                             .setDescription("Premium 1m bought")

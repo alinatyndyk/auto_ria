@@ -28,7 +28,6 @@ public class CarSQL {
 
     @Enumerated(EnumType.STRING)
     private EBrand brand;
-    //todo through api
 
     private int powerH;
 

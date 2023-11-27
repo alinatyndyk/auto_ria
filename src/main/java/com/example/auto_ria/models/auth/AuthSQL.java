@@ -24,7 +24,7 @@ public class AuthSQL {
     private int id;
 
     private int personId;
-    private ERole role; //todo add roles every creation
+    private ERole role;
 
     private String accessToken;
     private String refreshToken;

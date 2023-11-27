@@ -47,16 +47,11 @@ public class StripeController {
     public void handleInvoicePaymentFailedWebhook(@RequestBody Map<String, Object> event) {
         String type = (String) event.get("type");
 
-        System.out.println(type); //todo listen to this!!
-        System.out.println("type");
-
         if (type.equals("invoice.payment_failed")) {
             Map<String, Object> eventData = (Map<String, Object>) event.get("data");
             Map<String, Object> objectData = (Map<String, Object>) eventData.get("object");
 
             String customerId = (String) objectData.get("customer");
-            String customerEmail = (String) objectData.get("customer_email");
-            String customerName = (String) objectData.get("customer_name");
 
             PremiumPlan premiumPlan = premiumPlanDaoSQL.findByCustomerId(customerId);
             SellerSQL owner = userDaoSQL.findByPaymentSource(customerId);
@@ -69,9 +64,9 @@ public class StripeController {
 
             Map<String, Object> args = new HashMap<>();
             args.put("url", "http://localhost:3000");
-            args.put("name", "customer name"); //todo real params
+            args.put("name", owner.getName() + owner.getLastName());
 
-            mailer.sendEmail("haisicraisi@gmail.com", EMail.PAYMENT_FAILED, args);
+            mailer.sendEmail(owner.getEmail(), EMail.PAYMENT_FAILED, args);
 
         }
 
@@ -80,18 +75,21 @@ public class StripeController {
     @SneakyThrows
     @PostMapping("/add-payment-source")
     public ResponseEntity<String> addPaymentSource(
-            @RequestBody SetPaymentSourceRequest body
+            @RequestBody SetPaymentSourceRequest body,
+            HttpServletRequest request
     ) {
         try {
-            System.out.println(body.getToken());
+            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            if (sellerSQL == null) {
+                throw new CustomException("Invalid token", HttpStatus.FORBIDDEN);
+            }
+
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
 
-            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
 
             boolean sourcePresent = sellerSQL.isPaymentSourcePresent();
             String paymentToken = body.getToken();
 
-//todo add path to security
             if (!sourcePresent) {
                 Customer customer = Customer.create(
                         CustomerCreateParams.builder()
@@ -152,13 +150,11 @@ public class StripeController {
     @SneakyThrows
     @PostMapping("/cancel-subscription")
     public ResponseEntity<String> cancel(
-            @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request
     ) {
 
         try {
             SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
-//            SellerSQL sellerSQL = usersServiceMySQL.getById(body.getId()).getBody();
 
             if (!sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
                 throw new CustomException("Account with no subscription", HttpStatus.BAD_REQUEST);

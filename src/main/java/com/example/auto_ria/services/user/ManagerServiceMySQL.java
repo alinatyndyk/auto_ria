@@ -130,4 +130,13 @@ public class ManagerServiceMySQL {
         managerDaoSQL.save(managerSQL);
     }
 
+    public boolean isManagerByEmailPresent(String email) {
+
+        if (managerDaoSQL.findByEmail(email) != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }

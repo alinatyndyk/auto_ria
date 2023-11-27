@@ -14,6 +14,6 @@ public interface AdminAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     void deleteAllByCreatedAtBefore(LocalDateTime before);
 
     @Transactional
-    void deleteAllByRefreshToken(String refreshToken); //todo all or not
+    void deleteAllByRefreshToken(String refreshToken);
     long count();
 }

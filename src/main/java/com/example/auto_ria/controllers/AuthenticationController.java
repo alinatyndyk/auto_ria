@@ -440,11 +440,13 @@ public class AuthenticationController {
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
+            System.out.println("reset");
             if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
+            System.out.println("reset1");
             String encoded = passwordEncoder.encode(newPassword);
 
             String accessToken = jwtService.extractTokenFromHeader(request);
@@ -494,6 +496,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationInfoResponse> resetPassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
+        System.out.println("reset");
         try {
             String code = request.getHeader("Register-key");
 
@@ -502,18 +505,21 @@ public class AuthenticationController {
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
-            String encoded = passwordEncoder.encode(newPassword);
+            String encoded = passwordEncoder.encode(newPassword);System.out.println("reset2");
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String email = claims.get("sub").toString();
             String owner = claims.get("role").toString();
             String tokenType = claims.get("recognition").toString();
+            System.out.println(claims + " claims");
+            System.out.println(email + claims + tokenType);
 
             authenticationService.checkForgotKey(
                     code,
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.FORGOT_PASSWORD);
 
+            System.out.println("checked fine");
 
             return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
         } catch (CustomException e) {

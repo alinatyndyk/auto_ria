@@ -798,9 +798,12 @@ public class AuthenticationService {
                         .build();
             } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
                 SellerSQL sellerSQL = usersServiceMySQL.getByEmail(email);
+                System.out.println(sellerSQL);
+                System.out.println(801);
                 sellerSQL.setPassword(encoded);
                 userDaoSQL.save(sellerSQL);
                 sellerAuthDaoSQL.deleteAllByPersonId(sellerSQL.getId());
+                System.out.println(806);
                 AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
                         .accessToken(jwtService.generateToken(sellerSQL))
                         .refreshToken(jwtService.generateRefreshToken(sellerSQL))
@@ -812,6 +815,7 @@ public class AuthenticationService {
                         .id(sellerSQL.getId())
                         .build());
 
+                System.out.println(818);
                 authenticationInfoResponse = AuthenticationInfoResponse.builder()
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())

@@ -4,9 +4,7 @@ import {IAuthRequest} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks";
 import {authActions} from "../../redux/slices";
 import {useNavigate} from "react-router";
-import {auth} from "../../constants";
-import {sellerActions} from "../../redux/slices/seller.slice";
-import {authService} from "../../services";
+import {Link} from "react-router-dom";
 
 const LoginForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAuthRequest>();
@@ -23,13 +21,31 @@ const LoginForm: FC = () => {
     }
 
     return (
-        <div>
+        <div style={{
+            alignItems: "center",
+            width: "400px",
+            backgroundColor: "whitesmoke",
+            display: "flex",
+            flexDirection: "column"
+        }}>
             <div>Log in here</div>
             <form onSubmit={handleSubmit(login)}>
-                <input placeholder={"email"} {...register('email')}/>
-                <input placeholder={"password"} {...register('password')}/>
-                <button>login</button>
+                <div>
+                    <input placeholder={"email"} {...register('email')}/>
+                </div>
+                <div>
+                    <input placeholder={"password"} {...register('password')}/>
+                </div>
+                <button style={{
+                    color: "white",
+                    height: "25px",
+                    width: "100px",
+                    backgroundColor: "green",
+                    border: "none"
+                }}>login
+                </button>
             </form>
+            <Link to={'/auth/forgot-password'}>Forgot password?</Link>
             {errors ? <div>{errors?.message}</div> : <div></div>}
         </div>
     );

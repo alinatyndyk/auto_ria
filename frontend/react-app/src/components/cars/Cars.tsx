@@ -28,36 +28,36 @@ const Cars: FC<IProps> = ({sellerId}) => {
     let [getPage, setPage] = useState<number>(0);
 
     useEffect(() => {
-        console.log("effect");
-        console.log(pageCurrent, pagesInTotal)
-
         if (sellerId != null) {
-            dispatch(carActions.getBySeller({page: getPage, id: sellerId}))
+            dispatch(carActions.getBySeller({page: getPage, id: sellerId})).then(() => {
+            });
         } else {
             dispatch(carActions.getAll(getPage));
         }
 
-        if (pageCurrent <= 0) {
+        if (getPage <= 0) {
             setButtons(true);
         } else {
             setButtons(false);
         }
 
-        if (pageCurrent >= pagesInTotal) {
+        if (getPage + 1 >= pagesInTotal) {
             setNextButtons(true);
         } else {
             setNextButtons(false);
         }
 
-    }, [dispatch, getPage, sellerId])
+    }, [getPage, sellerId, pagesInTotal])
 
 
     const prevPage = () => {
-        setPage(prevState => prevState++);
+        console.log("prev")
+        setPage(prevState => prevState - 1);
     };
 
     const nextPage = () => {
-        setPage(prevState => prevState--);
+        console.log("next")
+        setPage(prevState => prevState + 1);
     };
 
     return (

@@ -48,6 +48,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
         try {
+            System.out.println(51);
             sessionMap.put(session.getId(), session);
 
 
@@ -60,6 +61,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token);
 
+            System.out.println(authSQL);
             if (authSQL == null) {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
@@ -87,24 +89,42 @@ public class WebSocketConnection extends TextWebSocketHandler {
                     chatDaoSQL.save(chat);
                 }
 
+                System.out.println(sessionUserType);
             } else {
                 throw new CustomException("For now chat function is available among sellers and customers only",
                         HttpStatus.UNAUTHORIZED);
             }
+            System.out.println(97);
 
-            sessionDaoSQL.deleteAllByUserId(authSQL.getPersonId());
+//            sessionDaoSQL.deleteSessionByUserId(authSQL.getPersonId());
 
-            Session session1 = Session.builder()
-                    .sessionId(session.getId())
-                    .userId(sessionUserId)
-                    .userType(sessionUserType)
-                    .isOnline(true)
-                    .build();
+            Session userSession = sessionDaoSQL.findByUserId(authSQL.getPersonId());
+            System.out.println(userSession);
+            System.out.println("userSession");
 
-            sessionDaoSQL.save(session1);
+            if (userSession == null) {
+                System.out.println("us null");
+                Session session1 = Session.builder()
+                        .sessionId(session.getId())
+                        .userId(sessionUserId)
+                        .userType(sessionUserType)
+                        .isOnline(true)
+                        .build();
+
+                sessionDaoSQL.save(session1);
+            } else {
+                System.out.println("us not null");
+                userSession.setSessionId(session.getId());
+                userSession.setOnline(true);
+                userSession.setDisconnectedAt(null);
+                sessionDaoSQL.save(userSession);
+            }
+
+            System.out.println(111);
 
             System.out.println("connection established" + session.getId());
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new CustomException("Error connecting to ws", HttpStatus.CONFLICT);
         }
     }
@@ -209,7 +229,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
         System.out.println("connection closed " + session.getId());
         sessionMap.remove(session.getId());
         Session session1 = sessionDaoSQL.getBySessionId(session.getId());
-//        session1.setOnline(false);
+        session1.setOnline(false);
         session1.setDisconnectedAt(LocalDateTime.now());
         sessionDaoSQL.save(session1);
     }

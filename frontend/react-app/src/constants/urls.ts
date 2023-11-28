@@ -3,6 +3,7 @@ const baseURL = 'http://localhost:8080';
 const cars = 'cars';
 const auth = 'auth';
 const sellers = 'sellers';
+const customers = 'customers';
 const common = 'common';
 const chats = 'chats';
 
@@ -48,9 +49,16 @@ const urls = {
         getById: (id: number): string => `${sellers}/${id}`,
     },
 
+    customers: {
+        customers,
+        all: (page: number): string => `${customers}/page/${page}`,
+        getById: (id: number): string => `${customers}/${id}`,
+    },
+
     chats: {
         chats,
         getChatMessages: (page: number): string => `${chats}/page/${page}`,
+        getChatsByUserToken: (page: number): string => `${chats}/of-user/page/${page}`,
     }
 };
 
@@ -60,6 +68,7 @@ export {
     cars,
     auth,
     sellers,
+    customers,
     chats,
     urls
 };

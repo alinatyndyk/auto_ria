@@ -145,7 +145,7 @@ public class CommonService {
     public CustomerResponse createCustomerResponse(CustomerSQL customer) {
         try {
 
-            Session session = sessionDaoSQL.findLatestSessionByUserId(customer.getId());
+            Session session = sessionDaoSQL.findByUserId(customer.getId());
 
             return CustomerResponse.builder()
                     .id(customer.getId())
@@ -198,8 +198,10 @@ public class CommonService {
 
     public SellerResponse createSellerResponse(SellerSQL sellerSQL) {
         try {
-
-            Session session = sessionDaoSQL.findLatestSessionByUserId(sellerSQL.getId());
+            System.out.println(201);
+            Session session = sessionDaoSQL.findByUserId(sellerSQL.getId());
+            System.out.println(session);
+            System.out.println("session");
 
             return SellerResponse.builder()
                     .id(sellerSQL.getId())
@@ -217,6 +219,7 @@ public class CommonService {
                     .build();
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new CustomException("Could not create response", HttpStatus.CONFLICT);
         }
     }

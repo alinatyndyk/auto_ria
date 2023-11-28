@@ -29,11 +29,7 @@ const authService = {
         }
     }),
     login: (info: IAuthRequest) => axiosService.post(urls.auth.login(), info),
-    signOut: () => axiosService.post(urls.auth.signOut(), {}, {
-        headers: {
-            Authorization: localStorage.getItem(_refreshTokenKey),
-        }
-    }),
+    signOut: () => axiosService.post(urls.auth.signOut(), {}),
     refresh: (refresh: IRefreshRequest) => axiosService.post(urls.auth.refresh(), {
         refreshToken: refresh.refreshToken
     }),//todo refresh

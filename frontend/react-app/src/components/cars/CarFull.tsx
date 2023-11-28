@@ -1,12 +1,11 @@
 import React, {FC, useState} from 'react';
 import {ICar} from "../../interfaces";
-import {Carousel} from "../Carousel";
 
 interface IProps {
     car: ICar
 }
 
-const Car: FC<IProps> = ({car}) => {
+const CarFull: FC<IProps> = ({car}) => {
 
     const [getPhotos, setPhotos] = useState();
 
@@ -23,12 +22,11 @@ const Car: FC<IProps> = ({car}) => {
         <div style={{
             display: "flex",
             backgroundColor: "whitesmoke",
-            height: "130px", width: "220px",
+            height: "110px", width: "220px",
             fontSize: "9px",
             columnGap: "10px"
         }}>
             <div>
-                <div>id: {id}</div>
                 <img height={"80px"} key={photo[0]} src={`http://localhost:8080/users/avatar/${photo[0]}`} alt=''/>
                 <div>{price} {currency}</div>
                 <div style={{fontSize: "9px"}}>{region}, {city}</div>
@@ -39,12 +37,12 @@ const Car: FC<IProps> = ({car}) => {
                 <div>power (h): {powerH}</div>
             </div>
             <br/>
-            <Carousel images={photo.map((src, id) => ({
-                id,
-                src: `http://localhost:8080/users/avatar/${src}`,
-            }))}/>
+            {
+
+                // photo?.map(image => <img key={image} src={`http://localhost:8080/users/avatar/${image}`} alt=''/>)
+            }
         </div>
     );
 };
 
-export {Car};
+export {CarFull};

@@ -33,6 +33,11 @@ public class ChatServiceMySQL {
                 throw new CustomException("Receiver doesnt exist", HttpStatus.BAD_REQUEST);
             }
 
+            System.out.println(state + " state");
+            System.out.println(customerId);
+            System.out.println(customerDaoSQL.findById(customerId));
+            System.out.println("customerDaoSQL.findById(customerId)");
+
             if (state.equals(ERole.SELLER) && customerDaoSQL.findById(customerId).isEmpty()) {
                 throw new CustomException("Receiver doesnt exist", HttpStatus.BAD_REQUEST);
             }

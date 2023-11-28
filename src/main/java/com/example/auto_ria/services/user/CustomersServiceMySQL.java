@@ -66,7 +66,7 @@ public class CustomersServiceMySQL {
     public ResponseEntity<CustomerResponse> getByIdAsResponse(int id) {
         try {
             Optional<CustomerSQL> customerSQL = customerDaoSQL.findById(id);
-            if (customerSQL.isPresent()) {
+            if (customerSQL.isEmpty()) {
                 throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
             }
 
@@ -74,6 +74,8 @@ public class CustomersServiceMySQL {
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("e.getMessage()");
             throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }

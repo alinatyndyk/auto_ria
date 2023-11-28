@@ -61,6 +61,7 @@ public class UsersServiceMySQLImpl {
 
             return new ResponseEntity<>(commonService.createSellerResponse(sellerSQL), HttpStatus.ACCEPTED);
         } catch (CustomException e) {
+            System.out.println(e.getMessage());
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
@@ -68,7 +69,11 @@ public class UsersServiceMySQLImpl {
     }
 
     public SellerSQL getByEmail(String email) {
-        return userDaoSQL.findSellerByEmail(email);
+        try {
+            return userDaoSQL.findSellerByEmail(email);
+        } catch (Exception e) {
+            throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
     }
 
     public SellerSQL getById(int id) {

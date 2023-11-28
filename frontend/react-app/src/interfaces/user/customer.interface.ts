@@ -11,12 +11,15 @@ export interface ICustomerInput {
 }
 
 export interface ICustomerResponse {
-    id: number,
-    name: string,
-    lastName: string,
-    email: string,
-    role: string,
-    avatar: File | null
+    id: number;
+    name: string;
+    lastName: string;
+    city: string;
+    region: string;
+    avatar: string;
+    role: string;
+    lastOnline: number[];
+    createdAt: number[];
 }
 
 export interface ICustomerPageResponse {

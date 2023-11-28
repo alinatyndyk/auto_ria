@@ -1,6 +1,8 @@
 import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
 import {IAdminResponse} from "../../interfaces/user/admin.interface";
+import {GenerateManagerForm} from "../../forms/auth/codes/GenerateManagerForm";
+import {GenerateAdminForm} from "../../forms/auth/codes/GenerateAdminForm";
 
 interface IProps {
     seller: IAdminResponse
@@ -27,6 +29,9 @@ const AdminProfile: FC<IProps> = ({seller}) => {
                 <img style={{height: "80px"}} src={`http://localhost:8080/users/avatar/${avatar}`} alt="Avatar"/>
             </div>
             <br/>
+            <GenerateManagerForm/>
+            <br/>
+            <GenerateAdminForm/>
         </div>
     );
 };

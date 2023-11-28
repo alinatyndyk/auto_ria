@@ -18,20 +18,36 @@ const ForgotPasswordForm: FC = () => {
 
         setResponse(String(payload));
 
-        // reset();
+        if (!errors) {
+            reset(); //todo with tokens or not. if with navigate
+        }
+
     }
     return (
-        <div>
-            <div>
-                <button onClick={() => navigate('/cars')}>Cars</button>
-            </div>
-            Activate seller
+        <div style={{
+            alignItems: "center",
+            width: "400px",
+            backgroundColor: "whitesmoke",
+            display: "flex",
+            flexDirection: "column"
+        }}>
+            Restore your password here
             {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'email'} {...register('email')}/>
                 </div>
-                <button>Register</button>
+                <div>
+
+                    <button style={{
+                        color: "white",
+                        height: "25px",
+                        width: "100px",
+                        backgroundColor: "green",
+                        border: "none"
+                    }}>Send email
+                    </button>
+                </div>
             </form>
         </div>
     );

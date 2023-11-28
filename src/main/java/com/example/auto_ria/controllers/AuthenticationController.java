@@ -1,6 +1,8 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
+import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
@@ -42,6 +44,7 @@ import java.util.Map;
 public class AuthenticationController {
 
     private AuthenticationService authenticationService;
+    private UserDaoSQL userDaoSQL;
 
     private UsersServiceMySQLImpl usersServiceMySQL;
     private AdministratorServiceMySQL administratorServiceMySQL;
@@ -133,7 +136,7 @@ public class AuthenticationController {
         try {
             String code = request.getHeader("Register-key");
 
-            if(code == null) {
+            if (code == null) {
                 throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
             }
 
@@ -193,7 +196,7 @@ public class AuthenticationController {
         try {
             String code = request.getHeader("Register-key");
 
-            if(code == null) {
+            if (code == null) {
                 throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
             }
 
@@ -306,19 +309,15 @@ public class AuthenticationController {
             AuthenticationInfoResponse authenticationInfoResponse = AuthenticationInfoResponse.builder().build();
             AuthenticationResponse authenticationResponse;
 
+            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
             CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
             ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
             AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
-            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
-
-            System.out.println(customerSQL);
-            System.out.println(managerSQL);
-            System.out.println(administratorSQL);
-            System.out.println(sellerSQL);
 
             if (customerSQL == null && managerSQL == null && administratorSQL == null && sellerSQL == null) {
                 throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
             }
+
             if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {
                 throw new CustomException("Activate your account", HttpStatus.LOCKED);
             } else if (customerSQL != null && customerSQL.getIsActivated().equals(true)) {
@@ -360,8 +359,7 @@ public class AuthenticationController {
             }
 
             return ResponseEntity.ok(authenticationInfoResponse);
-        } catch (
-                CustomException e) {
+        } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
 

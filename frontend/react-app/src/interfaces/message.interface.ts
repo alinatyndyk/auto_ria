@@ -25,3 +25,28 @@ export interface IMessagePageResponse {
     numberOfElements: number;
     empty: boolean;
 }
+
+export interface IChatsPageResponse {
+    content: IChatResponse[];
+    pageable: Pageable;
+    last: boolean;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+    number: number;
+    sort: Sort;
+    first: boolean;
+    numberOfElements: number;
+    empty: boolean;
+}
+
+export interface IChatResponse {
+    id: number;
+    sellerId: number;
+    customerId: number;
+    sellerSessionId: string | null;
+    customerSessionId: string | null;
+    roomKey: string;
+    createdAt: number[];
+    updatedAt: number[];
+}

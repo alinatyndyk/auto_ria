@@ -71,6 +71,7 @@ const slice = createSlice({
     extraReducers: builder =>
         builder
             .addCase(getAll.fulfilled, (state, action) => {
+                console.log(action.payload)
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;

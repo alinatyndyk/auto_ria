@@ -11,7 +11,7 @@ const carService = {
             // Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MDA1Njc5NzEsImlzcyI6IkFETUlOIiwiZXhwIjoxNzAwNTcxNTcxfQ.Vzl_YoRw_pJZoVLYzuqI0jbciHpWoWk0PhdVdQjEErQ'
         }
     }),
-    updateById: (id: number, car: ICar): IRes<ICar> => axiosService.put(urls.cars.byId(id), car), //todo add headers token
+    updateById: (id: number, car: ICar): IRes<ICar> => axiosService.put(urls.cars.byId(id), car),
     deleteById: (id: number): IRes<void> => axiosService.delete(urls.cars.byId(id)),
     getBySeller: (id: number, page: number): IRes<ICarResponse> => axiosService.get(urls.cars.bySeller(id, page)),
 }

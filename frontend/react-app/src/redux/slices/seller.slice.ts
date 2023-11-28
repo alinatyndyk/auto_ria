@@ -7,21 +7,27 @@ import {ICustomerResponse} from "../../interfaces/user/customer.interface";
 import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
 import {IMessage} from "../../components/cars";
-import {IMessagePageResponse} from "../../interfaces/message.interface";
+import {IChatResponse, IChatsPageResponse, IMessagePageResponse} from "../../interfaces/message.interface";
 
 interface IState {
     errors: IError | null,
     trigger: boolean,
     messages: IMessage[],
+    chats: IChatResponse[],
+    totalPages: number,
     chatPage: number,
     user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
+    customer: ICustomerResponse | null
 }
 
 const initialState: IState = {
     errors: null,
     trigger: false,
     messages: [],
+    chats: [],
     chatPage: 0,
+    totalPages: 0,
+    customer: null,
     user: null
 }
 
@@ -30,6 +36,19 @@ const getById = createAsyncThunk<ISellerResponse, number>(
     async (id: number, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getById(id);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getCustomerById = createAsyncThunk<ICustomerResponse, number>(
+    'sellerSlice/getCustomerById',
+    async (id: number, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getCustomerById(id);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -56,7 +75,20 @@ const getChatMessages = createAsyncThunk<IMessagePageResponse, number>(
     async (page: number, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getChatMessages(page);
-            return data; //todo return page
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getChatsByUserToken = createAsyncThunk<IChatsPageResponse, number>(
+    'sellerSlice/getChatsByUserToken',
+    async (page: number, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getChatsByUserToken(page);
+            return data;
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -73,9 +105,18 @@ const slice = createSlice({
             .addCase(getById.fulfilled, (state, action) => {
                 state.user = action.payload;
             })
+            .addCase(getCustomerById.fulfilled, (state, action) => {
+                state.customer = action.payload;
+            })
             .addCase(getChatMessages.fulfilled, (state, action) => {
                 state.messages = action.payload.content;
-                state.chatPage = action.payload.pageable.pageNumber; //todo set page size if smaller stop fetching
+                state.totalPages = action.payload.totalPages;
+                state.chatPage = action.payload.pageable.pageNumber;
+            })
+            .addCase(getChatsByUserToken.fulfilled, (state, action) => {
+                state.chats = action.payload.content;
+                state.totalPages = action.payload.totalPages;
+                state.chatPage = action.payload.pageable.pageNumber;
             })
             .addCase(getByToken.fulfilled, (state, action) => {
                 console.log(action.payload, "load");
@@ -94,8 +135,10 @@ const {actions, reducer: sellerReducer} = slice;
 const sellerActions = {
     ...actions,
     getById,
+    getCustomerById,
     getByToken,
-    getChatMessages
+    getChatMessages,
+    getChatsByUserToken
 }
 
 export {

@@ -10,7 +10,8 @@ import {authService} from "./auth.service";
 
 const sellerService = {
     getAll: (page: number): IRes<ISellerPageResponse> => axiosService.get(urls.sellers.all(page)),
-    getById: (id: number): IRes<ISellerResponse> => axiosService.put(urls.users.getById(id)),
+    getById: (id: number): IRes<ISellerResponse> => axiosService.get(urls.users.getById(id)),
+    getCustomerById: (id: number): IRes<ICustomerResponse> => axiosService.get(urls.customers.getById(id)),
     getByToken: (): IRes<any> => axiosService.get(urls.users.getByToken(), {
         headers: {
             Authorization: `Bearer ${authService.getAccessToken()}`
@@ -22,10 +23,11 @@ const sellerService = {
         customerId: 3
     }, {
         headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJpYXQiOjE3MDEwMTQ2ODUsImlzcyI6IlNFTExFUiIsImV4cCI6MTcwMTAxODI4NX0.Oc3HQy2SKRm2FH5rgMrm-rBTBy2Pqc5Zhhh5atD7F7k"
+            "Content-Type": "multipart/form-data"
         }
     }),
+
+    getChatsByUserToken: (page: number): IRes<any> => axiosService.get(urls.chats.getChatsByUserToken(page)),
 
     isSellerResponse(obj: any): obj is ISellerResponse {
         return (

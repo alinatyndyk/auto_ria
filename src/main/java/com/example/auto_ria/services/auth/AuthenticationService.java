@@ -122,6 +122,11 @@ public class AuthenticationService {
     public ResponseEntity<AuthenticationResponse> activateSeller(String email, String code) {
         try {
             SellerSQL sellerSQL = sellerDaoSQL.findSellerByEmail(email);
+
+            if (sellerSQL.getIsActivated()) {
+                throw new CustomException("Seller is already activated", HttpStatus.BAD_REQUEST);
+            }
+
             sellerSQL.setIsActivated(true);
 
             String access = jwtService.generateToken(sellerSQL);
@@ -252,10 +257,6 @@ public class AuthenticationService {
     public ResponseEntity<String> registerCustomer(RegisterCustomerRequest registerRequest) {
         try {
 
-            if (customersServiceMySQL.isCustomerByEmailPresent(registerRequest.getEmail())) {
-                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
-            }
-
             citiesService.isValidUkrainianCity(registerRequest.getRegion(), registerRequest.getCity());
 
             CustomerSQL customerSQL = CustomerSQL
@@ -287,7 +288,6 @@ public class AuthenticationService {
                 throw new CustomException("Something went wrong... Try again later", HttpStatus.CONFLICT);
             }
 
-            customerSQL.setIsActivated(false);
             customerDaoSQL.save(customerSQL);
 
             return ResponseEntity.ok("Check your email for activation");
@@ -301,6 +301,11 @@ public class AuthenticationService {
     public ResponseEntity<AuthenticationResponse> activateCustomer(String email, String code) {
         try {
             CustomerSQL customerSQL = customerDaoSQL.findByEmail(email);
+
+            if (customerSQL.getIsActivated()) {
+                throw new CustomException("Customer is already activated", HttpStatus.BAD_REQUEST);
+            }
+
             customerSQL.setIsActivated(true);
 
             String access = jwtService.generateToken(customerSQL);

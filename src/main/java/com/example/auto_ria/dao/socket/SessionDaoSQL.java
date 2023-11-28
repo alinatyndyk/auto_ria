@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 public interface SessionDaoSQL extends JpaRepository<Session, Integer> {
     Session getBySessionId(String sessionId);
 
-    @Transactional
-    Session deleteAllByUserId(int userId);
+//    @Transactional
+//    Session deleteSessionByUserId(int userId);
 
-    @Query("SELECT s FROM Session s WHERE s.userId = :userId ORDER BY s.createdAt DESC")
-    Session findLatestSessionByUserId(@Param("userId") int userId);
+    @Query("SELECT s FROM Session s WHERE s.userId = :userId")
+    Session findByUserId(@Param("userId") int userId);
 }

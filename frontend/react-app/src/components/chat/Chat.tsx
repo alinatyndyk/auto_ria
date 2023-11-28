@@ -1,20 +1,25 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {useAppDispatch, useAppSelector} from "../hooks";
-import {sellerActions} from "../redux/slices/seller.slice";
-import {IMessage} from "./cars";
-import {authService} from "../services";
+import React, {FC, useEffect, useMemo, useState} from 'react';
+import {useAppDispatch, useAppSelector} from "../../hooks";
+import {sellerActions} from "../../redux/slices/seller.slice";
+import {IMessage} from "../cars";
+import {authService} from "../../services";
+import {useParams} from "react-router";
 
 interface INewMessage {
     content: string;
 }
 
-function Chat() {
+const Chat: FC = () => {
 
-    const {messages, chatPage} = useAppSelector(state => state.sellerReducer);
+    const {messages, chatPage, totalPages, chats} = useAppSelector(state => state.sellerReducer);
     const dispatch = useAppDispatch();
 
     const [inputValue, setInputValue] = useState('');
+    const [getMoreBtn, setMoreBtn] = useState(false);
     const [getChatMessages, setChatMessages] = useState<IMessage[]>([]);
+
+    const {receiverId} = useParams<{ receiverId: string }>();
+
     const sendMessage = (message: INewMessage) => {
         if (socket.readyState === WebSocket.OPEN) {
             socket.send(message.content);
@@ -28,17 +33,20 @@ function Chat() {
     };
 
     useEffect(() => {
-        const page: number = 0;
-        dispatch(sellerActions.getChatMessages(page)); //todo 20 for element, when more -load another page
+        dispatch(sellerActions.getChatMessages(chatPage));
         setChatMessages(messages);
+        if (totalPages < chatPage + 1) {
+            setMoreBtn(true);
+        } else {
+            setMoreBtn(false);
+        }
     }, [])
 
     const [msg, setMsg] = useState([]);
     const auth = authService.getAccessToken();
-    const receiver: number = 3; //from url params
 
     const socket = useMemo(() =>
-        new WebSocket(`ws://localhost:8080/chat?receiverId=${receiver}&auth=${auth}`), [auth, receiver]);
+        new WebSocket(`ws://localhost:8080/chat?receiverId=${receiverId}&auth=${auth}`), [auth, receiverId]);
 
     useEffect(() => {
 
@@ -67,6 +75,11 @@ function Chat() {
     const getMore = () => {
         const page = chatPage + 1;
         dispatch(sellerActions.getChatMessages(page));
+        if (totalPages < page + 1) {
+            setMoreBtn(true);
+        } else {
+            setMoreBtn(false);
+        }
     }
 
     useEffect(() => {
@@ -76,8 +89,7 @@ function Chat() {
     return (
         <div>
             <div>Chat</div>
-
-            <button onClick={() => getMore()}>show more</button>
+            <button disabled={getMoreBtn} onClick={() => getMore()}>show more</button>
             {getChatMessages.map((message: IMessage, index) => (
                 <div key={index}>{message.content}</div>
             ))}

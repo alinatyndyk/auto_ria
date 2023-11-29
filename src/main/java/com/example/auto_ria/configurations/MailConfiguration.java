@@ -19,6 +19,11 @@ public class MailConfiguration {
             put("templateName", "welcome.ftl");
         }});
 
+        emails.put(EMail.REGISTER, new HashMap<>() {{
+            put("subject", "Please register your account!");
+            put("templateName", "register.ftl");
+        }});
+
         emails.put(EMail.PREMIUM_END, new HashMap<>() {{
             put("subject", "Premium end!");
             put("templateName", "premium-end.ftl");

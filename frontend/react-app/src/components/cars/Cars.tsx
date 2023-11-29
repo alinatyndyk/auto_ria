@@ -8,7 +8,7 @@ interface IProps {
     sellerId: number | null
 }
 
-export interface IMessage {
+export interface IMessage {  //todo to interface
     id: number,
     content: string,
     senderId: number,

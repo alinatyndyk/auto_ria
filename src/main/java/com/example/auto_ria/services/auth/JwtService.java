@@ -88,7 +88,7 @@ public class JwtService {
         try {
             claims = Jwts
                     .parserBuilder()
-                    .setSigningKey(getSigningKey(role))
+                    .setSigningKey(getSigningKey(role))//reset pass new key
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -120,11 +120,12 @@ public class JwtService {
             String email,
             ETokenRole role
     ) {
+        System.out.println(extraClaims);
+        System.out.println("extraClaims");
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
                 .setSubject(email)
-                .setAudience(role.name())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
                 .signWith(getSigningKey(role), SignatureAlgorithm.HS256)
@@ -132,8 +133,10 @@ public class JwtService {
     }
 
     public String generateRegisterKey(String email, ERole roleModel, ETokenRole role) {
+        System.out.println(email + roleModel + role);
         Map<String, Object> args = new HashMap<>();
         args.put("role", roleModel);
+        args.put("email", email);
         args.put("recognition", role);
         return generateRegisterKey(args, email, role);
     }

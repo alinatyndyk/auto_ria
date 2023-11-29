@@ -1,10 +1,10 @@
 import axios from "axios";
 
-import {baseURL} from "../constants";
+import {baseURL, geoURL} from "../constants";
 import {authService} from "./auth.service";
-import {IRefreshRequest} from "../interfaces";
 
 const axiosService = axios.create({baseURL});
+const axiosGeoService = axios.create({baseURL: geoURL});
 
 axiosService.interceptors.request.use((config) => {
     const access_token = authService.getAccessToken();
@@ -42,5 +42,6 @@ axiosService.interceptors.request.use((config) => {
 // )
 
 export {
-    axiosService
+    axiosService,
+    axiosGeoService
 }

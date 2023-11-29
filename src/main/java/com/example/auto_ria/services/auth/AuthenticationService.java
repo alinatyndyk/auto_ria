@@ -158,9 +158,9 @@ public class AuthenticationService {
         try {
             Map<String, Object> map = new HashMap<>();
             map.put("code", code);
-            map.put("role", ERole.ADMIN.name());
+            map.put("role", ERole.MANAGER.name());
 
-            mailer.sendEmail(email, EMail.REGISTER_KEY, map);
+            mailer.sendEmail(email, EMail.REGISTER, map);
 
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
 
@@ -210,7 +210,7 @@ public class AuthenticationService {
             map.put("code", code);
             map.put("role", ERole.ADMIN.name());
 
-            mailer.sendEmail(email, EMail.REGISTER_KEY, map);
+            mailer.sendEmail(email, EMail.REGISTER, map);
 
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
 
@@ -745,9 +745,17 @@ public class AuthenticationService {
 
             ERole role = commonService.findRoleByEmail(email);
 
+            System.out.println(role + "role");
+
+            if (role == null) {
+                throw new CustomException("User not found", HttpStatus.BAD_REQUEST);
+            }
+
             String code = jwtService.generateRegisterKey(email, role, ETokenRole.FORGOT_PASSWORD);
+            System.out.println(code + "code");
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
 
+            System.out.println(751 + email + code);
             Map<String, Object> args = new HashMap<>();
             args.put("email", email);
             args.put("time", LocalDateTime.now());
@@ -755,12 +763,14 @@ public class AuthenticationService {
             mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new CustomException("Forgot password error" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     public AuthenticationInfoResponse resetPassword(String email, String owner, String encoded) {
         AuthenticationInfoResponse authenticationInfoResponse;
+        System.out.println("here");
         try {
             if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
                 AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
@@ -772,6 +782,7 @@ public class AuthenticationService {
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(administratorSQL.getId())
+                        .personId(administratorSQL.getId())
                         .build());
 
                 authenticationInfoResponse = AuthenticationInfoResponse.builder()
@@ -789,6 +800,7 @@ public class AuthenticationService {
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(managerSQL.getId())
+                        .personId(managerSQL.getId())
                         .build());
 
                 authenticationInfoResponse = AuthenticationInfoResponse.builder()
@@ -797,8 +809,8 @@ public class AuthenticationService {
                         .id(managerSQL.getId())
                         .build();
             } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
+                System.out.println(805);
                 SellerSQL sellerSQL = usersServiceMySQL.getByEmail(email);
-                System.out.println(sellerSQL);
                 System.out.println(801);
                 sellerSQL.setPassword(encoded);
                 userDaoSQL.save(sellerSQL);
@@ -813,6 +825,7 @@ public class AuthenticationService {
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(sellerSQL.getId())
+                        .personId(sellerSQL.getId())
                         .build());
 
                 System.out.println(818);
@@ -832,6 +845,7 @@ public class AuthenticationService {
                         .accessToken(authenticationResponse.getAccessToken())
                         .refreshToken(authenticationResponse.getRefreshToken())
                         .id(customerSQL.getId())
+                        .personId(customerSQL.getId())
                         .build());
 
                 authenticationInfoResponse = AuthenticationInfoResponse.builder()

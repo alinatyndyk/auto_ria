@@ -180,10 +180,11 @@ const changePassword = createAsyncThunk<IAuthResponse, INewPassword>(
     }
 );
 
-const forgotPassword = createAsyncThunk<string, IForgotPassword>(
+const forgotPassword = createAsyncThunk<IAuthResponse, IForgotPassword>(
     'authSlice/forgotPassword',
     async (info, {rejectWithValue}) => {
         try {
+            console.log(info, "info");
             const {data} = await authService.forgotPassword(info);
             return data;
         } catch (e) {
@@ -197,6 +198,7 @@ const resetPassword = createAsyncThunk<IAuthResponse, IChangePassword>(
     'authSlice/resetPassword',
     async (info, {rejectWithValue}) => {
         try {
+            console.log(info, "password")
             const {data} = await authService.resetPassword(info);
             return data;
         } catch (e) {
@@ -225,7 +227,7 @@ const slice = createSlice({
                 window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
-                state.isAuth = false;
+                state.isAuth = true;
                 authService.setTokens({...action.payload});
                 window.location.reload();
             })
@@ -245,6 +247,11 @@ const slice = createSlice({
                 authService.setTokens({...action.payload});
                 state.authId = action.payload.id;
                 window.location.reload();
+            })
+            .addCase(forgotPassword.fulfilled, (state, action) => {
+                state.isAuth = false;
+                // authService.setTokens({...action.payload});
+                // window.location.reload();
             })
             .addCase(registerManager.fulfilled, (state, action) => {
                 state.isAuth = true;

@@ -8,12 +8,15 @@ import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
 import {IMessage} from "../../components/cars";
 import {IChatResponse, IChatsPageResponse, IMessagePageResponse} from "../../interfaces/message.interface";
+import {IGeoCitiesResponse, IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
 
 interface IState {
     errors: IError | null,
     trigger: boolean,
     messages: IMessage[],
     chats: IChatResponse[],
+    regions: IGeoRegion[],
+    cities: IGeoCity[],
     totalPages: number,
     chatPage: number,
     user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
@@ -25,6 +28,8 @@ const initialState: IState = {
     trigger: false,
     messages: [],
     chats: [],
+    regions: [],
+    cities: [],
     chatPage: 0,
     totalPages: 0,
     customer: null,
@@ -96,6 +101,34 @@ const getChatsByUserToken = createAsyncThunk<IChatsPageResponse, number>(
     }
 );
 
+const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
+    'sellerSlice/getRegionsByPrefix',
+    async (prefix: string, {rejectWithValue}) => {
+        try {
+            console.log(prefix, "prefix");
+            const {data} = await sellerService.getRegionsByPrefix(prefix);
+            return data.data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getRegionsPlaces = createAsyncThunk<IGeoCitiesResponse, string>(
+    'sellerSlice/getRegionsPlaces',
+    async (regionId: string, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getRegionsPlaces(regionId);
+            // retrieve totalCount to iterate other pages if they exist
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const slice = createSlice({
     name: 'sellerSlice',
     initialState,
@@ -107,6 +140,12 @@ const slice = createSlice({
             })
             .addCase(getCustomerById.fulfilled, (state, action) => {
                 state.customer = action.payload;
+            })
+            .addCase(getRegionsByPrefix.fulfilled, (state, action) => {
+                state.regions = action.payload;
+            })
+            .addCase(getRegionsPlaces.fulfilled, (state, action) => {
+                state.cities = action.payload.data;
             })
             .addCase(getChatMessages.fulfilled, (state, action) => {
                 state.messages = action.payload.content;
@@ -138,7 +177,9 @@ const sellerActions = {
     getCustomerById,
     getByToken,
     getChatMessages,
-    getChatsByUserToken
+    getChatsByUserToken,
+    getRegionsByPrefix,
+    getRegionsPlaces
 }
 
 export {

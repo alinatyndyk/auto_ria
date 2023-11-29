@@ -2,6 +2,7 @@ import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {useParams} from "react-router";
+import {sellerActions} from "../../../redux/slices/seller.slice";
 
 const ActivateForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -24,6 +25,9 @@ const ActivateForm: FC = () => {
 
         let payload;
 
+        const res = await dispatch(sellerActions.getByToken());
+
+
         if (role == 'SELLER') { //todo enum
             const res = await dispatch(authActions.activateSeller({code: code ?? ''}));
             payload = res.payload;
@@ -36,14 +40,7 @@ const ActivateForm: FC = () => {
             setResponse(`Invalid_Role_Url: ${role}.`); //todo on back
         }
 
-        const data = {
-            user: payload
-        };
-
-        console.log(payload, "43 payload af");
-        console.log(data, "44 user af");
-
-        navigate('/profile', {state: data})
+        navigate('/profile')
     }
     return (
         <div>

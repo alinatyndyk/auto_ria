@@ -127,16 +127,22 @@ public class CommonService {
 
     public ERole findRoleByEmail(String email) {
         try {
+            System.out.println(129);
             if (administratorDaoSQL.findByEmail(email) != null) {
+                System.out.println("admin");
                 return ERole.ADMIN;
             } else if (managerDaoSQL.findByEmail(email) != null) {
+                System.out.println("admin1");
                 return ERole.MANAGER;
             } else if (userDaoSQL.findSellerByEmail(email) != null) {
+                System.out.println("admin2");
                 return ERole.SELLER;
             } else if (customerDaoSQL.findByEmail(email) != null) {
+                System.out.println("admin3");
                 return ERole.CUSTOMER;
+            } else {
+                return null;
             }
-            return null;
         } catch (Exception e) {
             throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
         }
@@ -145,7 +151,7 @@ public class CommonService {
     public CustomerResponse createCustomerResponse(CustomerSQL customer) {
         try {
 
-            Session session = sessionDaoSQL.findByUserId(customer.getId());
+//            Session session = sessionDaoSQL.findByUserId(customer.getId());
 
             return CustomerResponse.builder()
                     .id(customer.getId())
@@ -155,7 +161,7 @@ public class CommonService {
                     .city(customer.getCity())
                     .avatar(customer.getAvatar())
                     .role(ERole.CUSTOMER)
-                    .lastOnline(session.getDisconnectedAt())
+//                    .lastOnline(session.getDisconnectedAt())
                     .createdAt(customer.getCreatedAt()) //todo on autoria since...
                     .build();
 
@@ -198,12 +204,7 @@ public class CommonService {
 
     public SellerResponse createSellerResponse(SellerSQL sellerSQL) {
         try {
-            System.out.println(201);
-            Session session = sessionDaoSQL.findByUserId(sellerSQL.getId());
-            System.out.println(session);
-            System.out.println("session");
-
-            return SellerResponse.builder()
+            SellerResponse sellerResponse = SellerResponse.builder()
                     .id(sellerSQL.getId())
                     .name(sellerSQL.getName())
                     .lastName(sellerSQL.getLastName())
@@ -214,9 +215,16 @@ public class CommonService {
                     .createdAt(sellerSQL.getCreatedAt())
                     .accountType(sellerSQL.getAccountType())
                     .role(ERole.SELLER)
-                    .lastOnline(session.getDisconnectedAt())
                     .isPaymentSourcePresent(sellerSQL.isPaymentSourcePresent())
                     .build();
+
+            Session session = sessionDaoSQL.findByUserId(sellerSQL.getId());
+
+            if (session != null) {
+                sellerResponse.setLastOnline(session.getDisconnectedAt());
+            }
+
+            return sellerResponse;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

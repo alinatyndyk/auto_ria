@@ -89,7 +89,6 @@ public class AuthenticationController {
                     registerRequestDTO.getPassword());
             return authenticationService.register(registerRequest);
         } catch (CustomException e) {
-            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
@@ -102,11 +101,9 @@ public class AuthenticationController {
             if (jwtService.isTokenExprired(code)) {
                 throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
             }
-            System.out.println("78");
             String email = jwtService.extractUsername(code, ETokenRole.SELLER_ACTIVATE);
             return authenticationService.activateSeller(email, code);
         } catch (CustomException e) {
-            System.out.println("83");
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
@@ -465,7 +462,7 @@ public class AuthenticationController {
     public ResponseEntity<String> forgotPassword(
             @RequestParam("email") String email) {
         try {
-
+            System.out.println("465");
             authenticationService.forgotPassword(email);
 
             return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{8})", "*"));
@@ -496,8 +493,8 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationInfoResponse> resetPassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
-        System.out.println("reset");
         try {
+            System.out.println(500);
             String code = request.getHeader("Register-key");
 
             if (newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
@@ -505,24 +502,22 @@ public class AuthenticationController {
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
-            String encoded = passwordEncoder.encode(newPassword);System.out.println("reset2");
+            String encoded = passwordEncoder.encode(newPassword);
+
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String email = claims.get("sub").toString();
             String owner = claims.get("role").toString();
             String tokenType = claims.get("recognition").toString();
-            System.out.println(claims + " claims");
-            System.out.println(email + claims + tokenType);
 
             authenticationService.checkForgotKey(
                     code,
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.FORGOT_PASSWORD);
 
-            System.out.println("checked fine");
-
             return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
         } catch (CustomException e) {
+            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
 

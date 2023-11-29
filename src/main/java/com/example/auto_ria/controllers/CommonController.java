@@ -69,8 +69,11 @@ public class CommonController {
             String token = jwtService.extractTokenFromHeader(request);
 
             AuthSQL authSQL = adminAuthDaoSQL.findByAccessToken(token);
+            System.out.println(authSQL +  "authSQL");
             int id = authSQL.getPersonId();
             ERole role = authSQL.getRole();
+
+            System.out.println(id + role.name());
 
             if (role.equals(ERole.CUSTOMER)) {
                 return ResponseEntity.ok(customersServiceMySQL.getByIdAsResponse(id));
@@ -79,6 +82,7 @@ public class CommonController {
             } else if (role.equals(ERole.ADMIN)) {
                 return ResponseEntity.ok(administratorServiceMySQL.getByIdAsResponse(id)); //fix
             } else if (role.equals(ERole.SELLER)) {
+                System.out.println("seller");
                 return ResponseEntity.ok(usersServiceMySQL.getByIdAsResponse(id));
             } else {
                 throw new CustomException("No users found", HttpStatus.BAD_REQUEST);

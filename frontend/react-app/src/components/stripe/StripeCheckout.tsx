@@ -42,7 +42,8 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     const handleIsAutoPay = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
-            setAutoPay(true); /// todo if auto on then default on
+            setAutoPay(true);
+            setAsDefaultCard(true);
         } else {
             setAutoPay(false);
         }
@@ -59,6 +60,8 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     const handleSetAsDefaultCard = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
             setAsDefaultCard(true);
+        } else if (autoPay) {
+            setAsDefaultCard(true);
         } else {
             setAsDefaultCard(false);
         }
@@ -72,7 +75,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     if (seller.isPaymentResourcePresent) {
         paymentComponent = <div style={{display: 'flex'}}>
             <label>
-                <input onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay with a default card of this
+                <input checked={getAsDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay with a default card of this
                 account?
             </label>
             <label>
@@ -85,16 +88,20 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
             />
         </div>
     } else if (!seller.isPaymentResourcePresent) {
-        paymentComponent = <div style={{display: 'flex'}}>
-            <label>
-                <input checked={autoPay} onChange={handleSetAsDefaultCard} type="checkbox"/> You want to make this a default card for this
-                account?
-                {autoPay ? <div style={{color: 'maroon'}}>Subscriptions *require* default cards for monthly payments</div> : null}
-            </label>
-            <label>
-                <input onChange={handleIsAutoPay} type="checkbox"/> You want to be charged automatically and start a
-                subscription?
-            </label>
+        paymentComponent = <div>
+            <div style={{display: 'flex'}}>
+                <label>
+                    <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox"/> You want to make this a
+                    default card for this
+                    account?
+                    {autoPay ? <div style={{color: 'maroon'}}>Subscriptions *require* default cards for monthly
+                        payments</div> : null}
+                </label>
+                <label>
+                    <input onChange={handleIsAutoPay} type="checkbox"/> You want to be charged automatically and start a
+                    subscription?
+                </label>
+            </div>
             <Stripe
                 stripeKey={stripeKeyPublish}
                 token={payNow}
@@ -107,7 +114,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     return (
         <div style={{
             backgroundColor: "whitesmoke",
-            height: "110px", width: "220px",
+            height: "100px", width: "500px",
             fontSize: "9px",
             columnGap: "10px"
         }}>

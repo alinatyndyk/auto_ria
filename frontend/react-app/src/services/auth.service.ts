@@ -32,7 +32,7 @@ const authService = {
     signOut: () => axiosService.post(urls.auth.signOut(), {}),
     refresh: (refresh: IRefreshRequest) => axiosService.post(urls.auth.refresh(), {
         refreshToken: refresh.refreshToken
-    }),//todo refresh
+    }),
     registerSeller: (info: ISellerInput) => axiosService.post(urls.auth.registerSeller(), info, {
         headers: {
             "Content-Type": "multipart/form-data",

@@ -36,6 +36,6 @@ export interface ISellerPageResponse {
     sort: Sort;
     first: boolean;
     numberOfElements: number;
-    empty: boolean; //todo transform pagable to 1 interface
+    empty: boolean;
 }
 

@@ -1,4 +1,5 @@
 const baseURL = 'http://localhost:8080';
+const geoURL = 'http://geodb-free-service.wirefreethought.com/v1/geo/countries/UA';
 
 const cars = 'cars';
 const auth = 'auth';
@@ -6,6 +7,7 @@ const sellers = 'sellers';
 const customers = 'customers';
 const common = 'common';
 const chats = 'chats';
+const regions = 'regions';
 
 const urls = {
     cars: {
@@ -59,16 +61,25 @@ const urls = {
         chats,
         getChatMessages: (page: number): string => `${chats}/page/${page}`,
         getChatsByUserToken: (page: number): string => `${chats}/of-user/page/${page}`,
+    },
+
+    geo: {
+        regions,
+        getRegionsByPrefix: (prefix: string): string => `${regions}?limit=10&offset=0&namePrefix=${prefix}`,
+        getRegionsPlaces: (regionId: string): string => `${regions}/${regionId}/places?limit=10&offset=0`, //todo all pages
+
     }
 };
 
 export {
     baseURL,
+    geoURL,
     common,
     cars,
     auth,
     sellers,
     customers,
     chats,
+    regions,
     urls
 };

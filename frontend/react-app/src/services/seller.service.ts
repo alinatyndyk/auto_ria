@@ -1,12 +1,12 @@
 import {IRes} from "../types/axiosRes.type";
-import {ICar, ICarResponse, ICreateCar} from "../interfaces";
-import {axiosService} from "./axios.service";
+import {axiosGeoService, axiosService} from "./axios.service";
 import {urls} from "../constants";
 import {ISellerPageResponse, ISellerResponse} from "../interfaces/user/seller.interface";
 import {ICustomerResponse} from "../interfaces/user/customer.interface";
 import {IAdminResponse} from "../interfaces/user/admin.interface";
 import {IManagerResponse} from "../interfaces/user/manager.interface";
 import {authService} from "./auth.service";
+import {IGeoCitiesResponse, IGeoRegionsResponse} from "../interfaces/geo.interface";
 
 const sellerService = {
     getAll: (page: number): IRes<ISellerPageResponse> => axiosService.get(urls.sellers.all(page)),
@@ -28,6 +28,8 @@ const sellerService = {
     }),
 
     getChatsByUserToken: (page: number): IRes<any> => axiosService.get(urls.chats.getChatsByUserToken(page)),
+    getRegionsByPrefix: (prefix: string): IRes<IGeoRegionsResponse> => axiosGeoService.get(urls.geo.getRegionsByPrefix(prefix)),
+    getRegionsPlaces: (regionId: string): IRes<IGeoCitiesResponse> => axiosGeoService.get(urls.geo.getRegionsPlaces(regionId)), //todo interface
 
     isSellerResponse(obj: any): obj is ISellerResponse {
         return (

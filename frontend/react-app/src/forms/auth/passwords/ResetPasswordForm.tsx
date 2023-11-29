@@ -3,6 +3,7 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {IChangePassword} from "../../../interfaces";
+import {useParams} from "react-router";
 
 const ResetPasswordForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IChangePassword>();
@@ -10,15 +11,26 @@ const ResetPasswordForm: FC = () => {
     const {errors} = useAppSelector(state => state.authReducer);
     const navigate = useAppNavigate();
 
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
     const [getResponse, setResponse] = useState('');
 
     const activate: SubmitHandler<IChangePassword> = async (newPassword: IChangePassword) => {
 
-        const {payload} = await dispatch(authActions.resetPassword(newPassword));
-
-        setResponse(String(payload));
-
-        // reset();
+        if (!code) {
+            setResponse("Error. Register code not provided");
+        } else {
+            await dispatch(authActions.resetPassword({
+                newPassword: newPassword.newPassword,
+                code: code
+            })).catch((error) => {
+                console.log(error)
+                setResponse(error.toString);
+            });
+        }
+        console.log(errors, "err")
+        // navigate("/profile");
     }
     return (
         <div>

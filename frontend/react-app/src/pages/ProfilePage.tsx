@@ -12,7 +12,6 @@ const ProfilePage: FC = () => {
 
     const {user, trigger} = useAppSelector(state => state.sellerReducer);
 
-    const navigate = useAppNavigate();
     const dispatch = useAppDispatch();
 
     useEffect(() => {

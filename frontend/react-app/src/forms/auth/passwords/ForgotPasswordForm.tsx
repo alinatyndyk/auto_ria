@@ -1,14 +1,13 @@
 import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
+import {useAppDispatch, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {IForgotPassword} from "../../../interfaces";
 
 const ForgotPasswordForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<IForgotPassword>();
+    const {handleSubmit, register} = useForm<IForgotPassword>();
     const dispatch = useAppDispatch();
     const {errors} = useAppSelector(state => state.authReducer);
-    const navigate = useAppNavigate();
 
     const [getResponse, setResponse] = useState('');
 
@@ -17,10 +16,6 @@ const ForgotPasswordForm: FC = () => {
         const {payload} = await dispatch(authActions.forgotPassword(email));
 
         setResponse(String(payload));
-
-        if (!errors) {
-            reset(); //todo with tokens or not. if with navigate
-        }
 
     }
     return (

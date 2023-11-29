@@ -11,6 +11,6 @@
 <p>Greetings from Autoria Team!</p>
 <p>Your account with email ${email} requested a password reset at ${time}</p>
 <p>If this was you, please press the on link below. Otherwise, ignore this letter</p>
-<a href="http://localhost:3000/auth/forgot-password?code=${code}">Change password</a>
+<a href="http://localhost:3000/auth/reset-password?code=${code}">Change password</a>
 </body>
 </html>

@@ -1,9 +1,8 @@
 import React, {FC} from 'react';
-import {ISellerResponse} from "../../interfaces/user/seller.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
 
 interface IProps {
-    seller: IManagerResponse //todo fix
+    seller: IManagerResponse
 }
 
 const ManagerProfile: FC<IProps> = ({seller}) => {

@@ -127,18 +127,13 @@ public class CommonService {
 
     public ERole findRoleByEmail(String email) {
         try {
-            System.out.println(129);
             if (administratorDaoSQL.findByEmail(email) != null) {
-                System.out.println("admin");
                 return ERole.ADMIN;
             } else if (managerDaoSQL.findByEmail(email) != null) {
-                System.out.println("admin1");
                 return ERole.MANAGER;
             } else if (userDaoSQL.findSellerByEmail(email) != null) {
-                System.out.println("admin2");
                 return ERole.SELLER;
             } else if (customerDaoSQL.findByEmail(email) != null) {
-                System.out.println("admin3");
                 return ERole.CUSTOMER;
             } else {
                 return null;

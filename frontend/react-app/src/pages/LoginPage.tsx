@@ -7,7 +7,7 @@ const LoginPage: FC = () => {
     return (
         <div>
             <LoginForm/>
-            {/*<LogOutForm/>//todo when auth true*/}
+            {localStorage.getItem("isAuth") === "true" && <LogOutForm/>}
         </div>
     );
 };

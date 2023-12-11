@@ -29,7 +29,7 @@ const sellerService = {
 
     getChatsByUserToken: (page: number): IRes<any> => axiosService.get(urls.chats.getChatsByUserToken(page)),
     getRegionsByPrefix: (prefix: string): IRes<IGeoRegionsResponse> => axiosGeoService.get(urls.geo.getRegionsByPrefix(prefix)),
-    getRegionsPlaces: (regionId: string): IRes<IGeoCitiesResponse> => axiosGeoService.get(urls.geo.getRegionsPlaces(regionId)), //todo interface
+    getRegionsPlaces: (regionId: string): IRes<IGeoCitiesResponse> => axiosGeoService.get(urls.geo.getRegionsPlaces(regionId)),
 
     isSellerResponse(obj: any): obj is ISellerResponse {
         return (
@@ -73,7 +73,7 @@ const sellerService = {
             typeof obj.email === 'string' &&
             (obj.avatar === null || typeof obj.avatar === 'string') &&
             Array.isArray(obj.createdAt) &&
-            obj.role === 'admin'  //todo move to common
+            obj.role === 'admin'
         );
     }
 }

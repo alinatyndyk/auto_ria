@@ -10,7 +10,6 @@ interface IProps {
 
 const SellerProfile: FC<IProps> = ({seller}) => {
 
-    //todo add cars and pagination
     //todo normal timestamp
 
     const navigate = useAppNavigate();

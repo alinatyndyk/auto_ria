@@ -1,48 +1,69 @@
-import React, {FC, useState} from 'react';
-import {ICar} from "../../interfaces";
+import React, {FC, useEffect} from 'react';
+import {Carousel} from "../Carousel";
+import {useParams} from "react-router";
+import {useAppDispatch, useAppNavigate, useAppSelector} from "../../hooks";
+import {carActions} from "../../redux/slices";
 
-interface IProps {
-    car: ICar
-}
+const CarFull: FC = () => {
 
-const CarFull: FC<IProps> = ({car}) => {
+    const {carId} = useParams<{ carId: string }>();
+    const dispatch = useAppDispatch();
+    const navigate = useAppNavigate();
 
-    const [getPhotos, setPhotos] = useState();
+    const {car} = useAppSelector(state => state.carReducer);
 
-    const {
-        id, city, currency,
-        model, photo, powerH,
-        price, priceEUR, priceUAH,
-        priceUSD, region,
-        seller,
-        description, brand
-    } = car;
 
-    return (
-        <div style={{
-            display: "flex",
-            backgroundColor: "whitesmoke",
-            height: "110px", width: "220px",
-            fontSize: "9px",
-            columnGap: "10px"
-        }}>
-            <div>
-                <img height={"80px"} key={photo[0]} src={`http://localhost:8080/users/avatar/${photo[0]}`} alt=''/>
-                <div>{price} {currency}</div>
-                <div style={{fontSize: "9px"}}>{region}, {city}</div>
+    useEffect(() => {
+        if (!isNaN(Number(carId)) && Number(carId) > 0) {
+            dispatch(carActions.getById(Number(carId)));
+        } else {
+
+        }
+    }, [carId]);
+
+    if (car != null) {
+
+        return (
+            <div style={{
+                // display: "flex",
+                backgroundColor: "whitesmoke",
+                fontSize: "9px",
+                columnGap: "10px"
+            }}>
+                <div>
+                    <Carousel images={car.photo.map((src, id) => ({
+                        id,
+                        src: `http://localhost:8080/users/avatar/${src}`,
+                    }))}/>
+                    <div>{car.price} {car.currency}</div>
+                    <div style={{fontSize: "9px"}}>{car.region}, {car.city}</div>
+                </div>
+                <div>
+                    <div>id: {car.id}</div>
+                    <div>brand: {car.brand}</div>
+                    <div>model: {car.model}</div>
+                    <div>power (h): {car.powerH}</div>
+                </div>
+                <div>
+                    <div>usd: {car.priceUSD}</div>
+                    <div>eur: {car.priceEUR}</div>
+                    <div>uah: {car.priceUAH}</div>
+                </div>
+                <div>desc: {car.description}</div>
+                <div>seller: {JSON.stringify(car.seller)}</div>
+                {
+                    localStorage.getItem('isAuth') === "true" &&
+                    <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>
+                }
+                <br/>
             </div>
-            <div>
-                <div>brand: {brand}</div>
-                <div>model: {model}</div>
-                <div>power (h): {powerH}</div>
-            </div>
-            <br/>
-            {
+        );
+    } else {
+        return (
+            <div>Error: invalid id</div>
+        )
+    }
 
-                // photo?.map(image => <img key={image} src={`http://localhost:8080/users/avatar/${image}`} alt=''/>)
-            }
-        </div>
-    );
 };
 
 export {CarFull};

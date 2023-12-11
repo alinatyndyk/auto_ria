@@ -5,6 +5,9 @@ import {urls} from "../constants";
 
 const carService = {
     getAll: (page: number): IRes<ICarResponse> => axiosService.get(urls.cars.all(page)),
+    getById: (id: number): IRes<ICar> => axiosService.get(urls.cars.byId(id)),
+    getAllBrands: (): IRes<string[]> => axiosService.get(urls.cars.allBrands()),
+    getAllModelsByBrand: (brand: string): IRes<string[]> => axiosService.get(urls.cars.allModelsByBrand(brand)),
     create: (car: ICreateCar): IRes<ICar> => axiosService.post(urls.cars.cars, car, {
         headers: {
             "Content-Type": "multipart/form-data",

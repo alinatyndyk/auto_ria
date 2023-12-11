@@ -2,6 +2,7 @@ const baseURL = 'http://localhost:8080';
 const geoURL = 'http://geodb-free-service.wirefreethought.com/v1/geo/countries/UA';
 
 const cars = 'cars';
+const brands = 'brands';
 const auth = 'auth';
 const sellers = 'sellers';
 const customers = 'customers';
@@ -13,6 +14,8 @@ const urls = {
     cars: {
         cars,
         all: (page: number): string => `${cars}/page/${page}`,
+        allBrands: (): string => `${cars}/${brands}`,
+        allModelsByBrand: (brand: string): string => `${cars}/${brands}/${brand}/models`,
         byId: (id: number): string => `${cars}/${id}`,
         bySeller: (id: number, page: number): string => `${cars}/by-seller/${id}/page/${page}`,
     },

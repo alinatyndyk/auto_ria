@@ -354,6 +354,8 @@ public class AuthenticationService {
                 );
 
             } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println("e.getMessage()");
                 throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
             }
 

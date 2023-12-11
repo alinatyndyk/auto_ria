@@ -302,10 +302,11 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationInfoResponse> loginAll(@RequestBody LoginRequest loginRequest) {
         try {
-
+            System.out.println("login all");
             AuthenticationInfoResponse authenticationInfoResponse = AuthenticationInfoResponse.builder().build();
             AuthenticationResponse authenticationResponse;
 
+//            SellerSQL sellerSQL = userDaoSQL.findByEmail(loginRequest.getEmail());
             SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
             CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
             ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
@@ -354,6 +355,7 @@ public class AuthenticationController {
                 authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
                 authenticationInfoResponse.setId(sellerSQL.getId());
             }
+            System.out.println(sellerSQL + "seller");
 
             return ResponseEntity.ok(authenticationInfoResponse);
         } catch (CustomException e) {
@@ -496,6 +498,7 @@ public class AuthenticationController {
         try {
             System.out.println(500);
             String code = request.getHeader("Register-key");
+            System.out.println(newPassword + "new pass");
 
             if (newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +
@@ -503,6 +506,7 @@ public class AuthenticationController {
                         HttpStatus.BAD_REQUEST);
             }
             String encoded = passwordEncoder.encode(newPassword);
+            System.out.println(encoded + "encoded");
 
 
             Claims claims = jwtService.extractClaimsCycle(code);

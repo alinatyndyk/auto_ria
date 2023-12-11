@@ -1,5 +1,5 @@
 import React, {FC, useEffect} from 'react';
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../hooks";
+import {useAppDispatch, useAppSelector} from "../hooks";
 import {sellerActions} from "../redux/slices/seller.slice";
 import {CustomerProfile} from "../components/profiles/CustomerProfile";
 import {AdminProfile} from "../components/profiles/AdminProfile";
@@ -7,6 +7,7 @@ import {ManagerProfile} from "../components/profiles/ManagerProfile";
 import {SellerProfile} from "../components/profiles/SellerProfile";
 import {sellerService} from "../services/seller.service";
 import {ChatPage} from "./ChatPage";
+import {ERole} from "../constants/role.enum";
 
 const ProfilePage: FC = () => {
 
@@ -24,13 +25,13 @@ const ProfilePage: FC = () => {
 
     if (user === null) {
         userComponent = <div>Loading...</div>;
-    } else if (user.role == "SELLER" && sellerService.isSellerResponse(user)) { //todo env and joi
+    } else if (user.role == ERole.SELLER && sellerService.isSellerResponse(user)) { //todo joi
         userComponent = <SellerProfile seller={user}/>;
-    } else if (user.role == "CUSTOMER" && sellerService.isCustomerResponse(user)) {
+    } else if (user.role == ERole.CUSTOMER && sellerService.isCustomerResponse(user)) {
         userComponent = <CustomerProfile seller={user}/>;
-    } else if (user.role == "ADMIN" && sellerService.isAdminResponse(user)) {
+    } else if (user.role == ERole.ADMIN && sellerService.isAdminResponse(user)) {
         userComponent = <AdminProfile seller={user}/>;
-    } else if (user.role == "MANAGER" && sellerService.isManagerResponse(user)) {
+    } else if (user.role == ERole.MANAGER && sellerService.isManagerResponse(user)) {
         userComponent = <ManagerProfile seller={user}/>;
     } else {
         userComponent = <div>User type not recognized</div>;

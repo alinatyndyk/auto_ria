@@ -34,7 +34,7 @@ const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
     'authSlice/login',
     async (info, {rejectWithValue}) => {
         try {
-            console.log("login admin");
+            console.log("login");
             const {data} = await authService.login(info);
             return data;
         } catch (e) {
@@ -218,6 +218,7 @@ const slice = createSlice({
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
                 state.authId = action.payload.id;
+                localStorage.setItem('isAuth', JSON.stringify(true));
                 // window.location.reload();
             })
             .addCase(changePassword.fulfilled, (state, action) => {
@@ -227,7 +228,7 @@ const slice = createSlice({
                 window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
-                state.isAuth = true;
+                state.isAuth = false;
                 authService.setTokens({...action.payload});
                 window.location.reload();
             })
@@ -250,22 +251,21 @@ const slice = createSlice({
             })
             .addCase(forgotPassword.fulfilled, (state, action) => {
                 state.isAuth = false;
-                // authService.setTokens({...action.payload});
-                // window.location.reload();
             })
             .addCase(registerManager.fulfilled, (state, action) => {
-                state.isAuth = true;
+                state.isAuth = false;
                 authService.setTokens({...action.payload});
                 state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
-                state.isAuth = true;
+                state.isAuth = false;
                 authService.setTokens({...action.payload});
                 state.authId = action.payload.id;
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
+                console.log(action.payload, "action payload error auth")
                 state.errors = action.payload as IError;
             })
 });

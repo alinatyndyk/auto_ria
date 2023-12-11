@@ -1,6 +1,7 @@
 import React, {FC, useState} from 'react';
 import {ICar} from "../../interfaces";
 import {Carousel} from "../Carousel";
+import {useAppNavigate} from "../../hooks";
 
 interface IProps {
     car: ICar
@@ -8,7 +9,7 @@ interface IProps {
 
 const Car: FC<IProps> = ({car}) => {
 
-    const [getPhotos, setPhotos] = useState();
+    const navigate = useAppNavigate();
 
     const {
         id, city, currency,
@@ -20,7 +21,7 @@ const Car: FC<IProps> = ({car}) => {
     } = car;
 
     return (
-        <div style={{
+        <div onClick={() => navigate(`${id}`)} style={{
             display: "flex",
             backgroundColor: "whitesmoke",
             height: "130px", width: "220px",
@@ -39,10 +40,6 @@ const Car: FC<IProps> = ({car}) => {
                 <div>power (h): {powerH}</div>
             </div>
             <br/>
-            <Carousel images={photo.map((src, id) => ({
-                id,
-                src: `http://localhost:8080/users/avatar/${src}`,
-            }))}/>
         </div>
     );
 };

@@ -47,7 +47,7 @@ export interface ICar {
     };
     priceUAH: number;
     priceEUR: number;
-    priceUSD: number; //add created at todo, when car was posted
+    priceUSD: number;
 }
 
 export interface ICarResponse {

@@ -13,6 +13,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     const [getUseDefaultCard, setUseDefaultCard] = useState(false);
     const [getAsDefaultCard, setAsDefaultCard] = useState(false);
     const [autoPay, setAutoPay] = useState(false);
+    const [getErrors, setErrors] = useState('');
 
     const payNow = async (token: any) => {
         try {
@@ -26,15 +27,13 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
                     autoPay: autoPay
                 }, {
                     headers: {
-                        // 'Content-type': 'multipart/form-data'
                         Authorization: `Bearer ${authService.getAccessToken()}`
                     }
                 })
             if (response.status === 200) {
-                console.log('Your payment was successful');
+                window.location.reload();
             }
         } catch (e) {
-            console.log(e, 'error');
             // @ts-ignore
             setErrors(e.response.data);
         }
@@ -74,8 +73,10 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     if (seller.isPaymentResourcePresent) {
         paymentComponent = <div style={{display: 'flex'}}>
+            <label>{getErrors}</label>
             <label>
-                <input checked={getAsDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay with a default card of this
+                <input checked={getAsDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay
+                with a default card of this
                 account?
             </label>
             <label>
@@ -90,8 +91,10 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     } else if (!seller.isPaymentResourcePresent) {
         paymentComponent = <div>
             <div style={{display: 'flex'}}>
+                <label>{getErrors}</label>
                 <label>
-                    <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox"/> You want to make this a
+                    <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox"/> You want to
+                    make this a
                     default card for this
                     account?
                     {autoPay ? <div style={{color: 'maroon'}}>Subscriptions *require* default cards for monthly

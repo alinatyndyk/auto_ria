@@ -29,7 +29,6 @@ const ResetPasswordForm: FC = () => {
                 setResponse(error.toString);
             });
         }
-        console.log(errors, "err")
         // navigate("/profile");
     }
     return (
@@ -43,7 +42,7 @@ const ResetPasswordForm: FC = () => {
                 <div>
                     <input type="text" placeholder={'new password'} {...register('newPassword')}/>
                 </div>
-                <button>Register</button>
+                <button>reset</button>
             </form>
         </div>
     );

@@ -3,6 +3,7 @@ import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {useParams} from "react-router";
 import {sellerActions} from "../../../redux/slices/seller.slice";
+import {ERole} from "../../../constants/role.enum";
 
 const ActivateForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -28,16 +29,16 @@ const ActivateForm: FC = () => {
         const res = await dispatch(sellerActions.getByToken());
 
 
-        if (role == 'SELLER') { //todo enum
+        if (role == ERole.SELLER) {
             const res = await dispatch(authActions.activateSeller({code: code ?? ''}));
             payload = res.payload;
             setResponse(String(payload));
-        } else if (role == 'CUSTOMER') {
+        } else if (role == ERole.CUSTOMER) {
             const res = await dispatch(authActions.activateCustomer({code: code ?? ''}));
             payload = res.payload;
             setResponse(String(payload));
         } else {
-            setResponse(`Invalid_Role_Url: ${role}.`); //todo on back
+            setResponse(`Invalid_Role_Url: ${role}.`);
         }
 
         navigate('/profile')

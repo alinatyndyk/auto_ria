@@ -13,7 +13,7 @@ const RegisterAdminForm: FC = () => {
 
     const [getResponse, setResponse] = useState('');
 
-    const {code} = useParams<{ code: string }>();
+    const {code} = useParams<{ code: string }>(); //todo check if not url params
 
     const registerSeller: SubmitHandler<IAdminInput> = async (customer: IAdminInput) => {
 

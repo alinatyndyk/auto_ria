@@ -5,6 +5,9 @@ import {AxiosError} from "axios";
 
 interface IState {
     cars: ICar[],
+    car: ICar | null,
+    brands: string[],
+    models: string[],
     errors: IError | null,
     trigger: boolean,
     pageCurrent: number,
@@ -14,6 +17,9 @@ interface IState {
 
 const initialState: IState = {
     cars: [],
+    car: null,
+    brands: [],
+    models: [],
     errors: null,
     carForUpdate: null,
     trigger: false,
@@ -28,6 +34,47 @@ const getAll = createAsyncThunk<ICarResponse, number>(
             console.log("24");
             console.log(page);
             const {data} = await carService.getAll(page);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getById = createAsyncThunk<ICar, number>(
+    'carSlice/getById',
+    async (carId: number, {rejectWithValue}) => {
+        try {
+            const {data} = await carService.getById(carId);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getAllBrands = createAsyncThunk<string[]>(
+    'carSlice/getAllBrands',
+    async (_, {rejectWithValue}) => {
+        try {
+            console.log("hello")
+            const {data} = await carService.getAllBrands();
+            console.log(data, "slice")
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getAllModelsByBrand = createAsyncThunk<string[], string>(
+    'carSlice/getAllModelsByBrand',
+    async (brand: string, {rejectWithValue}) => {
+        try {
+            const {data} = await carService.getAllModelsByBrand(brand);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -71,10 +118,18 @@ const slice = createSlice({
     extraReducers: builder =>
         builder
             .addCase(getAll.fulfilled, (state, action) => {
-                console.log(action.payload)
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
+            })
+            .addCase(getById.fulfilled, (state, action) => {
+                state.car = action.payload;
+            })
+            .addCase(getAllBrands.fulfilled, (state, action) => {
+                state.brands = action.payload;
+            })
+            .addCase(getAllModelsByBrand.fulfilled, (state, action) => {
+                state.models = action.payload;
             })
             .addCase(getBySeller.fulfilled, (state, action) => {
                 state.cars = action.payload.content;
@@ -83,7 +138,7 @@ const slice = createSlice({
                 state.trigger = !state.trigger;
                 console.log(state.pageCurrent, state.pagesInTotal)
             })
-            .addCase(create.fulfilled, (state, action) => {
+            .addCase(create.fulfilled, (state) => {
                 state.trigger = !state.trigger;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
@@ -97,6 +152,9 @@ const {actions, reducer: carReducer} = slice;
 const carActions = {
     ...actions,
     getAll,
+    getById,
+    getAllBrands,
+    getAllModelsByBrand,
     getBySeller,
     create
 }

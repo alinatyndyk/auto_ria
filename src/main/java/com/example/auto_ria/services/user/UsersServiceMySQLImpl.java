@@ -70,6 +70,7 @@ public class UsersServiceMySQLImpl {
 
     public SellerSQL getByEmail(String email) {
         try {
+            System.out.println(73);
             return userDaoSQL.findSellerByEmail(email);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);

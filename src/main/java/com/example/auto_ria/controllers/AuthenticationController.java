@@ -300,64 +300,47 @@ public class AuthenticationController {
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<AuthenticationInfoResponse> loginAll(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthenticationResponse> loginAll(@RequestBody LoginRequest loginRequest) {
         try {
-            System.out.println("login all");
-            AuthenticationInfoResponse authenticationInfoResponse = AuthenticationInfoResponse.builder().build();
-            AuthenticationResponse authenticationResponse;
+            AuthenticationResponse authenticationResponse = AuthenticationResponse.builder().build();
 
-//            SellerSQL sellerSQL = userDaoSQL.findByEmail(loginRequest.getEmail());
             SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
-            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
-            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
-            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
-
-            if (customerSQL == null && managerSQL == null && administratorSQL == null && sellerSQL == null) {
-                throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
-            }
-
-            if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (customerSQL != null && customerSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginCustomer(loginRequest);
-
-                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
-                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
-                authenticationInfoResponse.setId(customerSQL.getId());
-            }
-
-            if (managerSQL != null && !managerSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (managerSQL != null && managerSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginManager(loginRequest);
-
-                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
-                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
-                authenticationInfoResponse.setId(managerSQL.getId());
-            }
-
-            if (administratorSQL != null && !administratorSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (administratorSQL != null && administratorSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginAdmin(loginRequest);
-
-                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
-                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
-                authenticationInfoResponse.setId(administratorSQL.getId());
-            }
 
             if (sellerSQL != null && !sellerSQL.getIsActivated().equals(true)) {
                 throw new CustomException("Activate your account", HttpStatus.LOCKED);
             } else if (sellerSQL != null && sellerSQL.getIsActivated().equals(true)) {
                 authenticationResponse = authenticationService.login(loginRequest);
-
-                authenticationInfoResponse.setAccessToken(authenticationResponse.getAccessToken());
-                authenticationInfoResponse.setRefreshToken(authenticationResponse.getRefreshToken());
-                authenticationInfoResponse.setId(sellerSQL.getId());
             }
-            System.out.println(sellerSQL + "seller");
 
-            return ResponseEntity.ok(authenticationInfoResponse);
+            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
+
+            if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (customerSQL != null && customerSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginCustomer(loginRequest);
+            }
+
+            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
+
+            if (managerSQL != null && !managerSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (managerSQL != null && managerSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginManager(loginRequest);
+            }
+
+            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
+
+            if (administratorSQL != null && !administratorSQL.getIsActivated().equals(true)) {
+                throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            } else if (administratorSQL != null && administratorSQL.getIsActivated().equals(true)) {
+                authenticationResponse = authenticationService.loginAdmin(loginRequest);
+            }
+
+            if (customerSQL == null && managerSQL == null && administratorSQL == null && sellerSQL == null) {
+                throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
+            }
+
+            return ResponseEntity.ok(authenticationResponse);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

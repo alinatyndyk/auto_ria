@@ -40,7 +40,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Autowired
     private RabbitMQProducer rabbitMQProducer;
     @Autowired
-    private SellerAuthDaoSQL sellerAuthDaoSQL; //todo merge to one dao
+    private SellerAuthDaoSQL sellerAuthDaoSQL;
 
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
 

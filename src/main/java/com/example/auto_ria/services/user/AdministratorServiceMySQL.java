@@ -73,6 +73,7 @@ public class AdministratorServiceMySQL {
 
     public AdministratorSQL getByEmail(String email) {
         try {
+            System.out.println(76);
             return administratorDaoSQL.findByEmail(email);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.EXPECTATION_FAILED);

@@ -344,26 +344,21 @@ public class AuthenticationService {
             if (user == null) {
                 throw new CustomException("User not found", HttpStatus.NOT_FOUND);
             }
-            try {
-                sellerAuthenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                user.getEmail(),
-                                loginRequest.getPassword(),
-                                user.getAuthorities()
-                        )
-                );
 
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                System.out.println("e.getMessage()");
-                throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
-            }
+            sellerAuthenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getEmail(),
+                            loginRequest.getPassword(),
+                            user.getAuthorities()
+                    )
+            );
 
             if (!user.getIsActivated()) {
                 throw new CustomException("Activate your account to access secured endpoints", HttpStatus.FORBIDDEN);
             }
 
             String access_token = jwtService.generateToken(user);
+
             String refreshToken = jwtService.generateRefreshToken(user);
 
             sellerAuthDaoSQL.save(AuthSQL.builder().role(ERole.SELLER).

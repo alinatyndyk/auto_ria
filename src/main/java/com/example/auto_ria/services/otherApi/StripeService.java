@@ -1,16 +1,14 @@
 package com.example.auto_ria.services.otherApi;
 
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Customer;
-import com.stripe.model.PaymentMethod;
-import com.stripe.model.Price;
-import com.stripe.model.Subscription;
+import com.stripe.model.*;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.SubscriptionCreateParams;
@@ -31,6 +29,7 @@ import java.util.Map;
 public class StripeService {
 
     private Environment environment;
+    private UserDaoSQL userDaoSQL;
 
     private PremiumPlanDaoSQL premiumPlanDaoSQL;
 
@@ -47,7 +46,7 @@ public class StripeService {
                 defaultSource = null;
             } else {
                 Customer payer = Customer.retrieve(stripeId);
-                defaultSource = payer.getInvoiceSettings().getDefaultPaymentMethod();
+                defaultSource = payer.getDefaultSource();
             }
 
             String paymentToken;
@@ -100,23 +99,31 @@ public class StripeService {
                             CustomerCreateParams.builder()
                                     .setName(sellerSQL.getName() + sellerSQL.getLastName())
                                     .setEmail(sellerSQL.getEmail())
-                                    .setSource(body.getToken())
                                     .build()
                     );
                     paymentToken = body.getToken();
                     customerId = customer.getId();
-                    System.out.println(customerId + " customerID");
+
+                    sellerSQL.setPaymentSourcePresent(true);
+                    sellerSQL.setPaymentSource(customerId);
+
+                    userDaoSQL.save(sellerSQL);
                 } else if (!stripePresent && body.isSetAsDefaultCard()) {
                     System.out.println("first4");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()
-                                    .setName(sellerSQL.getName() + " hello " + sellerSQL.getLastName())
+                                    .setName(sellerSQL.getName() + sellerSQL.getLastName())
                                     .setEmail(sellerSQL.getEmail())
                                     .setSource(body.getToken())
                                     .build()
                     );
                     paymentToken = body.getToken();
                     customerId = customer.getId();
+
+                    sellerSQL.setPaymentSourcePresent(true);
+                    sellerSQL.setPaymentSource(customerId);
+
+                    userDaoSQL.save(sellerSQL);
                 } else {
                     throw new CustomException("Payment params invalid", HttpStatus.BAD_REQUEST);
                 }
@@ -130,7 +137,6 @@ public class StripeService {
 
                     Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
 
-                    System.out.println(price + "price");
                     Subscription subscription = Subscription.create(SubscriptionCreateParams.builder()
                             .setCustomer(customerId)
                             .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
@@ -160,21 +166,39 @@ public class StripeService {
 
                 } else {
                     Price price = Price.retrieve("price_1OCqatAe4RILjJWGmXhBnHeX");
-
                     Map<String, Object> paymentMethodParams = new HashMap<>();
                     paymentMethodParams.put("type", "card");
-//                    paymentMethodParams.put("card", Collections.singletonMap("token", body.getToken())); //todo
-                    paymentMethodParams.put("card", Collections.singletonMap("token", "tok_visa"));
-                    PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 
-                    PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder() /// TODO
-                            .setAmount(price.getUnitAmount())
-                            .setCurrency("usd")
-                            .setDescription("Premium 1m bought")
-                            .setPaymentMethod(paymentMethod.getId())
-                            .setCustomer(customerId)
-                            .setConfirm(true)
-                            .build();
+                    PaymentIntentCreateParams createParams;
+
+                    if (body.isUseDefaultCard() || defaultSource != null) {
+                        String defaultPaymentMethod = Customer.retrieve(customerId).getDefaultSource();
+                        paymentMethodParams.put("card", defaultPaymentMethod);
+
+                        createParams = new PaymentIntentCreateParams.Builder() /// TODO
+                                .setAmount(price.getUnitAmount())
+                                .setCurrency("usd")
+                                .setDescription("Premium 1m bought")
+                                .setCustomer(customerId)
+                                .setConfirm(true)
+                                .build();
+
+                    } else {
+                        paymentMethodParams.put("card", Collections.singletonMap("token", paymentToken)); //todo
+
+                        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+
+                        createParams = new PaymentIntentCreateParams.Builder()
+                                .setAmount(price.getUnitAmount())
+                                .setCurrency("chf")
+                                .setDescription("Premium 1m bought")
+                                .setPaymentMethod(paymentMethod.getId())
+                                .setCustomer(customerId)
+                                .setConfirm(true)
+                                .build();
+                    }
+
+                    PaymentIntent.create(createParams);
 
                     PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
                     if (premiumPlan != null) {
@@ -197,14 +221,23 @@ public class StripeService {
                     }
                 }
 
+                System.out.println(224);
             } else {
+                System.out.println(225);
                 throw new CustomException("Source attachment fail: credential provided is null or invalid", HttpStatus.BAD_REQUEST);
             }
+        } catch (CustomException e) {
+            System.out.println(228);
+            throw new CustomException(e.getMessage(), e.getStatus());
         } catch (StripeException e) {
+            System.out.println(231);
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
             return;
+        } catch (Exception e) {
+            System.out.println(235);
+            throw new CustomException("Failed to create payment", HttpStatus.EXPECTATION_FAILED);
         }
-        ResponseEntity.ok(Map.of("message", "Payment completed successfully"));
+        System.out.println(238);
     }
 
     public void cancelSubscription(PremiumPlan premiumPlan) {

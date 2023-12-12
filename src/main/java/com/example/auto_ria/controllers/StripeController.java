@@ -138,8 +138,11 @@ public class StripeController {
 
             stripeService.createPayment(body, sellerSQL);
 
+            System.out.println(141);
             sellerSQL.setAccountType(EAccountType.PREMIUM);
+            System.out.println(143);
             userDaoSQL.save(sellerSQL);
+            System.out.println(145);
             return ResponseEntity.ok("Premium bought successfully");
         } catch (CustomException e) {
             System.out.println(e.getMessage());

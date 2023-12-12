@@ -18,7 +18,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class ManagerAuthenticationProvider implements AuthenticationProvider {
 
-    private ManagerDaoSQL managerService;
+    private ManagerDaoSQL managerDaoSQL;
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -27,7 +27,7 @@ public class ManagerAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         Collection<? extends GrantedAuthority> permissions = authentication.getAuthorities();
 
-        ManagerSQL manager = managerService.findByEmail(username);
+        ManagerSQL manager = managerDaoSQL.findByEmail(username);
 
         if (!passwordEncoder.matches(password, manager.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");

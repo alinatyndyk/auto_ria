@@ -30,6 +30,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
                         Authorization: `Bearer ${authService.getAccessToken()}`
                     }
                 })
+            console.log(response, "RESPONSE")
             if (response.status === 200) {
                 window.location.reload();
             }
@@ -73,7 +74,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     if (seller.isPaymentResourcePresent) {
         paymentComponent = <div style={{display: 'flex'}}>
-            <label>{getErrors}</label>
+            <label>{JSON.stringify(getErrors)}</label>
             <label>
                 <input checked={getAsDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay
                 with a default card of this
@@ -91,7 +92,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     } else if (!seller.isPaymentResourcePresent) {
         paymentComponent = <div>
             <div style={{display: 'flex'}}>
-                <label>{getErrors}</label>
+                <label>{JSON.stringify(getErrors)}</label>
                 <label>
                     <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox"/> You want to
                     make this a

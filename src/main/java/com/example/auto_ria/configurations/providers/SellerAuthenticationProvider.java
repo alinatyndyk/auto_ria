@@ -9,8 +9,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +18,7 @@ import java.util.Collection;
 @AllArgsConstructor
 public class SellerAuthenticationProvider implements AuthenticationProvider {
 
-    private UserDaoSQL sellerService;
+    private UserDaoSQL userDaoSQL;
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -28,11 +26,8 @@ public class SellerAuthenticationProvider implements AuthenticationProvider {
         String username = authentication.getName();
         String password = authentication.getCredentials().toString();
         Collection<? extends GrantedAuthority> permissions = authentication.getAuthorities();
+        SellerSQL seller = userDaoSQL.findByEmail(username);
 
-        SellerSQL seller = sellerService.findSellerByEmail(username);
-
-        System.out.println(seller + "xxx");
-        System.out.println(password + " " + seller.getPassword());
         if (!passwordEncoder.matches(password, seller.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }

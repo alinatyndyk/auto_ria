@@ -82,6 +82,7 @@ public class CustomersServiceMySQL {
 
     public CustomerSQL getByEmail(String email) {
         try {
+            System.out.println(85);
             return customerDaoSQL.findByEmail(email);
         } catch (CustomException e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());

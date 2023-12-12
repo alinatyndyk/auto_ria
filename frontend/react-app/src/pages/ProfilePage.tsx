@@ -19,6 +19,9 @@ const ProfilePage: FC = () => {
         if (user === null) {
             dispatch(sellerActions.getByToken());
         }
+        console.log(user, "user")
+        console.log(user?.role == ERole.CUSTOMER)
+        // console.log(sellerService.isCustomerResponse(user), "check")
     }, [user]);
 
     let userComponent;

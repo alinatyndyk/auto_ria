@@ -53,6 +53,12 @@ const CarForm: FC = () => {
         for (let i = 0; i < car.pictures.length; i++) {
             photos.push(car.pictures[i])
         }
+
+        car.city = getCarCity;
+        car.region = getCarRegion;
+        car.brand = getBrand;
+        car.model = getModel;
+
         const updatedCar: ICreateCar = {
             ...car,
             pictures: photos

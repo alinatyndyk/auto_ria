@@ -21,7 +21,7 @@ const Car: FC<IProps> = ({car}) => {
     } = car;
 
     return (
-        <div onClick={() => navigate(`${id}`)} style={{
+        <div onClick={() => navigate(`/cars/${id}`)} style={{
             display: "flex",
             backgroundColor: "whitesmoke",
             height: "130px", width: "220px",

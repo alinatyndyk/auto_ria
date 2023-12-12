@@ -14,7 +14,7 @@ const ChatPage: FC = () => {
     const navigate = useAppNavigate();
 
     useEffect(() => {
-        dispatch(sellerActions.getChatsByUserToken(0));
+        dispatch(sellerActions.getChatsByUserToken(0)); //todo pagination
     }, [])
 
 

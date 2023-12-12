@@ -82,11 +82,13 @@ public class ChatController {
     @PostMapping("/page/{page}") // todo change to get CHANGE FRONT
     public ResponseEntity<Page<MessageClass>> getChatMessages(
             HttpServletRequest request,
+            @RequestParam("sellerId") String sellerId,
+            @RequestParam("customerId") String customerId,
             @PathVariable("page") int page
     ) {
         try {
-            String sellerId = request.getParameter("sellerId");
-            String customerId = request.getParameter("customerId");
+
+            //todo check if can fetch auth messages
 
             String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
             Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);

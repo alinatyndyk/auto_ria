@@ -35,12 +35,15 @@ const Chat: FC = () => {
     useEffect(() => {
         dispatch(sellerActions.getChatMessages(chatPage));
         setChatMessages(messages);
+        console.log(totalPages, "totalPages")
+        console.log(chatPage, "chatPage")
+        console.log(totalPages < chatPage + 1)
         if (totalPages < chatPage + 1) {
-            setMoreBtn(true);
-        } else {
             setMoreBtn(false);
+        } else {
+            setMoreBtn(true);
         }
-    }, [])
+    }, [chatPage])
 
     const [msg, setMsg] = useState([]);
     const auth = authService.getAccessToken();

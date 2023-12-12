@@ -7,6 +7,7 @@ import {IAdminResponse} from "../interfaces/user/admin.interface";
 import {IManagerResponse} from "../interfaces/user/manager.interface";
 import {authService} from "./auth.service";
 import {IGeoCitiesResponse, IGeoRegionsResponse} from "../interfaces/geo.interface";
+import {ERole} from "../constants/role.enum";
 
 const sellerService = {
     getAll: (page: number): IRes<ISellerPageResponse> => axiosService.get(urls.sellers.all(page)),
@@ -19,7 +20,7 @@ const sellerService = {
     }),
 
     getChatMessages: (page: number): IRes<any> => axiosService.post(urls.chats.getChatMessages(page), {
-        sellerId: 4,
+        sellerId: 2,
         customerId: 3
     }, {
         headers: {
@@ -50,7 +51,7 @@ const sellerService = {
             typeof obj.lastName === 'string' &&
             (obj.avatar === null || typeof obj.avatar === 'string') &&
             Array.isArray(obj.createdAt) &&
-            obj.role === 'manager'
+            obj.role === ERole.MANAGER
         );
     },
     isCustomerResponse(obj: any): obj is ICustomerResponse {
@@ -62,9 +63,10 @@ const sellerService = {
             typeof obj.region === 'string' &&
             (obj.avatar === null || typeof obj.avatar === 'string') &&
             Array.isArray(obj.createdAt) &&
-            obj.role === 'customer'
+            obj.role === ERole.CUSTOMER
         );
     },
+
     isAdminResponse(obj: any): obj is IAdminResponse {
         return (
             typeof obj.id === 'number' &&
@@ -73,7 +75,7 @@ const sellerService = {
             typeof obj.email === 'string' &&
             (obj.avatar === null || typeof obj.avatar === 'string') &&
             Array.isArray(obj.createdAt) &&
-            obj.role === 'admin'
+            obj.role === ERole.ADMIN
         );
     }
 }

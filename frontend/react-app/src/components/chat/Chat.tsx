@@ -35,15 +35,7 @@ const Chat: FC = () => {
     useEffect(() => {
         dispatch(sellerActions.getChatMessages(chatPage));
         setChatMessages(messages);
-        console.log(totalPages, "totalPages")
-        console.log(chatPage, "chatPage")
-        console.log(totalPages < chatPage + 1)
-        if (totalPages < chatPage + 1) {
-            setMoreBtn(false);
-        } else {
-            setMoreBtn(true);
-        }
-    }, [chatPage])
+    }, [])
 
     const [msg, setMsg] = useState([]);
     const auth = authService.getAccessToken();
@@ -78,15 +70,14 @@ const Chat: FC = () => {
     const getMore = () => {
         const page = chatPage + 1;
         dispatch(sellerActions.getChatMessages(page));
-        if (totalPages < page + 1) {
-            setMoreBtn(true);
-        } else {
-            setMoreBtn(false);
-        }
     }
 
     useEffect(() => {
-        setChatMessages(prevState => [...messages, ...prevState]);
+        if (getChatMessages.length > 0 && messages.length == 0) {
+            setMoreBtn(true);
+        } else {
+            setChatMessages(prevState => [...[...messages].reverse(), ...prevState]);
+        }
     }, [messages]);
 
     return (
@@ -101,7 +92,7 @@ const Chat: FC = () => {
             ))}
             <form onSubmit={handleFormSubmit}>
                 <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)}/>
-                <button type="submit">Send</button>
+                <button disabled={!inputValue.trim().length} type="submit">Send</button>
             </form>
         </div>
     );

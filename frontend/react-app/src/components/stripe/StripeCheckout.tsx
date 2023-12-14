@@ -20,7 +20,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
             const response =
                 await axios.post("http://localhost:8080/payments/buy-premium", {
                     // await axios.post("http://localhost:8080/payments/add-payment-source", {
-                    id: "4",
+                    // id: "4",
                     token: token.id,
                     useDefaultCard: getUseDefaultCard,
                     setAsDefaultCard: getAsDefaultCard,

@@ -19,5 +19,6 @@ public class CustomerResponse {
     private ERole role;
 
     private LocalDateTime lastOnline;
+    private Boolean isOnline;
     private LocalDateTime createdAt;
 }

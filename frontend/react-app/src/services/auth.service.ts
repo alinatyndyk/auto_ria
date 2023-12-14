@@ -20,6 +20,7 @@ import {IAdminInput} from "../interfaces/user/admin.interface";
 
 const _accessTokenKey: string = 'access_token'
 const _refreshTokenKey: string = 'refresh_token'
+const _isAuth: string = 'isAuth'
 
 const authService = {
     getAll: (page: number): IRes<ICarResponse> => axiosService.get(urls.cars.all(page)),
@@ -119,6 +120,7 @@ const authService = {
     deleteTokens: () => {
         localStorage.removeItem(_accessTokenKey)
         localStorage.removeItem(_refreshTokenKey)
+        localStorage.removeItem(_isAuth)
     },
 
     getAccessToken: () => {

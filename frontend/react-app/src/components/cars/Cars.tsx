@@ -20,7 +20,7 @@ export interface IMessage {
 }
 
 const Cars: FC<IProps> = ({sellerId}) => {
-    const {cars, trigger, pageCurrent, pagesInTotal} = useAppSelector(state => state.carReducer);
+    const {cars,pagesInTotal} = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();
 
     const [getButtons, setButtons] = useState(true);

@@ -26,9 +26,6 @@ const ActivateForm: FC = () => {
 
         let payload;
 
-        const res = await dispatch(sellerActions.getByToken());
-
-
         if (role == ERole.SELLER) {
             const res = await dispatch(authActions.activateSeller({code: code ?? ''}));
             payload = res.payload;

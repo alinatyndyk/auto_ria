@@ -34,6 +34,8 @@ const RegisterSellerForm: FC = () => {
         if (!getRegionInput || !getCityInput) {
             setResponse("Please specify the region and city");
         } else {
+            seller.city = getCarCity;
+            seller.region = getCarRegion;
             const {payload} = await dispatch(authActions.registerSeller(seller));
             setResponse(String(payload));
             reset();

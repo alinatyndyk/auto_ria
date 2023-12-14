@@ -1,25 +1,39 @@
-import React, {FC, useEffect} from 'react';
+import React, {FC, useContext, useEffect, useState} from 'react';
 import {Carousel} from "../Carousel";
 import {useParams} from "react-router";
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../hooks";
 import {carActions} from "../../redux/slices";
+import {ThemeContext} from "../../Context";
+import {sellerActions} from "../../redux/slices/seller.slice";
 
 const CarFull: FC = () => {
 
     const {carId} = useParams<{ carId: string }>();
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
+    const [textButtonVisible, setTextButtonVisible] = useState(false);
+    const [userByToken, setUserByToken] = useState();
 
     const {car} = useAppSelector(state => state.carReducer);
+    const {user} = useAppSelector(state => state.sellerReducer);
 
+    const theme = useContext(ThemeContext);
 
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
-        } else {
-
         }
+
+        dispatch(sellerActions.getByToken());
+        // // @ts-ignore
+        // setUserByToken(user);
+
+        if (theme.id != car?.seller.id) {
+            setTextButtonVisible(true);
+        }
+
     }, [carId]);
+
 
     if (car != null) {
 
@@ -51,8 +65,9 @@ const CarFull: FC = () => {
                 </div>
                 <div>desc: {car.description}</div>
                 <div>seller: {JSON.stringify(car.seller)}</div>
+                <div>{car.seller.createdAt}</div>
                 {
-                    localStorage.getItem('isAuth') === "true" &&
+                    textButtonVisible &&
                     <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>
                 }
                 <br/>

@@ -1,13 +1,15 @@
 import React, {FC} from 'react';
-import {useAppDispatch} from "../../hooks";
+import {useAppDispatch, useAppNavigate} from "../../hooks";
 import {authActions} from "../../redux/slices";
 
 const LogOutForm: FC = () => {
     const dispatch = useAppDispatch();
 
+    const navigate = useAppNavigate();
     const logOut = async () => {
 
         await dispatch(authActions.signOut());
+        navigate('/auth/login');
     }
 
     return (

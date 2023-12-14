@@ -44,11 +44,11 @@ public class Person implements UserDetails {
 
     @Column(updatable = false)
     @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy HH:mm:ss\"", timezone = "GMT")
     private LocalDateTime createdAt;
 
     @UpdateTimestamp()
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy HH:mm:ss\"", timezone = "GMT")
     private LocalDateTime updatedAt;
 
     @Builder

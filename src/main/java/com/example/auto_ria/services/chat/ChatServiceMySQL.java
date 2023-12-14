@@ -8,6 +8,10 @@ import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
+import com.example.auto_ria.models.user.CustomerSQL;
+import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.services.CommonService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +26,8 @@ public class ChatServiceMySQL {
 
     private ChatDaoSQL chatDaoSQL;
     private MessageDaoSQL messageDaoSQL;
+
+    private CommonService commonService;
 
     private UserDaoSQL sellerDaoSQL;
     private CustomerDaoSQL customerDaoSQL;
@@ -70,14 +76,28 @@ public class ChatServiceMySQL {
         return messageDaoSQL.getByChatId(chatId, pageable);
     }
 
-    public MessageClass patchMessage(int id, String content) {
+    public MessageClass patchMessage(MessageClass messageClass, String content) {
+        messageClass.setContent(content);
+        messageClass.setIsEdited(true);
+        messageDaoSQL.save(messageClass);
+        return messageClass;
+    }
+
+    public MessageClass hasAccessToMessage(int id, HttpServletRequest request) {
+
         if (messageDaoSQL.findById(id).isEmpty()) {
             throw new CustomException("Couldn't find message", HttpStatus.BAD_REQUEST);
         }
         MessageClass messageClass = messageDaoSQL.findById(id).get();
-        messageClass.setContent(content);
-        messageClass.setIsEdited(true);
-        messageDaoSQL.save(messageClass);
+
+        CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+        SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+
+        if (Integer.parseInt(messageClass.getSenderId()) != customerSQL.getId() ||
+                Integer.parseInt(messageClass.getSenderId()) != sellerSQL.getId()) {
+            throw new CustomException("Cannot edit foreign message", HttpStatus.UNAUTHORIZED);
+        }
+
         return messageClass;
     }
 

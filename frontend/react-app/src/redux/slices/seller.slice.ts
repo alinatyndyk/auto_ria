@@ -67,6 +67,7 @@ const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     async (_, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getByToken();
+            console.log(data.body, "get by");
             return data.body;
         } catch (e) {
             const err = e as AxiosError;

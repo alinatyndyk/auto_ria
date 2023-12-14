@@ -8,6 +8,7 @@ import {SellerProfile} from "../components/profiles/SellerProfile";
 import {sellerService} from "../services/seller.service";
 import {ChatPage} from "./ChatPage";
 import {ERole} from "../constants/role.enum";
+import CarPage from "./CarPage";
 
 const ProfilePage: FC = () => {
 
@@ -19,9 +20,6 @@ const ProfilePage: FC = () => {
         if (user === null) {
             dispatch(sellerActions.getByToken());
         }
-        console.log(user, "user")
-        console.log(user?.role == ERole.CUSTOMER)
-        // console.log(sellerService.isCustomerResponse(user), "check")
     }, [user]);
 
     let userComponent;

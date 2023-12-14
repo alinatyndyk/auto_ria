@@ -146,7 +146,7 @@ public class CommonService {
     public CustomerResponse createCustomerResponse(CustomerSQL customer) {
         try {
 
-//            Session session = sessionDaoSQL.findByUserId(customer.getId());
+            Session session = sessionDaoSQL.findByUserId(customer.getId());
 
             return CustomerResponse.builder()
                     .id(customer.getId())
@@ -156,8 +156,9 @@ public class CommonService {
                     .city(customer.getCity())
                     .avatar(customer.getAvatar())
                     .role(ERole.CUSTOMER)
-//                    .lastOnline(session.getDisconnectedAt())
-                    .createdAt(customer.getCreatedAt()) //todo on autoria since...
+                    .isOnline(session.getIsOnline())
+                    .lastOnline(session.getDisconnectedAt())
+                    .createdAt(customer.getCreatedAt())
                     .build();
 
         } catch (Exception e) {

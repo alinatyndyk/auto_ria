@@ -175,7 +175,7 @@ public class StripeService {
                         String defaultPaymentMethod = Customer.retrieve(customerId).getDefaultSource();
                         paymentMethodParams.put("card", defaultPaymentMethod);
 
-                        createParams = new PaymentIntentCreateParams.Builder() /// TODO
+                        createParams = new PaymentIntentCreateParams.Builder()
                                 .setAmount(price.getUnitAmount())
                                 .setCurrency("usd")
                                 .setDescription("Premium 1m bought")
@@ -184,7 +184,7 @@ public class StripeService {
                                 .build();
 
                     } else {
-                        paymentMethodParams.put("card", Collections.singletonMap("token", paymentToken)); //todo
+                        paymentMethodParams.put("card", Collections.singletonMap("token", paymentToken));
 
                         PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 

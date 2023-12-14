@@ -75,6 +75,7 @@ const registerManager = createAsyncThunk<IAuthResponse, RegisterManagerPayload>(
     'authSlice/registerManager',
     async ({managerInput, code}: RegisterManagerPayload, {rejectWithValue}) => {
         try {
+            console.log(code, "code")
             const {data} = await authService.registerManager(managerInput, code);
             return data;
         } catch (e) {
@@ -255,12 +256,14 @@ const slice = createSlice({
             .addCase(registerManager.fulfilled, (state, action) => {
                 state.isAuth = false;
                 authService.setTokens({...action.payload});
+                localStorage.setItem('isAuth', JSON.stringify(true));
                 state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
                 state.isAuth = false;
                 authService.setTokens({...action.payload});
+                localStorage.setItem('isAuth', JSON.stringify(true));
                 state.authId = action.payload.id;
                 window.location.reload();
             })

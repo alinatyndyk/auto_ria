@@ -8,9 +8,7 @@ const CarPage: FC = () => {
 
     return (
         <div>
-            <CarForm/>
             <Cars sellerId={null}/>
-            <button onClick={() => navigate('/register')}>register</button>
         </div>
     );
 };

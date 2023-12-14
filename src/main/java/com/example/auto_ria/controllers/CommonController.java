@@ -37,8 +37,6 @@ public class CommonController {
     @GetMapping("users/{id}")
     public ResponseEntity getIdAll(@PathVariable String id) {
         try {
-
-            //todo change int parse
             CustomerSQL customerSQL = customersServiceMySQL.getById(id).getBody();
             ManagerSQL managerSQL = managerServiceMySQL.getById(Integer.parseInt(id)).getBody();
             AdministratorSQL administratorSQL = administratorServiceMySQL.getById(id).getBody();

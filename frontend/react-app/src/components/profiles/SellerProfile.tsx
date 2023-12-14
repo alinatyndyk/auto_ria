@@ -1,27 +1,21 @@
 import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
 import {useAppDispatch, useAppNavigate} from "../../hooks";
-import {Cars} from "../cars";
+import {CarForm, Cars} from "../cars";
 import {StripeCheckout} from "../stripe/StripeCheckout";
+import {ChatPage} from "../../pages/ChatPage";
 
 interface IProps {
     seller: ISellerResponse
 }
 
 const SellerProfile: FC<IProps> = ({seller}) => {
-
-    //todo normal timestamp
-
     const navigate = useAppNavigate();
     const dispatch = useAppDispatch();
 
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
     } = seller;
-
-    console.log(seller, "seller")
-
-    let page = 0;
 
     let picture;
     if (avatar == null) {
@@ -48,6 +42,8 @@ const SellerProfile: FC<IProps> = ({seller}) => {
             </div>
             <br/>
             <StripeCheckout seller={seller}/>
+            <CarForm/>
+            <ChatPage/>
             <Cars sellerId={id}/>
         </div>
     );

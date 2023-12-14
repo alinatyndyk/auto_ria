@@ -40,9 +40,8 @@ const ProfilePage: FC = () => {
 
     return (
         <div>
-            <h1>Profile</h1>
+            <div>Profile</div>
             {userComponent}
-            <ChatPage/>
         </div>
     );
 };

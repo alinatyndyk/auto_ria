@@ -191,6 +191,7 @@ public class CommonService {
                     .avatar(administratorSQL.getAvatar())
                     .role(ERole.ADMIN)
                     .createdAt(administratorSQL.getCreatedAt())
+                    .email(administratorSQL.getEmail())
                     .build();
 
         } catch (Exception e) {

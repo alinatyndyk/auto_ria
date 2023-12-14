@@ -59,7 +59,7 @@ public class ManagerServiceMySQL {
     public ResponseEntity<ManagerResponse> getByIdAsResponse(int id) {
         try {
             Optional<ManagerSQL> managerSQL = managerDaoSQL.findById(id);
-            if (managerSQL.isPresent()) {
+            if (managerSQL.isEmpty()) {
                 throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
             }
 

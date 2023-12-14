@@ -19,6 +19,8 @@ axiosService.interceptors.response.use((response) => {
         return response
     }, async (error: AxiosError) => {
     console.log(error, "AXIOS ERROR");
+    // @ts-ignore
+    console.log(error.config.url, "AXIOS ERROR url");
     // const refresh_token = authService.getRefreshToken();
     if(error.response?.status == 423) {
         console.log("423 ERROR");

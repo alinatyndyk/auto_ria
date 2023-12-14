@@ -4,6 +4,7 @@ import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.models.user.SellerSQL;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,7 +12,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.EnumUtils;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -56,6 +61,15 @@ public class CarSQL {
     private String description;
 
     private boolean isActivated;
+
+    @Column(updatable = false)
+    @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy\"", timezone = "GMT")
+    private String createdAt;
+
+    @UpdateTimestamp()
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy\"", timezone = "GMT")
+    private String updatedAt;
 
 
     @Builder

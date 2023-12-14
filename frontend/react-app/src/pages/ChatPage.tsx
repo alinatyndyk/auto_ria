@@ -14,10 +14,10 @@ const ChatPage: FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
 
+    const [getPage, setPage] = useState<number>(0);
     useEffect(() => {
-        dispatch(sellerActions.getChatsByUserToken(0)); //todo pagination
+        dispatch(sellerActions.getChatsByUserToken(getPage));
     }, [])
-    let [getPage, setPage] = useState<number>(0);
 
 
     useEffect(() => {

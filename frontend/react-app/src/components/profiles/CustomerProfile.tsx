@@ -1,6 +1,7 @@
 import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
 import {ICustomerResponse} from "../../interfaces/user/customer.interface";
+import {ChatPage} from "../../pages/ChatPage";
 
 interface IProps {
     seller: ICustomerResponse
@@ -9,8 +10,14 @@ interface IProps {
 const CustomerProfile: FC<IProps> = ({seller}) => {
 
     const {
-        id, avatar, name, lastName //todo add created at to all
+        id, avatar, name, lastName
     } = seller;
+    let picture;
+    if (avatar == null) {
+        picture = "channels4_profile.jpg";
+    } else {
+        picture = avatar;
+    }
     return (
         <div style={{
             display: "flex",
@@ -23,9 +30,10 @@ const CustomerProfile: FC<IProps> = ({seller}) => {
                 Customer
                 <div>id: {id}</div>
                 <div>{name} {lastName}</div>
-                <img style={{height: "80px"}} src={`http://localhost:8080/users/avatar/${avatar}`} alt="Avatar"/>
-            </div>
+                <img style={{height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px"}}
+                     src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar"/>            </div>
             <br/>
+            <ChatPage/>
         </div>
     );
 };

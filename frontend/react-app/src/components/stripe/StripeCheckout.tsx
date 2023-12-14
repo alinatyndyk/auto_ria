@@ -40,6 +40,26 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
         }
     }
 
+    const addCard = async (token: any) => {
+        try {
+            const response =
+                await axios.post("http://localhost:8080/payments/add-payment-source", {
+                    token: token.id
+                }, {
+                    headers: {
+                        Authorization: `Bearer ${authService.getAccessToken()}`
+                    }
+                })
+            console.log(response, "RESPONSE")
+            if (response.status === 200) {
+                window.location.reload();
+            }
+        } catch (e) {
+            // @ts-ignore
+            setErrors(e.response.data);
+        }
+    }
+
     const handleIsAutoPay = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
             setAutoPay(true);
@@ -124,6 +144,11 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
         }}>
             STRIPE
             {paymentComponent}
+            <Stripe
+                stripeKey={stripeKeyPublish}
+                token={addCard}
+                name={"add card"}
+            />
         </div>
     );
 };

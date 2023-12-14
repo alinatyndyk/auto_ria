@@ -1,7 +1,6 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
-import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
@@ -114,7 +113,7 @@ public class AuthenticationController {
     ) {
         try {
             Map<String, String> claims = new HashMap<>();
-            claims.put("email", email);
+            claims.put("username", email);
             claims.put("role", ETokenRole.MANAGER_REGISTER.name());
 
             String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.MANAGER_REGISTER);
@@ -141,28 +140,28 @@ public class AuthenticationController {
                 throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
             }
 
-            Claims claims = jwtService.extractClaimsCycle(code);
-            String tokenType = claims.get("recognition").toString();
+            System.out.println("code " + code);
 
             String key = authenticationService.checkRegistrationKey(
                     code,
                     registerRequestDTO.getEmail(),
                     ERole.MANAGER,
-                    ETokenRole.valueOf(tokenType),
                     ETokenRole.MANAGER_REGISTER);
 
             String fileName = registerRequestDTO.getAvatar().getOriginalFilename();
             usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
 
-            RegisterManagerRequest registerRequest = new RegisterManagerRequest(
-                    registerRequestDTO.getName(),
-                    registerRequestDTO.getEmail(),
-                    fileName,
-                    registerRequestDTO.getPassword(),
-                    registerRequestDTO.getLastName());
+            RegisterManagerRequest registerRequest = RegisterManagerRequest.builder()
+                            .lastName(registerRequestDTO.getLastName())
+                            .name(registerRequestDTO.getName())
+                            .avatar(fileName)
+                            .password(registerRequestDTO.getPassword())
+                            .email(registerRequestDTO.getEmail())
+                            .build();
 
-            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-            return authenticationService.registerManager(registerRequest, key);
+            ResponseEntity<AuthenticationResponse> auth = authenticationService.registerManager(registerRequest, key);
+
+            return auth;
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -201,14 +200,10 @@ public class AuthenticationController {
                 throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
             }
 
-            Claims claims = jwtService.extractClaimsCycle(code);
-            String tokenType = claims.get("recognition").toString();
-
             String key = authenticationService.checkRegistrationKey(
                     code,
                     registerRequestDTO.getEmail(),
                     ERole.ADMIN,
-                    ETokenRole.valueOf(tokenType),
                     ETokenRole.ADMIN_REGISTER);
 
             String fileName = registerRequestDTO.getAvatar().getOriginalFilename();

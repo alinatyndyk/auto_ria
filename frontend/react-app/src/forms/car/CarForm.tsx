@@ -65,7 +65,9 @@ const CarForm: FC = () => {
         };
 
         const {payload} = await dispatch(carActions.create(updatedCar));
-        setResponse(String(payload));
+        if (!errors) {
+            setResponse("Car created successfully");
+        }
 
         // reset();
     }
@@ -181,6 +183,7 @@ const CarForm: FC = () => {
                         setRegionInput(false);
                         setCarRegion('');
                         setIsRegionVisible(true);
+                        setCarCity('');
                     }}>change region
                     </button>
                 </div>

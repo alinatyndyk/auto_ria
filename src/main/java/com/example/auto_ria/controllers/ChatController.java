@@ -85,7 +85,7 @@ public class ChatController {
         }
     }
 
-    @PostMapping("/page/{page}") // todo change to get CHANGE FRONT
+    @PostMapping("/page/{page}")
     public ResponseEntity<Page<MessageClass>> getChatMessages(
             HttpServletRequest request,
             @RequestParam("sellerId") String sellerId,

@@ -29,6 +29,7 @@ import com.example.auto_ria.services.user.AdministratorServiceMySQL;
 import com.example.auto_ria.services.user.CustomersServiceMySQL;
 import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
+import io.jsonwebtoken.Claims;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -172,14 +173,19 @@ public class AuthenticationService {
 
     public ResponseEntity<AuthenticationResponse> registerManager(RegisterManagerRequest registerRequest, String key) {
         try {
+
+            System.out.println(registerRequest);
             ManagerSQL manager = ManagerSQL
                     .managerSQLBuilder()
                     .name(registerRequest.getName())
+                    .lastName(registerRequest.getLastName())
                     .email(registerRequest.getEmail())
                     .avatar(registerRequest.getAvatar())
                     .password(passwordEncoder.encode(registerRequest.getPassword()))
                     .roles(List.of(ERole.MANAGER, ERole.MANAGER_GLOBAL))
                     .build();
+
+            System.out.println(manager + " manager");
 
             AuthenticationResponse authenticationResponse = jwtService.generateManagerTokenPair(manager);
 
@@ -191,15 +197,16 @@ public class AuthenticationService {
                     personId(manager.getId()).accessToken(authenticationResponse.getAccessToken())
                     .refreshToken(authenticationResponse.getRefreshToken()).build());
 
-
-            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-
             Map<String, Object> args = new HashMap<>();
             args.put("name", manager.getName() + manager.getLastName());
             mailer.sendEmail(manager.getEmail(), EMail.WELCOME, args);
 
+            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
+
             return ResponseEntity.ok(authenticationResponse);
         } catch (Exception e) {
+            System.out.println("e.getMessage()");
+            System.out.println(e.getMessage());
             throw new CustomException("Failed register", HttpStatus.EXPECTATION_FAILED);
         }
     }
@@ -909,6 +916,8 @@ public class AuthenticationService {
             throw new CustomException("Key is not valid", HttpStatus.FORBIDDEN);
         }
 
+        System.out.println(funcRecognition + " " + tokenRecognition);
+
         if (!funcRecognition.equals(tokenRecognition)) {
             throw new CustomException("Invalid key recognition", HttpStatus.FORBIDDEN);
         }
@@ -922,16 +931,32 @@ public class AuthenticationService {
     public String checkRegistrationKey(String authorizationHeader,
                                        String email,
                                        ERole role,
-                                       ETokenRole tokenRecognition,
                                        ETokenRole funcRecognition) {
 
-        checkKey(authorizationHeader, tokenRecognition, funcRecognition);
+        System.out.println(authorizationHeader + "auth");
 
-        if (!jwtService.extractIssuer(authorizationHeader).equals(role.name())) {
+        Claims claims = jwtService.extractClaimsCycle(authorizationHeader);
+        System.out.println(claims + "claims");
+        String tokenRec = claims.getIssuer();
+
+        System.out.println(tokenRec + " Token rec");
+
+        checkKey(authorizationHeader, ETokenRole.valueOf(tokenRec), funcRecognition);
+
+        System.out.println(funcRecognition + "funcRecognition");
+        System.out.println(funcRecognition.name() + "funcRecognition name");
+        System.out.println(role.name() + " role name");
+
+
+        if (!tokenRec.equals(funcRecognition.name())) {
             throw new CustomException("The key is not valid for creation of " + role.name().toLowerCase(), HttpStatus.FORBIDDEN);
         }
 
-        if (!jwtService.isKeyValid(authorizationHeader, email, ETokenRole.valueOf(role.name()))) {
+        System.out.println(941);
+
+        System.out.println(authorizationHeader);
+
+        if (!jwtService.isKeyValid(authorizationHeader, email, ETokenRole.valueOf(funcRecognition.name()))) {
             throw new CustomException("Not valid key owner", HttpStatus.FORBIDDEN);
         }
 

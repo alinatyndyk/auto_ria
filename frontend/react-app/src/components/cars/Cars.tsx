@@ -20,7 +20,7 @@ export interface IMessage {
 }
 
 const Cars: FC<IProps> = ({sellerId}) => {
-    const {cars,pagesInTotal} = useAppSelector(state => state.carReducer);
+    const {cars, pagesInTotal} = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();
 
     const [getButtons, setButtons] = useState(true);
@@ -63,7 +63,7 @@ const Cars: FC<IProps> = ({sellerId}) => {
     return (
         <div>
             Cars
-            <CarForm/>
+            {pagesInTotal == 0 && <div style={{color: "blue"}}>There are no cars to view</div>}
             {cars.map(car => <Car key={car.id} car={car}/>)}
             <div style={{display: 'flex'}}>
                 <button disabled={getButtons} onClick={() => prevPage()}>prev</button>

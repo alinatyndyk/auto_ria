@@ -6,6 +6,11 @@ import {carActions} from "../../redux/slices";
 import {ThemeContext} from "../../Context";
 import {sellerActions} from "../../redux/slices/seller.slice";
 
+import moment from "moment";
+import {ERole} from "../../constants/role.enum";
+
+// ...
+
 const CarFull: FC = () => {
 
     const {carId} = useParams<{ carId: string }>();
@@ -25,15 +30,12 @@ const CarFull: FC = () => {
         }
 
         dispatch(sellerActions.getByToken());
-        // // @ts-ignore
-        // setUserByToken(user);
 
-        if (theme.id != car?.seller.id) {
+        if (theme.role == ERole.CUSTOMER && theme.id != car?.seller.id) {
             setTextButtonVisible(true);
         }
 
     }, [carId]);
-
 
     if (car != null) {
 
@@ -66,6 +68,7 @@ const CarFull: FC = () => {
                 <div>desc: {car.description}</div>
                 <div>seller: {JSON.stringify(car.seller)}</div>
                 <div>{car.seller.createdAt}</div>
+                <div>{moment(car.seller.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
                 {
                     textButtonVisible &&
                     <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>

@@ -30,7 +30,9 @@ public class JwtService {
 
     public String extractUsername(String jwt, ETokenRole role) {
         String claim;
+        System.out.println(33);
         try {
+        System.out.println(35);
             claim = extractClaim(jwt, Claims::getSubject, role);
         } catch (NullPointerException e) {
             return null;
@@ -42,12 +44,9 @@ public class JwtService {
         return extractClaim(jwt, Claims::getSubject);
     }
 
-    public String extractIssuer(String jwt) {
-        return extractClaim(jwt, Claims::getIssuer);
-    }
-
     public <T> T extractClaim(String token, Function<Claims, T> claimsTFunction, ETokenRole role) {
         Claims claims = extractAllClaims(token, role);
+        System.out.println("49 " + claims);
         return claimsTFunction.apply(claims);
     }
 
@@ -271,6 +270,7 @@ public class JwtService {
 
     public boolean isKeyValid(String jwt, String email, ETokenRole role) {
         String username = extractUsername(jwt, role);
+        System.out.println(username +  "user name");
         return (username.equals(email) && !isTokenExprired(jwt));
     }
 

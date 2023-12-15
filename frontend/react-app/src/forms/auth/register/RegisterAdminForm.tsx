@@ -1,25 +1,34 @@
 import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
-import {useAppDispatch, useAppSelector} from "../../../hooks";
+import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
-import {ICustomerInput} from "../../../interfaces/user/customer.interface";
 import {IAdminInput} from "../../../interfaces/user/admin.interface";
-import {useParams} from "react-router";
 
 const RegisterAdminForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAdminInput>();
     const dispatch = useAppDispatch();
+    const navigate = useAppNavigate();
     const {errors} = useAppSelector(state => state.authReducer);
 
     const [getResponse, setResponse] = useState('');
 
-    const {code} = useParams<{ code: string }>(); //todo check if not url params
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
 
     const registerSeller: SubmitHandler<IAdminInput> = async (customer: IAdminInput) => {
 
+        if (code) {
         const {payload} = await dispatch(authActions.registerAdmin({adminInput: customer, code: code ?? ""}));
+            setResponse(String(payload));
 
-        setResponse(String(payload));
+            if(!errors) {
+                // navigate('/profile');
+            }
+
+        } else {
+            setResponse("No code provided in url");
+        }
+
 
         // reset();
     }

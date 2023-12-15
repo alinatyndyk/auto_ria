@@ -26,22 +26,22 @@ const SellerProfile: FC<IProps> = ({seller}) => {
 
     return (
         <div>
-            <div style={{display: "flex"}}>
+            <div style={{display: "flex", columnGap: "20px"}}>
                 <img style={{height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px"}}
                      src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar"/>
                 <div>
 
                     <div>id: {id}</div>
                     <div>{name} {lastName}</div>
-                    <div>{number}</div>
+                    <div>✆ {number}</div>
+                    <div style={{fontSize: "9px"}}>◉ {region}, {city}</div>
                     <div>account: {accountType}</div>
-                    <div style={{fontSize: "9px"}}>{region}, {city}</div>
                     <div>joined: {createdAt}</div>
 
                 </div>
+            <StripeCheckout seller={seller}/>
             </div>
             <br/>
-            <StripeCheckout seller={seller}/>
             <CarForm/>
             <ChatPage/>
             <Cars sellerId={id}/>

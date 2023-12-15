@@ -41,6 +41,7 @@ export interface ICar {
         lastName: string | null;
         city: string;
         region: string;
+        role: string;
         number: string;
         avatar: string | null;
         createdAt: number[];

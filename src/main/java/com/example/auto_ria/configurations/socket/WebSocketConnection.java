@@ -69,6 +69,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
             int sessionUserId;
             ERole sessionUserType;
 
+            System.out.println(authSQL + "AAUTH-------------------");
+
             if (authSQL.getRole().equals(ERole.SELLER)) {
                 sessionUserId = authSQL.getPersonId();
                 sessionUserType = ERole.SELLER;

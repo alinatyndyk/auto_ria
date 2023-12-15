@@ -371,6 +371,7 @@ public class CarsServiceMySQLImpl {
                             .avatar(carSQL.getSeller().getAvatar())
                             .city(carSQL.getSeller().getCity())
                             .region(carSQL.getSeller().getRegion())
+                            .role(carSQL.getSeller().getRoles().get(0))
                             .number(carSQL.getSeller().getNumber())
                             .createdAt(carSQL.getSeller().getCreatedAt())
                             .build())

@@ -114,13 +114,13 @@ const authService = {
     }),
 
     setTokens: ({accessToken, refreshToken}: IAuthResponse) => {
-        localStorage.setItem(_accessTokenKey, accessToken)
-        localStorage.setItem(_refreshTokenKey, refreshToken)
+        localStorage.setItem(_accessTokenKey, accessToken);
+        localStorage.setItem(_refreshTokenKey, refreshToken);
     },
     deleteTokens: () => {
-        localStorage.removeItem(_accessTokenKey)
-        localStorage.removeItem(_refreshTokenKey)
-        localStorage.removeItem(_isAuth)
+        localStorage.removeItem(_accessTokenKey);
+        localStorage.removeItem(_refreshTokenKey);
+        localStorage.removeItem(_isAuth);
     },
 
     getAccessToken: () => {

@@ -237,6 +237,7 @@ public class CarController {
         try {
             SellerSQL seller = commonService.extractSellerFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+            System.out.println(carDTO + "car");
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
@@ -254,7 +255,7 @@ public class CarController {
                     .description(carDTO.getDescription())
                     .build();
 
-            if (carsService.findAllBySeller(seller).isEmpty()) {
+            if (!carsService.findAllBySeller(seller).isEmpty()) {
                 carsService.isPremium(request);
             }
 

@@ -15,7 +15,6 @@ const RegisterManagerForm: FC = () => {
     const [getResponse, setResponse] = useState('');
 
     const params = new URLSearchParams(window.location.search);
-    console.log(params, "params");
     const code = params.get('code');
 
     const registerSeller: SubmitHandler<IManagerInput> = async (customer: IManagerInput) => {

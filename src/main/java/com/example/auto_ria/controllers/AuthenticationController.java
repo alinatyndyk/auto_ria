@@ -1,7 +1,6 @@
 package com.example.auto_ria.controllers;
 
 import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
-import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
@@ -43,7 +42,6 @@ import java.util.Map;
 public class AuthenticationController {
 
     private AuthenticationService authenticationService;
-    private UserDaoSQL userDaoSQL;
 
     private UsersServiceMySQLImpl usersServiceMySQL;
     private AdministratorServiceMySQL administratorServiceMySQL;
@@ -148,20 +146,21 @@ public class AuthenticationController {
                     ERole.MANAGER,
                     ETokenRole.MANAGER_REGISTER);
 
-            String fileName = registerRequestDTO.getAvatar().getOriginalFilename();
-            usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            String fileName = null;
+            if (!registerRequestDTO.getAvatar().isEmpty()) {
+                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            }
 
             RegisterManagerRequest registerRequest = RegisterManagerRequest.builder()
-                            .lastName(registerRequestDTO.getLastName())
-                            .name(registerRequestDTO.getName())
-                            .avatar(fileName)
-                            .password(registerRequestDTO.getPassword())
-                            .email(registerRequestDTO.getEmail())
-                            .build();
+                    .lastName(registerRequestDTO.getLastName())
+                    .name(registerRequestDTO.getName())
+                    .avatar(fileName)
+                    .password(registerRequestDTO.getPassword())
+                    .email(registerRequestDTO.getEmail())
+                    .build();
 
-            ResponseEntity<AuthenticationResponse> auth = authenticationService.registerManager(registerRequest, key);
-
-            return auth;
+            return authenticationService.registerManager(registerRequest, key);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -173,7 +172,7 @@ public class AuthenticationController {
     ) {
         try {
             Map<String, String> claims = new HashMap<>();
-            claims.put("email", email);
+            claims.put("username", email);
             claims.put("role", ETokenRole.ADMIN_REGISTER.name());
 
             String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.ADMIN_REGISTER);
@@ -206,19 +205,25 @@ public class AuthenticationController {
                     ERole.ADMIN,
                     ETokenRole.ADMIN_REGISTER);
 
-            String fileName = registerRequestDTO.getAvatar().getOriginalFilename();
-            usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            String fileName = null;
+            System.out.println(registerRequestDTO + "register request");
+                System.out.println("before avatar exists");
+            if (registerRequestDTO.getAvatar() != null) {
+                System.out.println("avatar exists");
+                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            }
+                System.out.println("after avatar exists");
 
-            RegisterAdminRequest registerRequest = new RegisterAdminRequest(
-                    registerRequestDTO.getName(),
-                    registerRequestDTO.getLastName(),
-                    registerRequestDTO.getEmail(),
-                    fileName,
-                    registerRequestDTO.getPassword());
+            RegisterAdminRequest registerRequest = RegisterAdminRequest.builder()
+                    .lastName(registerRequestDTO.getLastName())
+                    .name(registerRequestDTO.getName())
+                    .avatar(fileName)
+                    .password(registerRequestDTO.getPassword())
+                    .email(registerRequestDTO.getEmail())
+                    .build();
 
-            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-
-            return authenticationService.registerAdmin(registerRequest);
+            return authenticationService.registerAdmin(registerRequest, key);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -458,6 +463,7 @@ public class AuthenticationController {
             String accessToken = jwtService.extractTokenFromHeader(request);
             Claims claims = jwtService.extractClaimsCycle(accessToken);
 
+            System.out.println(claims + " claims sign out");
             String email = claims.get("sub").toString();
             String owner = claims.get("iss").toString();
 

@@ -16,7 +16,7 @@ const LoginForm: FC = () => {
 
         await dispatch(authActions.login(info));
 
-        if (errors) {
+        if (errors) { //todo errors
             console.log(errors, "errors if")
         } else {
             navigate('/profile');

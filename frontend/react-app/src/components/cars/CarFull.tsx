@@ -31,7 +31,7 @@ const CarFull: FC = () => {
 
         dispatch(sellerActions.getByToken());
 
-        if (theme.role == ERole.CUSTOMER && theme.id != car?.seller.id) {
+        if (theme.role == ERole.CUSTOMER && theme.id != car?.seller.id && car?.seller.role == ERole.SELLER) {
             setTextButtonVisible(true);
         }
 
@@ -69,6 +69,8 @@ const CarFull: FC = () => {
                 <div>seller: {JSON.stringify(car.seller)}</div>
                 <div>{car.seller.createdAt}</div>
                 <div>{moment(car.seller.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
+                {car?.seller.role == ERole.ADMIN && <div style={{color: "blue"}}>The car is sold by AutoRio Services.
+                Please use {car?.seller.number} for further information</div>}
                 {
                     textButtonVisible &&
                     <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>

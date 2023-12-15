@@ -75,7 +75,6 @@ const registerManager = createAsyncThunk<IAuthResponse, RegisterManagerPayload>(
     'authSlice/registerManager',
     async ({managerInput, code}: RegisterManagerPayload, {rejectWithValue}) => {
         try {
-            console.log(code, "code")
             const {data} = await authService.registerManager(managerInput, code);
             return data;
         } catch (e) {
@@ -89,7 +88,7 @@ const registerAdmin = createAsyncThunk<IAuthResponse, RegisterAdminPayload>(
     'authSlice/registerAdmin',
     async ({adminInput, code}: RegisterAdminPayload, {rejectWithValue}) => {
         try {
-            const {data} = await authService.registerManager(adminInput, code);
+            const {data} = await authService.registerAdmin(adminInput, code);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -236,19 +235,18 @@ const slice = createSlice({
             .addCase(signOut.fulfilled, (state) => {
                 state.isAuth = false;
                 authService.deleteTokens();
-                window.location.reload();
             })
             .addCase(activateCustomer.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                localStorage.setItem('isAuth', JSON.stringify(true));
                 state.authId = action.payload.id;
-                window.location.reload();
             })
             .addCase(activateSeller.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
+                localStorage.setItem('isAuth', JSON.stringify(true));
                 state.authId = action.payload.id;
-                window.location.reload();
             })
             .addCase(forgotPassword.fulfilled, (state, action) => {
                 state.isAuth = false;

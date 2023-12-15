@@ -19,20 +19,23 @@ const CustomerProfile: FC<IProps> = ({seller}) => {
         picture = avatar;
     }
     return (
-        <div style={{
-            display: "flex",
-            backgroundColor: "whitesmoke",
-            height: "110px", width: "220px",
-            fontSize: "9px",
-            columnGap: "10px"
-        }}>
-            <div>
-                Customer
-                <div>id: {id}</div>
-                <div>{name} {lastName}</div>
-                <img style={{height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px"}}
-                     src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar"/>            </div>
-            <br/>
+        <div>
+
+            <div style={{
+                display: "flex",
+                backgroundColor: "whitesmoke",
+                height: "110px", width: "220px",
+                fontSize: "9px",
+                columnGap: "10px"
+            }}>
+                <div>
+                    Customer
+                    <div>id: {id}</div>
+                    <div>{name} {lastName}</div>
+                    <img style={{height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px"}}
+                         src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar"/></div>
+                <br/>
+            </div>
             <ChatPage/>
         </div>
     );

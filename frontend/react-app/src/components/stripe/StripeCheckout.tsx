@@ -129,6 +129,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
             <Stripe
                 stripeKey={stripeKeyPublish}
                 token={payNow}
+                description={"Buy AutoRia premium"}
             />
         </div>
     } else {
@@ -138,16 +139,19 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     return (
         <div style={{
             backgroundColor: "whitesmoke",
-            height: "100px", width: "500px",
             fontSize: "9px",
+            padding: "20px",
+            borderRadius: "5px",
             columnGap: "10px"
         }}>
-            STRIPE
+            <h4 style={{color: "green"}}>Buy premium</h4>
             {paymentComponent}
+            <br/>
+            <h4 style={{color: "green"}}>Add default payment source</h4>
             <Stripe
                 stripeKey={stripeKeyPublish}
                 token={addCard}
-                name={"add card"}
+                description={"Bind a card to AutoRia"}
             />
         </div>
     );

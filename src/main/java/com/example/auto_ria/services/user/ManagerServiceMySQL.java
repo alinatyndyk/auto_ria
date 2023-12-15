@@ -44,7 +44,6 @@ public class ManagerServiceMySQL {
     }
 
     public ManagerSQL getByEmail(String email) {
-        System.out.println(47);
         return managerDaoSQL.findByEmail(email);
     }
 

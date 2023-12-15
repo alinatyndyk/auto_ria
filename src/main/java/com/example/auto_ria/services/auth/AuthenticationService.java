@@ -185,12 +185,9 @@ public class AuthenticationService {
                     .roles(List.of(ERole.MANAGER, ERole.MANAGER_GLOBAL))
                     .build();
 
-            System.out.println(manager + " manager");
-
             AuthenticationResponse authenticationResponse = jwtService.generateManagerTokenPair(manager);
 
             manager.setIsActivated(true);
-
             managerDaoSQL.save(manager);
 
             managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).
@@ -227,7 +224,7 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseEntity<AuthenticationResponse> registerAdmin(RegisterAdminRequest registerRequest) {
+    public ResponseEntity<AuthenticationResponse> registerAdmin(RegisterAdminRequest registerRequest, String key) {
         try {
 
             AdministratorSQL administrator = AdministratorSQL
@@ -243,7 +240,6 @@ public class AuthenticationService {
             AuthenticationResponse authenticationResponse = jwtService.generateAdminTokenPair(administrator);
 
             administrator.setIsActivated(true);
-
             administratorDaoSQL.save(administrator);
 
             adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).
@@ -252,8 +248,9 @@ public class AuthenticationService {
 
             Map<String, Object> args = new HashMap<>();
             args.put("name", administrator.getName() + " " + administrator.getLastName());
-
             mailer.sendEmail(administrator.getEmail(), EMail.WELCOME, args);
+
+            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
 
             return ResponseEntity.ok(authenticationResponse);
         } catch (Exception e) {
@@ -872,25 +869,23 @@ public class AuthenticationService {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+            System.out.println(authentication + "authentication");
+
             if (authentication != null && authentication.getName().equals(email)) {
                 SecurityContextHolder.clearContext();
             }
 
             if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
                 AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
-                administratorDaoSQL.save(administratorSQL);
                 adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
             } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
                 ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
-                managerDaoSQL.save(managerSQL);
                 managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
             } else if (ERole.SELLER.equals(ERole.valueOf(owner))) {
                 SellerSQL sellerSQL = usersServiceMySQL.getByEmail(email);
-                userDaoSQL.save(sellerSQL);
                 sellerAuthDaoSQL.deleteAllByPersonId(sellerSQL.getId());
             } else if (ERole.CUSTOMER.equals(ERole.valueOf(owner))) {
                 CustomerSQL customerSQL = customersServiceMySQL.getByEmail(email);
-                customerDaoSQL.save(customerSQL);
                 customerAuthDaoSQL.deleteAllByPersonId(customerSQL.getId());
             } else {
                 throw new CustomException("Something went wrong...", HttpStatus.BAD_REQUEST);

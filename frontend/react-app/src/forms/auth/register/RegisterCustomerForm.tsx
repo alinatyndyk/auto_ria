@@ -32,6 +32,8 @@ const RegisterCustomerForm: FC = () => {
 
     const registerSeller: SubmitHandler<ICustomerInput> = async (customer: ICustomerInput) => {
 
+        customer.region = getCarRegion;
+        customer.city = getCarCity;
         const {payload} = await dispatch(authActions.registerCustomer(customer));
 
         setResponse(String(payload));

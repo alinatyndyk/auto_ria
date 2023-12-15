@@ -66,7 +66,7 @@ const ChatPage: FC = () => {
     return (
         <div>
             Chat page
-
+            {fetchedCustomers.length == 0 && <div style={{color: "blue"}}>No conversations started yet</div>}
             {fetchedCustomers.map((customer, index) => (
                 <div key={index} onClick={() => navigate(`/chats/${customer.id}`)}>
                     <div>

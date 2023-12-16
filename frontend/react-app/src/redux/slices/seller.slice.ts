@@ -7,7 +7,12 @@ import {ICustomerResponse} from "../../interfaces/user/customer.interface";
 import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {IManagerResponse} from "../../interfaces/user/manager.interface";
 import {IMessage} from "../../components/cars";
-import {IChatResponse, IChatsPageResponse, IMessagePageResponse} from "../../interfaces/message.interface";
+import {
+    IChatResponse,
+    IChatsPageResponse,
+    IGetChatMessagesRequest,
+    IMessagePageResponse
+} from "../../interfaces/message.interface";
 import {IGeoCitiesResponse, IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
 
 interface IState {
@@ -20,7 +25,10 @@ interface IState {
     totalPages: number,
     chatPage: number,
     user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
-    customer: ICustomerResponse | null
+    customer: ICustomerResponse | null,
+    seller: ISellerResponse | null,
+    totalPagesMessages: number,
+    chatPageMessages: number
 }
 
 const initialState: IState = {
@@ -32,7 +40,10 @@ const initialState: IState = {
     cities: [],
     chatPage: 0,
     totalPages: 0,
+    chatPageMessages: 0,
+    totalPagesMessages: 0,
     customer: null,
+    seller: null,
     user: null
 }
 
@@ -62,12 +73,24 @@ const getCustomerById = createAsyncThunk<ICustomerResponse, number>(
     }
 );
 
+const getSellerById = createAsyncThunk<ISellerResponse, number>(
+    'sellerSlice/getSellerById',
+    async (id: number, {rejectWithValue}) => {
+        try {
+            const {data} = await sellerService.getSellerById(id);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     'sellerSlice/getByToken',
     async (_, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getByToken();
-            console.log(data.body, "get by");
             return data.body;
         } catch (e) {
             const err = e as AxiosError;
@@ -76,11 +99,11 @@ const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     }
 );
 
-const getChatMessages = createAsyncThunk<IMessagePageResponse, number>(
+const getChatMessages = createAsyncThunk<IMessagePageResponse, IGetChatMessagesRequest>(
     'sellerSlice/getChatMessages',
-    async (page: number, {rejectWithValue}) => {
+    async (info, {rejectWithValue}) => {
         try {
-            const {data} = await sellerService.getChatMessages(page);
+            const {data} = await sellerService.getChatMessages(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -142,6 +165,9 @@ const slice = createSlice({
             .addCase(getCustomerById.fulfilled, (state, action) => {
                 state.customer = action.payload;
             })
+            .addCase(getSellerById.fulfilled, (state, action) => {
+                state.seller = action.payload;
+            })
             .addCase(getRegionsByPrefix.fulfilled, (state, action) => {
                 state.regions = action.payload;
             })
@@ -150,8 +176,8 @@ const slice = createSlice({
             })
             .addCase(getChatMessages.fulfilled, (state, action) => {
                 state.messages = action.payload.content;
-                state.totalPages = action.payload.totalPages;
-                state.chatPage = action.payload.pageable.pageNumber;
+                state.totalPagesMessages = action.payload.totalPages;
+                state.chatPageMessages = action.payload.pageable.pageNumber;
             })
             .addCase(getChatsByUserToken.fulfilled, (state, action) => {
                 state.chats = action.payload.content;
@@ -159,9 +185,7 @@ const slice = createSlice({
                 state.chatPage = action.payload.pageable.pageNumber;
             })
             .addCase(getByToken.fulfilled, (state, action) => {
-                console.log(action.payload, "load");
                 state.user = action.payload;
-                console.log(state.user);
                 state.trigger = !state.trigger;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
@@ -176,6 +200,7 @@ const sellerActions = {
     ...actions,
     getById,
     getCustomerById,
+    getSellerById,
     getByToken,
     getChatMessages,
     getChatsByUserToken,

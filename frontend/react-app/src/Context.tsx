@@ -4,7 +4,7 @@ import {ISellerResponse} from "./interfaces/user/seller.interface";
 import {IManagerResponse} from "./interfaces/user/manager.interface";
 import {IAdminResponse} from "./interfaces/user/admin.interface";
 import {sellerActions} from "./redux/slices/seller.slice";
-import {useAppSelector} from "./hooks";
+import {useAppDispatch, useAppSelector} from "./hooks";
 
 interface IChildren {
     children: any
@@ -19,12 +19,18 @@ export const MyContextProvider: FC<IChildren> = ({children}) => {
     const [theme, setTheme] =
         useState<ICustomerResponse | ISellerResponse | IManagerResponse | IAdminResponse | string>("");
 
+    const dispatch = useAppDispatch();
+
     useEffect(() => {
-        sellerActions.getByToken();
+        if (user === null) {
+            dispatch(sellerActions.getByToken());
+        }
+
         if (user != null) {
             setTheme(user);
         }
     }, [user]);
+
 
     return (
         <ThemeContext.Provider value={theme}>

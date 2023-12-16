@@ -11,9 +11,14 @@ import com.example.auto_ria.services.chat.ChatServiceMySQL;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -49,7 +54,6 @@ public class ChatController {
             String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
 
             Chat chat = chatServiceMySQL.getByRoomKey(roomKey);
-            System.out.println(chat);
             return ResponseEntity.ok(chat);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -61,10 +65,10 @@ public class ChatController {
             HttpServletRequest request,
             @PathVariable("page") int page) {
         try {
-
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! of user");
             SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
             CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
-
+            System.out.println("---------" + sellerSQL + " " + customerSQL);
             int id;
             ERole role;
 
@@ -110,7 +114,12 @@ public class ChatController {
             String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
             Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);
 
-            return ResponseEntity.ok(messageClasses);
+            List<MessageClass> reversedMessages = new ArrayList<>(messageClasses.getContent());
+            Collections.reverse(reversedMessages);
+
+            Page<MessageClass> reversedPage = new PageImpl<>(reversedMessages, messageClasses.getPageable(), messageClasses.getTotalElements());
+
+            return ResponseEntity.ok(reversedPage);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

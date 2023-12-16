@@ -9,6 +9,7 @@ import {sellerService} from "../services/seller.service";
 import {ChatPage} from "./ChatPage";
 import {ERole} from "../constants/role.enum";
 import CarPage from "./CarPage";
+import {authActions} from "../redux/slices";
 
 const ProfilePage: FC = () => {
 
@@ -25,7 +26,8 @@ const ProfilePage: FC = () => {
     let userComponent;
 
     if (user === null) {
-        userComponent = <div>Loading...</div>;
+        userComponent = <div>Loading...
+            <button onClick={() => dispatch(authActions.refresh())}>refresh</button></div>;
     } else if (user.role == ERole.SELLER && sellerService.isSellerResponse(user)) { //todo joi
         userComponent = <SellerProfile seller={user}/>;
     } else if (user.role == ERole.CUSTOMER && sellerService.isCustomerResponse(user)) {

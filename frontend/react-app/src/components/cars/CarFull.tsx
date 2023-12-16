@@ -8,6 +8,7 @@ import {sellerActions} from "../../redux/slices/seller.slice";
 
 import moment from "moment";
 import {ERole} from "../../constants/role.enum";
+import {ICar} from "../../interfaces";
 
 // ...
 
@@ -23,13 +24,17 @@ const CarFull: FC = () => {
     const {user} = useAppSelector(state => state.sellerReducer);
 
     const theme = useContext(ThemeContext);
+    console.log(theme, "CAR CONTEXT")
 
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
         }
-
-        dispatch(sellerActions.getByToken());
+        console.log(theme, "CAR CONTEXT LOG")
+        console.log(theme.role == ERole.CUSTOMER)
+        console.log(theme.id != car?.seller.id)
+        console.log(car?.seller.role == ERole.SELLER)
+        console.log(car?.seller.role)
 
         if (theme.role == ERole.CUSTOMER && theme.id != car?.seller.id && car?.seller.role == ERole.SELLER) {
             setTextButtonVisible(true);
@@ -70,7 +75,7 @@ const CarFull: FC = () => {
                 <div>{car.seller.createdAt}</div>
                 <div>{moment(car.seller.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
                 {car?.seller.role == ERole.ADMIN && <div style={{color: "blue"}}>The car is sold by AutoRio Services.
-                Please use {car?.seller.number} for further information</div>}
+                    Please use {car?.seller.number} for further information</div>}
                 {
                     textButtonVisible &&
                     <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>

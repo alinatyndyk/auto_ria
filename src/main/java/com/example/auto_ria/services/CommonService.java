@@ -83,8 +83,11 @@ public class CommonService {
     public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
         try {
             String bearerToken = jwtService.extractTokenFromHeader(request);
+            System.out.println(bearerToken + "bearer token");
             return jwtService.extractUsername(bearerToken, role);
-        } catch (Exception ignore) {
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("111111111111111 e.getMessage()");
             throw new CustomException("Please sign in", HttpStatus.UNAUTHORIZED);
         }
 

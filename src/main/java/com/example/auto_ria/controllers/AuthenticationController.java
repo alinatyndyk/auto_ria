@@ -407,10 +407,10 @@ public class AuthenticationController {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
-
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refreshAll(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
+            System.out.println("refreshRequest " + refreshRequest);
             return ResponseEntity.ok(authenticationService.refreshAll(refreshRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

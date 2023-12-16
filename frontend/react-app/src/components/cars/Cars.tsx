@@ -2,7 +2,7 @@ import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "../../hooks";
 import {Car} from "./Car";
 import {carActions} from "../../redux/slices";
-import {CarForm} from "../../forms";
+import {useSearchParams} from "react-router-dom";
 
 interface IProps {
     sellerId: number | null
@@ -22,12 +22,17 @@ export interface IMessage {
 const Cars: FC<IProps> = ({sellerId}) => {
     const {cars, pagesInTotal} = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();
+    const [searchParams, setSearchParams] = useSearchParams();
 
     const [getButtons, setButtons] = useState(true);
     const [getNextButtons, setNextButtons] = useState(false);
     let [getPage, setPage] = useState<number>(0);
 
     useEffect(() => {
+
+        searchParams.set('page', getPage.toString());
+        setSearchParams(searchParams);
+
         if (sellerId != null) {
             dispatch(carActions.getBySeller({page: getPage, id: sellerId})).then(() => {
             });
@@ -51,12 +56,12 @@ const Cars: FC<IProps> = ({sellerId}) => {
 
 
     const prevPage = () => {
-        console.log("prev")
+        // console.log("prev")
         setPage(prevState => prevState - 1);
     };
 
     const nextPage = () => {
-        console.log("next")
+        // console.log("next")
         setPage(prevState => prevState + 1);
     };
 

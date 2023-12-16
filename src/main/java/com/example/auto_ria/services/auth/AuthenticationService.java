@@ -668,6 +668,7 @@ public class AuthenticationService {
     public AuthenticationResponse refreshAll(RefreshRequest refreshRequest) {
         try {
             String refreshToken = refreshRequest.getRefreshToken();
+            System.out.println("refresh " + refreshToken);
 
             if (jwtService.isTokenExprired(refreshToken)) {
                 throw new CustomException("Token expired", HttpStatus.FORBIDDEN);
@@ -676,15 +677,22 @@ public class AuthenticationService {
             String username;
             AuthenticationResponse tokenPair = null;
 
+            System.out.println(jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER));
+            System.out.println("jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER)");
+            System.out.println(customerAuthDaoSQL.findByRefreshToken(refreshToken));
+            System.out.println("customerAuthDaoSQL.findByRefreshToken(refreshToken)");
+
             if ((username = jwtService.extractUsername(refreshToken, ETokenRole.CUSTOMER)) != null &&
                     customerAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
                 CustomerSQL customerSQL = customerDaoSQL.findByEmail(username);
+                System.out.println("customer " + customerSQL);
                 if (customerSQL != null) {
                     tokenPair = jwtService.generateCustomerTokenPair(customerSQL);
                     customerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
                     customerAuthDaoSQL.save(AuthSQL.builder().role(ERole.CUSTOMER).
                             personId(customerSQL.getId()).accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken()).build());
+                    System.out.println("tokenPair " + tokenPair);
                 }
 
             } else if ((username = jwtService.extractUsername(refreshToken, ETokenRole.SELLER)) != null &&

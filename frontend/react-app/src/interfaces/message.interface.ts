@@ -50,3 +50,20 @@ export interface IChatResponse {
     createdAt: number[];
     updatedAt: number[];
 }
+
+export interface IGetChatMessagesRequest {
+    page: number,
+    sellerId: string,
+    customerId: string
+}
+
+export interface IGetChatMessagesRequest {
+    page: number,
+    sellerId: string,
+    customerId: string
+}
+
+export interface IGetChatMessagesOutlet {
+    senderId: string,
+    senderRole: string
+}

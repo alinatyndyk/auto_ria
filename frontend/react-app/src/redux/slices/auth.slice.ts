@@ -44,6 +44,25 @@ const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
     }
 );
 
+
+const refresh = createAsyncThunk<IAuthResponse, void>(
+    'authSlice/refresh',
+    async (_, {rejectWithValue}) => {
+        try {
+            console.log("refresh");
+            const refresh = authService.getRefreshToken();
+            if (!refresh) {
+                return rejectWithValue("refresh_token is required");
+            }
+            const {data} = await authService.refresh({refreshToken: refresh});
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const signOut = createAsyncThunk<void, void>(
     'authSlice/logOut',
     async (_, {rejectWithValue}) => {
@@ -221,6 +240,12 @@ const slice = createSlice({
                 localStorage.setItem('isAuth', JSON.stringify(true));
                 // window.location.reload();
             })
+            .addCase(refresh.fulfilled, (state, action) => {
+                state.isAuth = true;
+                state.authId = action.payload.id;
+                authService.setTokens({...action.payload});
+                localStorage.setItem('isAuth', JSON.stringify(true));
+            })
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
                 state.authId = action.payload.id;
@@ -234,7 +259,7 @@ const slice = createSlice({
             })
             .addCase(signOut.fulfilled, (state) => {
                 state.isAuth = false;
-                authService.deleteTokens();
+                localStorage.clear();
             })
             .addCase(activateCustomer.fulfilled, (state, action) => {
                 state.isAuth = true;
@@ -248,7 +273,7 @@ const slice = createSlice({
                 localStorage.setItem('isAuth', JSON.stringify(true));
                 state.authId = action.payload.id;
             })
-            .addCase(forgotPassword.fulfilled, (state, action) => {
+            .addCase(forgotPassword.fulfilled, (state) => {
                 state.isAuth = false;
             })
             .addCase(registerManager.fulfilled, (state, action) => {
@@ -277,6 +302,7 @@ const {actions, reducer: authReducer} = slice;
 const authActions = {
     ...actions,
     login,
+    refresh,
     signOut,
     registerSeller,
     registerCustomer,

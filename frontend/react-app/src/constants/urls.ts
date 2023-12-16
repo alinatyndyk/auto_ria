@@ -23,7 +23,7 @@ const urls = {
         auth,
         login: (): string => `/api/v1/${auth}/authenticate`,
         signOut: (): string => `/api/v1/${auth}/sign-out`,
-        refresh: (): string => `${auth}/refresh`,
+        refresh: (): string => `/api/v1/${auth}/refresh`,
 
         registerSeller: (): string => `/api/v1/${auth}/register-seller/person`,
         registerCustomer: (): string => `/api/v1/${auth}/register-customer`,

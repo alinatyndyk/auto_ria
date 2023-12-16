@@ -2,12 +2,17 @@ import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
 import {ICustomerResponse} from "../../interfaces/user/customer.interface";
 import {ChatPage} from "../../pages/ChatPage";
+import {authService} from "../../services";
+import {useAppDispatch} from "../../hooks";
+import {authActions} from "../../redux/slices";
 
 interface IProps {
     seller: ICustomerResponse
 }
 
 const CustomerProfile: FC<IProps> = ({seller}) => {
+
+    const dispatch = useAppDispatch();
 
     const {
         id, avatar, name, lastName
@@ -20,7 +25,6 @@ const CustomerProfile: FC<IProps> = ({seller}) => {
     }
     return (
         <div>
-
             <div style={{
                 display: "flex",
                 backgroundColor: "whitesmoke",

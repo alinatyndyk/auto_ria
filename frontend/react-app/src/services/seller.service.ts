@@ -8,20 +8,23 @@ import {IManagerResponse} from "../interfaces/user/manager.interface";
 import {authService} from "./auth.service";
 import {IGeoCitiesResponse, IGeoRegionsResponse} from "../interfaces/geo.interface";
 import {ERole} from "../constants/role.enum";
+import {IGetChatMessagesRequest} from "../interfaces/message.interface";
 
 const sellerService = {
     getAll: (page: number): IRes<ISellerPageResponse> => axiosService.get(urls.sellers.all(page)),
     getById: (id: number): IRes<ISellerResponse> => axiosService.get(urls.users.getById(id)),
     getCustomerById: (id: number): IRes<ICustomerResponse> => axiosService.get(urls.customers.getById(id)),
+    getSellerById: (id: number): IRes<ISellerResponse> => axiosService.get(urls.sellers.getById(id)),
     getByToken: (): IRes<any> => axiosService.get(urls.users.getByToken(), {
         headers: {
             Authorization: `Bearer ${authService.getAccessToken()}`
         }
     }),
 
-    getChatMessages: (page: number): IRes<any> => axiosService.post(urls.chats.getChatMessages(page), {
-        sellerId: 2,
-        customerId: 3
+    getChatMessages: ({sellerId, customerId, page}: IGetChatMessagesRequest):
+        IRes<any> => axiosService.post(urls.chats.getChatMessages(page), {
+        sellerId,
+        customerId
     }, {
         headers: {
             "Content-Type": "multipart/form-data"

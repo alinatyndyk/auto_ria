@@ -6,7 +6,7 @@ import {carActions} from "../../redux/slices";
 import {sellerActions} from "../../redux/slices/seller.slice";
 import {IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
 
-enum ECurrency {
+export enum ECurrency {
     UAH = "UAH", EUR = "EUR", USD = "USD"
 }
 
@@ -41,11 +41,18 @@ const CarForm: FC = () => {
     const [getBrand, setBrand] = useState('');
     const [getModel, setModel] = useState('');
 
+    const [getErrors, setErrors] = useState<null | string>(JSON.stringify(errors));
+
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
     const [getCurrencies, setCurrencies] = useState<ECurrency[]>([]);
 
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        setErrors(JSON.stringify(errors));
+    }, [errors])
+
     const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
         console.log(car, "car")
         let photos = [];
@@ -64,16 +71,35 @@ const CarForm: FC = () => {
             pictures: photos
         };
 
-        const {payload} = await dispatch(carActions.create(updatedCar));
-        if (!errors) {
-            // setResponse("Car created successfully");
-        }
 
-        // reset();
+        await dispatch(carActions.create(updatedCar))
+            .then((res) => {
+                const type = res.type;
+                const lastWord = type.substring(type.lastIndexOf("/") + 1);
+
+                if (lastWord == "fulfilled") {
+                    setResponse("Car created successfully");
+                    setCarCity('');
+                    setCarRegion('');
+                    setBrand('');
+                    setModel('');
+                    reset();
+
+                    setErrors(null);
+                } else {
+                    setErrors(JSON.stringify(errors));
+                }
+
+                console.log(getErrors + "ERRORS ---------------------------");
+                console.log(errors?.message + "1ERRORS ---------------------------");
+                //     console.log(res);
+            }).catch((err) => {
+                console.log(err, "CATCH")
+            });
     }
+
     useEffect(() => {
         setCurrencies(Object.values(ECurrency));
-        handleBrands();
     }, [])
 
     const handleBrands = async () => {
@@ -130,7 +156,7 @@ const CarForm: FC = () => {
 
     return (
         <div>
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            <div>{getResponse ? getResponse : <div>{JSON.stringify(errors?.message)}</div>}</div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
                     <input type="text" readOnly={true} value={getBrand} placeholder={'brand'}

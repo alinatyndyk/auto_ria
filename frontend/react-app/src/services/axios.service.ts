@@ -28,19 +28,20 @@ axiosService.interceptors.response.use(
         if (error.response?.status === 423 && refresh_token && !isRefreshing) {
             isRefreshing = true;
 
+            console.log("423 error");
+
             try {
                 const refresh = authService.getRefreshToken();
                 if (!refresh) {
                     throw new Error("refresh_token is required");
                 }
-                const { data } = await authService.refresh({ refreshToken: refresh });
+                const {data} = await authService.refresh({refreshToken: refresh});
                 authService.setTokens(data);
                 localStorage.setItem('isAuth', JSON.stringify(true));
 
                 // Resend the original request with the new token
-                const originalRequest = error.config;
-                originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-                return axiosService(originalRequest);
+
+                return axiosService(error.config);
             } catch (e) {
                 authService.deleteTokens();
                 // return history.replace('/account?ExpSession=true');

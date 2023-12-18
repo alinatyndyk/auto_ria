@@ -21,7 +21,7 @@ export interface ISellerResponse {
     avatar: string;
     accountType: string;
     role: string,
-    isPaymentResourcePresent: boolean,
+    paymentSourcePresent: boolean,
     createdAt: number[];
 }
 

@@ -66,7 +66,7 @@ public class CitiesService {
                 }
             }
 
-            int regionCode = region.get("isoCode").asInt();
+            String regionCode = region.get("isoCode").asText();
 
             String findCity = environment.getProperty("geodb.api") +
                     "/countries/UA/" +

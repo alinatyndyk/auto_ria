@@ -236,19 +236,15 @@ const slice = createSlice({
             .addCase(login.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
-                state.authId = action.payload.id;
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                // window.location.reload();
             })
             .addCase(refresh.fulfilled, (state, action) => {
                 state.isAuth = true;
-                state.authId = action.payload.id;
                 authService.setTokens({...action.payload});
                 localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
-                state.authId = action.payload.id;
                 authService.setTokens({...action.payload});
                 window.location.reload();
             })
@@ -265,13 +261,11 @@ const slice = createSlice({
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                state.authId = action.payload.id;
             })
             .addCase(activateSeller.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({...action.payload});
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                state.authId = action.payload.id;
             })
             .addCase(forgotPassword.fulfilled, (state) => {
                 state.isAuth = false;
@@ -280,14 +274,12 @@ const slice = createSlice({
                 state.isAuth = false;
                 authService.setTokens({...action.payload});
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
                 state.isAuth = false;
                 authService.setTokens({...action.payload});
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                state.authId = action.payload.id;
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {

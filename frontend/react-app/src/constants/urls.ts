@@ -17,6 +17,7 @@ const urls = {
         allBrands: (): string => `${cars}/${brands}`,
         allModelsByBrand: (brand: string): string => `${cars}/${brands}/${brand}/models`,
         byId: (id: number): string => `${cars}/${id}`,
+        deleteById: (id: number): string => `${cars}/${id}`,
         bySeller: (id: number, page: number): string => `${cars}/by-seller/${id}/page/${page}`,
     },
     auth: {

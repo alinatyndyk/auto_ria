@@ -237,7 +237,6 @@ public class CarController {
         try {
             SellerSQL seller = commonService.extractSellerFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
-            System.out.println(carDTO + "car");
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
@@ -299,15 +298,17 @@ public class CarController {
                 }
             }
 
-            commonService.transferPhotos(carDTO.getPictures());
+            if (carDTO.getPictures() != null) {
+                commonService.transferPhotos(carDTO.getPictures());
 
-            List<String> names = new ArrayList<>();
+                List<String> names = new ArrayList<>();
 
-            for (MultipartFile file : carDTO.getPictures()) {
-                names.add(file.getOriginalFilename());
+                for (MultipartFile file : carDTO.getPictures()) {
+                    names.add(file.getOriginalFilename());
+                }
+
+                car.setPhoto(names);
             }
-
-            car.setPhoto(names);
 
             return carsService.post(car, seller, administratorSQL);
         } catch (CustomException e) {
@@ -320,11 +321,57 @@ public class CarController {
                                                 @RequestBody @Valid CarUpdateDTO partialCar,
                                                 HttpServletRequest request) {
         try {
-            carsService.extractById(id);
+            CarSQL carSQL = carsService.extractById(id);
+
+            SellerSQL seller = commonService.extractSellerFromHeader(request);
+            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
             carsService.checkCredentials(request, id);
 
             citiesService.isValidUkrainianCity(partialCar.getRegion(), partialCar.getCity());
+
+            String filteredText = profanityFilterService.containsProfanity(partialCar.getDescription());
+
+            if (profanityFilterService.containsProfanityBoolean(filteredText, partialCar.getDescription())) {
+                int currentCount = validationFailureCounter.incrementAndGet();
+                if (currentCount > 3) {
+
+                    carSQL.setActivated(false);
+                    carsService.save(carSQL);
+                    try {
+                        HashMap<String, Object> vars = new HashMap<>();
+                        List<ManagerSQL> managers = managerServiceMySQL.getAll();
+
+                        String email;
+
+                        if (seller != null) {
+                            vars.put("name", seller.getName());
+                            email = seller.getEmail();
+                        } else if (administratorSQL != null) {
+                            vars.put("name", administratorSQL.getName());
+                            email = administratorSQL.getEmail();
+                        } else {
+                            throw new CustomException("Invalid token user", HttpStatus.FORBIDDEN);
+                        }
+                        vars.put("description", partialCar.getDescription());
+
+                        managers.forEach(managerSQLItem -> {
+                            try {
+                                mailer.sendEmail(managerSQLItem.getEmail(), EMail.CHECK_ANNOUNCEMENT, vars);
+                            } catch (Exception ignore) {
+                            }
+                        });
+                        mailer.sendEmail(email, EMail.CAR_BEING_CHECKED, vars);
+                    } catch (Exception e) {
+                        throw new CustomException("Error sending emails", HttpStatus.EXPECTATION_FAILED);
+                    }
+                } else {
+                    int attemptsLeft = 4 - currentCount;
+                    throw new CustomException("Consider editing your description. " +
+                            "Profanity found - attempts left:  " + attemptsLeft, HttpStatus.BAD_REQUEST);
+                }
+            }
+
             return carsService.update(id, partialCar);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

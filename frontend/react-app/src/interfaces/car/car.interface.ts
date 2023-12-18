@@ -24,6 +24,19 @@ export interface ICreateInputCar {
     pictures: File[];
 }
 
+export interface IUpdateInputCar {
+    city: string;
+    region: string;
+    price: string;
+    description: string;
+    currency: string;
+}
+
+export interface IUpdateCarRequest {
+    id: number,
+    car: IUpdateInputCar
+}
+
 export interface ICar {
     id: number;
     brand: string;

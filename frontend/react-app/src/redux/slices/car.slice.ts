@@ -1,4 +1,4 @@
-import {ICar, ICarResponse, ICreateCar, IError} from "../../interfaces";
+import {ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest} from "../../interfaces";
 import {createAsyncThunk, createSlice, isRejectedWithValue} from "@reduxjs/toolkit";
 import {carService} from "../../services";
 import {AxiosError} from "axios";
@@ -47,6 +47,19 @@ const getById = createAsyncThunk<ICar, number>(
     async (carId: number, {rejectWithValue}) => {
         try {
             const {data} = await carService.getById(carId);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const deleteById = createAsyncThunk(
+    'carSlice/deleteById',
+    async (carId: number, {rejectWithValue}) => {
+        try {
+            const {data} = await carService.deleteById(carId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -111,6 +124,19 @@ const create = createAsyncThunk<ICar, ICreateCar>(
     }
 );
 
+const update = createAsyncThunk<ICar, IUpdateCarRequest>(
+    'carSlice/update',
+    async (request, {rejectWithValue}) => {
+        try {
+            const {data} = await carService.updateById(request.id, request.car);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
 const slice = createSlice({
     name: 'carSlice',
     initialState,
@@ -125,6 +151,9 @@ const slice = createSlice({
             .addCase(getById.fulfilled, (state, action) => {
                 state.car = action.payload;
             })
+            .addCase(deleteById.fulfilled, () => {
+                window.location.href = "http://localhost:3000/profile";
+            })
             .addCase(getAllBrands.fulfilled, (state, action) => {
                 state.brands = action.payload;
             })
@@ -138,8 +167,8 @@ const slice = createSlice({
                 state.trigger = !state.trigger;
                 console.log(state.pageCurrent, state.pagesInTotal)
             })
-            .addCase(create.fulfilled, (state) => {
-                state.trigger = !state.trigger;
+            .addCase(update.fulfilled, () => {
+                window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 state.errors = action.payload as IError;
@@ -153,10 +182,12 @@ const carActions = {
     ...actions,
     getAll,
     getById,
+    deleteById,
     getAllBrands,
     getAllModelsByBrand,
     getBySeller,
-    create
+    create,
+    update
 }
 
 export {

@@ -39,8 +39,8 @@ public class Chat {
     private String sellerSessionId;
     private String customerSessionId;
 
-//    private int notSeenSeller;
-//    private int notSeenCustomer;
+    private int notSeenSeller;
+    private int notSeenCustomer;
 
     private String roomKey;
 
@@ -53,9 +53,6 @@ public class Chat {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime updatedAt;
 
-    // No need for createdAt and updatedAt fields here
-
-    // Add a method to add a message to the chat
     public void addMessage(MessageClass message) {
         messages.add(message);
     }

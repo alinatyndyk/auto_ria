@@ -73,7 +73,13 @@ public class ChatServiceMySQL {
     public Page<MessageClass> getMessagesPage(String roomKey, int page) {
         Pageable pageable = PageRequest.of(page, 2, Sort.by("id").descending());
         int chatId = getByRoomKey(roomKey).getId();
-        return messageDaoSQL.getByChatId(chatId, pageable);
+        Page<MessageClass> chat = messageDaoSQL.getByChatId(chatId, pageable);
+
+        return chat;
+    }
+
+    public void save(Chat chat) {
+        chatDaoSQL.save(chat);
     }
 
     public MessageClass patchMessage(MessageClass messageClass, String content) {

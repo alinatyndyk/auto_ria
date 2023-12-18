@@ -5,6 +5,7 @@ import {IManagerResponse} from "./interfaces/user/manager.interface";
 import {IAdminResponse} from "./interfaces/user/admin.interface";
 import {sellerActions} from "./redux/slices/seller.slice";
 import {useAppDispatch, useAppSelector} from "./hooks";
+import {securityService} from "./services/security.service";
 
 interface IChildren {
     children: any
@@ -25,6 +26,8 @@ export const MyContextProvider: FC<IChildren> = ({children}) => {
         if (user === null) {
             dispatch(sellerActions.getByToken());
         }
+
+        localStorage.setItem("authorization", securityService.encryptObject(user));
 
         if (user != null) {
             setTheme(user);

@@ -248,6 +248,14 @@ public class CarsServiceMySQLImpl {
         }
     }
 
+    public void save(CarSQL car) {
+        try {
+            carDAO.save(car);
+        } catch (Exception e) {
+            throw new CustomException("Failed save" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
     public List<CarSQL> findAllBySeller(SellerSQL seller) {
         try {
             return carDAO.findBySeller(seller);
@@ -305,7 +313,7 @@ public class CarsServiceMySQLImpl {
 
             } catch (Exception ignore) {
             }
-            return new ResponseEntity<>("Success.Car_deleted", HttpStatus.GONE);
+            return ResponseEntity.ok("Success.Car_deleted");
         } catch (Exception e) {
             throw new CustomException("Failed delete: " + e.getMessage(), HttpStatus.CONFLICT);
         }

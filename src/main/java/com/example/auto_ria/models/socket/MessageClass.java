@@ -29,6 +29,7 @@ public class MessageClass {
     private int chatId;
     
     private Boolean isEdited = false;
+    private Boolean isSeen = false;
 
     @UpdateTimestamp()
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")

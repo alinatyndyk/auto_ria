@@ -37,7 +37,6 @@ const ChatPage: FC = () => {
                         const lastWord = type.substring(type.lastIndexOf("/") + 1);
                         // @ts-ignore
                         if (lastWord == "fulfilled" && !fetchedCustomers.some((c) => c.id === customer.payload.id)) {
-
                             // @ts-ignore
                             setFetchedCustomers(prevState => [...prevState, customer.payload]); //display customer.payload in reverse
                         }
@@ -53,6 +52,7 @@ const ChatPage: FC = () => {
                         const lastWord = type.substring(type.lastIndexOf("/") + 1);
                         // @ts-ignore
                         if (lastWord == "fulfilled" && !fetchedCustomers.some((c) => c.id === customer.payload.id)) {
+                            console.log("fulfilled did pass if");
                             // @ts-ignore
                             setFetchedCustomers(prevState => [...prevState, customer.payload]); //display customer.payload in reverse
                         }

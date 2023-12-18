@@ -67,7 +67,7 @@ public class StripeService {
                         "You can change it at any moment at - Http//3000/attach-card", HttpStatus.BAD_REQUEST);
             }
 
-            if (body.isAutoPay() && !body.isSetAsDefaultCard()) {
+            if (body.isAutoPay() && !body.isSetAsDefaultCard() && !stripePresent) {
                 throw new CustomException("Subscription requires a default card", HttpStatus.BAD_REQUEST);
             }
 

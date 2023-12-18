@@ -46,7 +46,7 @@ public class CarSQL {
     private List<String> photo = new ArrayList<>();
 
     @JsonManagedReference
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinTable(
             name = "seller_cars",
             joinColumns = @JoinColumn(name = "car_id"),

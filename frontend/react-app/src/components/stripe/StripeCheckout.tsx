@@ -19,8 +19,6 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
         try {
             const response =
                 await axios.post("http://localhost:8080/payments/buy-premium", {
-                    // await axios.post("http://localhost:8080/payments/add-payment-source", {
-                    // id: "4",
                     token: token.id,
                     useDefaultCard: getUseDefaultCard,
                     setAsDefaultCard: getAsDefaultCard,
@@ -69,8 +67,18 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
         }
     };
 
-    const handlePayWithDefaultCard = (event: { target: { checked: any; }; }) => {
+    const handleIsAutoPayWithSource = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
+            console.log("P")
+            setAutoPay(true);
+            setUseDefaultCard(true);
+        } else {
+            setAutoPay(false);
+        }
+    };
+
+    const handlePayWithDefaultCard = (event: { target: { checked: any; }; }) => {
+        if (event.target.checked || autoPay) {
             setUseDefaultCard(true);
         } else {
             setUseDefaultCard(false);
@@ -80,7 +88,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     const handleSetAsDefaultCard = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
             setAsDefaultCard(true);
-        } else if (autoPay) {
+        } else if (autoPay && !seller.paymentSourcePresent) {
             setAsDefaultCard(true);
         } else {
             setAsDefaultCard(false);
@@ -92,24 +100,36 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
 
     let paymentComponent;
 
-    if (seller.isPaymentResourcePresent) {
+    if (seller.paymentSourcePresent) {
         paymentComponent = <div style={{display: 'flex'}}>
             <label>{JSON.stringify(getErrors)}</label>
             <label>
-                <input checked={getAsDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to pay
-                with a default card of this
-                account?
-            </label>
-            <label>
-                <input onChange={handleIsAutoPay} type="checkbox"/> You want to be charged automatically and start a
+                <input onChange={handleIsAutoPayWithSource} type="checkbox"/> You want to be charged automatically
+                and
+                start a
                 subscription?
+                <input checked={getUseDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox"/> You want to
+                pay
+                with a default card of this account?
+                {autoPay ? <div style={{color: 'maroon'}}>Subscriptions *require* default cards for monthly
+                    payments</div> : null}
             </label>
-            <Stripe
-                stripeKey={stripeKeyPublish}
-                token={payNow}
-            />
+            {!getUseDefaultCard ?
+                <Stripe
+                    stripeKey={stripeKeyPublish}
+                    token={payNow}
+                    email={seller.id.toString()}
+                /> : <button style={{
+                    color: "white",
+                    height: "40px",
+                    width: "100px",
+                    backgroundColor: "cadetblue",
+                    borderRadius: "5px",
+                    border: "none"
+                }} onClick={() => payNow('')}>pay with default card</button>
+            }
         </div>
-    } else if (!seller.isPaymentResourcePresent) {
+    } else if (!seller.paymentSourcePresent) {
         paymentComponent = <div>
             <div style={{display: 'flex'}}>
                 <label>{JSON.stringify(getErrors)}</label>
@@ -129,6 +149,7 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
             <Stripe
                 stripeKey={stripeKeyPublish}
                 token={payNow}
+                email={seller.id.toString()}
                 description={"Buy AutoRia premium"}
             />
         </div>
@@ -137,22 +158,35 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
     }
 
     return (
-        <div style={{
-            backgroundColor: "whitesmoke",
-            fontSize: "9px",
-            padding: "20px",
-            borderRadius: "5px",
-            columnGap: "10px"
-        }}>
-            <h4 style={{color: "green"}}>Buy premium</h4>
-            {paymentComponent}
-            <br/>
-            <h4 style={{color: "green"}}>Add default payment source</h4>
-            <Stripe
-                stripeKey={stripeKeyPublish}
-                token={addCard}
-                description={"Bind a card to AutoRia"}
-            />
+        <div>
+            <div style={{
+                backgroundColor: "whitesmoke",
+                fontSize: "9px",
+                padding: "20px",
+                borderRadius: "5px",
+                columnGap: "10px"
+            }}>
+                <h4 style={{color: "green"}}>Buy premium</h4>
+                <h3 style={{color: "green"}}>MARK: A Subscription lasts 1 month,
+                    automatic subscriptions renew every month automatically by withdrawing money from your default
+                    card</h3>
+                {paymentComponent}
+            </div>
+            <hr/>
+            <div style={{
+                backgroundColor: "whitesmoke",
+                fontSize: "9px",
+                padding: "20px",
+                borderRadius: "5px",
+                columnGap: "10px"
+            }}>
+                <h4 style={{color: "green"}}>Add default payment source</h4>
+                <Stripe
+                    stripeKey={stripeKeyPublish}
+                    token={addCard}
+                    description={"Bind a card to AutoRia"}
+                />
+            </div>
         </div>
     );
 };

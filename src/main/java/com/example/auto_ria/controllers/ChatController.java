@@ -1,5 +1,6 @@
 package com.example.auto_ria.controllers;
 
+import com.example.auto_ria.dao.socket.MessageDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @AllArgsConstructor
@@ -28,6 +30,7 @@ public class ChatController {
 
     private CommonService commonService;
     private ChatServiceMySQL chatServiceMySQL;
+    private MessageDaoSQL messageDaoSQL;
 
     @GetMapping("chat")
     public ResponseEntity<Chat> getChat(
@@ -65,10 +68,9 @@ public class ChatController {
             HttpServletRequest request,
             @PathVariable("page") int page) {
         try {
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! of user");
             SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
             CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
-            System.out.println("---------" + sellerSQL + " " + customerSQL);
+
             int id;
             ERole role;
 
@@ -82,6 +84,27 @@ public class ChatController {
                 throw new CustomException("For now chat function is available for seller and customers only",
                         HttpStatus.FORBIDDEN);
             }
+
+            AtomicInteger notSeenCounter = new AtomicInteger(); //TODO SEEN MESSAGES
+
+            List<Chat> chats = chatServiceMySQL.getChatsByUserId(id, role, page)
+                    .map(chat -> {
+                        int unseenMessageCount = chatServiceMySQL.getMessagesPage(chat.getRoomKey(), 0)
+                                .filter(messageClass -> !messageClass.getIsSeen())
+                                .toList()
+                                .size();
+
+                        System.out.println(unseenMessageCount + " unseenMessageCount");
+
+                        if (unseenMessageCount > 0) {
+                            notSeenCounter.getAndIncrement();
+                        }
+
+                        chat.setNotSeenCustomer(unseenMessageCount);
+
+                        return chat;
+                    })
+                    .toList();
 
             return ResponseEntity.ok(chatServiceMySQL.getChatsByUserId(id, role, page));
         } catch (CustomException e) {
@@ -102,6 +125,7 @@ public class ChatController {
                 throw new CustomException("Cannot access foreign messages", HttpStatus.UNAUTHORIZED);
             }
             CustomerSQL customerSQL = commonService.extractCustomerFromHeader(request);
+
             if (customerSQL != null && customerSQL.getId() != Integer.parseInt(customerId)) {
                 throw new CustomException("Cannot access foreign messages", HttpStatus.UNAUTHORIZED);
             }
@@ -113,6 +137,25 @@ public class ChatController {
 
             String roomKey = chatServiceMySQL.getRoomKey(customerId, sellerId);
             Page<MessageClass> messageClasses = chatServiceMySQL.getMessagesPage(roomKey, page);
+
+            if (customerSQL != null) {
+
+                messageClasses.map(messageClass -> {
+                    if (!messageClass.getIsSeen() && messageClass.getReceiverId().equals(customerId)) {
+                        messageClass.setIsSeen(true);
+                        messageDaoSQL.save(messageClass);
+                    }
+                    return null;
+                });
+            } else {
+                messageClasses.map(messageClass -> {
+                    if (!messageClass.getIsSeen() && messageClass.getReceiverId().equals(sellerId)) {
+                        messageClass.setIsSeen(true);
+                        messageDaoSQL.save(messageClass);
+                    }
+                    return null;
+                });
+            }
 
             List<MessageClass> reversedMessages = new ArrayList<>(messageClasses.getContent());
             Collections.reverse(reversedMessages);

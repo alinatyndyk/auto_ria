@@ -65,17 +65,17 @@ const Chat: FC = () => {
             throw new Error("Chat info absent");
         }
         if (outletParse.senderRole == ERole.CUSTOMER) {
-            sellerId = outletParse.senderId;
-            customerId = receiverId;
+            customerId = outletParse.senderId;
+            sellerId = receiverId;
         } else if (outletParse.senderRole == ERole.SELLER) {
             sellerId = outletParse.senderId;
             customerId = receiverId;
         } else {
             throw new Error("Could not execute chat info");
         }
-        console.log(sellerId, customerId, '-------------------')
 
         if (sellerId && customerId) {
+            console.log(sellerId, customerId, "ids");
             dispatch(sellerActions.getChatMessages({
                 page: chatPageMessages,
                 sellerId: sellerId,
@@ -126,8 +126,8 @@ const Chat: FC = () => {
         if (outlet != null) {
             outletParse = securityService.decryptObject(outlet);
             if (outletParse.senderRole == ERole.CUSTOMER) {
-                sellerId = outletParse.senderId;
-                customerId = receiverId;
+                customerId = outletParse.senderId;
+                sellerId = receiverId;
             } else if (outletParse.senderRole == ERole.SELLER) {
                 sellerId = outletParse.senderId;
                 customerId = receiverId;

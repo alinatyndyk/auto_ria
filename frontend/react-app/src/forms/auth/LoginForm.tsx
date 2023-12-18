@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import React, {FC, useState} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
 import {IAuthRequest} from "../../interfaces";
 import {useAppDispatch, useAppSelector} from "../../hooks";
@@ -11,16 +11,21 @@ const LoginForm: FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const {errors, authId, isAuth} = useAppSelector(state => state.authReducer);
+    const [res, setRes] = useState<string>();
 
     const login: SubmitHandler<IAuthRequest> = async (info: IAuthRequest) => {
 
-        await dispatch(authActions.login(info));
+        await dispatch(authActions.login(info)).then((res) => {
+            const type = res.type;
+            const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
-        if (errors) { //todo errors
-            console.log(errors, "errors if")
-        } else {
-            navigate('/profile');
-        }
+            if (lastWord != "fulfilled") {
+                setRes(String(errors));
+                reset();
+            } else {
+                navigate('/profile');
+            }
+        });
 
     }
 

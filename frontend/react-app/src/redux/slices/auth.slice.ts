@@ -273,7 +273,6 @@ const slice = createSlice({
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                console.log(action.payload, "action payload error auth")
                 state.errors = action.payload as IError;
             })
 });

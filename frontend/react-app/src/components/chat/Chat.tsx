@@ -157,11 +157,6 @@ const Chat: FC = () => {
                     <button>edit</button>
                 </div>
             ))}
-            <div style={{
-                backgroundColor: "grey",
-                height: "200px"
-            }}>box
-            </div>
             {msg.map((message, index) => (
                 <div key={index}>{message}</div>
             ))}

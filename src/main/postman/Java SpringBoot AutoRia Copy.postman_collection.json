@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "26ceeff2-53b7-445b-baaa-4e87bcde15fa",
-		"name": "Java SpringBoot AutoRia",
+		"_postman_id": "0d098c02-2eef-4fbf-b2f5-71ae76ebad59",
+		"name": "Java SpringBoot AutoRia Copy",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "22455865"
+		"_exporter_id": "22455865",
+		"_collection_link": "https://restless-astronaut-325656.postman.co/workspace/My-Workspace~f6dca56c-860d-400c-8653-9eec51945a16/collection/22455865-0d098c02-2eef-4fbf-b2f5-71ae76ebad59?action=share&source=collection_link&creator=22455865"
 	},
 	"item": [
 		{

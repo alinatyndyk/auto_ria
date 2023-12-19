@@ -73,6 +73,7 @@ public class CronConfiguration {
 //
 //        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
 
+
         invoiceExpiredPremiumAccounts();
         getCurrencyRates();
         deleteUnactivatedAccounts();
@@ -118,7 +119,7 @@ public class CronConfiguration {
         }
     }
 
-    @Scheduled(cron = "0 0 0 * * *") //todo nicht am ersten tag
+    @Scheduled(cron = "0 0 0 * * *")
     public void invoiceExpiredPremiumAccounts() {
         try {
             List<PremiumPlan> premiumPlans = premiumPlanDaoSQL.findAll();
@@ -143,7 +144,6 @@ public class CronConfiguration {
             });
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Error while getting exchange rates", HttpStatus.EXPECTATION_FAILED);
         }
     }

@@ -730,7 +730,7 @@ public class AuthenticationService {
                             personId(managerSQL.getId()).
                             accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken())
-                            .build()); //todo use refresh Manager and not code again
+                            .build());
                 }
             }
 

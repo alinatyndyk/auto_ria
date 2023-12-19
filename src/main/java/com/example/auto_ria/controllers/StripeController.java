@@ -123,8 +123,6 @@ public class StripeController {
             HttpServletRequest request
     ) {
         try {
-            System.out.println("HELLO");
-            System.out.println(body + "BODY------------");
 
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
             String email = commonService.extractEmailFromHeader(request, ETokenRole.SELLER);
@@ -139,14 +137,10 @@ public class StripeController {
 
             stripeService.createPayment(body, sellerSQL);
 
-            System.out.println(141);
             sellerSQL.setAccountType(EAccountType.PREMIUM);
-            System.out.println(143);
             userDaoSQL.save(sellerSQL);
-            System.out.println(145);
             return ResponseEntity.ok("Premium bought successfully");
         } catch (CustomException e) {
-            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }

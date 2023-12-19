@@ -1,11 +1,7 @@
 package com.example.auto_ria.dto.updateDTO;
 
 import com.example.auto_ria.enums.ECurrency;
-import com.example.auto_ria.enums.ERegion;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

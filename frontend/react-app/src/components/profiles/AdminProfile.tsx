@@ -3,8 +3,7 @@ import {IAdminResponse} from "../../interfaces/user/admin.interface";
 import {GenerateManagerForm} from "../../forms/auth/codes/GenerateManagerForm";
 import {GenerateAdminForm} from "../../forms/auth/codes/GenerateAdminForm";
 import {CarForm} from "../../forms";
-import {Cars} from "../cars";
-import CarPage from "../../pages/CarPage";
+import CarPage from "../../pages/car/CarPage";
 
 interface IProps {
     seller: IAdminResponse

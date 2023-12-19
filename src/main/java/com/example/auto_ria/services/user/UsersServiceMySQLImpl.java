@@ -5,7 +5,6 @@ import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.responses.user.SellerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
@@ -17,14 +16,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -167,20 +164,12 @@ public class UsersServiceMySQLImpl {
 
     public boolean isSellerByNumberPresent(String number) {
 
-        if (userDaoSQL.findSellerByNumber(number) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return userDaoSQL.findSellerByNumber(number) != null;
     }
 
     public boolean isSellerByEmailPresent(String email) {
 
-        if (userDaoSQL.findSellerByEmail(email) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return userDaoSQL.findSellerByEmail(email) != null;
     }
 
 }

@@ -1,17 +1,13 @@
 package com.example.auto_ria.dto.requests;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.logging.log4j.core.tools.picocli.CommandLine;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.processing.SupportedOptions;
 
 @Data
 @AllArgsConstructor

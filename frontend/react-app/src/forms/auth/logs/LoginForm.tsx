@@ -1,8 +1,8 @@
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import {SubmitHandler, useForm} from "react-hook-form";
-import {IAuthRequest} from "../../interfaces";
-import {useAppDispatch, useAppSelector} from "../../hooks";
-import {authActions} from "../../redux/slices";
+import {IAuthRequest} from "../../../interfaces";
+import {useAppDispatch, useAppSelector} from "../../../hooks";
+import {authActions} from "../../../redux/slices";
 import {useNavigate} from "react-router";
 import {Link} from "react-router-dom";
 
@@ -10,8 +10,7 @@ const LoginForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAuthRequest>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {errors, authId, isAuth} = useAppSelector(state => state.authReducer);
-    const [res, setRes] = useState<string>();
+    const {errors} = useAppSelector(state => state.authReducer);
 
     const login: SubmitHandler<IAuthRequest> = async (info: IAuthRequest) => {
 
@@ -20,7 +19,6 @@ const LoginForm: FC = () => {
             const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
             if (lastWord != "fulfilled") {
-                setRes(String(errors));
                 reset();
             } else {
                 navigate('/profile');

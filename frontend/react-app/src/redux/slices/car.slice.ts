@@ -31,8 +31,6 @@ const getAll = createAsyncThunk<ICarResponse, number>(
     'carSlice/getAll',
     async (page: number, {rejectWithValue}) => {
         try {
-            console.log("24");
-            console.log(page);
             const {data} = await carService.getAll(page);
             return data;
         } catch (e) {
@@ -72,9 +70,7 @@ const getAllBrands = createAsyncThunk<string[]>(
     'carSlice/getAllBrands',
     async (_, {rejectWithValue}) => {
         try {
-            console.log("hello")
             const {data} = await carService.getAllBrands();
-            console.log(data, "slice")
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -113,8 +109,6 @@ const create = createAsyncThunk<ICar, ICreateCar>(
     'carSlice/create',
     async (car, {rejectWithValue}) => {
         try {
-            console.log("39");
-            console.log(car, "car");
             const {data} = await carService.create(car);
             return data;
         } catch (e) {
@@ -164,8 +158,6 @@ const slice = createSlice({
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
-                state.trigger = !state.trigger;
-                console.log(state.pageCurrent, state.pagesInTotal)
             })
             .addCase(update.fulfilled, () => {
                 window.location.reload();

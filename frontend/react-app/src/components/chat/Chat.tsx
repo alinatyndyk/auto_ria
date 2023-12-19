@@ -5,7 +5,7 @@ import {IMessage} from "../cars";
 import {authService} from "../../services";
 import {useOutletContext, useParams} from "react-router";
 import {ERole} from "../../constants/role.enum";
-import {IGetChatMessagesOutlet} from "../../interfaces/message.interface";
+import {IGetChatMessagesOutlet} from "../../interfaces/chat/message.interface";
 import {securityService} from "../../services/security.service";
 
 interface INewMessage {
@@ -14,15 +14,15 @@ interface INewMessage {
 
 const Chat: FC = () => {
 
-    const {messages, chatPageMessages, totalPagesMessages, chats} = useAppSelector(state => state.sellerReducer);
+    const {messages, chatPageMessages} = useAppSelector(state => state.sellerReducer);
     const dispatch = useAppDispatch();
 
     const [inputValue, setInputValue] = useState('');
     const [getMoreBtn, setMoreBtn] = useState(false);
     const [getChatMessages, setChatMessages] = useState<IMessage[]>([]);
 
-    const [getSellerId, setSellerId] = useState<string>();
-    const [getCustomerId, setCustomerId] = useState<string>();
+    const [msg, setMsg] = useState([]);
+    const auth = authService.getAccessToken();
 
     const {receiverId} = useParams<{ receiverId: string }>();
 
@@ -85,9 +85,6 @@ const Chat: FC = () => {
         }
 
     }, [])
-
-    const [msg, setMsg] = useState([]);
-    const auth = authService.getAccessToken();
 
     const socket = useMemo(() =>
         new WebSocket(`ws://localhost:8080/chat?receiverId=${receiverId}&auth=${auth}`), [auth, receiverId]);
@@ -160,6 +157,11 @@ const Chat: FC = () => {
                     <button>edit</button>
                 </div>
             ))}
+            <div style={{
+                backgroundColor: "grey",
+                height: "200px"
+            }}>box
+            </div>
             {msg.map((message, index) => (
                 <div key={index}>{message}</div>
             ))}

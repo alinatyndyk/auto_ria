@@ -18,19 +18,13 @@ const RegisterAdminForm: FC = () => {
     const registerSeller: SubmitHandler<IAdminInput> = async (customer: IAdminInput) => {
 
         if (code) {
-        const {payload} = await dispatch(authActions.registerAdmin({adminInput: customer, code: code ?? ""}));
+            const {payload} = await dispatch(authActions.registerAdmin({adminInput: customer, code: code ?? ""}));
             setResponse(String(payload));
-
-            if(!errors) {
-                // navigate('/profile');
-            }
 
         } else {
             setResponse("No code provided in url");
         }
-
-
-        // reset();
+        reset();
     }
     return (
         <div>

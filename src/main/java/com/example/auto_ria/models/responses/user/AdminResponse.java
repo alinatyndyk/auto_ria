@@ -1,6 +1,5 @@
 package com.example.auto_ria.models.responses.user;
 
-import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ERole;
 import lombok.Builder;
 import lombok.Data;

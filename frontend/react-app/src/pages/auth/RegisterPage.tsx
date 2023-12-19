@@ -1,11 +1,9 @@
 import React, {FC} from 'react';
-import {RegisterSellerForm} from "../forms/auth/register/RegisterSellerForm";
-import {RegisterCustomerForm} from "../forms/auth/register/RegisterCustomerForm";
-import {RegisterManagerForm} from "../forms/auth/register/RegisterManagerForm";
-import {RegisterAdminForm} from "../forms/auth/register/RegisterAdminForm";
+import {RegisterSellerForm} from "../../forms/auth/register/RegisterSellerForm";
+import {RegisterCustomerForm} from "../../forms/auth/register/RegisterCustomerForm";
+import {RegisterManagerForm} from "../../forms/auth/register/RegisterManagerForm";
+import {RegisterAdminForm} from "../../forms/auth/register/RegisterAdminForm";
 import {useParams} from "react-router";
-import {Link} from "react-router-dom";
-import {ERole} from "../constants/role.enum";
 
 const RegisterPage: FC = () => {
 

@@ -3,11 +3,10 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {IManagerInput} from "../../../interfaces/user/manager.interface";
-import {useParams} from "react-router";
 
 
 const RegisterManagerForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<IManagerInput>();
+    const {handleSubmit, register} = useForm<IManagerInput>();
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
     const {errors} = useAppSelector(state => state.authReducer);
@@ -23,7 +22,7 @@ const RegisterManagerForm: FC = () => {
             const {payload} = await dispatch(authActions.registerManager({managerInput: customer, code: code}));
             setResponse(String(payload));
 
-            if(!errors) {
+            if (!errors) {
                 navigate('/profile');
             }
 

@@ -1,6 +1,6 @@
 import React, {FC} from 'react';
-import {useAppDispatch, useAppNavigate} from "../../hooks";
-import {authActions} from "../../redux/slices";
+import {useAppDispatch, useAppNavigate} from "../../../hooks";
+import {authActions} from "../../../redux/slices";
 
 const LogOutForm: FC = () => {
     const dispatch = useAppDispatch();

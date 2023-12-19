@@ -1,11 +1,9 @@
-import React, {FC, useContext, useEffect, useState} from 'react';
+import React, {FC} from 'react';
 import {Outlet} from "react-router";
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../hooks";
+import {useAppNavigate} from "../hooks";
 import {Link} from "react-router-dom";
 import {ERole} from "../constants/role.enum";
-import {ThemeContext} from "../Context";
-import {LogOutForm} from "../forms/auth/LogOutForm";
-import {sellerActions} from "../redux/slices/seller.slice";
+import {LogOutForm} from "../forms/auth/logs/LogOutForm";
 
 const MainLayout: FC = () => {
 

@@ -1,18 +1,17 @@
 import React, {FC, useContext, useEffect, useState} from 'react';
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../hooks";
-import {sellerActions} from "../redux/slices/seller.slice";
+import {useAppDispatch, useAppNavigate, useAppSelector} from "../../hooks";
+import {sellerActions} from "../../redux/slices/seller.slice";
 import {Outlet} from "react-router";
-import {ICustomerResponse} from "../interfaces/user/customer.interface";
-import {ThemeContext} from "../Context";
-import {ERole} from "../constants/role.enum";
+import {ICustomerChatResponse, ISellerChatResponse} from "../../interfaces/user/customer.interface";
+import {ThemeContext} from "../../Context";
+import {ERole} from "../../constants/role.enum";
 
 const ChatPage: FC = () => {
 
     const theme = useContext(ThemeContext);
-    // console.log(theme, "CONTEXT")
 
     const {chats, totalPages} = useAppSelector(state => state.sellerReducer);
-    const [fetchedCustomers, setFetchedCustomers] = useState<ICustomerResponse[]>([]);
+    const [fetchedCustomers, setFetchedCustomers] = useState<ICustomerChatResponse[] | ISellerChatResponse[]>([]);
 
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
@@ -25,8 +24,6 @@ const ChatPage: FC = () => {
 
 
     useEffect(() => {
-        // console.log("new load")
-
         chats.forEach((chat) => {
             if (theme.role == ERole.CUSTOMER) {
                 console.log("in customer")
@@ -38,13 +35,14 @@ const ChatPage: FC = () => {
                         // @ts-ignore
                         if (lastWord == "fulfilled" && !fetchedCustomers.some((c) => c.id === customer.payload.id)) {
                             // @ts-ignore
-                            setFetchedCustomers(prevState => [...prevState, customer.payload]); //display customer.payload in reverse
+                            setFetchedCustomers(prevState => [...prevState, {
+                                // @ts-ignore
+                                ...customer.payload,
+                                notSeen: chat.notSeenCustomer
+                            }]); //display customer.payload in reverse
                         }
-                    }).catch((error) => {
-                    console.log(error);
-                });
+                    });
             } else if (theme.role == ERole.SELLER) {
-                console.log("in seller")
                 dispatch(sellerActions.getCustomerById(chat.customerId))
                     .then((customer) => {
 
@@ -53,12 +51,13 @@ const ChatPage: FC = () => {
                         // @ts-ignore
                         if (lastWord == "fulfilled" && !fetchedCustomers.some((c) => c.id === customer.payload.id)) {
                             console.log("fulfilled did pass if");
-                            // @ts-ignore
-                            setFetchedCustomers(prevState => [...prevState, customer.payload]); //display customer.payload in reverse
+                            setFetchedCustomers(prevState => [...prevState, {
+                                // @ts-ignore
+                                ...customer.payload,
+                                notSeen: chat.notSeenSeller
+                            }]);
                         }
-                    }).catch((error) => {
-                    console.log(error);
-                });
+                    })
             }
         });
 
@@ -79,12 +78,10 @@ const ChatPage: FC = () => {
     const [getNextButtons, setNextButtons] = useState(false);
 
     const prevPage = () => {
-        console.log("prev")
         setPage(prevState => prevState - 1);
     };
 
     const nextPage = () => {
-        console.log("next")
         setPage(prevState => prevState + 1);
     };
 
@@ -107,6 +104,7 @@ const ChatPage: FC = () => {
                              src={`http://localhost:8080/users/avatar/${customer.avatar}`} alt=''/>
                     </div>
                     <div>{customer.id}</div>
+                    <div>NOT SEEN: {customer.notSeen}</div>
                     <div>{customer.name} {customer.lastName}</div>
                     <div>last online: {customer.lastOnline}</div>
                 </div>

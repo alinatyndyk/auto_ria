@@ -5,7 +5,6 @@ import com.example.auto_ria.dao.auth.CustomerAuthDaoSQL;
 import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.auth.UserDetailsServiceImpl;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
@@ -28,7 +27,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Objects;
 
 @Component
 @AllArgsConstructor
@@ -52,11 +50,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
                                     @NotNull FilterChain filterChain) throws IOException {
         try {
-            System.out.println("foletr");
-            String referer = request.getRequestURL().toString();
-            System.out.println("referer " + referer);
+
             String authorizationHeader = request.getHeader("Authorization");
-            String authorizationParam = request.getParameter("auth"); //for react socket
+            String authorizationParam = request.getParameter("auth");
 
             if (authorizationHeader == null && authorizationParam == null) {
                 filterChain.doFilter(request, response);
@@ -106,16 +102,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            System.out.println(e.getMessage() + "epx exc");
-//            response.setStatus(HttpStatus.LOCKED.value());
-//            response.getWriter().write("{\"error\": \"Jwt invalid\", \"status\": 423}");
             response.sendError(423);
         } catch (IllegalAccessException e) {
-            System.out.println(e.getMessage() + "ill acc exc");
             response.getWriter().write("Jwt invalid");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } catch (Exception e) {
-            System.out.println(e.getMessage() + "exc");
             response.getWriter().write(e.getMessage());
             response.setStatus(HttpStatus.EXPECTATION_FAILED.value());
         }

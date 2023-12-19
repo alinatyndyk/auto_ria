@@ -3,9 +3,7 @@ package com.example.auto_ria.services.user;
 import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.responses.user.ManagerResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.services.CommonService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +11,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -132,11 +129,7 @@ public class ManagerServiceMySQL {
 
     public boolean isManagerByEmailPresent(String email) {
 
-        if (managerDaoSQL.findByEmail(email) != null) {
-            return true;
-        } else {
-            return false;
-        }
+        return managerDaoSQL.findByEmail(email) != null;
     }
 
 }

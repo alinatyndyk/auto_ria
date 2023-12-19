@@ -48,9 +48,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
         try {
-            System.out.println(51);
             sessionMap.put(session.getId(), session);
-
 
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
@@ -61,15 +59,12 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token);
 
-            System.out.println(authSQL);
             if (authSQL == null) {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
             int sessionUserId;
             ERole sessionUserType;
-
-            System.out.println(authSQL + "AAUTH-------------------");
 
             if (authSQL.getRole().equals(ERole.SELLER)) {
                 sessionUserId = authSQL.getPersonId();
@@ -96,9 +91,6 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 throw new CustomException("For now chat function is available among sellers and customers only",
                         HttpStatus.UNAUTHORIZED);
             }
-            System.out.println(97);
-
-//            sessionDaoSQL.deleteSessionByUserId(authSQL.getPersonId());
 
             Session userSession = sessionDaoSQL.findByUserId(authSQL.getPersonId());
             System.out.println(userSession);
@@ -193,24 +185,32 @@ public class WebSocketConnection extends TextWebSocketHandler {
             if (role.equals(ERole.CUSTOMER)) {
                 messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
                 messageClass.setReceiverId(receiverId);
+                messageClass.setIsSeen(false);
 
                 rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
                         Integer.parseInt(receiverId), authSQL.getPersonId());
 
+                MessageClass newMessage = messageDaoSQL.save(messageClass);
+                chat.addMessage(newMessage);
+                chat.setNotSeenSeller(chat.getNotSeenSeller() + 1);
+
             } else {
                 messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
                 messageClass.setReceiverId(receiverId);
+                messageClass.setIsSeen(false);
 
                 rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
                         authSQL.getPersonId(), Integer.parseInt(receiverId));
+
+                MessageClass newMessage = messageDaoSQL.save(messageClass);
+                chat.addMessage(newMessage);
+                chat.setNotSeenCustomer(chat.getNotSeenCustomer() + 1);
             }
 
-            MessageClass newMessage = messageDaoSQL.save(messageClass);
-            chat.addMessage(newMessage);
             chatDaoSQL.save(chat);
 
-            sendTextMessageIfSessionExists(sellerSessionId, message.getPayload());
-            sendTextMessageIfSessionExists(customerSessionId, message.getPayload());
+            sendTextMessageIfSessionExists(sellerSessionId, message.getPayload() + " " + messageClass.getIsSeen());
+            sendTextMessageIfSessionExists(customerSessionId, message.getPayload() + " " + messageClass.getIsSeen());
 
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

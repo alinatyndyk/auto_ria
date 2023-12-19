@@ -1,7 +1,6 @@
 import React, {FC} from 'react';
-import {LoginForm} from "../forms";
-import {LogOutForm} from "../forms/auth/LogOutForm";
-import {ForgotPasswordForm} from "../forms/auth/passwords/ForgotPasswordForm";
+import {LoginForm} from "../../forms";
+import {LogOutForm} from "../../forms/auth/logs/LogOutForm";
 
 const LoginPage: FC = () => {
     return (

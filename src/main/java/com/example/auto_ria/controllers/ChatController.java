@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @AllArgsConstructor
@@ -84,27 +83,6 @@ public class ChatController {
                 throw new CustomException("For now chat function is available for seller and customers only",
                         HttpStatus.FORBIDDEN);
             }
-
-            AtomicInteger notSeenCounter = new AtomicInteger(); //TODO SEEN MESSAGES
-
-            List<Chat> chats = chatServiceMySQL.getChatsByUserId(id, role, page)
-                    .map(chat -> {
-                        int unseenMessageCount = chatServiceMySQL.getMessagesPage(chat.getRoomKey(), 0)
-                                .filter(messageClass -> !messageClass.getIsSeen())
-                                .toList()
-                                .size();
-
-                        System.out.println(unseenMessageCount + " unseenMessageCount");
-
-                        if (unseenMessageCount > 0) {
-                            notSeenCounter.getAndIncrement();
-                        }
-
-                        chat.setNotSeenCustomer(unseenMessageCount);
-
-                        return chat;
-                    })
-                    .toList();
 
             return ResponseEntity.ok(chatServiceMySQL.getChatsByUserId(id, role, page));
         } catch (CustomException e) {

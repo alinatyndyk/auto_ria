@@ -2,7 +2,6 @@ import React, {FC, useEffect, useState} from 'react';
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {useParams} from "react-router";
-import {sellerActions} from "../../../redux/slices/seller.slice";
 import {ERole} from "../../../constants/role.enum";
 
 const ActivateForm: FC = () => {

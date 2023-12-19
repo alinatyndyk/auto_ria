@@ -3,10 +3,9 @@ import {SubmitHandler, useForm} from "react-hook-form";
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
 import {authActions} from "../../../redux/slices";
 import {IChangePassword} from "../../../interfaces";
-import {useParams} from "react-router";
 
 const ResetPasswordForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<IChangePassword>();
+    const {handleSubmit, register} = useForm<IChangePassword>();
     const dispatch = useAppDispatch();
     const {errors} = useAppSelector(state => state.authReducer);
     const navigate = useAppNavigate();
@@ -25,11 +24,9 @@ const ResetPasswordForm: FC = () => {
                 newPassword: newPassword.newPassword,
                 code: code
             })).catch((error) => {
-                console.log(error)
                 setResponse(error.toString);
             });
         }
-        // navigate("/profile");
     }
     return (
         <div>

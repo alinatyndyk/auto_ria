@@ -7,7 +7,7 @@ import {IGeoCity, IGeoRegion} from "../../../interfaces/geo.interface";
 import {sellerActions} from "../../../redux/slices/seller.slice";
 
 const RegisterCustomerForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<ICustomerInput>();
+    const {handleSubmit, register} = useForm<ICustomerInput>();
     const dispatch = useAppDispatch();
     const {errors} = useAppSelector(state => state.authReducer);
     const {regions, cities} = useAppSelector(state => state.sellerReducer);

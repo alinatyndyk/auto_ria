@@ -5,7 +5,6 @@ import com.example.auto_ria.dto.updateDTO.CustomerUpdateDTO;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.responses.user.CustomerResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.CustomerSQL;
@@ -185,15 +184,6 @@ public class CustomersServiceMySQL {
             throw new CustomException("Failed fetch: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
-
-    public boolean isCustomerByEmailPresent(String email) {
-
-        if (customerDaoSQL.findByEmail(email) != null) {
-            return true;
-        } else {
-            return false;
         }
     }
 

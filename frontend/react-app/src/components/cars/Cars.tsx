@@ -56,12 +56,10 @@ const Cars: FC<IProps> = ({sellerId}) => {
 
 
     const prevPage = () => {
-        // console.log("prev")
         setPage(prevState => prevState - 1);
     };
 
     const nextPage = () => {
-        // console.log("next")
         setPage(prevState => prevState + 1);
     };
 

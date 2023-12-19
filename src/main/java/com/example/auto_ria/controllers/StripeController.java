@@ -12,7 +12,6 @@ import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.otherApi.StripeService;
-import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import com.stripe.Stripe;
 import com.stripe.model.Customer;
 import com.stripe.param.CustomerCreateParams;
@@ -34,7 +33,6 @@ import java.util.Map;
 
 public class StripeController {
 
-    private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
     private Environment environment;
     private PremiumPlanDaoSQL premiumPlanDaoSQL;

@@ -43,6 +43,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -739,7 +740,7 @@ public class AuthenticationService {
 
 
             return AuthenticationResponse.builder()
-                    .accessToken(tokenPair.getAccessToken())
+                    .accessToken(Objects.requireNonNull(tokenPair).getAccessToken())
                     .refreshToken(tokenPair.getRefreshToken()).build();
 
         } catch (CustomException e) {

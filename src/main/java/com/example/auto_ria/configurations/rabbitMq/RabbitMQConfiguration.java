@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 
+import java.util.Objects;
+
 @Configuration
 @AllArgsConstructor
 public class RabbitMQConfiguration {
@@ -17,7 +19,7 @@ public class RabbitMQConfiguration {
 
     @Bean
     public Queue queue() {
-        return new Queue(environment.getProperty("rabbitmq.queue.name"));
+        return new Queue(Objects.requireNonNull(environment.getProperty("rabbitmq.queue.name")));
     }
 
     @Bean

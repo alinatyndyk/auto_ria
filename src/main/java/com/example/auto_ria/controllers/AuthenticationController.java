@@ -1,6 +1,5 @@
 package com.example.auto_ria.controllers;
 
-import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
@@ -48,7 +47,6 @@ public class AuthenticationController {
     private CustomersServiceMySQL customersServiceMySQL;
     private ManagerServiceMySQL managerServiceMySQL;
 
-    private RegisterKeyDaoSQL registerKeyDaoSQL;
     private JwtService jwtService;
     private PasswordEncoder passwordEncoder;
     private CitiesService citiesService;
@@ -138,8 +136,6 @@ public class AuthenticationController {
                 throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
             }
 
-            System.out.println("code " + code);
-
             String key = authenticationService.checkRegistrationKey(
                     code,
                     registerRequestDTO.getEmail(),
@@ -206,14 +202,10 @@ public class AuthenticationController {
                     ETokenRole.ADMIN_REGISTER);
 
             String fileName = null;
-            System.out.println(registerRequestDTO + "register request");
-                System.out.println("before avatar exists");
             if (registerRequestDTO.getAvatar() != null) {
-                System.out.println("avatar exists");
                 fileName = registerRequestDTO.getAvatar().getOriginalFilename();
                 usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
             }
-                System.out.println("after avatar exists");
 
             RegisterAdminRequest registerRequest = RegisterAdminRequest.builder()
                     .lastName(registerRequestDTO.getLastName())
@@ -353,7 +345,6 @@ public class AuthenticationController {
             if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
                 throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
             }
-            System.out.println("260");
             return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -410,7 +401,6 @@ public class AuthenticationController {
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refreshAll(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
-            System.out.println("refreshRequest " + refreshRequest);
             return ResponseEntity.ok(authenticationService.refreshAll(refreshRequest));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -422,13 +412,11 @@ public class AuthenticationController {
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
-            System.out.println("reset");
             if (!newPassword.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +
                         "uppercase letter, lowercase letter, number, special character. At least 8 characters long",
                         HttpStatus.BAD_REQUEST);
             }
-            System.out.println("reset1");
             String encoded = passwordEncoder.encode(newPassword);
 
             String accessToken = jwtService.extractTokenFromHeader(request);
@@ -447,7 +435,6 @@ public class AuthenticationController {
     public ResponseEntity<String> forgotPassword(
             @RequestParam("email") String email) {
         try {
-            System.out.println("465");
             authenticationService.forgotPassword(email);
 
             return ResponseEntity.ok("Check" + email.replaceAll(".(?=.{8})", "*"));
@@ -463,7 +450,6 @@ public class AuthenticationController {
             String accessToken = jwtService.extractTokenFromHeader(request);
             Claims claims = jwtService.extractClaimsCycle(accessToken);
 
-            System.out.println(claims + " claims sign out");
             String email = claims.get("sub").toString();
             String owner = claims.get("iss").toString();
 
@@ -480,9 +466,7 @@ public class AuthenticationController {
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
-            System.out.println(500);
             String code = request.getHeader("Register-key");
-            System.out.println(newPassword + "new pass");
 
             if (newPassword.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)[a-zA-Z\\d]{8,}$")) {
                 throw new CustomException("Invalid password. Must contain: " +

@@ -18,7 +18,7 @@ const ChangePasswordForm: FC = () => {
 
         setResponse(String(payload));
 
-        // reset();
+        reset();
     }
     return (
         <div>

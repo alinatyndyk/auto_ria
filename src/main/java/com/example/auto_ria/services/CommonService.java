@@ -26,7 +26,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -53,9 +52,9 @@ public class CommonService {
         }
     }
 
-    public List<String> transferPhotos(MultipartFile[] newPictures) {
+    public void transferPhotos(MultipartFile[] newPictures) {
         try {
-            return Arrays.stream(newPictures).map(picture -> {
+            Arrays.stream(newPictures).map(picture -> {
                 String fileName = picture.getOriginalFilename();
                 transferAvatar(picture, fileName);
                 return fileName;

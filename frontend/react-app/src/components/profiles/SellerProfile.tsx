@@ -1,17 +1,14 @@
 import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
-import {useAppDispatch, useAppNavigate} from "../../hooks";
 import {CarForm, Cars} from "../cars";
 import {StripeCheckout} from "../stripe/StripeCheckout";
-import {ChatPage} from "../../pages/ChatPage";
+import {ChatPage} from "../../pages/chat/ChatPage";
 
 interface IProps {
     seller: ISellerResponse
 }
 
 const SellerProfile: FC<IProps> = ({seller}) => {
-    const navigate = useAppNavigate();
-    const dispatch = useAppDispatch();
 
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
@@ -39,7 +36,7 @@ const SellerProfile: FC<IProps> = ({seller}) => {
                     <div>joined: {createdAt}</div>
 
                 </div>
-            <StripeCheckout seller={seller}/>
+                <StripeCheckout seller={seller}/>
             </div>
             <br/>
             <CarForm/>

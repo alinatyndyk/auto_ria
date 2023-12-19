@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useState} from 'react';
-import {Carousel} from "../Carousel";
+import {Carousel} from "./Carousel";
 import {useParams} from "react-router";
 import {useAppDispatch, useAppNavigate, useAppSelector} from "../../hooks";
 import {carActions} from "../../redux/slices";
@@ -45,8 +45,6 @@ const CarFull: FC = () => {
     const [getCityInput, setCityInput] = useState(true);
 
     const {errors} = useAppSelector(state => state.carReducer);
-
-    const [getErrors, setErrors] = useState<null | string>(JSON.stringify(errors));
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
@@ -132,18 +130,8 @@ const CarFull: FC = () => {
                     setCarCity('');
                     setCarRegion('');
                     reset();
-
-                    setErrors(null);
-                } else {
-                    setErrors(JSON.stringify(errors));
                 }
-
-                console.log(getErrors + "ERRORS ---------------------------");
-                console.log(errors?.message + "1ERRORS ---------------------------");
-                //     console.log(res);
-            }).catch((err) => {
-                console.log(err, "CATCH")
-            });
+            })
     }
 
 

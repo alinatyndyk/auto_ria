@@ -1,2 +1,2 @@
-export * from './CarPage';
-export * from './LoginPage';
+export * from './car/CarPage';
+export * from './auth/LoginPage';

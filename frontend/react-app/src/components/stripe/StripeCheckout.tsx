@@ -28,7 +28,6 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
                         Authorization: `Bearer ${authService.getAccessToken()}`
                     }
                 })
-            console.log(response, "RESPONSE")
             if (response.status === 200) {
                 window.location.reload();
             }
@@ -48,7 +47,6 @@ const StripeCheckout: FC<IProps> = ({seller}) => {
                         Authorization: `Bearer ${authService.getAccessToken()}`
                     }
                 })
-            console.log(response, "RESPONSE")
             if (response.status === 200) {
                 window.location.reload();
             }

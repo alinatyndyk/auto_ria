@@ -9,8 +9,6 @@ const GenerateManagerForm: FC = () => {
     const dispatch = useAppDispatch();
     const {errors} = useAppSelector(state => state.authReducer);
 
-    //error for everyone
-
     const [getResponse, setResponse] = useState('');
 
     const activate: SubmitHandler<IGenerateCode> = async (email: IGenerateCode) => {
@@ -19,7 +17,7 @@ const GenerateManagerForm: FC = () => {
 
         setResponse(String(payload));
 
-        // reset();
+        reset();
     }
     return (
         <div>

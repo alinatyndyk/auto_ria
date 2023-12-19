@@ -8,7 +8,7 @@ import {IManagerResponse} from "../interfaces/user/manager.interface";
 import {authService} from "./auth.service";
 import {IGeoCitiesResponse, IGeoRegionsResponse} from "../interfaces/geo.interface";
 import {ERole} from "../constants/role.enum";
-import {IGetChatMessagesRequest} from "../interfaces/message.interface";
+import {IGetChatMessagesRequest} from "../interfaces/chat/message.interface";
 
 const sellerService = {
     getAll: (page: number): IRes<ISellerPageResponse> => axiosService.get(urls.sellers.all(page)),

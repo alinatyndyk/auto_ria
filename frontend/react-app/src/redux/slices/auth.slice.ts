@@ -34,7 +34,6 @@ const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
     'authSlice/login',
     async (info, {rejectWithValue}) => {
         try {
-            console.log("login");
             const {data} = await authService.login(info);
             return data;
         } catch (e) {
@@ -49,7 +48,6 @@ const refresh = createAsyncThunk<IAuthResponse, void>(
     'authSlice/refresh',
     async (_, {rejectWithValue}) => {
         try {
-            console.log("refresh");
             const refresh = authService.getRefreshToken();
             if (!refresh) {
                 return rejectWithValue("refresh_token is required");
@@ -80,7 +78,6 @@ const registerSeller = createAsyncThunk<string, ISellerInput>(
     'authSlice/registerSeller',
     async (info, {rejectWithValue}) => {
         try {
-            console.log(info, "info");
             const {data} = await authService.registerSeller(info);
             return data;
         } catch (e) {
@@ -120,7 +117,6 @@ const registerCustomer = createAsyncThunk<string, ICustomerInput>(
     'authSlice/registerCustomer',
     async (info, {rejectWithValue}) => {
         try {
-            console.log(info, "info")
             const {data} = await authService.registerCustomer(info);
             return data;
         } catch (e) {
@@ -134,7 +130,6 @@ const activateCustomer = createAsyncThunk<IAuthResponse, IActivationCode>(
     'authSlice/activateCustomer',
     async (code, {rejectWithValue}) => {
         try {
-            console.log(code, "code")
             const {data} = await authService.activateCustomer(code);
             return data;
         } catch (e) {
@@ -148,7 +143,6 @@ const activateSeller = createAsyncThunk<IAuthResponse, IActivationCode>(
     'authSlice/activateSeller',
     async (code, {rejectWithValue}) => {
         try {
-            console.log(code, "code")
             const {data} = await authService.activateSeller(code);
             return data;
         } catch (e) {
@@ -162,7 +156,6 @@ const generateManager = createAsyncThunk<void, IGenerateCode>(
     'authSlice/generateManager',
     async (email, {rejectWithValue}) => {
         try {
-            console.log(email, "code")
             const {data} = await authService.generateManager(email);
             return data;
         } catch (e) {
@@ -176,7 +169,6 @@ const generateAdmin = createAsyncThunk<void, IGenerateCode>(
     'authSlice/generateAdmin',
     async (email, {rejectWithValue}) => {
         try {
-            console.log(email, "code")
             const {data} = await authService.generateAdmin(email);
             return data;
         } catch (e) {
@@ -203,7 +195,6 @@ const forgotPassword = createAsyncThunk<IAuthResponse, IForgotPassword>(
     'authSlice/forgotPassword',
     async (info, {rejectWithValue}) => {
         try {
-            console.log(info, "info");
             const {data} = await authService.forgotPassword(info);
             return data;
         } catch (e) {
@@ -217,7 +208,6 @@ const resetPassword = createAsyncThunk<IAuthResponse, IChangePassword>(
     'authSlice/resetPassword',
     async (info, {rejectWithValue}) => {
         try {
-            console.log(info, "password")
             const {data} = await authService.resetPassword(info);
             return data;
         } catch (e) {

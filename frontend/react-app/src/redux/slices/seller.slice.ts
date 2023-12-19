@@ -12,7 +12,7 @@ import {
     IChatsPageResponse,
     IGetChatMessagesRequest,
     IMessagePageResponse
-} from "../../interfaces/message.interface";
+} from "../../interfaces/chat/message.interface";
 import {IGeoCitiesResponse, IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
 
 interface IState {
@@ -129,7 +129,6 @@ const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
     'sellerSlice/getRegionsByPrefix',
     async (prefix: string, {rejectWithValue}) => {
         try {
-            console.log(prefix, "prefix");
             const {data} = await sellerService.getRegionsByPrefix(prefix);
             return data.data;
         } catch (e) {
@@ -144,7 +143,6 @@ const getRegionsPlaces = createAsyncThunk<IGeoCitiesResponse, string>(
     async (regionId: string, {rejectWithValue}) => {
         try {
             const {data} = await sellerService.getRegionsPlaces(regionId);
-            // retrieve totalCount to iterate other pages if they exist
             return data;
         } catch (e) {
             const err = e as AxiosError;

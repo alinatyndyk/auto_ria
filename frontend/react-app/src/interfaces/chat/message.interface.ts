@@ -1,5 +1,4 @@
-import {Pageable, Sort} from "./pagable.interface";
-import {ISellerResponse} from "./user/seller.interface";
+import {Pageable, Sort} from "../pagable.interface";
 
 export interface IMessage {
     id: number,
@@ -47,6 +46,9 @@ export interface IChatResponse {
     sellerSessionId: string | null;
     customerSessionId: string | null;
     roomKey: string;
+    notSeenCustomer: number,
+    notSeenSeller: number
+
     createdAt: number[];
     updatedAt: number[];
 }

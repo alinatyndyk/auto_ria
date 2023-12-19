@@ -76,13 +76,14 @@ public class StripeService {
                     System.out.println("first");
                     paymentToken = defaultSource;
                     customerId = stripeId;
-                } else if (stripePresent && !body.isUseDefaultCard() && !body.isSetAsDefaultCard()) {
+                } else if (stripePresent && !body.isSetAsDefaultCard()) {
                     System.out.println("first1");
                     paymentToken = body.getToken();
                     customerId = stripeId;
 
-                } else if (stripePresent && defaultSource == null && body.isSetAsDefaultCard()) {
+                } else if (stripePresent) {
                     System.out.println("first2");
+                    assert stripeId != null;
                     Customer stripeCustomer = Customer.retrieve(stripeId);
 
                     Map<String, Object> params = new HashMap<>();
@@ -93,7 +94,7 @@ public class StripeService {
                     paymentToken = body.getToken();
                     customerId = stripeId;
 
-                } else if (!stripePresent && !body.isSetAsDefaultCard()) {
+                } else if (!body.isSetAsDefaultCard()) {
                     System.out.println("first3");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()
@@ -108,7 +109,7 @@ public class StripeService {
                     sellerSQL.setPaymentSource(customerId);
 
                     userDaoSQL.save(sellerSQL);
-                } else if (!stripePresent && body.isSetAsDefaultCard()) {
+                } else if (body.isSetAsDefaultCard()) {
                     System.out.println("first4");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()

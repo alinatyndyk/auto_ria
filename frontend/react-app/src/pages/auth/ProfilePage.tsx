@@ -1,15 +1,14 @@
 import React, {FC, useEffect} from 'react';
-import {useAppDispatch, useAppSelector} from "../hooks";
-import {sellerActions} from "../redux/slices/seller.slice";
-import {CustomerProfile} from "../components/profiles/CustomerProfile";
-import {AdminProfile} from "../components/profiles/AdminProfile";
-import {ManagerProfile} from "../components/profiles/ManagerProfile";
-import {SellerProfile} from "../components/profiles/SellerProfile";
-import {sellerService} from "../services/seller.service";
-import {ChatPage} from "./ChatPage";
-import {ERole} from "../constants/role.enum";
-import CarPage from "./CarPage";
-import {authActions} from "../redux/slices";
+import {useAppDispatch, useAppSelector} from "../../hooks";
+import {sellerActions} from "../../redux/slices/seller.slice";
+import {CustomerProfile} from "../../components/profiles/CustomerProfile";
+import {AdminProfile} from "../../components/profiles/AdminProfile";
+import {ManagerProfile} from "../../components/profiles/ManagerProfile";
+import {SellerProfile} from "../../components/profiles/SellerProfile";
+import {sellerService} from "../../services/seller.service";
+import {ERole} from "../../constants/role.enum";
+import {authActions} from "../../redux/slices";
+import {ChangePasswordForm} from "../../forms/auth/passwords/ChangePasswordForm";
 
 const ProfilePage: FC = () => {
 
@@ -44,6 +43,7 @@ const ProfilePage: FC = () => {
         <div>
             <div>Profile</div>
             {userComponent}
+            <ChangePasswordForm/>
         </div>
     );
 };

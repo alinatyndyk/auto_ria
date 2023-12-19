@@ -1,6 +1,5 @@
-import React, {FC, useState} from 'react';
+import React, {FC} from 'react';
 import {ICar} from "../../interfaces";
-import {Carousel} from "../Carousel";
 import {useAppNavigate} from "../../hooks";
 
 interface IProps {
@@ -14,10 +13,7 @@ const Car: FC<IProps> = ({car}) => {
     const {
         id, city, currency,
         model, photo, powerH,
-        price, priceEUR, priceUAH,
-        priceUSD, region,
-        seller,
-        description, brand
+        price, region, brand
     } = car;
 
     return (

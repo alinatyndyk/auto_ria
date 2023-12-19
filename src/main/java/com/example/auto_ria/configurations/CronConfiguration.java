@@ -15,13 +15,9 @@ import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
-import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.responses.currency.CurrencyResponse;
-import com.stripe.Stripe;
-import com.stripe.model.*;
-import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.SubscriptionCreateParams;
+import com.example.auto_ria.models.user.SellerSQL;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +32,10 @@ import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Configuration
 @EnableScheduling
@@ -73,7 +72,6 @@ public class CronConfiguration {
 //        params.put("url", "https://webhook.site/e038300e-b72e-49f5-8b67-14c80d1ea5eb");
 //
 //        WebhookEndpoint webhookEndpoint = WebhookEndpoint.create(params);
-
 
         invoiceExpiredPremiumAccounts();
         getCurrencyRates();
@@ -177,9 +175,6 @@ public class CronConfiguration {
 
     }
 
-    //todo delete old sessions
-
-//todo delete messages in chat older than 2 years
     @Scheduled(cron = "0 0 3 * * *")
     public void deleteExpiredTokens() {
         try {

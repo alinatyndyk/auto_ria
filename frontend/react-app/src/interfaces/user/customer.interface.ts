@@ -22,6 +22,32 @@ export interface ICustomerResponse {
     createdAt: number[];
 }
 
+export interface ICustomerChatResponse {
+    id: number;
+    name: string;
+    lastName: string;
+    city: string;
+    region: string;
+    avatar: string;
+    role: string;
+    lastOnline: number[];
+    notSeen: number,
+    createdAt: number[];
+}
+
+export interface ISellerChatResponse {
+    id: number;
+    name: string;
+    lastName: string;
+    city: string;
+    region: string;
+    avatar: string;
+    role: string;
+    lastOnline: number[];
+    notSeen: number,
+    createdAt: number[];
+}
+
 export interface ICustomerPageResponse {
     content: ICustomerResponse[];
     pageable: Pageable;

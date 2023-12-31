@@ -76,7 +76,7 @@ const CarFull: FC = () => {
             const decryptedAuth = securityService.decryptObject(auth);
             setAuthorization(decryptedAuth);
 
-            if (decryptedAuth.role == ERole.CUSTOMER) {
+            if (decryptedAuth?.role == ERole.CUSTOMER) {
                 setTextButtonVisible(true);
             }
         }

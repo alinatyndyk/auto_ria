@@ -76,7 +76,7 @@ const CarFull: FC = () => {
             const decryptedAuth = securityService.decryptObject(auth);
             setAuthorization(decryptedAuth);
 
-            if (decryptedAuth.role == ERole.CUSTOMER) {
+            if (decryptedAuth?.role == ERole.CUSTOMER) {
                 setTextButtonVisible(true);
             }
         }
@@ -176,7 +176,7 @@ const CarFull: FC = () => {
                 }
                 <br/>
                 {authorization && authorization.id == car.seller.id
-                    // || authorization && authorization.role == ERole.ADMIN
+                    || authorization && authorization.role == ERole.ADMIN
                     &&
 
                     <form onSubmit={handleSubmit(save)}>

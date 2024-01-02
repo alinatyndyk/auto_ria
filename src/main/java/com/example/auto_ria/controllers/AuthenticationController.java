@@ -143,7 +143,8 @@ public class AuthenticationController {
                     ETokenRole.MANAGER_REGISTER);
 
             String fileName = null;
-            if (!registerRequestDTO.getAvatar().isEmpty()) {
+
+            if (registerRequestDTO.getAvatar() != null) {
                 fileName = registerRequestDTO.getAvatar().getOriginalFilename();
                 usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
             }

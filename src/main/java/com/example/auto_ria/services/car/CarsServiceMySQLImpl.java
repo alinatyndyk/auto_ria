@@ -1,6 +1,7 @@
 package com.example.auto_ria.services.car;
 
 import com.example.auto_ria.dao.CarDaoSQL;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.*;
@@ -15,6 +16,7 @@ import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.SellerSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.currency.CurrencyConverterService;
+import jakarta.persistence.EntityManager;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -34,7 +36,10 @@ import java.util.Map;
 @AllArgsConstructor
 public class CarsServiceMySQLImpl {
 
+
+    private EntityManager entityManager;
     private CarDaoSQL carDAO;
+    private AdministratorDaoSQL administratorDaoSQL;
     private CommonService commonService;
     private FMService mailer;
     private CurrencyConverterService currencyConverterService;
@@ -279,14 +284,18 @@ public class CarsServiceMySQLImpl {
                     .isActivated(carDTO.isActivated())
                     .build();
 
+
             if (administratorSQL != null) {
-                car.setSeller(SellerSQL.adminBuilder()
+
+                SellerSQL adminSeller = SellerSQL.adminBuilder()
                         .id(administratorSQL.getId())
                         .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
                         .name(environment.getProperty("office.name"))
                         .region(environment.getProperty("office.region"))
                         .city(environment.getProperty("office.city"))
-                        .build());
+                        .build();
+
+                car.setSeller(adminSeller);
             } else {
                 car.setSeller(seller);
             }

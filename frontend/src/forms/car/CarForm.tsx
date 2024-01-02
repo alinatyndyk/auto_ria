@@ -102,10 +102,6 @@ const CarForm: FC = () => {
         setCurrencies(Object.values(ECurrency));
     }, [])
 
-    const handleBrands = async () => {
-        await dispatch(carActions.getAllBrands());
-    };
-
     const handleModels = async (brand: string) => {
         await dispatch(carActions.getAllModelsByBrand(brand));
     };

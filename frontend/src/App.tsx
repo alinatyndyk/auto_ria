@@ -12,7 +12,6 @@ import {ChatPage} from "./pages/chat/ChatPage";
 import {ResetPasswordForm} from "./forms/auth/passwords/ResetPasswordForm";
 import {ActivateForm} from "./forms/auth/activate/ActivateForm";
 import {CarFull} from "./components/cars/CarFull";
-import {LogOutForm} from "./forms/auth/logs/LogOutForm";
 
 function App() {
     return (

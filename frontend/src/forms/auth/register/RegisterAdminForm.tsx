@@ -7,7 +7,6 @@ import {IAdminInput} from "../../../interfaces/user/admin.interface";
 const RegisterAdminForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IAdminInput>();
     const dispatch = useAppDispatch();
-    const navigate = useAppNavigate();
     const {errors} = useAppSelector(state => state.authReducer);
 
     const [getResponse, setResponse] = useState('');

@@ -3,9 +3,6 @@ import {Cars} from "../../components/cars";
 import {useAppNavigate} from "../../hooks";
 
 const CarPage: FC = () => {
-
-    const navigate = useAppNavigate();
-
     return (
         <div>
             <Cars sellerId={null}/>

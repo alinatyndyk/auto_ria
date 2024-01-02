@@ -12,7 +12,7 @@ import {ChangePasswordForm} from "../../forms/auth/passwords/ChangePasswordForm"
 
 const ProfilePage: FC = () => {
 
-    const {user, trigger} = useAppSelector(state => state.sellerReducer);
+    const {user} = useAppSelector(state => state.sellerReducer);
 
     const dispatch = useAppDispatch();
 

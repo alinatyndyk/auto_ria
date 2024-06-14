@@ -7,7 +7,7 @@ import {INewPassword} from "../../../interfaces";
 const ChangePasswordForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<INewPassword>();
     const dispatch = useAppDispatch();
-    const {errors} = useAppSelector(state => state.authReducer);
+    const {changePasswordErrors} = useAppSelector(state => state.authReducer);
     const navigate = useAppNavigate();
 
     const [getResponse, setResponse] = useState('');
@@ -26,7 +26,7 @@ const ChangePasswordForm: FC = () => {
                 <button onClick={() => navigate('/cars')}>Cars</button>
             </div>
             Activate seller
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            {changePasswordErrors ? <div>{changePasswordErrors?.message + "err"}</div> : <div>{getResponse + "res"}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'new password'} {...register('newPassword')}/>

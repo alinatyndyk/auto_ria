@@ -8,16 +8,19 @@ import {
     IGenerateCode,
     INewPassword
 } from "../../interfaces";
-import {createAsyncThunk, createSlice, isRejectedWithValue} from "@reduxjs/toolkit";
-import {authService} from "../../services";
-import {AxiosError} from "axios";
-import {ISellerInput} from "../../interfaces/user/seller.interface";
-import {ICustomerInput} from "../../interfaces/user/customer.interface";
-import {RegisterManagerPayload} from "../../interfaces/user/manager.interface";
-import {RegisterAdminPayload} from "../../interfaces/user/admin.interface";
+import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
+import { authService } from "../../services";
+import { AxiosError } from "axios";
+import { ISellerInput } from "../../interfaces/user/seller.interface";
+import { ICustomerInput } from "../../interfaces/user/customer.interface";
+import { RegisterManagerPayload } from "../../interfaces/user/manager.interface";
+import { RegisterAdminPayload } from "../../interfaces/user/admin.interface";
 
 interface IState {
     errors: IError | null,
+    generateManagerErrors: IError | null,
+    generateAdminErrors: IError | null,
+    changePasswordErrors: IError | null,
     trigger: boolean,
     isAuth: boolean,
     authId: number
@@ -26,15 +29,18 @@ interface IState {
 const initialState: IState = {
     isAuth: false,
     errors: null,
+    generateManagerErrors: null,
+    generateAdminErrors: null,
+    changePasswordErrors: null,
     trigger: false,
     authId: 0
 }
 
 const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
     'authSlice/login',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.login(info);
+            const { data } = await authService.login(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -46,13 +52,13 @@ const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
 
 const refresh = createAsyncThunk<IAuthResponse, void>(
     'authSlice/refresh',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
             const refresh = authService.getRefreshToken();
             if (!refresh) {
                 return rejectWithValue("refresh_token is required");
             }
-            const {data} = await authService.refresh({refreshToken: refresh});
+            const { data } = await authService.refresh({ refreshToken: refresh });
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -63,9 +69,9 @@ const refresh = createAsyncThunk<IAuthResponse, void>(
 
 const signOut = createAsyncThunk<void, void>(
     'authSlice/logOut',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const {data} = await authService.signOut();
+            const { data } = await authService.signOut();
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -76,9 +82,9 @@ const signOut = createAsyncThunk<void, void>(
 
 const registerSeller = createAsyncThunk<string, ISellerInput>(
     'authSlice/registerSeller',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.registerSeller(info);
+            const { data } = await authService.registerSeller(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -89,9 +95,9 @@ const registerSeller = createAsyncThunk<string, ISellerInput>(
 
 const registerManager = createAsyncThunk<IAuthResponse, RegisterManagerPayload>(
     'authSlice/registerManager',
-    async ({managerInput, code}: RegisterManagerPayload, {rejectWithValue}) => {
+    async ({ managerInput, code }: RegisterManagerPayload, { rejectWithValue }) => {
         try {
-            const {data} = await authService.registerManager(managerInput, code);
+            const { data } = await authService.registerManager(managerInput, code);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -102,9 +108,9 @@ const registerManager = createAsyncThunk<IAuthResponse, RegisterManagerPayload>(
 
 const registerAdmin = createAsyncThunk<IAuthResponse, RegisterAdminPayload>(
     'authSlice/registerAdmin',
-    async ({adminInput, code}: RegisterAdminPayload, {rejectWithValue}) => {
+    async ({ adminInput, code }: RegisterAdminPayload, { rejectWithValue }) => {
         try {
-            const {data} = await authService.registerAdmin(adminInput, code);
+            const { data } = await authService.registerAdmin(adminInput, code);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -115,9 +121,9 @@ const registerAdmin = createAsyncThunk<IAuthResponse, RegisterAdminPayload>(
 
 const registerCustomer = createAsyncThunk<string, ICustomerInput>(
     'authSlice/registerCustomer',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.registerCustomer(info);
+            const { data } = await authService.registerCustomer(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -128,9 +134,9 @@ const registerCustomer = createAsyncThunk<string, ICustomerInput>(
 
 const activateCustomer = createAsyncThunk<IAuthResponse, IActivationCode>(
     'authSlice/activateCustomer',
-    async (code, {rejectWithValue}) => {
+    async (code, { rejectWithValue }) => {
         try {
-            const {data} = await authService.activateCustomer(code);
+            const { data } = await authService.activateCustomer(code);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -141,9 +147,9 @@ const activateCustomer = createAsyncThunk<IAuthResponse, IActivationCode>(
 
 const activateSeller = createAsyncThunk<IAuthResponse, IActivationCode>(
     'authSlice/activateSeller',
-    async (code, {rejectWithValue}) => {
+    async (code, { rejectWithValue }) => {
         try {
-            const {data} = await authService.activateSeller(code);
+            const { data } = await authService.activateSeller(code);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -154,9 +160,9 @@ const activateSeller = createAsyncThunk<IAuthResponse, IActivationCode>(
 
 const generateManager = createAsyncThunk<void, IGenerateCode>(
     'authSlice/generateManager',
-    async (email, {rejectWithValue}) => {
+    async (email, { rejectWithValue }) => {
         try {
-            const {data} = await authService.generateManager(email);
+            const { data } = await authService.generateManager(email);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -167,9 +173,9 @@ const generateManager = createAsyncThunk<void, IGenerateCode>(
 
 const generateAdmin = createAsyncThunk<void, IGenerateCode>(
     'authSlice/generateAdmin',
-    async (email, {rejectWithValue}) => {
+    async (email, { rejectWithValue }) => {
         try {
-            const {data} = await authService.generateAdmin(email);
+            const { data } = await authService.generateAdmin(email);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -180,9 +186,9 @@ const generateAdmin = createAsyncThunk<void, IGenerateCode>(
 
 const changePassword = createAsyncThunk<IAuthResponse, INewPassword>(
     'authSlice/changePassword',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.changePassword(info);
+            const { data } = await authService.changePassword(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -193,9 +199,9 @@ const changePassword = createAsyncThunk<IAuthResponse, INewPassword>(
 
 const forgotPassword = createAsyncThunk<IAuthResponse, IForgotPassword>(
     'authSlice/forgotPassword',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.forgotPassword(info);
+            const { data } = await authService.forgotPassword(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -206,9 +212,9 @@ const forgotPassword = createAsyncThunk<IAuthResponse, IForgotPassword>(
 
 const resetPassword = createAsyncThunk<IAuthResponse, IChangePassword>(
     'authSlice/resetPassword',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await authService.resetPassword(info);
+            const { data } = await authService.resetPassword(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -225,22 +231,22 @@ const slice = createSlice({
         builder
             .addCase(login.fulfilled, (state, action) => {
                 state.isAuth = true;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(refresh.fulfilled, (state, action) => {
                 state.isAuth = true;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
                 state.isAuth = false;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 window.location.reload();
             })
             .addCase(signOut.fulfilled, (state) => {
@@ -249,12 +255,12 @@ const slice = createSlice({
             })
             .addCase(activateCustomer.fulfilled, (state, action) => {
                 state.isAuth = true;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(activateSeller.fulfilled, (state, action) => {
                 state.isAuth = true;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(forgotPassword.fulfilled, (state) => {
@@ -262,23 +268,35 @@ const slice = createSlice({
             })
             .addCase(registerManager.fulfilled, (state, action) => {
                 state.isAuth = false;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
                 window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
                 state.isAuth = false;
-                authService.setTokens({...action.payload});
+                authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                state.errors = action.payload as IError;
+                console.log(JSON.stringify(action) + "action");
+                if (action.type === "authSlice/generateManager/rejected") {
+                    state.generateManagerErrors = action.payload as IError;
+                } else if (action.type === "authSlice/generateAdmin/rejected") {
+                    state.generateAdminErrors = action.payload as IError;
+                } else if (action.type === "authSlice/changePassword/rejected") {
+                    state.changePasswordErrors = action.payload as IError;
+                } else if (action.type === "authSlice/changePassword/rejected") {
+                    state.changePasswordErrors = action.payload as IError;
+                } else {
+                    state.errors = action.payload as IError;
+                }
             })
+
 });
 
 
-const {actions, reducer: authReducer} = slice;
+const { actions, reducer: authReducer } = slice;
 
 const authActions = {
     ...actions,

@@ -44,7 +44,7 @@ const CarFull: FC = () => {
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
 
-    const {errors} = useAppSelector(state => state.carReducer);
+    const {carErrors} = useAppSelector(state => state.carReducer);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
@@ -181,7 +181,7 @@ const CarFull: FC = () => {
 
                     <form onSubmit={handleSubmit(save)}>
                         <div>
-                            <div>{getResponse ? getResponse : <div>{JSON.stringify(errors?.message)}</div>}</div>
+                            <div>{getResponse ? getResponse : <div>{carErrors?.message}</div>}</div>
                             <input placeholder={'region'} {...register('region', {value: getCarRegion})}
                                    value={getCarRegion} disabled={getRegionInput}
                                    autoComplete={"off"} type="text" onChange={handleInputChange}/>

@@ -1,21 +1,28 @@
-import React, {FC, useEffect, useState} from 'react';
-import {SubmitHandler, useForm} from "react-hook-form";
-import {ICreateCar, ICreateInputCar} from "../../interfaces";
-import {useAppDispatch, useAppSelector} from "../../hooks";
-import {carActions} from "../../redux/slices";
-import {sellerActions} from "../../redux/slices/seller.slice";
-import {IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
+import React, { FC, useEffect, useState } from 'react';
+import { SubmitHandler, useForm } from "react-hook-form";
+import { ICreateCar, ICreateInputCar } from "../../interfaces";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { carActions } from "../../redux/slices";
+import { sellerActions } from "../../redux/slices/seller.slice";
+import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 
 export enum ECurrency {
     UAH = "UAH", EUR = "EUR", USD = "USD"
 }
 
 const CarForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<ICreateInputCar>();
-    const {errors, brands, models} = useAppSelector(state => state.carReducer);
+    const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
+    const { carErrors, brands, models } = useAppSelector(state => state.carReducer);
+
+    useEffect(() => {
+        dispatch(carActions.getAllBrands());
+    }, [useAppDispatch]);
+
+
+
     const [getResponse, setResponse] = useState('');
 
-    const {regions, cities} = useAppSelector(state => state.sellerReducer);
+    const { regions, cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -41,7 +48,7 @@ const CarForm: FC = () => {
     const [getBrand, setBrand] = useState('');
     const [getModel, setModel] = useState('');
 
-    const [getErrors, setErrors] = useState<null | string>(JSON.stringify(errors));
+    const [getErrors, setErrors] = useState<undefined | string>(carErrors?.message);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
@@ -50,8 +57,8 @@ const CarForm: FC = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        setErrors(JSON.stringify(errors));
-    }, [errors])
+        setErrors(carErrors?.message);
+    }, [carErrors])
 
     const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
         console.log(car, "car")
@@ -85,14 +92,11 @@ const CarForm: FC = () => {
                     setModel('');
                     reset();
 
-                    setErrors(null);
+                    setErrors('');
                 } else {
-                    setErrors(JSON.stringify(errors));
+                    setErrors(carErrors?.message);
                 }
 
-                console.log(getErrors + "ERRORS ---------------------------");
-                console.log(errors?.message + "1ERRORS ---------------------------");
-                //     console.log(res);
             }).catch((err) => {
                 console.log(err, "CATCH")
             });
@@ -152,21 +156,26 @@ const CarForm: FC = () => {
 
     return (
         <div>
-            <div>{getResponse ? getResponse : <div>{JSON.stringify(errors?.message)}</div>}</div>
+            {/* <div>{getResponse ? getResponse : <div>{JSON.stringify(errors?.message)}</div>}</div> */}
+            <div>{getResponse ? getResponse : <div>{JSON.stringify(carErrors?.message)}</div>}</div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
-                    <input type="text" readOnly={true} value={getBrand} placeholder={'brand'}
-                           {...register('brand')}
-                           onClick={() => {
-                               setIsBrandsVisible(true);
-                           }}/>
+                    <input style={{ cursor: 'pointer' }} type="text" readOnly={true} value={getBrand} placeholder={'brand'}
+                        {...register('brand')}
+                        onClick={() => {
+
+                            setIsBrandsVisible(true);
+                            console.log(getBrands);
+                        }} />
                 </div>
                 {
                     isBrandsVisible &&
-                    <div>
+                    <div style={{ cursor: 'pointer' }}>
                         {getBrands.map((brand) => (
                             <div key={brand} onClick={() => {
+
                                 setBrand(brand);
+                                setModel('');
                                 handleModels(brand);
                                 setIsBrandsVisible(false);
                             }}>
@@ -176,14 +185,14 @@ const CarForm: FC = () => {
                     </div>
                 }
                 <div>
-                    <input autoComplete={"off"} readOnly={true} value={getModel} type="text"
-                           placeholder={'model'} {...register('model', {value: getModel})}
-                           onClick={() => {
-                               setIsModelsVisible(true);
-                           }}/>
+                    <input style={{ cursor: 'pointer' }} autoComplete={"off"} readOnly={true} value={getModel} type="text"
+                        placeholder={'model'} {...register('model', { value: getModel })}
+                        onClick={() => {
+                            setIsModelsVisible(true);
+                        }} />
                 </div>
                 {isModelsVisible &&
-                    <div>
+                    <div style={{ cursor: 'pointer' }}>
                         {getModels.map((model) => (
                             <div key={model} onClick={() => {
                                 setModel(model);
@@ -195,12 +204,14 @@ const CarForm: FC = () => {
                     </div>
                 }
                 <div>
-                    <input autoComplete={"off"} type="text" placeholder={'powerH'} {...register('powerH')}/>
+                    <input autoComplete={"off"} type="number" placeholder={'powerH'} {...register('powerH', {
+                        pattern: /^[0-9]*$/,
+                    })} />
                 </div>
                 <div>
-                    <input placeholder={'region'} {...register('region', {value: getCarRegion})}
-                           value={getCarRegion} disabled={getRegionInput}
-                           autoComplete={"off"} type="text" onChange={handleInputChange}/>
+                    <input placeholder={'region'} {...register('region', { value: getCarRegion })}
+                        value={getCarRegion} disabled={getRegionInput}
+                        autoComplete={"off"} type="text" onChange={handleInputChange} />
                     <button onClick={() => {
                         setRegionInput(false);
                         setCarRegion('');
@@ -222,9 +233,9 @@ const CarForm: FC = () => {
                     </div>
                 }
                 <div>
-                    <input placeholder={'city'} {...register('city', {value: getCarCity})}
-                           value={getCarCity} disabled={getCityInput}
-                           autoComplete={"off"} type="text" onChange={handleCityInputChange}/>
+                    <input placeholder={'city'} {...register('city', { value: getCarCity })}
+                        value={getCarCity} disabled={getCityInput}
+                        autoComplete={"off"} type="text" onChange={handleCityInputChange} />
                     <button onClick={() => {
                         setCityInput(false);
                         setCarCity('');
@@ -251,14 +262,14 @@ const CarForm: FC = () => {
                     </div>
                 }
                 <div>
-                    <input type="number" placeholder={'price'} {...register('price')}/>
+                    <input type="number" placeholder={'price'} {...register('price')} />
                 </div>
                 <div>
                     <input autoComplete={"off"} type="text" readOnly={true} value={getCurrency}
-                           placeholder={'currency'} {...register('currency', {value: getCurrency})}
-                           onClick={() => {
-                               setIsCurrencyVisible(true);
-                           }}/>
+                        placeholder={'currency'} {...register('currency', { value: getCurrency })}
+                        onClick={() => {
+                            setIsCurrencyVisible(true);
+                        }} />
                 </div>
                 {isCurrencyVisible && getCurrencies.map((curr) => {
                     return (
@@ -274,10 +285,10 @@ const CarForm: FC = () => {
                 })}
                 <div>
                     <input formEncType="multipart/form-data" type="file" multiple={true}
-                           placeholder={'pictures'} {...register('pictures')}/>
+                        placeholder={'pictures'} {...register('pictures')} />
                 </div>
                 <div>
-                    <input autoComplete={"off"} type="text" placeholder={'description'} {...register('description')}/>
+                    <input autoComplete={"off"} type="text" placeholder={'description'} {...register('description')} />
                 </div>
                 <button>save</button>
             </form>
@@ -285,4 +296,4 @@ const CarForm: FC = () => {
     );
 };
 
-export {CarForm};
+export { CarForm };

@@ -7,7 +7,7 @@ import {IGenerateCode} from "../../../interfaces";
 const GenerateManagerForm: FC = () => {
     const {reset, handleSubmit, register} = useForm<IGenerateCode>();
     const dispatch = useAppDispatch();
-    const {errors} = useAppSelector(state => state.authReducer);
+    const {generateManagerErrors} = useAppSelector(state => state.authReducer);
 
     const [getResponse, setResponse] = useState('');
 
@@ -22,7 +22,7 @@ const GenerateManagerForm: FC = () => {
     return (
         <div>
             Generate code for manager
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            {generateManagerErrors ? <div>{generateManagerErrors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'email'} {...register('email')}/>

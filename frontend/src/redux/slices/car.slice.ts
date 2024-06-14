@@ -1,14 +1,14 @@
-import {ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest} from "../../interfaces";
-import {createAsyncThunk, createSlice, isRejectedWithValue} from "@reduxjs/toolkit";
-import {carService} from "../../services";
-import {AxiosError} from "axios";
+import { ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest } from "../../interfaces";
+import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
+import { carService } from "../../services";
+import { AxiosError } from "axios";
 
 interface IState {
     cars: ICar[],
     car: ICar | null,
     brands: string[],
     models: string[],
-    errors: IError | null,
+    carErrors: IError | null,
     trigger: boolean,
     pageCurrent: number,
     pagesInTotal: number,
@@ -20,7 +20,7 @@ const initialState: IState = {
     car: null,
     brands: [],
     models: [],
-    errors: null,
+    carErrors: null,
     carForUpdate: null,
     trigger: false,
     pageCurrent: 0,
@@ -29,9 +29,9 @@ const initialState: IState = {
 
 const getAll = createAsyncThunk<ICarResponse, number>(
     'carSlice/getAll',
-    async (page: number, {rejectWithValue}) => {
+    async (page: number, { rejectWithValue }) => {
         try {
-            const {data} = await carService.getAll(page);
+            const { data } = await carService.getAll(page);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -42,9 +42,9 @@ const getAll = createAsyncThunk<ICarResponse, number>(
 
 const getById = createAsyncThunk<ICar, number>(
     'carSlice/getById',
-    async (carId: number, {rejectWithValue}) => {
+    async (carId: number, { rejectWithValue }) => {
         try {
-            const {data} = await carService.getById(carId);
+            const { data } = await carService.getById(carId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -55,9 +55,9 @@ const getById = createAsyncThunk<ICar, number>(
 
 const deleteById = createAsyncThunk(
     'carSlice/deleteById',
-    async (carId: number, {rejectWithValue}) => {
+    async (carId: number, { rejectWithValue }) => {
         try {
-            const {data} = await carService.deleteById(carId);
+            const { data } = await carService.deleteById(carId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -68,9 +68,9 @@ const deleteById = createAsyncThunk(
 
 const getAllBrands = createAsyncThunk<string[]>(
     'carSlice/getAllBrands',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const {data} = await carService.getAllBrands();
+            const { data } = await carService.getAllBrands();
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -81,9 +81,9 @@ const getAllBrands = createAsyncThunk<string[]>(
 
 const getAllModelsByBrand = createAsyncThunk<string[], string>(
     'carSlice/getAllModelsByBrand',
-    async (brand: string, {rejectWithValue}) => {
+    async (brand: string, { rejectWithValue }) => {
         try {
-            const {data} = await carService.getAllModelsByBrand(brand);
+            const { data } = await carService.getAllModelsByBrand(brand);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -94,9 +94,9 @@ const getAllModelsByBrand = createAsyncThunk<string[], string>(
 
 const getBySeller = createAsyncThunk<ICarResponse, { id: number, page: number }>(
     'carSlice/getBySeller',
-    async ({id, page}, {rejectWithValue}) => {
+    async ({ id, page }, { rejectWithValue }) => {
         try {
-            const {data} = await carService.getBySeller(id, page);
+            const { data } = await carService.getBySeller(id, page);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -107,9 +107,9 @@ const getBySeller = createAsyncThunk<ICarResponse, { id: number, page: number }>
 
 const create = createAsyncThunk<ICar, ICreateCar>(
     'carSlice/create',
-    async (car, {rejectWithValue}) => {
+    async (car, { rejectWithValue }) => {
         try {
-            const {data} = await carService.create(car);
+            const { data } = await carService.create(car);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -120,9 +120,9 @@ const create = createAsyncThunk<ICar, ICreateCar>(
 
 const update = createAsyncThunk<ICar, IUpdateCarRequest>(
     'carSlice/update',
-    async (request, {rejectWithValue}) => {
+    async (request, { rejectWithValue }) => {
         try {
-            const {data} = await carService.updateById(request.id, request.car);
+            const { data } = await carService.updateById(request.id, request.car);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -149,6 +149,7 @@ const slice = createSlice({
                 window.location.href = "http://localhost:3000/profile";
             })
             .addCase(getAllBrands.fulfilled, (state, action) => {
+                console.log(action.payload)
                 state.brands = action.payload;
             })
             .addCase(getAllModelsByBrand.fulfilled, (state, action) => {
@@ -163,12 +164,13 @@ const slice = createSlice({
                 window.location.reload();
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                state.errors = action.payload as IError;
+                if (action.type.startsWith("carSlice"))
+                    state.carErrors = action.payload as IError;
             })
 });
 
 
-const {actions, reducer: carReducer} = slice;
+const { actions, reducer: carReducer } = slice;
 
 const carActions = {
     ...actions,

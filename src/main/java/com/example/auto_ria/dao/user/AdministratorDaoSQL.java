@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 public interface AdministratorDaoSQL extends JpaRepository<AdministratorSQL, Integer> {
+    
     AdministratorSQL findByEmail(String email);
+
     @NotNull Page<AdministratorSQL> findAll(@NotNull Pageable pageable);
     long count();
 

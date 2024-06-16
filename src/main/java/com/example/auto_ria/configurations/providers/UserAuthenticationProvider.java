@@ -1,8 +1,7 @@
 package com.example.auto_ria.configurations.providers;
 
-import com.example.auto_ria.dao.user.CustomerDaoSQL;
-import com.example.auto_ria.models.user.CustomerSQL;
-import lombok.AllArgsConstructor;
+import java.util.Collection;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,13 +11,16 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import com.example.auto_ria.dao.user.UserDaoSQL;
+import com.example.auto_ria.models.user.UserSQL;
+
+import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
-public class CustomerAuthenticationProvider implements AuthenticationProvider {
+public class UserAuthenticationProvider implements AuthenticationProvider {
 
-    private CustomerDaoSQL customerDaoSQL;
+    private UserDaoSQL userDaoSQL;
     private PasswordEncoder passwordEncoder;
 
     @Override
@@ -27,9 +29,9 @@ public class CustomerAuthenticationProvider implements AuthenticationProvider {
         String password = authentication.getCredentials().toString();
         Collection<? extends GrantedAuthority> permissions = authentication.getAuthorities();
 
-        CustomerSQL customer = customerDaoSQL.findByEmail(username);
+        UserSQL user = userDaoSQL.findByEmail(username);
 
-        if (!passwordEncoder.matches(password, customer.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
 

@@ -1,13 +1,14 @@
 package com.example.auto_ria.models.responses.car;
 
+import java.util.List;
+
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.models.responses.user.SellerCarResponse;
+import com.example.auto_ria.models.responses.user.UserCarResponse;
+
 import lombok.Builder;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class CarResponse {
@@ -22,7 +23,7 @@ public class CarResponse {
     private ECurrency currency;
     private List<String> photo;
     private String description;
-    private SellerCarResponse seller;
+    private UserCarResponse user;
 
     private double priceUAH;
     private double priceEUR;
@@ -30,9 +31,9 @@ public class CarResponse {
 
     @Builder
     public CarResponse(int id, EBrand brand, EModel model, int powerH, String city,
-                       String region, String price, ECurrency currency,
-                       List<String> photo, String description, SellerCarResponse seller,
-                       double priceUAH, double priceEUR, double priceUSD) {
+            String region, String price, ECurrency currency,
+            List<String> photo, String description, UserCarResponse user,
+            double priceUAH, double priceEUR, double priceUSD) {
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -43,9 +44,9 @@ public class CarResponse {
         this.currency = currency;
         this.photo = photo;
         this.description = description;
-        this.seller = seller;
-        if (seller.getName().equals("Auto.Ria Services")) {
-            seller.setNumber("+380 63 748 73 02");
+        this.user = user;
+        if (user.getName().equals("Auto.Ria Services")) {
+            user.setNumber("+380 63 748 73 02");
         }
         this.priceUAH = priceUAH;
         this.priceEUR = priceEUR;

@@ -30,7 +30,7 @@ public class InitialDataLoader {
                         .password(environment.getProperty("initial.admin.pass"))
                         .build();
 
-                authenticationService.registerAdmin(request, "");
+                authenticationService.registerAdmin(request, "404E745266556A586E327234538762F413F4428472B4B625064536756685921");
             }
         } catch (CustomException e) {
             throw new CustomException("Error while loading initial data" + e.getMessage(), e.getStatus());

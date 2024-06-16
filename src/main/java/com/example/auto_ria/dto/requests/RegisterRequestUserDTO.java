@@ -13,12 +13,18 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterRequestCustomerDTO {
+public class RegisterRequestUserDTO {
+
     @NotBlank(message = "city cant be empty")
     private String city;
 
     @NotBlank(message = "region cant be empty")
     private String region;
+
+    @Size(min = 9, message = "number must have less than 9 characters")
+    @Size(max = 12, message = "name must have more than 12 characters")
+    @Pattern(regexp = "^\\d+$", message = "Invalid number: Must contain only numbers")
+    private String number;
 
     @NotBlank(message = "name cant be empty")
     @Size(min = 2, message = "name must have more than 2 characters")
@@ -40,5 +46,5 @@ public class RegisterRequestCustomerDTO {
                     "At least 8 characters long")
     private String password;
 
-    private MultipartFile avatar;
+    private MultipartFile avatar = null;
 }

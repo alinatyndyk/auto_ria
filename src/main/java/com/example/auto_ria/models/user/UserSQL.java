@@ -16,7 +16,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SellerSQL extends Person {
+@ToString(exclude = {"cars"})
+public class UserSQL extends Person {
 
     private String city;
     private String region;
@@ -40,8 +41,8 @@ public class SellerSQL extends Person {
     @Enumerated(EnumType.STRING)
     private EAccountType accountType = EAccountType.BASIC;
 
-    @Builder(builderMethodName = "sellerBuilder")
-    public SellerSQL(
+    @Builder(builderMethodName = "userBuilder")
+    public UserSQL(
             String name,
             String email,
             String avatar,
@@ -59,7 +60,7 @@ public class SellerSQL extends Person {
     }
 
     @Builder(builderMethodName = "adminBuilder")
-    public SellerSQL(
+    public UserSQL(
             @JsonProperty("name") String name,
             @JsonProperty("region") String region,
             @JsonProperty("city") String city,
@@ -74,3 +75,5 @@ public class SellerSQL extends Person {
         this.city = city;
     }
 }
+
+

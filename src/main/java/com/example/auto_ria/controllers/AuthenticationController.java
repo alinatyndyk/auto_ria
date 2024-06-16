@@ -1,38 +1,45 @@
 package com.example.auto_ria.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
-import com.example.auto_ria.dto.requests.RegisterRequestCustomerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
-import com.example.auto_ria.dto.requests.RegisterRequestSellerDTO;
+import com.example.auto_ria.dto.requests.RegisterRequestUserDTO;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.requests.*;
-import com.example.auto_ria.models.responses.auth.AuthenticationInfoResponse;
+import com.example.auto_ria.models.requests.LoginRequest;
+import com.example.auto_ria.models.requests.RefreshRequest;
+import com.example.auto_ria.models.requests.RegisterAdminRequest;
+import com.example.auto_ria.models.requests.RegisterManagerRequest;
+import com.example.auto_ria.models.requests.RegisterUserRequest;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.AuthenticationService;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.CustomersServiceMySQL;
 import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
+
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
-
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
@@ -44,27 +51,30 @@ public class AuthenticationController {
 
     private UsersServiceMySQLImpl usersServiceMySQL;
     private AdministratorServiceMySQL administratorServiceMySQL;
-    private CustomersServiceMySQL customersServiceMySQL;
     private ManagerServiceMySQL managerServiceMySQL;
 
     private JwtService jwtService;
     private PasswordEncoder passwordEncoder;
     private CitiesService citiesService;
 
-    @PostMapping("/register-seller/person")
-    public ResponseEntity<String> register(
-            @ModelAttribute @Valid RegisterRequestSellerDTO registerRequestDTO
-    ) {
+    // ------------------------------ mix seller/customer
+
+    @PostMapping("/register-user")
+    public ResponseEntity<String> registerUser(
+            @ModelAttribute @Valid RegisterRequestUserDTO registerRequestDTO) {
         try {
 
-            citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(), registerRequestDTO.getCity());
+            citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(),
+                    registerRequestDTO.getCity());
 
-            if (usersServiceMySQL.isSellerByNumberPresent(registerRequestDTO.getNumber())) {
-                throw new CustomException("User with this number already exists", HttpStatus.BAD_REQUEST);
+            if (usersServiceMySQL.isUserByNumberPresent(registerRequestDTO.getNumber())) {
+                throw new CustomException("User with this number already exists",
+                        HttpStatus.BAD_REQUEST);
             }
 
-            if (usersServiceMySQL.isSellerByEmailPresent(registerRequestDTO.getEmail())) {
-                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
+            if (usersServiceMySQL.isUserByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists",
+                        HttpStatus.BAD_REQUEST);
             }
 
             String fileName = null;
@@ -73,7 +83,7 @@ public class AuthenticationController {
                 usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
             }
 
-            RegisterSellerRequest registerRequest = new RegisterSellerRequest(
+            RegisterUserRequest registerRequest = new RegisterUserRequest(
                     registerRequestDTO.getCity(),
                     registerRequestDTO.getRegion(),
                     registerRequestDTO.getName(),
@@ -82,31 +92,33 @@ public class AuthenticationController {
                     registerRequestDTO.getNumber(),
                     fileName,
                     registerRequestDTO.getPassword());
-            return authenticationService.register(registerRequest);
+            return authenticationService.registerUser(registerRequest);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
 
-    @PostMapping("/activate-seller-account")
+    // ------------------------------
+    // mix
+    @PostMapping("/activate-user")
     public ResponseEntity<AuthenticationResponse> activateSeller(
-            @RequestParam("code") String code
-    ) {
+            @RequestParam("code") String code) {
         try {
             if (jwtService.isTokenExprired(code)) {
-                throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
+                throw new CustomException("Activation key expired. Your account has been deleted",
+                        HttpStatus.FORBIDDEN);
             }
-            String email = jwtService.extractUsername(code, ETokenRole.SELLER_ACTIVATE);
-            return authenticationService.activateSeller(email, code);
+            String email = jwtService.extractUsername(code, ETokenRole.USER_ACTIVATE);
+            return authenticationService.activateUser(email, code);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
+    // ----------------------------------
 
     @PostMapping("/code-manager")
     public ResponseEntity<String> codeManager(
-            @RequestParam("email") String email
-    ) {
+            @RequestParam("email") String email) {
         try {
             Map<String, String> claims = new HashMap<>();
             claims.put("username", email);
@@ -123,8 +135,7 @@ public class AuthenticationController {
     @PostMapping("/register-manager")
     public ResponseEntity<AuthenticationResponse> registerManager(
             @ModelAttribute @Valid RegisterRequestManagerDTO registerRequestDTO,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
             String code = request.getHeader("Register-key");
 
@@ -165,15 +176,15 @@ public class AuthenticationController {
 
     @PostMapping("/code-admin")
     public ResponseEntity<String> codeAdmin(
-            @RequestParam("email") String email
-    ) {
+            @RequestParam("email") String email) {
         try {
+            System.out.println("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
             Map<String, String> claims = new HashMap<>();
             claims.put("username", email);
             claims.put("role", ETokenRole.ADMIN_REGISTER.name());
 
             String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.ADMIN_REGISTER);
-
+            System.out.println(187);
             return authenticationService.codeAdmin(email, code);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -183,8 +194,7 @@ public class AuthenticationController {
     @PostMapping("/register-admin")
     public ResponseEntity<AuthenticationResponse> registerAdmin(
             @ModelAttribute @Valid RegisterRequestAdminDTO registerRequestDTO,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
             String code = request.getHeader("Register-key");
 
@@ -222,95 +232,68 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/register-customer")
-    public ResponseEntity<String> registerCustomer(
-            @ModelAttribute @Valid RegisterRequestCustomerDTO registerRequestDTO
-    ) {
-        try {
+    // @PostMapping("/register-customer")
+    // public ResponseEntity<String> registerCustomer(
+    // @ModelAttribute @Valid RegisterRequestCustomerDTO registerRequestDTO) {
+    // try {
 
-            if (usersServiceMySQL.isSellerByEmailPresent(registerRequestDTO.getEmail())) {
-                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
-            }
+    // if (usersServiceMySQL.isSellerByEmailPresent(registerRequestDTO.getEmail()))
+    // {
+    // throw new CustomException("User with this email already exists",
+    // HttpStatus.BAD_REQUEST);
+    // }
 
-            String fileName = null;
+    // String fileName = null;
 
-            if (registerRequestDTO.getAvatar() != null) {
-                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
-                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
-            }
+    // if (registerRequestDTO.getAvatar() != null) {
+    // fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+    // usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+    // }
 
-            RegisterCustomerRequest registerRequest = new RegisterCustomerRequest(
-                    registerRequestDTO.getCity(),
-                    registerRequestDTO.getRegion(),
-                    registerRequestDTO.getName(),
-                    registerRequestDTO.getLastName(),
-                    registerRequestDTO.getEmail(),
-                    fileName,
-                    registerRequestDTO.getPassword());
-            return authenticationService.registerCustomer(registerRequest);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // RegisterCustomerRequest registerRequest = new RegisterCustomerRequest(
+    // registerRequestDTO.getCity(),
+    // registerRequestDTO.getRegion(),
+    // registerRequestDTO.getName(),
+    // registerRequestDTO.getLastName(),
+    // registerRequestDTO.getEmail(),
+    // fileName,
+    // registerRequestDTO.getPassword());
+    // return authenticationService.registerCustomer(registerRequest);
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/activate-customer-account")
-    public ResponseEntity<AuthenticationResponse> activateCustomer(
-            @RequestParam("code") String code
-    ) {
-        try {
-            if (jwtService.isTokenExprired(code)) {
-                throw new CustomException("Activation key expired. Your account has been deleted", HttpStatus.FORBIDDEN);
-            }
-            String email = jwtService.extractUsername(code, ETokenRole.CUSTOMER_ACTIVATE);
-            return authenticationService.activateCustomer(email, code);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PostMapping("/authenticate/seller")
-    public ResponseEntity<AuthenticationResponse> login(@RequestBody LoginRequest loginRequest) {
-        try {
-            if (!usersServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
-                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
-            }
-            return ResponseEntity.ok(authenticationService.login(loginRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PostMapping("/authenticate/manager")
-    public ResponseEntity<AuthenticationResponse> loginManager(@RequestBody LoginRequest loginRequest) {
-        try {
-            if (!managerServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
-                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
-            }
-            return ResponseEntity.ok(authenticationService.loginManager(loginRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // @PostMapping("/activate-customer-account")
+    // public ResponseEntity<AuthenticationResponse> activateCustomer(
+    // @RequestParam("code") String code) {
+    // try {
+    // if (jwtService.isTokenExprired(code)) {
+    // throw new CustomException("Activation key expired. Your account has been
+    // deleted",
+    // HttpStatus.FORBIDDEN);
+    // }
+    // String email = jwtService.extractUsername(code,
+    // ETokenRole.CUSTOMER_ACTIVATE);
+    // return authenticationService.activateCustomer(email, code);
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> loginAll(@RequestBody LoginRequest loginRequest) {
         try {
+
+            System.out.println("login request*********" + loginRequest);
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder().build();
 
-            SellerSQL sellerSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
+            UserSQL userSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
 
-            if (sellerSQL != null && !sellerSQL.getIsActivated().equals(true)) {
+            if (userSQL != null && !userSQL.getIsActivated().equals(true)) {// ? equals !true -> false then?
                 throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (sellerSQL != null && sellerSQL.getIsActivated().equals(true)) {
+            } else if (userSQL != null && userSQL.getIsActivated().equals(true)) {
                 authenticationResponse = authenticationService.login(loginRequest);
-            }
-
-            CustomerSQL customerSQL = customersServiceMySQL.getByEmail(loginRequest.getEmail());
-
-            if (customerSQL != null && !customerSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (customerSQL != null && customerSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginCustomer(loginRequest);
             }
 
             ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
@@ -322,83 +305,70 @@ public class AuthenticationController {
             }
 
             AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
+            System.out.println("++++jjjadmin************" + administratorSQL);
 
             if (administratorSQL != null && !administratorSQL.getIsActivated().equals(true)) {
                 throw new CustomException("Activate your account", HttpStatus.LOCKED);
             } else if (administratorSQL != null && administratorSQL.getIsActivated().equals(true)) {
                 authenticationResponse = authenticationService.loginAdmin(loginRequest);
+                System.out.println("authenticationResponse" + authenticationResponse);
             }
 
-            if (customerSQL == null && managerSQL == null && administratorSQL == null && sellerSQL == null) {
-                throw new CustomException("Login or password is not valid", HttpStatus.FORBIDDEN);
+            if (userSQL == null && managerSQL == null && administratorSQL == null) {
+                System.out.println("yes");
+                throw new CustomException("Login or password is not valid. Try again", HttpStatus.FORBIDDEN);
             }
 
             return ResponseEntity.ok(authenticationResponse);
         } catch (CustomException e) {
+            System.out.println("yes here 2");
             throw new CustomException(e.getMessage(), e.getStatus());
         }
 
     }
 
-    @PostMapping("/authenticate/admin")
-    public ResponseEntity<AuthenticationResponse> loginAdmin(@RequestBody LoginRequest loginRequest) {
-        try {
-            if (!administratorServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
-                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
-            }
-            return ResponseEntity.ok(authenticationService.loginAdmin(loginRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // @PostMapping("/refresh/seller")
+    // public ResponseEntity<AuthenticationResponse> refresh(@RequestBody @Valid
+    // RefreshRequest refreshRequest) {
+    // try {
+    // return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/authenticate/customer")
-    public ResponseEntity<AuthenticationResponse> loginCustomer(@RequestBody LoginRequest loginRequest) {
-        try {
-            if (!customersServiceMySQL.getByEmail(loginRequest.getEmail()).getIsActivated().equals(true)) {
-                throw new CustomException("Account is inactivated", HttpStatus.FORBIDDEN);
-            }
-            return ResponseEntity.ok(authenticationService.loginCustomer(loginRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // @PostMapping("/refresh/manager")
+    // public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody
+    // @Valid RefreshRequest refreshRequest) {
+    // try {
+    // return
+    // ResponseEntity.ok(authenticationService.refreshManager(refreshRequest));
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/refresh/seller")
-    public ResponseEntity<AuthenticationResponse> refresh(@RequestBody @Valid RefreshRequest refreshRequest) {
-        try {
-            return ResponseEntity.ok(authenticationService.refresh(refreshRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // @PostMapping("/refresh/admin")
+    // public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody
+    // @Valid RefreshRequest refreshRequest) {
+    // try {
+    // return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/refresh/manager")
-    public ResponseEntity<AuthenticationResponse> refreshManager(@RequestBody @Valid RefreshRequest refreshRequest) {
-        try {
-            return ResponseEntity.ok(authenticationService.refreshManager(refreshRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // @PostMapping("/refresh/customer")
+    // public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody
+    // @Valid RefreshRequest refreshRequest) {
+    // try {
+    // return
+    // ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/refresh/admin")
-    public ResponseEntity<AuthenticationResponse> refreshAdmin(@RequestBody @Valid RefreshRequest refreshRequest) {
-        try {
-            return ResponseEntity.ok(authenticationService.refreshAdmin(refreshRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PostMapping("/refresh/customer")
-    public ResponseEntity<AuthenticationResponse> refreshCustomer(@RequestBody @Valid RefreshRequest refreshRequest) {
-        try {
-            return ResponseEntity.ok(authenticationService.refreshCustomer(refreshRequest));
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
     @PostMapping("/refresh")
     public ResponseEntity<AuthenticationResponse> refreshAll(@RequestBody @Valid RefreshRequest refreshRequest) {
         try {
@@ -409,7 +379,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/change-passwords")
-    public ResponseEntity<AuthenticationInfoResponse> changePassword(
+    public ResponseEntity<AuthenticationResponse> changePassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
@@ -463,7 +433,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<AuthenticationInfoResponse> resetPassword(
+    public ResponseEntity<AuthenticationResponse> resetPassword(
             @RequestParam("newPassword") String newPassword,
             HttpServletRequest request) {
         try {
@@ -476,7 +446,6 @@ public class AuthenticationController {
             }
             String encoded = passwordEncoder.encode(newPassword);
             System.out.println(encoded + "encoded");
-
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String email = claims.get("sub").toString();

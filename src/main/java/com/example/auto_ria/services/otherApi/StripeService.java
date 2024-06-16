@@ -5,7 +5,7 @@ import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
@@ -33,15 +33,15 @@ public class StripeService {
 
     private PremiumPlanDaoSQL premiumPlanDaoSQL;
 
-    public void createPayment(SetPaymentSourceRequest body, SellerSQL sellerSQL) {
+    public void createPayment(SetPaymentSourceRequest body, UserSQL userSQL) {
         try {
 
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
 
             String defaultSource;
 
-            String stripeId = sellerSQL.getPaymentSource();
-            boolean stripePresent = sellerSQL.isPaymentSourcePresent();
+            String stripeId = userSQL.getPaymentSource();
+            boolean stripePresent = userSQL.isPaymentSourcePresent();
             if (stripeId == null) {
                 defaultSource = null;
             } else {
@@ -98,33 +98,33 @@ public class StripeService {
                     System.out.println("first3");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()
-                                    .setName(sellerSQL.getName() + sellerSQL.getLastName())
-                                    .setEmail(sellerSQL.getEmail())
+                                    .setName(userSQL.getName() + userSQL.getLastName())
+                                    .setEmail(userSQL.getEmail())
                                     .build()
                     );
                     paymentToken = body.getToken();
                     customerId = customer.getId();
 
-                    sellerSQL.setPaymentSourcePresent(true);
-                    sellerSQL.setPaymentSource(customerId);
+                    userSQL.setPaymentSourcePresent(true);
+                    userSQL.setPaymentSource(customerId);
 
-                    userDaoSQL.save(sellerSQL);
+                    userDaoSQL.save(userSQL);
                 } else if (body.isSetAsDefaultCard()) {
                     System.out.println("first4");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()
-                                    .setName(sellerSQL.getName() + sellerSQL.getLastName())
-                                    .setEmail(sellerSQL.getEmail())
+                                    .setName(userSQL.getName() + userSQL.getLastName())
+                                    .setEmail(userSQL.getEmail())
                                     .setSource(body.getToken())
                                     .build()
                     );
                     paymentToken = body.getToken();
                     customerId = customer.getId();
 
-                    sellerSQL.setPaymentSourcePresent(true);
-                    sellerSQL.setPaymentSource(customerId);
+                    userSQL.setPaymentSourcePresent(true);
+                    userSQL.setPaymentSource(customerId);
 
-                    userDaoSQL.save(sellerSQL);
+                    userDaoSQL.save(userSQL);
                 } else {
                     throw new CustomException("Payment params invalid", HttpStatus.BAD_REQUEST);
                 }
@@ -143,7 +143,7 @@ public class StripeService {
                             .addItem(SubscriptionCreateParams.Item.builder().setPrice(price.getId()).build())
                             .build());
 
-                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findByUserId(userSQL.getId());
 
                     if (premiumPlan != null) {
                         premiumPlan.setAutoPayments(body.isAutoPay());
@@ -158,7 +158,7 @@ public class StripeService {
                                 .autoPayments(body.isAutoPay())
                                 .startDate(LocalDate.now())
                                 .endDate(LocalDate.now().plusMonths(1))
-                                .sellerId(sellerSQL.getId())
+                                .userId(userSQL.getId())
                                 .customerId(customerId)
                                 .subId(subscription.getId())
                                 .isActive(true)
@@ -201,7 +201,7 @@ public class StripeService {
 
                     PaymentIntent.create(createParams);
 
-                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+                    PremiumPlan premiumPlan = premiumPlanDaoSQL.findByUserId(userSQL.getId());
                     if (premiumPlan != null) {
                         premiumPlan.setAutoPayments(body.isAutoPay());
                         premiumPlan.setStartDate(LocalDate.now());
@@ -214,7 +214,7 @@ public class StripeService {
                                 .autoPayments(body.isAutoPay())
                                 .startDate(LocalDate.now())
                                 .endDate(LocalDate.now().plusMonths(1))
-                                .sellerId(sellerSQL.getId())
+                                .userId(userSQL.getId())
                                 .customerId(customerId)
                                 .subId(null)
                                 .isActive(true)

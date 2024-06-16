@@ -1,5 +1,17 @@
 package com.example.auto_ria.controllers;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
@@ -9,22 +21,16 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.premium.PremiumPlan;
 import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.otherApi.StripeService;
 import com.stripe.Stripe;
 import com.stripe.model.Customer;
 import com.stripe.param.CustomerCreateParams;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @AllArgsConstructor
@@ -52,7 +58,7 @@ public class StripeController {
             String customerId = (String) objectData.get("customer");
 
             PremiumPlan premiumPlan = premiumPlanDaoSQL.findByCustomerId(customerId);
-            SellerSQL owner = userDaoSQL.findByPaymentSource(customerId);
+            UserSQL owner = userDaoSQL.findByPaymentSource(customerId);
 
             premiumPlan.setActive(false);
             premiumPlanDaoSQL.save(premiumPlan);
@@ -74,16 +80,14 @@ public class StripeController {
     @PostMapping("/add-payment-source")
     public ResponseEntity<String> addPaymentSource(
             @RequestBody SetPaymentSourceRequest body,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
-            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            UserSQL sellerSQL = commonService.extractUserFromHeader(request);
             if (sellerSQL == null) {
                 throw new CustomException("Invalid token", HttpStatus.FORBIDDEN);
             }
 
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-
 
             boolean sourcePresent = sellerSQL.isPaymentSourcePresent();
             String paymentToken = body.getToken();
@@ -94,8 +98,7 @@ public class StripeController {
                                 .setName(sellerSQL.getName() + sellerSQL.getLastName())
                                 .setEmail(sellerSQL.getEmail())
                                 .setSource(paymentToken)
-                                .build()
-                );
+                                .build());
 
                 sellerSQL.setPaymentSource(customer.getId());
                 sellerSQL.setPaymentSourcePresent(true);
@@ -107,7 +110,7 @@ public class StripeController {
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("source", paymentToken);
-                stripeCustomer.update(params);
+                stripeCustomer.update(params); /// turn into one model!
             }
 
             return ResponseEntity.ok("Card attached successfully");
@@ -120,14 +123,13 @@ public class StripeController {
     @PostMapping("/buy-premium")
     public ResponseEntity<String> getPremium(
             @RequestBody SetPaymentSourceRequest body,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
 
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
-            String email = commonService.extractEmailFromHeader(request, ETokenRole.SELLER);
+            String email = commonService.extractEmailFromHeader(request, ETokenRole.USER);
 
-            SellerSQL sellerSQL = userDaoSQL.findSellerByEmail(email);
+            UserSQL sellerSQL = userDaoSQL.findUserByEmail(email);
 
             if (sellerSQL == null) {
                 throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
@@ -148,17 +150,16 @@ public class StripeController {
     @SneakyThrows
     @PostMapping("/cancel-subscription")
     public ResponseEntity<String> cancel(
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
 
         try {
-            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            UserSQL sellerSQL = commonService.extractUserFromHeader(request);
 
             if (!sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
                 throw new CustomException("Account with no subscription", HttpStatus.BAD_REQUEST);
             }
 
-            PremiumPlan premiumPlan = premiumPlanDaoSQL.findBySellerId(sellerSQL.getId());
+            PremiumPlan premiumPlan = premiumPlanDaoSQL.findByUserId(sellerSQL.getId());
 
             stripeService.cancelSubscription(premiumPlan);
 

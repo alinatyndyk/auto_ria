@@ -22,9 +22,9 @@ public class PremiumPlan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private String customerId;
+    private String customerId; //(для страйпа)
     private String subId;
-    private int sellerId;
+    private int userId;
 
     private LocalDate startDate;
     private LocalDate endDate;

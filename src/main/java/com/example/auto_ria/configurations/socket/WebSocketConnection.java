@@ -1,7 +1,25 @@
 package com.example.auto_ria.configurations.socket;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import org.assertj.core.util.Arrays;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.socket.CloseStatus;
+import org.springframework.web.socket.TextMessage;
+import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.example.auto_ria.configurations.rabbitMq.RabbitMQProducer;
-import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.socket.MessageDaoSQL;
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
@@ -12,21 +30,10 @@ import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
 import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.services.chat.ChatServiceMySQL;
+
 import jakarta.validation.constraints.NotNull;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.time.LocalDateTime;
-import java.util.*;
-
-//@AllArgsConstructor
 public class WebSocketConnection extends TextWebSocketHandler {
 
     @Autowired
@@ -40,10 +47,9 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Autowired
     private RabbitMQProducer rabbitMQProducer;
     @Autowired
-    private SellerAuthDaoSQL sellerAuthDaoSQL;
+    private UserAuthDaoSQL userAuthDaoSQL;
 
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
-
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
@@ -52,85 +58,93 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
-            MultiValueMap<String, String> queryParams =
-                    UriComponentsBuilder.fromUriString(uri).build().getQueryParams();
+            MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString(uri).build()
+                    .getQueryParams();
 
             String token = queryParams.getFirst("auth");
 
-            AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token);
+            AuthSQL authSQL = userAuthDaoSQL.findByAccessToken(token);
 
             if (authSQL == null) {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
-            int sessionUserId;
-            ERole sessionUserType;
+            int sessionUserId = authSQL.getPersonId();
+            ERole sessionUserType = authSQL.getRole();
 
-            if (authSQL.getRole().equals(ERole.SELLER)) {
-                sessionUserId = authSQL.getPersonId();
-                sessionUserType = ERole.SELLER;
-
-                List<Chat> chatsRequired = chatDaoSQL.getBySellerId(authSQL.getPersonId());
-                for (Chat chat : chatsRequired) {
-                    chat.setSellerSessionId(session.getId());
-                    chatDaoSQL.save(chat);
-                }
-
-            } else if (authSQL.getRole().equals(ERole.CUSTOMER)) {
-                sessionUserId = authSQL.getPersonId();
-                sessionUserType = ERole.CUSTOMER;
-
-                List<Chat> chatsRequired = chatDaoSQL.getByCustomerId(authSQL.getPersonId());
-                for (Chat chat : chatsRequired) {
-                    chat.setCustomerSessionId(session.getId());
-                    chatDaoSQL.save(chat);
-                }
-
-                System.out.println(sessionUserType);
-            } else {
-                throw new CustomException("For now chat function is available among sellers and customers only",
+            if (!sessionUserType.equals(ERole.USER)) {
+                throw new CustomException("For now chat function is available among users only",
                         HttpStatus.UNAUTHORIZED);
             }
 
+            // List<Chat> chatsRequired = chatDaoSQL.getByUserId(authSQL.getPersonId());
+            // for (Chat chat : chatsRequired) {
+            // chat.setSellerSessionId(session.getId());
+            // chatDaoSQL.save(chat); //тут походу чтобі показівать когда впослндний раз
+            // человек был онлайн но это можно сделать только 1 раз для профиля а не каждого
+            // чата
+
+            // int sessionUserId;
+            // ERole sessionUserType;
+
+            // if (authSQL.getRole().equals(ERole.USER)) {
+            // sessionUserId = authSQL.getPersonId();
+            // sessionUserType = ERole.USER;
+
+            // List<Chat> chatsRequired = chatDaoSQL.getBySellerId(authSQL.getPersonId());
+            // for (Chat chat : chatsRequired) {
+            // chat.setSellerSessionId(session.getId());
+            // chatDaoSQL.save(chat);
+            // }
+
+            // } else if (authSQL.getRole().equals(ERole.CUSTOMER)) {
+            // sessionUserId = authSQL.getPersonId();
+            // sessionUserType = ERole.CUSTOMER;
+
+            // List<Chat> chatsRequired = chatDaoSQL.getByCustomerId(authSQL.getPersonId());
+            // for (Chat chat : chatsRequired) {
+            // chat.setCustomerSessionId(session.getId());
+            // chatDaoSQL.save(chat);
+            // }
+
+            // System.out.println(sessionUserType);
+            // } else {
+            // // проверить не смотрит ли все аус
+            // throw new CustomException("For now chat function is available among users
+            // only",
+            // HttpStatus.UNAUTHORIZED);
+            // }
+
             Session userSession = sessionDaoSQL.findByUserId(authSQL.getPersonId());
-            System.out.println(userSession);
-            System.out.println("userSession");
 
             if (userSession == null) {
-                System.out.println("us null");
                 Session session1 = Session.builder()
                         .sessionId(session.getId())
                         .userId(sessionUserId)
-                        .userType(sessionUserType)
-                        .isOnline(true)
+                        .isOnline(true) // fix
                         .build();
 
                 sessionDaoSQL.save(session1);
             } else {
-                System.out.println("us not null");
                 userSession.setSessionId(session.getId());
                 userSession.setOnline(true);
                 userSession.setDisconnectedAt(null);
                 sessionDaoSQL.save(userSession);
             }
 
-            System.out.println(111);
-
-            System.out.println("connection established" + session.getId());
         } catch (Exception e) {
             System.out.println(e.getMessage());
             throw new CustomException("Error connecting to ws", HttpStatus.CONFLICT);
         }
     }
 
-
     @Override
     protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) {
         try {
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
-            MultiValueMap<String, String> queryParams =
-                    UriComponentsBuilder.fromUriString(uri).build().getQueryParams();
+            MultiValueMap<String, String> queryParams = UriComponentsBuilder.fromUriString(uri).build()
+                    .getQueryParams();
 
             String token = queryParams.getFirst("auth");
             String receiverId = queryParams.getFirst("receiverId");
@@ -141,76 +155,107 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 throw new CustomException("ReceiverId can't be null", HttpStatus.BAD_REQUEST);
             }
 
-            AuthSQL authSQL = sellerAuthDaoSQL.findByAccessToken(token);
+            AuthSQL authSQL = userAuthDaoSQL.findByAccessToken(token);
 
             if (authSQL == null) {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
-            ERole role = authSQL.getRole();
+            // String checkIfPresentRoomKey;
 
-            String checkIfPresentRoomKey;
+            // if (role.equals(ERole.SELLER)) {
+            // checkIfPresentRoomKey = chatServiceMySQL.getRoomKey(receiverId,
+            // String.valueOf(authSQL.getPersonId()));
+            // } else if (role.equals(ERole.CUSTOMER)) {
+            // checkIfPresentRoomKey =
+            // chatServiceMySQL.getRoomKey(String.valueOf(authSQL.getPersonId()),
+            // receiverId);
+            // } else {
+            // throw new CustomException("For now chat function is available among users
+            // only",
+            // HttpStatus.UNAUTHORIZED);
+            // }
 
-            if (role.equals(ERole.SELLER)) {
-                checkIfPresentRoomKey = chatServiceMySQL.getRoomKey(receiverId, String.valueOf(authSQL.getPersonId()));
-            } else if (role.equals(ERole.CUSTOMER)) {
-                checkIfPresentRoomKey = chatServiceMySQL.getRoomKey(String.valueOf(authSQL.getPersonId()), receiverId);
-            } else {
-                throw new CustomException("For now chat function is available among sellers and customers only",
-                        HttpStatus.UNAUTHORIZED);
+            // Chat chat = chatDaoSQL.getByRoomKey(checkIfPresentRoomKey);
+
+            // вместо этого найти комнату по одному из юзеров
+
+            Chat chat;
+
+            chat = chatServiceMySQL.getChatByUserIdFilterReciever(authSQL.getPersonId(),
+                    Integer.valueOf(receiverId)); // находим все чаты сендера и фильтром берем только с ресиверайди
+            System.out.println("chat-------------" + chat);
+
+            if (chat == null) {
+
+                List<Integer> userList = new ArrayList<>();
+                userList.add(authSQL.getPersonId());
+                userList.add(Integer.parseInt(receiverId));
+
+                List<String> sessionList = new ArrayList<>();
+                sessionList.add(session.getId()); // второго пока еще нет
+
+                chat = Chat.builder().users(userList)
+                        .sessions(sessionList)
+                        .build();
+
+                chatServiceMySQL.save(chat);
             }
 
-            Chat chat = chatDaoSQL.getByRoomKey(checkIfPresentRoomKey);
+            // String roomKey;
+            // if (chat != null) {
+            // roomKey = chat.getRoomKey();
+            // } else if (role.equals(ERole.CUSTOMER)) {
+            // roomKey = chatServiceMySQL.createChatRoom(authSQL.getPersonId(),
+            // Integer.parseInt(receiverId),
+            // session.getId(), null, role);
+            // // chat = chatDaoSQL.getByRoomKey(roomKey);
+            // } else {
+            // // roomKey = chatServiceMySQL.createChatRoom(Integer.parseInt(receiverId),
+            // authSQL.getPersonId(), null,
+            // // session.getId(), role);
+            // // chat = chatDaoSQL.getByRoomKey(roomKey);
+            // }
 
-            String roomKey;
-            if (chat != null) {
-                roomKey = checkIfPresentRoomKey;
-            } else if (role.equals(ERole.CUSTOMER)) {
-                roomKey = chatServiceMySQL.createChatRoom(authSQL.getPersonId(), Integer.parseInt(receiverId), session.getId(), null, role);
-                chat = chatDaoSQL.getByRoomKey(roomKey);
-            } else {
-                roomKey = chatServiceMySQL.createChatRoom(Integer.parseInt(receiverId), authSQL.getPersonId(), null, session.getId(), role);
-                chat = chatDaoSQL.getByRoomKey(roomKey);
-            }
-
-            String sellerSessionId = chat.getSellerSessionId();
-            String customerSessionId = chat.getCustomerSessionId();
+            // String user1SessionId = chat.getUser1SessionId();
+            // String user2SessionId = chat.getUser2SessionId(); //!sessions from array
 
             MessageClass messageClass = MessageClass.builder()
                     .content(message.getPayload())
                     .chatId(chat.getId())
                     .build();
 
+            // if (role.equals(ERole.CUSTOMER)) {
+            messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
+            messageClass.setReceiverId(receiverId);
+            messageClass.setIsSeen(false);
 
-            if (role.equals(ERole.CUSTOMER)) {
-                messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
-                messageClass.setReceiverId(receiverId);
-                messageClass.setIsSeen(false);
+            rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
+                    Integer.parseInt(receiverId), authSQL.getPersonId());
 
-                rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
-                        Integer.parseInt(receiverId), authSQL.getPersonId());
+            MessageClass newMessage = messageDaoSQL.save(messageClass);
+            chat.addMessage(newMessage);
+            // chat.setNotSeenSeller(chat.getNotSeenSeller() + 1); //FIX NOT SEEN
 
-                MessageClass newMessage = messageDaoSQL.save(messageClass);
-                chat.addMessage(newMessage);
-                chat.setNotSeenSeller(chat.getNotSeenSeller() + 1);
+            // } else {
+            // messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
+            // messageClass.setReceiverId(receiverId);
+            // messageClass.setIsSeen(false);
 
-            } else {
-                messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
-                messageClass.setReceiverId(receiverId);
-                messageClass.setIsSeen(false);
+            // rabbitMQProducer.sendMessage(message.getPayload() + " " + new
+            // Date(System.currentTimeMillis()),
+            // authSQL.getPersonId(), Integer.parseInt(receiverId));
 
-                rabbitMQProducer.sendMessage(message.getPayload() + " " + new Date(System.currentTimeMillis()),
-                        authSQL.getPersonId(), Integer.parseInt(receiverId));
-
-                MessageClass newMessage = messageDaoSQL.save(messageClass);
-                chat.addMessage(newMessage);
-                chat.setNotSeenCustomer(chat.getNotSeenCustomer() + 1);
-            }
+            // MessageClass newMessage = messageDaoSQL.save(messageClass);
+            // chat.addMessage(newMessage);
+            // chat.setNotSeenCustomer(chat.getNotSeenCustomer() + 1);
+            // }
 
             chatDaoSQL.save(chat);
 
-            sendTextMessageIfSessionExists(sellerSessionId, message.getPayload() + " " + messageClass.getIsSeen());
-            sendTextMessageIfSessionExists(customerSessionId, message.getPayload() + " " + messageClass.getIsSeen());
+            for (String sess : chat.getSessions()) {
+                sendTextMessageIfSessionExists(sess, message.getPayload() + " " + messageClass.getIsSeen());
+            }
 
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

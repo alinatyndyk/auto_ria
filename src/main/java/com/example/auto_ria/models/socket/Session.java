@@ -30,8 +30,6 @@ public class Session {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "GMT")
     private LocalDateTime disconnectedAt;
 
-    private ERole userType;
-
     private Boolean isOnline;
 
     @Column(updatable = false)
@@ -44,7 +42,6 @@ public class Session {
         this.sessionId = sessionId;
         this.userId = userId;
         this.disconnectedAt = disconnectedAt;
-        this.userType = userType;
         this.isOnline = isOnline;
     }
 

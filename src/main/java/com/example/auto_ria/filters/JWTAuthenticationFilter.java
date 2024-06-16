@@ -1,22 +1,7 @@
 package com.example.auto_ria.filters;
 
-import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
-import com.example.auto_ria.dao.auth.CustomerAuthDaoSQL;
-import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
-import com.example.auto_ria.dao.auth.SellerAuthDaoSQL;
-import com.example.auto_ria.enums.ERole;
-import com.example.auto_ria.services.auth.JwtService;
-import com.example.auto_ria.services.auth.UserDetailsServiceImpl;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.CustomersServiceMySQL;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
-import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,7 +11,22 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
+import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
+import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
+import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
+import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.services.auth.JwtService;
+import com.example.auto_ria.services.auth.UserDetailsServiceImpl;
+import com.example.auto_ria.services.user.AdministratorServiceMySQL;
+import com.example.auto_ria.services.user.ManagerServiceMySQL;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
@@ -38,26 +38,30 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     private AdminAuthDaoSQL adminAuthDaoSQL;
     private ManagerAuthDaoSQL managerAuthDaoSQL;
-    private SellerAuthDaoSQL sellerAuthDaoSQL;
-    private CustomerAuthDaoSQL customerAuthDaoSQL;
+    private UserAuthDaoSQL sellerAuthDaoSQL;
 
     private AdministratorServiceMySQL administratorServiceMySQL;
     private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
-    private CustomersServiceMySQL customersServiceMySQL;
 
+    @SuppressWarnings("null")
     @Override
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
-                                    @NotNull FilterChain filterChain) throws IOException {
+            @NotNull FilterChain filterChain) throws IOException {
         try {
+            System.out.println("filter--------------------------");
 
             String authorizationHeader = request.getHeader("Authorization");
             String authorizationParam = request.getParameter("auth");
-
+            System.out.println(authorizationHeader + authorizationParam);
+            System.out.println("1geuuuuuuuuuuuuuuuuuuuuuu");
+            
             if (authorizationHeader == null && authorizationParam == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
+
+            System.out.println("geuuuuuuuuuuuuuuuuuuuuuu");
 
             if (authorizationHeader != null && !authorizationHeader.startsWith("Bearer ")) {
                 filterChain.doFilter(request, response);
@@ -72,25 +76,28 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 jwt = authorizationParam;
             }
 
-
             System.out.println(jwt);
             String userEmail = jwtService.extractUsername(jwt);
 
-            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            System.out.println(userEmail);
+            System.out.println(SecurityContextHolder.getContext().getAuthentication());
 
-                if (
-                        jwtService.isTokenValid(jwt, userDetails)
-                ) {
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                System.out.println("userdetails");
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                System.out.println(userDetails + "userdetails1");
+                System.out.println(82+ "************************************");
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    System.out.println(84);
                     if (!isInDbAndActivated(userDetails, jwt)) {
                         throw new IllegalAccessException("Token invalid");
                     }
+                    System.out.println(88);
 
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities()
-                    );
+                            userDetails.getAuthorities());
 
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
@@ -119,15 +126,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))
                 && managerServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return managerAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.CUSTOMER.name()))
-                && customersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
-            return customerAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.SELLER.name()))
+        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.USER.name()))
                 && usersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return sellerAuthDaoSQL.findByAccessToken(jwt) != null;
         }
         return false;
     }
-
 
 }

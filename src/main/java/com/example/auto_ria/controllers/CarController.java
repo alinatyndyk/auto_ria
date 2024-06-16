@@ -1,5 +1,29 @@
 package com.example.auto_ria.controllers;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.requests.CarDTORequest;
@@ -16,7 +40,7 @@ import com.example.auto_ria.models.responses.currency.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.statistics.StatisticsResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.car.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.otherApi.CitiesService;
@@ -24,18 +48,10 @@ import com.example.auto_ria.services.otherApi.MixpanelService;
 import com.example.auto_ria.services.otherApi.ProfanityFilterService;
 import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:3000", maxAge = 3600)
@@ -58,8 +74,7 @@ public class CarController {
     @GetMapping("page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllPageQuery(
             @PathVariable("page") int page,
-            @RequestParam Map<String, String> queryParams
-    ) {
+            @RequestParam Map<String, String> queryParams) {
         try {
             CarSQL carQueryParams = new CarSQL();
 
@@ -90,11 +105,9 @@ public class CarController {
         }
     }
 
-
     @PostMapping("/viewed/{id}")
     public void addView(
-            @PathVariable("id") int id
-    ) {
+            @PathVariable("id") int id) {
         try {
             CarSQL carSQL = carsService.extractById(id);
             if (!carSQL.isActivated()) {
@@ -108,8 +121,7 @@ public class CarController {
 
     @PostMapping("/activate/{id}")
     public ResponseEntity<String> activate(
-            @PathVariable("id") int id
-    ) {
+            @PathVariable("id") int id) {
         try {
 
             CarSQL carSQL = carsService.extractById(id);
@@ -126,8 +138,7 @@ public class CarController {
 
     @PostMapping("/ban/{id}")
     public ResponseEntity<String> banCar(
-            @PathVariable("id") int id
-    ) {
+            @PathVariable("id") int id) {
         try {
 
             CarSQL carSQL = carsService.extractById(id);
@@ -145,8 +156,7 @@ public class CarController {
     @GetMapping("/middle/{id}")
     public ResponseEntity<MiddlePriceResponse> middle(
             @PathVariable("id") int id,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
             carsService.isPremium(request);
             CarSQL carSQL = carsService.extractById(id);
@@ -162,21 +172,20 @@ public class CarController {
         }
     }
 
-    @GetMapping("/by-seller/{id}/page/{page}")
+    @GetMapping("/by-user/{id}/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
             @PathVariable("id") int id,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
-            SellerSQL sellerSQL = usersServiceMySQL.getById(id);
+            UserSQL userSQL = usersServiceMySQL.getById(id);
 
             if (commonService.extractManagerFromHeader(request) != null ||
                     commonService.extractAdminFromHeader(request) != null ||
-                    commonService.extractSellerFromHeader(request).getId() == id) {
-                return carsService.getBySeller(sellerSQL, page);
+                    commonService.extractUserFromHeader(request).getId() == id) {
+                return carsService.getByUser(userSQL, page);
             } else {
-                return carsService.getBySellerActivatedOnly(sellerSQL, page);
+                return carsService.getByUserActivatedOnly(userSQL, page);
             }
 
         } catch (CustomException e) {
@@ -231,10 +240,9 @@ public class CarController {
     @PostMapping()
     public ResponseEntity<CarResponse> post(
             @ModelAttribute @Valid CarDTORequest carDTO,
-            HttpServletRequest request
-    ) {
+            HttpServletRequest request) {
         try {
-            SellerSQL seller = commonService.extractSellerFromHeader(request);
+            UserSQL user = commonService.extractUserFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
@@ -253,8 +261,12 @@ public class CarController {
                     .description(carDTO.getDescription())
                     .build();
 
-            if (!carsService.findAllBySeller(seller).isEmpty()) {
-                carsService.isPremium(request);
+            System.out.println("is premium checked");
+            if (administratorSQL == null ) {
+                //&& !carsService.findAllByUser(user).isEmpty()
+                System.out.println("is premium checked1");
+                // carsService.isPremium(request);
+                System.out.println("is premium checked2");
             }
 
             String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
@@ -269,9 +281,9 @@ public class CarController {
 
                         String email;
 
-                        if (seller != null) {
-                            vars.put("name", seller.getName());
-                            email = seller.getEmail();
+                        if (user != null) {
+                            vars.put("name", user.getName());
+                            email = user.getEmail();
                         } else if (administratorSQL != null) {
                             vars.put("name", administratorSQL.getName());
                             email = administratorSQL.getEmail();
@@ -309,7 +321,7 @@ public class CarController {
                 car.setPhoto(names);
             }
 
-            return carsService.post(car, seller, administratorSQL);
+            return carsService.post(car, user, administratorSQL);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -317,12 +329,12 @@ public class CarController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<CarResponse> patchCar(@PathVariable int id,
-                                                @RequestBody @Valid CarUpdateDTO partialCar,
-                                                HttpServletRequest request) {
+            @RequestBody @Valid CarUpdateDTO partialCar,
+            HttpServletRequest request) {
         try {
             CarSQL carSQL = carsService.extractById(id);
 
-            SellerSQL seller = commonService.extractSellerFromHeader(request);
+            UserSQL userSQL = commonService.extractUserFromHeader(request);
             AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
             carsService.checkCredentials(request, id);
@@ -343,9 +355,9 @@ public class CarController {
 
                         String email;
 
-                        if (seller != null) {
-                            vars.put("name", seller.getName());
-                            email = seller.getEmail();
+                        if (userSQL != null) {
+                            vars.put("name", userSQL.getName());
+                            email = userSQL.getEmail();
                         } else if (administratorSQL != null) {
                             vars.put("name", administratorSQL.getName());
                             email = administratorSQL.getEmail();
@@ -379,11 +391,10 @@ public class CarController {
 
     @PatchMapping("photos/{id}")
     public ResponseEntity<String> patchPhotos(@PathVariable int id,
-                                              @RequestParam("pictures[]") MultipartFile[] newPictures,
-                                              HttpServletRequest request) {
+            @RequestParam("pictures[]") MultipartFile[] newPictures,
+            HttpServletRequest request) {
         try {
             carsService.checkCredentials(request, id);
-
 
             CarSQL carSQL = carsService.extractById(id);
 

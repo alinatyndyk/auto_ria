@@ -30,9 +30,7 @@ public class JwtService {
 
     public String extractUsername(String jwt, ETokenRole role) {
         String claim;
-        System.out.println(33);
         try {
-        System.out.println(35);
             claim = extractClaim(jwt, Claims::getSubject, role);
         } catch (NullPointerException e) {
             return null;
@@ -46,7 +44,6 @@ public class JwtService {
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsTFunction, ETokenRole role) {
         Claims claims = extractAllClaims(token, role);
-        System.out.println("49 " + claims);
         return claimsTFunction.apply(claims);
     }
 
@@ -87,7 +84,7 @@ public class JwtService {
         try {
             claims = Jwts
                     .parserBuilder()
-                    .setSigningKey(getSigningKey(role))//reset pass new key
+                    .setSigningKey(getSigningKey(role)) // reset pass new key
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -99,14 +96,12 @@ public class JwtService {
 
     public Key getSigningKey(ETokenRole role) {
         String key = switch (role) {
+            case USER -> environment.getProperty("token.generation.key.user");
             case ADMIN -> environment.getProperty("token.generation.key.admin");
             case MANAGER -> environment.getProperty("token.generation.key.manager");
-            case SELLER -> environment.getProperty("token.generation.key.seller");
-            case CUSTOMER -> environment.getProperty("token.generation.key.customer");
             case ADMIN_REGISTER -> environment.getProperty("token.register.key.admin");
             case MANAGER_REGISTER -> environment.getProperty("token.register.key.manager");
-            case SELLER_ACTIVATE -> environment.getProperty("token.activate.key.seller");
-            case CUSTOMER_ACTIVATE -> environment.getProperty("token.activate.key.customer");
+            case USER_ACTIVATE -> environment.getProperty("token.activate.key.user"); // mix seller/customer
             case FORGOT_PASSWORD -> environment.getProperty("token.forgot.pass.key");
         };
 
@@ -117,10 +112,8 @@ public class JwtService {
     public String generateRegisterKey(
             Map<String, Object> extraClaims,
             String email,
-            ETokenRole role
-    ) {
-        System.out.println(extraClaims);
-        System.out.println("extraClaims");
+            ETokenRole role) {
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -132,7 +125,6 @@ public class JwtService {
     }
 
     public String generateRegisterKey(String email, ERole roleModel, ETokenRole role) {
-        System.out.println(email + roleModel + role);
         Map<String, Object> args = new HashMap<>();
         args.put("role", roleModel);
         args.put("email", email);
@@ -140,49 +132,47 @@ public class JwtService {
         return generateRegisterKey(args, email, role);
     }
 
-    public String generateToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setIssuer(ERole.SELLER.name())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256)
-                .compact();
-    }
+    // public String generateToken(
+    //         Map<String, Object> extraClaims,
+    //         UserDetails userDetails) {
+    //     return Jwts
+    //             .builder()
+    //             .setClaims(extraClaims)
+    //             .setSubject(userDetails.getUsername())
+    //             .setIssuedAt(new Date(System.currentTimeMillis()))
+    //             .setIssuer(ERole.SELLER.name())
+    //             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+    //             .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256) /// ??????????????
+    //             .compact();
+    // }
 
-    public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
-    }
+    // public String generateToken(UserDetails userDetails) {
+    // return generateToken(new HashMap<>(), userDetails);
+    // }
 
-    public String generateRefreshToken(
-            Map<String, Object> extraClaims,
-            UserDetails userDetails
-    ) {
-        return Jwts
-                .builder()
-                .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setIssuer(ERole.SELLER.name())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256)
-                .compact();
-    }
+    // public String generateRefreshToken(
+    // Map<String, Object> extraClaims,
+    // UserDetails userDetails
+    // ) {
+    // return Jwts
+    // .builder()
+    // .setClaims(extraClaims)
+    // .setSubject(userDetails.getUsername())
+    // .setIssuedAt(new Date(System.currentTimeMillis()))
+    // .setIssuer(ERole.SELLER.name())
+    // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
+    // .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256)
+    // .compact();
+    // }
 
-    public String generateRefreshToken(UserDetails userDetails) {
-        return generateRefreshToken(new HashMap<>(), userDetails);
-    }
+    // public String generateRefreshToken(UserDetails userDetails) {
+    // return generateRefreshToken(new HashMap<>(), userDetails);
+    // }
 
     public String generateCode(
             ETokenRole issuer,
             Map<String, String> extraClaims,
-            String userDetails
-    ) {
+            String userDetails) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -197,16 +187,14 @@ public class JwtService {
     public String generateRegistrationCode(
             Map<String, String> extraClaims,
             String userDetails,
-            ETokenRole role
-    ) {
+            ETokenRole role) {
         return generateCode(role, extraClaims, userDetails);
     }
 
     public AuthenticationResponse generateTokenPair(
             ETokenRole issuer,
             Map<String, String> extraClaims,
-            UserDetails userDetails
-    ) {
+            UserDetails userDetails) {
         String accessToken = Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -232,8 +220,7 @@ public class JwtService {
 
     public AuthenticationResponse generateManagerTokenPair(
             Map<String, String> extraClaims,
-            UserDetails userDetails
-    ) {
+            UserDetails userDetails) {
         return generateTokenPair(ETokenRole.MANAGER, extraClaims, userDetails);
     }
 
@@ -243,8 +230,7 @@ public class JwtService {
 
     public AuthenticationResponse generateAdminTokenPair(
             Map<String, String> extraClaims,
-            UserDetails userDetails
-    ) {
+            UserDetails userDetails) {
         return generateTokenPair(ETokenRole.ADMIN, extraClaims, userDetails);
     }
 
@@ -252,15 +238,14 @@ public class JwtService {
         return generateAdminTokenPair(new HashMap<>(), userDetails);
     }
 
-    public AuthenticationResponse generateCustomerTokenPair(
+    public AuthenticationResponse generateUserTokenPair(
             Map<String, String> extraClaims,
-            UserDetails userDetails
-    ) {
-        return generateTokenPair(ETokenRole.CUSTOMER, extraClaims, userDetails);
+            UserDetails userDetails) {
+        return generateTokenPair(ETokenRole.USER, extraClaims, userDetails);
     }
 
-    public AuthenticationResponse generateCustomerTokenPair(UserDetails userDetails) {
-        return generateCustomerTokenPair(new HashMap<>(), userDetails);
+    public AuthenticationResponse generateUserTokenPair(UserDetails userDetails) {
+        return generateUserTokenPair(new HashMap<>(), userDetails);
     }
 
     public boolean isTokenValid(String jwt, UserDetails userDetails) {
@@ -270,7 +255,7 @@ public class JwtService {
 
     public boolean isKeyValid(String jwt, String email, ETokenRole role) {
         String username = extractUsername(jwt, role);
-        System.out.println(username +  "user name");
+        System.out.println(username + "user name");
         return (username.equals(email) && !isTokenExprired(jwt));
     }
 
@@ -278,7 +263,6 @@ public class JwtService {
         String bearerToken = null;
 
         String authorizationHeader = request.getHeader("Authorization");
-        System.out.println(authorizationHeader + "auth header");
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             bearerToken = authorizationHeader.substring(7);
         }

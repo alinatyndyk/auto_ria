@@ -1,21 +1,21 @@
 package com.example.auto_ria.configurations;
 
-import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
-import com.example.auto_ria.configurations.providers.CustomerAuthenticationProvider;
-import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
-import com.example.auto_ria.configurations.providers.SellerAuthenticationProvider;
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.user.CustomerDaoSQL;
-import com.example.auto_ria.dao.user.ManagerDaoSQL;
-import com.example.auto_ria.dao.user.UserDaoSQL;
-import lombok.AllArgsConstructor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
-import java.util.List;
+import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
+import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
+import com.example.auto_ria.configurations.providers.UserAuthenticationProvider;
+import com.example.auto_ria.dao.user.AdministratorDaoSQL;
+import com.example.auto_ria.dao.user.ManagerDaoSQL;
+import com.example.auto_ria.dao.user.UserDaoSQL;
+
+import lombok.AllArgsConstructor;
 
 @Configuration
 @AllArgsConstructor
@@ -23,17 +23,15 @@ public class ApplicationConfiguration {
 
     private UserDaoSQL userDAO;
     private ManagerDaoSQL managerDaoSQL;
-    private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
-    private CustomerAuthenticationProvider customerAuthenticationProvider;
     private ManagerAuthenticationProvider managerAuthenticationProvider;
-    private SellerAuthenticationProvider sellerAuthenticationProvider;
+    private UserAuthenticationProvider userAuthenticationProvider;
     private AdminAuthenticationProvider adminAuthenticationProvider;
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userDAO.findSellerByEmail(username);
+        return username -> userDAO.findUserByEmail(username);
     }
 
     @Bean
@@ -47,16 +45,10 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public UserDetailsService customerDetailsService() {
-        return username -> customerDaoSQL.findByEmail(username);
-    }
-
-    @Bean
     public AuthenticationManager authenticationManager() {
         return new ProviderManager(
-                List.of(sellerAuthenticationProvider,
+                List.of(userAuthenticationProvider,
                         managerAuthenticationProvider,
-                        adminAuthenticationProvider,
-                        customerAuthenticationProvider));
+                        adminAuthenticationProvider));
     }
 }

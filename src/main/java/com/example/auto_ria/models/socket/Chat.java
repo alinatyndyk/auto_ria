@@ -33,14 +33,18 @@ public class Chat {
     )
     private List<MessageClass> messages = new ArrayList<>();
 
-    private int sellerId;
-    private int customerId;
+    // private int user1Id;
+    // private int user2Id;
 
-    private String sellerSessionId;
-    private String customerSessionId;
+    private List<Integer> users = new ArrayList<>();
 
-    private int notSeenSeller;
-    private int notSeenCustomer;
+    // private String user1SessionId;
+    // private String user2SessionId;
+
+    private List<String> sessions = new ArrayList<>();
+
+    private int notSeenUser1;
+    private int notSeenUser2;
 
     private String roomKey;
 

@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterSellerRequest {
+public class RegisterUserRequest {
+
     @NotBlank(message = "city is required")
     private String city;
 
@@ -41,4 +42,5 @@ public class RegisterSellerRequest {
             message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
                     "At least 8 characters long")
     private String password;
+
 }

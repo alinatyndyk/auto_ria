@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
-public interface SellerAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
+public interface UserAuthDaoSQL extends JpaRepository<AuthSQL, Integer> {
     @Transactional
     void deleteAllByPersonId(int personId);
 

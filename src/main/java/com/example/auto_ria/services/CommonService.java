@@ -2,21 +2,18 @@ package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
 import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.user.CustomerDaoSQL;
 import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.user.AdminResponse;
-import com.example.auto_ria.models.responses.user.CustomerResponse;
 import com.example.auto_ria.models.responses.user.ManagerResponse;
-import com.example.auto_ria.models.responses.user.SellerResponse;
+import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.CustomerSQL;
 import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
@@ -37,12 +34,12 @@ public class CommonService {
     private UserDaoSQL userDaoSQL;
     private SessionDaoSQL sessionDaoSQL;
     private ManagerDaoSQL managerDaoSQL;
-    private CustomerDaoSQL customerDaoSQL;
     private AdministratorDaoSQL administratorDaoSQL;
 
     public void transferAvatar(MultipartFile picture, String originalFileName) {
         try {
-            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator
+                    + originalFileName;
             File transferDestinationFile = new File(path);
             picture.transferTo(transferDestinationFile);
         } catch (CustomException e) {
@@ -68,7 +65,8 @@ public class CommonService {
 
     public void removeAvatar(String originalFileName) {
         try {
-            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator + originalFileName;
+            String path = System.getProperty("user.home") + File.separator + "springboot-lib" + File.separator
+                    + originalFileName;
             File transferDestinationFile = new File(path);
             if (transferDestinationFile.exists()) {
                 transferDestinationFile.delete();
@@ -78,30 +76,37 @@ public class CommonService {
         }
     }
 
-
     public String extractEmailFromHeader(HttpServletRequest request, ETokenRole role) {
         try {
             String bearerToken = jwtService.extractTokenFromHeader(request);
-            System.out.println(bearerToken + "bearer token");
             return jwtService.extractUsername(bearerToken, role);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println("111111111111111 e.getMessage()");
             throw new CustomException("Please sign in", HttpStatus.UNAUTHORIZED);
         }
 
     }
 
-    public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
-        SellerSQL sellerSQL = null;
+    // public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
+    // SellerSQL sellerSQL = null;
+    // try {
+    // String email = extractEmailFromHeader(request, ETokenRole.SELLER);
+    // // sellerSQL = userDaoSQL.findSellerByEmail(email);
+    // } catch (Exception ignore) {
+    // }
+    // return sellerSQL;
+    // }
+
+    // mix
+    public UserSQL extractUserFromHeader(HttpServletRequest request) {
+        UserSQL sellerSQL = null;
         try {
-            String email = extractEmailFromHeader(request, ETokenRole.SELLER);
-            sellerSQL = userDaoSQL.findSellerByEmail(email);
+            String email = extractEmailFromHeader(request, ETokenRole.USER);
+            sellerSQL = userDaoSQL.findByEmail(email);
         } catch (Exception ignore) {
         }
         return sellerSQL;
     }
-
 
     public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
         ManagerSQL managerSQL;
@@ -123,9 +128,10 @@ public class CommonService {
         return administratorSQL;
     }
 
-    public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
-        return customerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.CUSTOMER));
-    }
+    // public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
+    // return customerDaoSQL.findByEmail(extractEmailFromHeader(request,
+    // ETokenRole.CUSTOMER));
+    // }
 
     public ERole findRoleByEmail(String email) {
         try {
@@ -133,10 +139,8 @@ public class CommonService {
                 return ERole.ADMIN;
             } else if (managerDaoSQL.findByEmail(email) != null) {
                 return ERole.MANAGER;
-            } else if (userDaoSQL.findSellerByEmail(email) != null) {
-                return ERole.SELLER;
-            } else if (customerDaoSQL.findByEmail(email) != null) {
-                return ERole.CUSTOMER;
+            } else if (userDaoSQL.findUserByEmail(email) != null) {
+                return ERole.USER; // was seller and cus -> only user
             } else {
                 return null;
             }
@@ -145,28 +149,28 @@ public class CommonService {
         }
     }
 
-    public CustomerResponse createCustomerResponse(CustomerSQL customer) {
-        try {
+    // public CustomerResponse createCustomerResponse(CustomerSQL customer) {
+    // try {
 
-            Session session = sessionDaoSQL.findByUserId(customer.getId());
+    // Session session = sessionDaoSQL.findByUserId(customer.getId());
 
-            return CustomerResponse.builder()
-                    .id(customer.getId())
-                    .name(customer.getName())
-                    .lastName(customer.getLastName())
-                    .region(customer.getRegion())
-                    .city(customer.getCity())
-                    .avatar(customer.getAvatar())
-                    .role(ERole.CUSTOMER)
-                    .isOnline(session.getIsOnline())
-                    .lastOnline(session.getDisconnectedAt())
-                    .createdAt(customer.getCreatedAt())
-                    .build();
+    // return CustomerResponse.builder()
+    // .id(customer.getId())
+    // .name(customer.getName())
+    // .lastName(customer.getLastName())
+    // .region(customer.getRegion())
+    // .city(customer.getCity())
+    // .avatar(customer.getAvatar())
+    // .role(ERole.CUSTOMER)
+    // .isOnline(session.getIsOnline())
+    // .lastOnline(session.getDisconnectedAt())
+    // .createdAt(customer.getCreatedAt())
+    // .build();
 
-        } catch (Exception e) {
-            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-        }
-    }
+    // } catch (Exception e) {
+    // throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+    // }
+    // }
 
     public ManagerResponse createManagerResponse(ManagerSQL manager) {
         try {
@@ -201,29 +205,29 @@ public class CommonService {
         }
     }
 
-    public SellerResponse createSellerResponse(SellerSQL sellerSQL) {
+    public UserResponse createUserResponse(UserSQL userSQL) {
         try {
-            SellerResponse sellerResponse = SellerResponse.builder()
-                    .id(sellerSQL.getId())
-                    .name(sellerSQL.getName())
-                    .lastName(sellerSQL.getLastName())
-                    .region(sellerSQL.getRegion())
-                    .city(sellerSQL.getCity())
-                    .number(sellerSQL.getNumber())
-                    .avatar(sellerSQL.getAvatar())
-                    .createdAt(sellerSQL.getCreatedAt())
-                    .accountType(sellerSQL.getAccountType())
-                    .role(ERole.SELLER)
-                    .isPaymentSourcePresent(sellerSQL.isPaymentSourcePresent())
+            UserResponse userResponse = UserResponse.builder()
+                    .id(userSQL.getId())
+                    .name(userSQL.getName())
+                    .lastName(userSQL.getLastName())
+                    .region(userSQL.getRegion())
+                    .city(userSQL.getCity())
+                    .number(userSQL.getNumber())
+                    .avatar(userSQL.getAvatar())
+                    .createdAt(userSQL.getCreatedAt())
+                    .accountType(userSQL.getAccountType())
+                    .role(ERole.USER)
+                    .isPaymentSourcePresent(userSQL.isPaymentSourcePresent())
                     .build();
 
-            Session session = sessionDaoSQL.findByUserId(sellerSQL.getId());
+            Session session = sessionDaoSQL.findByUserId(userSQL.getId());
 
             if (session != null) {
-                sellerResponse.setLastOnline(session.getDisconnectedAt());
+                userResponse.setLastOnline(session.getDisconnectedAt());
             }
 
-            return sellerResponse;
+            return userResponse;
 
         } catch (Exception e) {
             System.out.println(e.getMessage());

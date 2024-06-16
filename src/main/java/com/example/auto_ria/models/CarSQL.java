@@ -3,7 +3,7 @@ package com.example.auto_ria.models;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -11,6 +11,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import org.apache.commons.lang3.EnumUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -23,6 +25,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = {"user"})
 public class CarSQL {
 
     @Id
@@ -50,7 +53,7 @@ public class CarSQL {
             joinColumns = @JoinColumn(name = "car_id", nullable = false),  // Set nullable to false
             inverseJoinColumns = @JoinColumn(name = "seller_id")
     )
-    private SellerSQL seller;
+    private UserSQL user;
 
     private String price;
 
@@ -71,9 +74,8 @@ public class CarSQL {
 
 
     @Builder
-    @SuppressWarnings("unused")
     public CarSQL(EBrand brand, Integer powerH, String city, String region,
-                  EModel model, List<String> photo, SellerSQL seller, String price,
+                  EModel model, List<String> photo, UserSQL user, String price,
                   ECurrency currency, String description, boolean isActivated) {
         this.brand = brand;
         this.model = model;
@@ -83,7 +85,7 @@ public class CarSQL {
         this.city = city;
         this.region = region;
         this.photo = photo;
-        this.seller = seller;
+        this.user = user;
         this.price = price;
         this.currency = currency;
         this.description = description;

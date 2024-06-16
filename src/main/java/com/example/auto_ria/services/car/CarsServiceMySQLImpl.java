@@ -1,51 +1,55 @@
 package com.example.auto_ria.services.car;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.example.auto_ria.dao.CarDaoSQL;
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
-import com.example.auto_ria.enums.*;
+import com.example.auto_ria.enums.EAccountType;
+import com.example.auto_ria.enums.ECurrency;
+import com.example.auto_ria.enums.EMail;
+import com.example.auto_ria.enums.EModel;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.CarSQL;
 import com.example.auto_ria.models.responses.car.CarResponse;
 import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
-import com.example.auto_ria.models.responses.user.SellerCarResponse;
+import com.example.auto_ria.models.responses.user.UserCarResponse;
 import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.SellerSQL;
+import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.currency.CurrencyConverterService;
-import jakarta.persistence.EntityManager;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.data.domain.*;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @AllArgsConstructor
 public class CarsServiceMySQLImpl {
 
-
-    private EntityManager entityManager;
     private CarDaoSQL carDAO;
-    private AdministratorDaoSQL administratorDaoSQL;
     private CommonService commonService;
     private FMService mailer;
     private CurrencyConverterService currencyConverterService;
 
     private Environment environment;
-
 
     public ResponseEntity<List<CarSQL>> getAll() {
         try {
@@ -77,8 +81,8 @@ public class CarsServiceMySQLImpl {
                 String currency = map.get("currency").toString();
                 String price = map.get("price").toString();
 
-                CurrencyConverterResponse response =
-                        currencyConverterService.convert(ECurrency.valueOf(currency), price);
+                CurrencyConverterResponse response = currencyConverterService.convert(ECurrency.valueOf(currency),
+                        price);
 
                 totalInUAH = totalInUAH + response.getCurrencyHashMap().get(ECurrency.UAH);
                 totalInEUR = totalInEUR + response.getCurrencyHashMap().get(ECurrency.EUR);
@@ -96,7 +100,8 @@ public class CarsServiceMySQLImpl {
                     .middleInUSD(middleInUSD)
                     .build());
         } catch (Exception e) {
-            throw new CustomException("Could not get middle price for current item: " + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
+            throw new CustomException("Could not get middle price for current item: " + e.getMessage(),
+                    HttpStatus.EXPECTATION_FAILED);
         }
     }
 
@@ -131,11 +136,10 @@ public class CarsServiceMySQLImpl {
 
             if (!carSQL.isActivated() &&
                     commonService.extractManagerFromHeader(request) == null &&
-                    commonService.extractAdminFromHeader(request) == null
-            ) {
-                SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+                    commonService.extractAdminFromHeader(request) == null) {
+                UserSQL user = commonService.extractUserFromHeader(request);
 
-                if (sellerSQL == null || sellerSQL.getId() != carSQL.getSeller().getId()) {
+                if (user == null || user.getId() != carSQL.getUser().getId()) {
                     throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
                 }
             }
@@ -165,9 +169,9 @@ public class CarsServiceMySQLImpl {
 
     public void checkCredentials(HttpServletRequest request, int id) {
         try {
-            SellerSQL sellerFromHeader = commonService.extractSellerFromHeader(request);
+            UserSQL userFromHeader = commonService.extractUserFromHeader(request);
             CarSQL carSQL = extractById(id);
-            if (sellerFromHeader != null && sellerFromHeader.getId() != carSQL.getSeller().getId()) {
+            if (userFromHeader != null && userFromHeader.getId() != carSQL.getUser().getId()) {
                 throw new CustomException("Access_denied: check credentials", HttpStatus.FORBIDDEN);
             }
         } catch (CustomException e) {
@@ -179,9 +183,9 @@ public class CarsServiceMySQLImpl {
 
     public void isPremium(HttpServletRequest request) {
         try {
-            SellerSQL sellerSQL = commonService.extractSellerFromHeader(request);
+            UserSQL userSQL = commonService.extractUserFromHeader(request);
 
-            if (sellerSQL != null && sellerSQL.getAccountType().equals(EAccountType.BASIC)) {
+            if (userSQL != null && userSQL.getAccountType().equals(EAccountType.BASIC)) {
                 throw new CustomException("Premium plan required", HttpStatus.PAYMENT_REQUIRED);
             }
         } catch (CustomException e) {
@@ -197,9 +201,9 @@ public class CarsServiceMySQLImpl {
             carDAO.save(carSQL);
             try {
                 HashMap<String, Object> vars = new HashMap<>();
-                vars.put("name", carSQL.getSeller().getName());
+                vars.put("name", carSQL.getUser().getName());
                 vars.put("car_id", carSQL.getId());
-                mailer.sendEmail(carSQL.getSeller().getEmail(), EMail.CAR_BEING_ACTIVATED, vars);
+                mailer.sendEmail(carSQL.getUser().getEmail(), EMail.CAR_BEING_ACTIVATED, vars);
             } catch (Exception ignore) {
             }
             return ResponseEntity.ok("Car activated successfully");
@@ -214,9 +218,9 @@ public class CarsServiceMySQLImpl {
             carDAO.save(carSQL);
             try {
                 HashMap<String, Object> vars = new HashMap<>();
-                vars.put("name", carSQL.getSeller().getName());
+                vars.put("name", carSQL.getUser().getName());
                 vars.put("car_id", carSQL.getId());
-                mailer.sendEmail(carSQL.getSeller().getEmail(), EMail.CAR_BEING_BANNED, vars);
+                mailer.sendEmail(carSQL.getUser().getEmail(), EMail.CAR_BEING_BANNED, vars);
             } catch (Exception ignore) {
             }
             return ResponseEntity.ok("Car banned successfully");
@@ -225,11 +229,11 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<Page<CarResponse>> getBySeller(SellerSQL seller, int page) {
+    public ResponseEntity<Page<CarResponse>> getByUser(UserSQL user, int page) {
         try {
 
             Pageable pageable = PageRequest.of(page, 2);
-            Page<CarSQL> carsPage = carDAO.findAllBySeller(seller, pageable);
+            Page<CarSQL> carsPage = carDAO.findAllByUser(user, pageable);
 
             Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 
@@ -239,11 +243,11 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<Page<CarResponse>> getBySellerActivatedOnly(SellerSQL seller, int page) {
+    public ResponseEntity<Page<CarResponse>> getByUserActivatedOnly(UserSQL user, int page) {
         try {
 
             Pageable pageable = PageRequest.of(page, 2);
-            Page<CarSQL> carsPage = carDAO.findAllBySellerAndActivatedTrue(seller, pageable);
+            Page<CarSQL> carsPage = carDAO.findAllByUserAndActivatedTrue(user, pageable);
 
             Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 
@@ -261,15 +265,15 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public List<CarSQL> findAllBySeller(SellerSQL seller) {
+    public List<CarSQL> findAllByUser(UserSQL user) {
         try {
-            return carDAO.findBySeller(seller);
+            return carDAO.findByUser(user);
         } catch (Exception e) {
             throw new CustomException("Failed fetch: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
 
-    public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, SellerSQL seller, AdministratorSQL administratorSQL) {
+    public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, UserSQL user, AdministratorSQL administratorSQL) {
         try {
             CarSQL car = CarSQL.builder()
                     .brand(carDTO.getBrand())
@@ -284,10 +288,9 @@ public class CarsServiceMySQLImpl {
                     .isActivated(carDTO.isActivated())
                     .build();
 
-
             if (administratorSQL != null) {
 
-                SellerSQL adminSeller = SellerSQL.adminBuilder()
+                UserSQL adminSeller = UserSQL.adminBuilder()
                         .id(administratorSQL.getId())
                         .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
                         .name(environment.getProperty("office.name"))
@@ -295,9 +298,9 @@ public class CarsServiceMySQLImpl {
                         .city(environment.getProperty("office.city"))
                         .build();
 
-                car.setSeller(adminSeller);
+                car.setUser(adminSeller);
             } else {
-                car.setSeller(seller);
+                car.setUser(user);
             }
 
             CarSQL carSQL = carDAO.save(car);
@@ -315,10 +318,10 @@ public class CarsServiceMySQLImpl {
             carDAO.deleteById(id);
             try {
                 HashMap<String, Object> vars = new HashMap<>();
-                vars.put("name", car.getSeller().getName());
+                vars.put("name", car.getUser().getName());
                 vars.put("description", car.getDescription());
 
-                mailer.sendEmail(car.getSeller().getEmail(), EMail.CAR_BEING_BANNED, vars);
+                mailer.sendEmail(car.getUser().getEmail(), EMail.CAR_BEING_BANNED, vars);
 
             } catch (Exception ignore) {
             }
@@ -369,7 +372,8 @@ public class CarsServiceMySQLImpl {
     private CarResponse formCarResponse(CarSQL carSQL) {
         try {
 
-            CurrencyConverterResponse converterResponse = currencyConverterService.convert(carSQL.getCurrency(), carSQL.getPrice());
+            CurrencyConverterResponse converterResponse = currencyConverterService.convert(carSQL.getCurrency(),
+                    carSQL.getPrice());
 
             return CarResponse.builder()
                     .id(carSQL.getId())
@@ -381,16 +385,16 @@ public class CarsServiceMySQLImpl {
                     .price(carSQL.getPrice())
                     .currency(carSQL.getCurrency())
                     .photo(carSQL.getPhoto())
-                    .seller(SellerCarResponse.builder()
-                            .id(carSQL.getSeller().getId())
-                            .name(carSQL.getSeller().getName())
-                            .lastName(carSQL.getSeller().getLastName())
-                            .avatar(carSQL.getSeller().getAvatar())
-                            .city(carSQL.getSeller().getCity())
-                            .region(carSQL.getSeller().getRegion())
-                            .role(carSQL.getSeller().getRoles().get(0))
-                            .number(carSQL.getSeller().getNumber())
-                            .createdAt(carSQL.getSeller().getCreatedAt())
+                    .user(UserCarResponse.builder()
+                            .id(carSQL.getUser().getId())
+                            .name(carSQL.getUser().getName())
+                            .lastName(carSQL.getUser().getLastName())
+                            .avatar(carSQL.getUser().getAvatar())
+                            .city(carSQL.getUser().getCity())
+                            .region(carSQL.getUser().getRegion())
+                            .role(carSQL.getUser().getRoles().get(0))
+                            .number(carSQL.getUser().getNumber())
+                            .createdAt(carSQL.getUser().getCreatedAt())
                             .build())
                     .description(carSQL.getDescription())
                     .priceUAH(converterResponse.getCurrencyHashMap().get(ECurrency.UAH))
@@ -403,6 +407,5 @@ public class CarsServiceMySQLImpl {
             throw new CustomException("Failed to form response: " + e.getMessage(), HttpStatus.CONFLICT);
         }
     }
-
 
 }

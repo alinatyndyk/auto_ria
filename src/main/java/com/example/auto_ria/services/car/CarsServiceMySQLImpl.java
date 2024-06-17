@@ -14,6 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.auto_ria.dao.CarDaoSQL;
@@ -131,14 +134,18 @@ public class CarsServiceMySQLImpl {
             }
             CarSQL carSQL = carDAO.findById(id).get();
 
-            if (!carSQL.isActivated() &&
-                    commonService.extractManagerFromHeader(request) == null && // todo if tole m or m
-                    commonService.extractAdminFromHeader(request) == null) {
-                UserSQL user = commonService.extractUserFromHeader(request);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-                if (user == null || user.getId() != carSQL.getUser().getId()) {
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                if (!carSQL.isActivated() && 
+                userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER")) &&
+                carSQL.getUser().getEmail() != userDetails.getUsername()) {
                     throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
                 }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
             CarResponse carResponse = formCarResponse(carSQL);
@@ -285,7 +292,7 @@ public class CarsServiceMySQLImpl {
                     .isActivated(carDTO.isActivated())
                     .build();
 
-                    car.setUser(user);
+            car.setUser(user);
 
             CarSQL carSQL = carDAO.save(car);
 

@@ -33,7 +33,7 @@ public class InitialDataLoader {
                         .lastName(environment.getProperty("initial.admin.lastName"))
                         .email(environment.getProperty("initial.admin.email"))
                         .password(passwordEncoder.encode(environment.getProperty("initial.admin.pass")))
-                        .roles(List.of(ERole.USER, ERole.ADMIN, ERole.ADMIN_GLOBAL))
+                        .roles(List.of(ERole.USER, ERole.ADMIN))
                         .avatar(null)
                         .city(environment.getProperty("initial.admin.city"))
                         .region(environment.getProperty("initial.admin.region"))

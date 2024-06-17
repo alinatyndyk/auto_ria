@@ -19,8 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.auto_ria.currency_converter.ExchangeRateCache;
-import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
-import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
@@ -43,15 +41,10 @@ import lombok.SneakyThrows;
 public class CronConfiguration {
 
     private UserDaoSQL userDaoSQL;
-
     private UserAuthDaoSQL userAuthDaoSQL;
-    private ManagerAuthDaoSQL managerAuthDaoSQL;
-    private AdminAuthDaoSQL adminAuthDaoSQL;
-
     private PremiumPlanDaoSQL premiumPlanDaoSQL;
 
     private FMService mailer;
-
     private Environment environment;
 
     @SneakyThrows
@@ -138,8 +131,6 @@ public class CronConfiguration {
             LocalDateTime twoDaysAgoDateTime = LocalDateTime.of(twoDaysAgo, LocalTime.MIDNIGHT);
 
             userDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-            // administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-            // managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -163,9 +154,8 @@ public class CronConfiguration {
             LocalDate now = LocalDate.now();
             LocalDateTime nowDateTime = LocalDateTime.of(now, LocalTime.now()).minusHours(24);
 
+            System.out.println(nowDateTime + "*******************");
             userAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
-            managerAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
-            adminAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

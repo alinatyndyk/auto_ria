@@ -11,6 +11,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +35,7 @@ import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.EModel;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.CarSQL;
@@ -38,15 +43,12 @@ import com.example.auto_ria.models.responses.car.CarResponse;
 import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.currency.ExchangeRateResponse;
 import com.example.auto_ria.models.responses.statistics.StatisticsResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.car.CarsServiceMySQLImpl;
 import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.otherApi.MixpanelService;
 import com.example.auto_ria.services.otherApi.ProfanityFilterService;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -118,6 +120,7 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER')")
     @PostMapping("/activate/{id}")
     public ResponseEntity<String> activate(
             @PathVariable("id") int id) {
@@ -135,6 +138,7 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER')")
     @PostMapping("/ban/{id}")
     public ResponseEntity<String> banCar(
             @PathVariable("id") int id) {
@@ -152,19 +156,32 @@ public class CarController {
         }
     }
 
+    
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', USER)")
     @GetMapping("/middle/{id}")
     public ResponseEntity<MiddlePriceResponse> middle(
             @PathVariable("id") int id,
             HttpServletRequest request) {
         try {
-            carsService.isPremium(request);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))
+                && userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("MANAGER"))){
+                    carsService.isPremium(request);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
             CarSQL carSQL = carsService.extractById(id);
+            carsService.checkCredentials(request, id);
 
             if (!carSQL.isActivated()) {
                 throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
             }
 
-            carsService.checkCredentials(request, id);
             return carsService.getMiddlePrice(carSQL.getModel(), carSQL.getRegion());
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -174,35 +191,29 @@ public class CarController {
     @GetMapping("/by-user/{id}/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
-            @PathVariable("id") int id
-            // HttpServletRequest request
-            ) {
+            @PathVariable("id") int id) {
         try {
             UserSQL userSQL = usersServiceMySQL.getById(id);
-
-            // if (commonService.extractManagerFromHeader(request) != null ||
-            //         commonService.extractAdminFromHeader(request) != null ||
-            //         commonService.extractUserFromHeader(request).getId() == id) {
-            //     return carsService.getByUser(userSQL, page);
-            // } else {
-                return carsService.getByUserActivatedOnly(userSQL, page);
-            // }
+            return carsService.getByUserActivatedOnly(userSQL, page);
 
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @GetMapping("/statistics/{id}")
     public ResponseEntity<StatisticsResponse> getStatistics(
             @PathVariable("id") int id,
             HttpServletRequest request) {
         try {
+
+            
             carsService.isPremium(request);
             CarSQL carSQL = carsService.extractById(id);
 
             if (carSQL.isActivated()) {
-                throw new CustomException("The car is already banned", HttpStatus.FORBIDDEN);
+                throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
             }
 
             return ResponseEntity.ok(mixpanelService.getCarViewsStatistics(String.valueOf(id)));
@@ -237,13 +248,13 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'USER')")
     @PostMapping()
     public ResponseEntity<CarResponse> post(
             @ModelAttribute @Valid CarDTORequest carDTO,
             HttpServletRequest request) {
         try {
             UserSQL user = commonService.extractUserFromHeader(request);
-            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request); //todo if role admin 
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
@@ -261,12 +272,18 @@ public class CarController {
                     .description(carDTO.getDescription())
                     .build();
 
-            System.out.println("is premium checked"); //todo
-            if (administratorSQL == null ) {
-                //&& !carsService.findAllByUser(user).isEmpty()
-                System.out.println("is premium checked1");
-                // carsService.isPremium(request);
-                System.out.println("is premium checked2");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                if (userDetails.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("USER"))
+                        && !carsService.findAllByUser(user).isEmpty()) {
+                    carsService.isPremium(request);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
             String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
@@ -277,16 +294,13 @@ public class CarController {
                     car.setActivated(false);
                     try {
                         HashMap<String, Object> vars = new HashMap<>();
-                        List<ManagerSQL> managers = managerServiceMySQL.getAll();
+                        List<UserSQL> managers = usersServiceMySQL.findAllByRole(ERole.MANAGER);
 
                         String email;
 
                         if (user != null) {
                             vars.put("name", user.getName());
                             email = user.getEmail();
-                        } else if (administratorSQL != null) {
-                            vars.put("name", administratorSQL.getName()); //
-                            email = administratorSQL.getEmail();
                         } else {
                             throw new CustomException("Invalid token user", HttpStatus.FORBIDDEN);
                         }
@@ -321,12 +335,13 @@ public class CarController {
                 car.setPhoto(names);
             }
 
-            return carsService.post(car, user, administratorSQL);
+            return carsService.post(car, user);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'USER')")
     @PatchMapping("/{id}")
     public ResponseEntity<CarResponse> patchCar(@PathVariable int id,
             @RequestBody @Valid CarUpdateDTO partialCar,
@@ -335,7 +350,6 @@ public class CarController {
             CarSQL carSQL = carsService.extractById(id);
 
             UserSQL userSQL = commonService.extractUserFromHeader(request);
-            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
 
             carsService.checkCredentials(request, id);
 
@@ -351,16 +365,13 @@ public class CarController {
                     carsService.save(carSQL);
                     try {
                         HashMap<String, Object> vars = new HashMap<>();
-                        List<ManagerSQL> managers = managerServiceMySQL.getAll();
+                        List<UserSQL> managers = usersServiceMySQL.findAllByRole(ERole.MANAGER);
 
                         String email;
 
                         if (userSQL != null) {
                             vars.put("name", userSQL.getName());
                             email = userSQL.getEmail();
-                        } else if (administratorSQL != null) {
-                            vars.put("name", administratorSQL.getName());
-                            email = administratorSQL.getEmail();
                         } else {
                             throw new CustomException("Invalid token user", HttpStatus.FORBIDDEN);
                         }
@@ -389,12 +400,25 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'USER')")
     @PatchMapping("photos/{id}")
     public ResponseEntity<String> patchPhotos(@PathVariable int id,
             @RequestParam("pictures[]") MultipartFile[] newPictures,
             HttpServletRequest request) {
         try {
-            carsService.checkCredentials(request, id);
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))){
+                    carsService.checkCredentials(request, id);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
+
 
             CarSQL carSQL = carsService.extractById(id);
 
@@ -427,13 +451,24 @@ public class CarController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id, HttpServletRequest request) {
         try {
             List<String> pictures = carsService.extractById(id).getPhoto();
 
-            carsService.checkCredentials(request, id);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))){
+                    carsService.checkCredentials(request, id);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
+            
             pictures.forEach(picture -> commonService.removeAvatar(picture));
 
             return carsService.deleteById(id);

@@ -1,25 +1,25 @@
 package com.example.auto_ria.services;
 
+import java.io.File;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.responses.user.AdminResponse;
-import com.example.auto_ria.models.responses.user.ManagerResponse;
 import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.JwtService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -81,17 +81,6 @@ public class CommonService {
 
     }
 
-    // public SellerSQL extractSellerFromHeader(HttpServletRequest request) {
-    // SellerSQL sellerSQL = null;
-    // try {
-    // String email = extractEmailFromHeader(request, ETokenRole.SELLER);
-    // // sellerSQL = userDaoSQL.findSellerByEmail(email);
-    // } catch (Exception ignore) {
-    // }
-    // return sellerSQL;
-    // }
-
-    // mix
     public UserSQL extractUserFromHeader(HttpServletRequest request) {
         UserSQL sellerSQL = null;
         try {
@@ -102,104 +91,7 @@ public class CommonService {
         return sellerSQL;
     }
 
-    // public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
-    //     ManagerSQL managerSQL;
-    //     try {
-    //         managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.MANAGER));
-    //     } catch (Exception e) {
-    //         return null;
-    //     }
-    //     return managerSQL;
-    // }
-
-    // public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
-    //     AdministratorSQL administratorSQL;
-    //     try {
-    //         administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.ADMIN));
-    //     } catch (Exception e) {
-    //         return null;
-    //     }
-    //     return administratorSQL;
-    // }
-
-    // // public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
-    // // return customerDaoSQL.findByEmail(extractEmailFromHeader(request,
-    // // ETokenRole.CUSTOMER));
-    // // }
-
-    // public ERole findRoleByEmail(String email) {
-    //     try {
-    //         if (administratorDaoSQL.findByEmail(email) != null) {
-    //             return ERole.ADMIN;
-    //         } else if (managerDaoSQL.findByEmail(email) != null) {
-    //             return ERole.MANAGER;
-    //         } else if (userDaoSQL.findUserByEmail(email) != null) {
-    //             return ERole.USER; // was seller and cus -> only user
-    //         } else {
-    //             return null;
-    //         }
-    //     } catch (Exception e) {
-    //         throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
-    //     }
-    // }
-
-    // public CustomerResponse createCustomerResponse(CustomerSQL customer) {
-    // try {
-
-    // Session session = sessionDaoSQL.findByUserId(customer.getId());
-
-    // return CustomerResponse.builder()
-    // .id(customer.getId())
-    // .name(customer.getName())
-    // .lastName(customer.getLastName())
-    // .region(customer.getRegion())
-    // .city(customer.getCity())
-    // .avatar(customer.getAvatar())
-    // .role(ERole.CUSTOMER)
-    // .isOnline(session.getIsOnline())
-    // .lastOnline(session.getDisconnectedAt())
-    // .createdAt(customer.getCreatedAt())
-    // .build();
-
-    // } catch (Exception e) {
-    // throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-    // }
-    // }
-
-    // public ManagerResponse createManagerResponse(ManagerSQL manager) {
-    //     try {
-    //         return ManagerResponse.builder()
-    //                 .id(manager.getId())
-    //                 .name(manager.getName())
-    //                 .lastName(manager.getLastName())
-    //                 .avatar(manager.getAvatar())
-    //                 .role(ERole.MANAGER)
-    //                 .createdAt(manager.getCreatedAt())
-    //                 .build();
-
-    //     } catch (Exception e) {
-    //         throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-    //     }
-    // }
-
-    // public AdminResponse createAdminResponse(AdministratorSQL administratorSQL) {
-    //     try {
-    //         return AdminResponse.builder()
-    //                 .id(administratorSQL.getId())
-    //                 .name(administratorSQL.getName())
-    //                 .lastName(administratorSQL.getLastName())
-    //                 .avatar(administratorSQL.getAvatar())
-    //                 .role(ERole.ADMIN)
-    //                 .createdAt(administratorSQL.getCreatedAt())
-    //                 .email(administratorSQL.getEmail())
-    //                 .build();
-
-    //     } catch (Exception e) {
-    //         throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-    //     }
-    // }
-
-    public UserResponse createUserResponse(UserSQL userSQL) {
+     public UserResponse createUserResponse(UserSQL userSQL) {
         try {
             UserResponse userResponse = UserResponse.builder()
                     .id(userSQL.getId())

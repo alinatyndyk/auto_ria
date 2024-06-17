@@ -3,6 +3,7 @@ package com.example.auto_ria.services.user;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.HashMap;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -91,17 +92,14 @@ public class UsersServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<String> deleteById(String id, UserSQL user) {
+    public ResponseEntity<String> deleteById(String id, UserSQL user, EMail deleteTypeMail) {
         userDaoSQL.deleteById(Integer.valueOf(id));
 
         HashMap<String, Object> vars = new HashMap<>();
         vars.put("name", user.getName());
         vars.put("email", user.getEmail());
 
-        mailer.sendEmail(user.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
-        // todo 2 separate methods for ban and leave
-
-        mailer.sendEmail(user.getEmail(), EMail.PLATFORM_LEAVE, vars);
+        mailer.sendEmail(user.getEmail(), deleteTypeMail, vars);
 
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
@@ -110,35 +108,29 @@ public class UsersServiceMySQLImpl {
         return user.getId() == user1.getId();
     }
 
-    public ResponseEntity<UserSQL> update(int id, UserUpdateDTO userDTO) {
+    public ResponseEntity<UserResponse> update(int id, UserUpdateDTO userDTO, UserSQL user) {
         try {
-            UserSQL user = getById(String.valueOf(id)).getBody();
 
-            assert user != null;
-            if (doesBelongToSeller(userSQL, user)) {
+            Class<?> userDTOClass = userDTO.getClass();
+            Field[] fields = userDTOClass.getDeclaredFields();
 
-                Class<?> carDTOClass = userDTO.getClass();
-                Field[] fields = carDTOClass.getDeclaredFields();
+            for (Field field : fields) {
 
-                for (Field field : fields) {
+                field.setAccessible(true);
 
-                    field.setAccessible(true);
+                String fieldName = field.getName();
+                Object fieldValue = field.get(userDTO);
 
-                    String fieldName = field.getName();
-                    Object fieldValue = field.get(userDTO);
+                if (fieldValue != null) {
 
-                    if (fieldValue != null) {
+                    Field carField = UserSQL.class.getDeclaredField(fieldName);
 
-                        Field carField = UserSQL.class.getDeclaredField(fieldName);
-
-                        carField.setAccessible(true);
-                        carField.set(user, fieldValue);
-                    }
+                    carField.setAccessible(true);
+                    carField.set(user, fieldValue);
                 }
-            } else {
-                throw new IllegalAccessException("Error.Update_fail: The car does not belong to seller");
             }
-            return new ResponseEntity<>(userDaoSQL.save(user), HttpStatus.ACCEPTED);
+            UserSQL userSQL = userDaoSQL.save(user);
+            return new ResponseEntity<>(commonService.createUserResponse(userSQL), HttpStatus.ACCEPTED);
         } catch (IllegalAccessException e) {
             throw new CustomException(e.getMessage(), HttpStatus.FORBIDDEN);
         } catch (Exception e) {
@@ -155,7 +147,6 @@ public class UsersServiceMySQLImpl {
         userDaoSQL.save(user);
     }
 
-    // mix
 
     public boolean isUserByNumberPresent(String number) {
 
@@ -175,7 +166,13 @@ public class UsersServiceMySQLImpl {
         Page<UserResponse> userResponsePage = userSQLPage
                 .map(userSQL -> commonService.createUserResponse(userSQL));
 
-        return new ResponseEntity<>(userResponsePage, HttpStatus.OK); //todo to common service
+        return new ResponseEntity<>(userResponsePage, HttpStatus.OK); // todo to common service
+    }
+
+    public List<UserSQL> findAllByRole(ERole role) {
+
+        return userDaoSQL.findAllByRole(role);
+
     }
 
 }

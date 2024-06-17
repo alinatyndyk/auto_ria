@@ -17,6 +17,7 @@ import org.apache.commons.lang3.EnumUtils;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,7 +48,8 @@ public class CarSQL {
     private List<String> photo = new ArrayList<>();
 
     @JsonManagedReference
-    @ManyToOne(cascade = CascadeType.ALL)
+    // @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinTable(
             name = "seller_cars",
             joinColumns = @JoinColumn(name = "car_id", nullable = false),  // Set nullable to false
@@ -65,8 +67,8 @@ public class CarSQL {
 
     @Column(updatable = false)
     @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy\"", timezone = "GMT")
-    private String createdAt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
+    private LocalDate createdAt;
 
     @UpdateTimestamp()
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "\"dd/MM/yyyy\"", timezone = "GMT")

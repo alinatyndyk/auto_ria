@@ -1,47 +1,45 @@
 package com.example.auto_ria.controllers.user;
 
-import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
-import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.responses.user.ManagerResponse;
-import com.example.auto_ria.models.user.ManagerSQL;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.CommonService;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
-import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
+import java.util.Objects;
+
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Objects;
+import com.example.auto_ria.dto.updateDTO.ManagerUpdateDTO;
+import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.responses.user.ManagerResponse;
+import com.example.auto_ria.models.responses.user.UserResponse;
+import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 
 @RestController
 @AllArgsConstructor
 @RequestMapping(value = "managers")
 public class ManagerController {
 
-    private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
-    private AdministratorServiceMySQL administratorServiceMySQL;
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER')")
     @GetMapping("/page/{page}")
-    public ResponseEntity<Page<ManagerResponse>> getAll(
-            @PathVariable("page") int page
-    ) {
+    public ResponseEntity<Page<UserResponse>> getAll(
+            @PathVariable("page") int page) {
         try {
-            return managerServiceMySQL.getAll(page);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ManagerResponse> getById(@PathVariable("id") int id) {
-        try {
-            return managerServiceMySQL.getByIdAsResponse(id);
+            return usersServiceMySQL.findAllByRole(ERole.MANAGER, page);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -51,7 +49,7 @@ public class ManagerController {
     public ResponseEntity<ManagerSQL> patch(
             HttpServletRequest request,
             @PathVariable int id,
-            @RequestBody ManagerUpdateDTO partial) {
+            @RequestBody UserUp partial) {
         try {
             managerServiceMySQL.checkCredentials(request, id);
             return managerServiceMySQL.update(id, partial);
@@ -62,8 +60,8 @@ public class ManagerController {
 
     @PatchMapping("/change-avatar/{id}")
     public ResponseEntity<String> patchAvatar(@PathVariable int id,
-                                              @RequestParam("avatar") MultipartFile avatar,
-                                              HttpServletRequest request) {
+            @RequestParam("avatar") MultipartFile avatar,
+            HttpServletRequest request) {
         try {
             managerServiceMySQL.checkCredentials(request, id);
 
@@ -80,7 +78,7 @@ public class ManagerController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable int id,
-                                             HttpServletRequest request) {
+            HttpServletRequest request) {
         try {
             if (administratorServiceMySQL.getById(String.valueOf(id)).getBody() == null) {
                 managerServiceMySQL.checkCredentials(request, id);

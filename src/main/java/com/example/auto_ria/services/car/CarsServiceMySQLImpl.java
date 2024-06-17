@@ -31,7 +31,6 @@ import com.example.auto_ria.models.responses.car.CarResponse;
 import com.example.auto_ria.models.responses.car.MiddlePriceResponse;
 import com.example.auto_ria.models.responses.currency.CurrencyConverterResponse;
 import com.example.auto_ria.models.responses.user.UserCarResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.currency.CurrencyConverterService;
@@ -48,8 +47,6 @@ public class CarsServiceMySQLImpl {
     private CommonService commonService;
     private FMService mailer;
     private CurrencyConverterService currencyConverterService;
-
-    private Environment environment;
 
     public ResponseEntity<List<CarSQL>> getAll() {
         try {
@@ -135,7 +132,7 @@ public class CarsServiceMySQLImpl {
             CarSQL carSQL = carDAO.findById(id).get();
 
             if (!carSQL.isActivated() &&
-                    commonService.extractManagerFromHeader(request) == null &&
+                    commonService.extractManagerFromHeader(request) == null && // todo if tole m or m
                     commonService.extractAdminFromHeader(request) == null) {
                 UserSQL user = commonService.extractUserFromHeader(request);
 
@@ -273,7 +270,7 @@ public class CarsServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, UserSQL user, AdministratorSQL administratorSQL) {
+    public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, UserSQL user) {
         try {
             CarSQL car = CarSQL.builder()
                     .brand(carDTO.getBrand())
@@ -288,20 +285,7 @@ public class CarsServiceMySQLImpl {
                     .isActivated(carDTO.isActivated())
                     .build();
 
-            if (administratorSQL != null) {
-
-                UserSQL adminSeller = UserSQL.adminBuilder()
-                        .id(administratorSQL.getId())
-                        .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
-                        .name(environment.getProperty("office.name"))
-                        .region(environment.getProperty("office.region"))
-                        .city(environment.getProperty("office.city"))
-                        .build();
-
-                car.setUser(adminSeller);
-            } else {
-                car.setUser(user);
-            }
+                    car.setUser(user);
 
             CarSQL carSQL = carDAO.save(car);
 
@@ -400,6 +384,7 @@ public class CarsServiceMySQLImpl {
                     .priceUAH(converterResponse.getCurrencyHashMap().get(ECurrency.UAH))
                     .priceUSD(converterResponse.getCurrencyHashMap().get(ECurrency.USD))
                     .priceEUR(converterResponse.getCurrencyHashMap().get(ECurrency.EUR))
+                    .createdAt(carSQL.getCreatedAt())
                     .build();
         } catch (CustomException e) {
             throw new CustomException("Failed to form response: " + e.getMessage(), e.getStatus());

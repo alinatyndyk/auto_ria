@@ -10,8 +10,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
-import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.UserAuthenticationProvider;
 import com.example.auto_ria.filters.JWTAuthenticationFilter;
 
@@ -23,8 +21,6 @@ import lombok.AllArgsConstructor;
 public class SecurityConfiguration {
     private JWTAuthenticationFilter jwtAuthenticationFilter;
     private UserAuthenticationProvider userAuthenticationProvider;
-    private ManagerAuthenticationProvider managerAuthenticationProvider;
-    private AdminAuthenticationProvider adminAuthenticationProvider;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -83,8 +79,6 @@ public class SecurityConfiguration {
                 .sessionManagement(managementConfigurer -> managementConfigurer
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(userAuthenticationProvider)
-                .authenticationProvider(managerAuthenticationProvider)
-                .authenticationProvider(adminAuthenticationProvider)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();

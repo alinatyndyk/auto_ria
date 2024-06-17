@@ -14,15 +14,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.auto_ria.configurations.providers.AdminAuthenticationProvider;
-import com.example.auto_ria.configurations.providers.ManagerAuthenticationProvider;
 import com.example.auto_ria.configurations.providers.UserAuthenticationProvider;
 import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
 import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.auth.RegisterKeyDaoSQL;
 import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.ERole;
@@ -33,16 +29,10 @@ import com.example.auto_ria.models.auth.AuthSQL;
 import com.example.auto_ria.models.auth.RegisterKey;
 import com.example.auto_ria.models.requests.LoginRequest;
 import com.example.auto_ria.models.requests.RefreshRequest;
-import com.example.auto_ria.models.requests.RegisterAdminRequest;
-import com.example.auto_ria.models.requests.RegisterManagerRequest;
 import com.example.auto_ria.models.requests.RegisterUserRequest;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
@@ -54,22 +44,16 @@ public class AuthenticationService {
 
     private JwtService jwtService;
     private UserDaoSQL userDaoSQL;
-    private ManagerDaoSQL managerDaoSQL;
-    private AdministratorDaoSQL administratorDaoSQL;
-    private AdministratorServiceMySQL administratorServiceMySQL;
     private CommonService commonService;
 
     private UsersServiceMySQLImpl usersServiceMySQL;
-    private ManagerServiceMySQL managerServiceMySQL;
 
     private UserAuthDaoSQL userAuthDaoSQL;
     private AdminAuthDaoSQL adminAuthDaoSQL;
     private ManagerAuthDaoSQL managerAuthDaoSQL;
 
     private UserAuthenticationProvider sellerAuthenticationManager;
-    private ManagerAuthenticationProvider managerAuthenticationManager;
     private RegisterKeyDaoSQL registerKeyDaoSQL;
-    private AdminAuthenticationProvider adminAuthenticationProvider;
 
     private PasswordEncoder passwordEncoder;
     private FMService mailer;
@@ -93,13 +77,52 @@ public class AuthenticationService {
             user.setIsActivated(false);
             userDaoSQL.save(user);
 
-            System.out.println("***********************" + user);
-            System.out.println("***********************" + user.getAuthorities());
-
             String activateToken = jwtService.generateRegisterKey(
-                    user.getEmail(), ERole.USER, ETokenRole.USER_ACTIVATE);
+                    user.getEmail(), ETokenRole.USER_ACTIVATE);
 
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(activateToken).build());
+
+            HashMap<String, Object> variables = new HashMap<>();
+            variables.put("name", registerRequest.getName());
+            variables.put("role", ETokenRole.USER);
+            variables.put("code", activateToken);
+
+            try {
+                mailer.sendEmail(registerRequest.getEmail(), EMail.REGISTER_KEY, variables);
+            } catch (Exception e) {
+                throw new CustomException("Something went wrong... Try again later", HttpStatus.CONFLICT);
+            }
+
+            return ResponseEntity.ok("Check your email for activation");
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        } catch (Exception e) {
+            throw new CustomException("Register failed", HttpStatus.EXPECTATION_FAILED);
+        }
+    }
+
+    public ResponseEntity<String> registerUserWithAuthority(RegisterUserRequest registerRequest, String key) {
+        try {
+
+            UserSQL user = UserSQL.userBuilder()
+                    .name(registerRequest.getName())
+                    .lastName(registerRequest.getLastName())
+                    .email(registerRequest.getEmail())
+                    .password(passwordEncoder.encode(registerRequest.getPassword()))
+                    .roles(List.of(ERole.USER)) // seller person none
+                    .avatar(registerRequest.getAvatar())
+                    .city(registerRequest.getCity())
+                    .region(registerRequest.getRegion())
+                    .number(registerRequest.getNumber())
+                    .build();
+
+            user.setIsActivated(false);
+            userDaoSQL.save(user);
+
+            String activateToken = jwtService.generateRegisterKey(
+                    user.getEmail(), ETokenRole.USER_ACTIVATE);
+
+            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
 
             HashMap<String, Object> variables = new HashMap<>();
             variables.put("name", registerRequest.getName());
@@ -172,42 +195,44 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseEntity<AuthenticationResponse> registerManager(RegisterManagerRequest registerRequest, String key) {
-        try {
+    // public ResponseEntity<AuthenticationResponse>
+    // registerManager(RegisterManagerRequest registerRequest, String key) {
+    // try {
 
-            System.out.println(registerRequest);
-            ManagerSQL manager = ManagerSQL
-                    .managerSQLBuilder()
-                    .name(registerRequest.getName())
-                    .lastName(registerRequest.getLastName())
-                    .email(registerRequest.getEmail())
-                    .avatar(registerRequest.getAvatar())
-                    .password(passwordEncoder.encode(registerRequest.getPassword()))
-                    .roles(List.of(ERole.MANAGER, ERole.MANAGER_GLOBAL))
-                    .build();
+    // System.out.println(registerRequest);
+    // ManagerSQL manager = ManagerSQL
+    // .managerSQLBuilder()
+    // .name(registerRequest.getName())
+    // .lastName(registerRequest.getLastName())
+    // .email(registerRequest.getEmail())
+    // .avatar(registerRequest.getAvatar())
+    // .password(passwordEncoder.encode(registerRequest.getPassword()))
+    // .roles(List.of(ERole.MANAGER, ERole.MANAGER_GLOBAL))
+    // .build();
 
-            AuthenticationResponse authenticationResponse = jwtService.generateManagerTokenPair(manager);
+    // AuthenticationResponse authenticationResponse =
+    // jwtService.generateManagerTokenPair(manager);
 
-            manager.setIsActivated(true);
-            managerDaoSQL.save(manager);
+    // manager.setIsActivated(true);
+    // managerDaoSQL.save(manager);
 
-            managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).personId(manager.getId())
-                    .accessToken(authenticationResponse.getAccessToken())
-                    .refreshToken(authenticationResponse.getRefreshToken()).build());
+    // managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).personId(manager.getId())
+    // .accessToken(authenticationResponse.getAccessToken())
+    // .refreshToken(authenticationResponse.getRefreshToken()).build());
 
-            Map<String, Object> args = new HashMap<>();
-            args.put("name", manager.getName() + manager.getLastName());
-            mailer.sendEmail(manager.getEmail(), EMail.WELCOME, args);
+    // Map<String, Object> args = new HashMap<>();
+    // args.put("name", manager.getName() + manager.getLastName());
+    // mailer.sendEmail(manager.getEmail(), EMail.WELCOME, args);
 
-            registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
+    // registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
 
-            return ResponseEntity.ok(authenticationResponse);
-        } catch (Exception e) {
-            System.out.println("e.getMessage()");
-            System.out.println(e.getMessage());
-            throw new CustomException("Failed register", HttpStatus.EXPECTATION_FAILED);
-        }
-    }
+    // return ResponseEntity.ok(authenticationResponse);
+    // } catch (Exception e) {
+    // System.out.println("e.getMessage()");
+    // System.out.println(e.getMessage());
+    // throw new CustomException("Failed register", HttpStatus.EXPECTATION_FAILED);
+    // }
+    // }
 
     public ResponseEntity<String> codeAdmin(String email, String code) {
         try {
@@ -226,44 +251,50 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseEntity<AuthenticationResponse> registerAdmin(RegisterAdminRequest registerRequest, String key) {
-        try {
+    // public ResponseEntity<AuthenticationResponse>
+    // registerAdmin(RegisterAdminRequest registerRequest, String key) {
+    // try {
 
-            AdministratorSQL administrator = AdministratorSQL
-                    .adminBuilder()
-                    .name(registerRequest.getName())
-                    .email(registerRequest.getEmail())
-                    .avatar(registerRequest.getAvatar())
-                    .password(passwordEncoder.encode(registerRequest.getPassword()))
-                    .lastName(registerRequest.getLastName())
-                    .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
-                    .build();
+    // AdministratorSQL administrator = AdministratorSQL
+    // .adminBuilder()
+    // .name(registerRequest.getName())
+    // .email(registerRequest.getEmail())
+    // .avatar(registerRequest.getAvatar())
+    // .password(passwordEncoder.encode(registerRequest.getPassword()))
+    // .lastName(registerRequest.getLastName())
+    // .roles(List.of(ERole.ADMIN, ERole.ADMIN_GLOBAL))
+    // .build();
 
-            AuthenticationResponse authenticationResponse = jwtService.generateAdminTokenPair(administrator);
+    // AuthenticationResponse authenticationResponse =
+    // jwtService.generateAdminTokenPair(administrator);
 
-            administrator.setIsActivated(true);
-            administratorDaoSQL.save(administrator);
+    // administrator.setIsActivated(true);
+    // administratorDaoSQL.save(administrator);
 
-            System.out.println("***********************" + administrator);
-            System.out.println("***********************" + administrator.getAuthorities());
+    // System.out.println("***********************" + administrator);
+    // System.out.println("***********************" +
+    // administrator.getAuthorities());
 
-            adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administrator.getId())
-                    .accessToken(authenticationResponse.getAccessToken())
-                    .refreshToken(authenticationResponse.getRefreshToken()).build());
+    // adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administrator.getId())
+    // .accessToken(authenticationResponse.getAccessToken())
+    // .refreshToken(authenticationResponse.getRefreshToken()).build());
 
-            Map<String, Object> args = new HashMap<>();
-            args.put("name", administrator.getName() + " " + administrator.getLastName());
-            mailer.sendEmail(administrator.getEmail(), EMail.WELCOME, args);
+    // Map<String, Object> args = new HashMap<>();
+    // args.put("name", administrator.getName() + " " +
+    // administrator.getLastName());
+    // mailer.sendEmail(administrator.getEmail(), EMail.WELCOME, args);
 
-            if (key != "404E745266556A586E327234538762F413F4428472B4B625064536756685921") {
-                registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
-            }
+    // if (key != "404E745266556A586E327234538762F413F4428472B4B625064536756685921")
+    // {
+    // registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
+    // }
 
-            return ResponseEntity.ok(authenticationResponse);
-        } catch (Exception e) {
-            throw new CustomException("Failed register: " + e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+    // return ResponseEntity.ok(authenticationResponse);
+    // } catch (Exception e) {
+    // throw new CustomException("Failed register: " + e.getMessage(),
+    // HttpStatus.CONFLICT);
+    // }
+    // }
 
     public AuthenticationResponse login(LoginRequest loginRequest) {
         try {
@@ -301,87 +332,97 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse loginManager(LoginRequest loginRequest) {
-        try {
-            ManagerSQL user = managerDaoSQL.findByEmail(loginRequest.getEmail());
+    // public AuthenticationResponse loginManager(LoginRequest loginRequest) {
+    // try {
+    // ManagerSQL user = managerDaoSQL.findByEmail(loginRequest.getEmail());
 
-            if (user == null) {
-                throw new CustomException("User not found", HttpStatus.NOT_FOUND);
-            }
-            System.out.println(
-                    "-------------------" + user.getEmail() + user.getAuthorities() + loginRequest.getPassword());
+    // if (user == null) {
+    // throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+    // }
+    // System.out.println(
+    // "-------------------" + user.getEmail() + user.getAuthorities() +
+    // loginRequest.getPassword());
 
-            try {
-                managerAuthenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                user.getEmail(),
-                                loginRequest.getPassword(),
-                                user.getAuthorities()));
-            } catch (Exception e) {
-                throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
-            }
+    // try {
+    // managerAuthenticationManager.authenticate(
+    // new UsernamePasswordAuthenticationToken(
+    // user.getEmail(),
+    // loginRequest.getPassword(),
+    // user.getAuthorities()));
+    // } catch (Exception e) {
+    // throw new CustomException("Login or password is not valid",
+    // HttpStatus.BAD_REQUEST);
+    // }
 
-            if (!user.getIsActivated()) {
-                throw new CustomException("Activate your account to access secured endpoints", HttpStatus.FORBIDDEN);
-            }
+    // if (!user.getIsActivated()) {
+    // throw new CustomException("Activate your account to access secured
+    // endpoints", HttpStatus.FORBIDDEN);
+    // }
 
-            AuthenticationResponse tokenPair = jwtService.generateManagerTokenPair(user);
+    // AuthenticationResponse tokenPair = jwtService.generateManagerTokenPair(user);
 
-            managerAuthDaoSQL.save(
-                    AuthSQL.builder().role(ERole.MANAGER).personId(user.getId()).accessToken(tokenPair.getAccessToken())
-                            .refreshToken(tokenPair.getRefreshToken()).build());
+    // managerAuthDaoSQL.save(
+    // AuthSQL.builder().role(ERole.MANAGER).personId(user.getId()).accessToken(tokenPair.getAccessToken())
+    // .refreshToken(tokenPair.getRefreshToken()).build());
 
-            managerDaoSQL.save(user);
+    // managerDaoSQL.save(user);
 
-            return tokenPair;
-        } catch (CustomException e) {
-            throw new CustomException("Failed login: " + e.getMessage(), e.getStatus());
-        } catch (Exception e) {
-            throw new CustomException("Failed login: " + e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+    // return tokenPair;
+    // } catch (CustomException e) {
+    // throw new CustomException("Failed login: " + e.getMessage(), e.getStatus());
+    // } catch (Exception e) {
+    // throw new CustomException("Failed login: " + e.getMessage(),
+    // HttpStatus.CONFLICT);
+    // }
+    // }
 
-    public AuthenticationResponse loginAdmin(LoginRequest loginRequest) {
-        try {
-            System.out.println("login admin-------------------");
-            AdministratorSQL administrator = administratorDaoSQL.findByEmail(loginRequest.getEmail());
-            System.out.println("admin-------------------" + administrator);
+    // public AuthenticationResponse loginAdmin(LoginRequest loginRequest) {
+    // try {
+    // System.out.println("login admin-------------------");
+    // AdministratorSQL administrator =
+    // administratorDaoSQL.findByEmail(loginRequest.getEmail());
+    // System.out.println("admin-------------------" + administrator);
 
-            if (administrator == null) {
-                throw new CustomException("User not found", HttpStatus.NOT_FOUND);
-            }
+    // if (administrator == null) {
+    // throw new CustomException("User not found", HttpStatus.NOT_FOUND);
+    // }
 
-            System.out.println("-------------------" + administrator.getEmail() + loginRequest.getPassword());
+    // System.out.println("-------------------" + administrator.getEmail() +
+    // loginRequest.getPassword());
 
-            try {
-                adminAuthenticationProvider.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                administrator.getEmail(),
-                                loginRequest.getPassword(),
-                                administrator.getAuthorities()));
-            } catch (Exception e) {
-                throw new CustomException("Login or password is not valid", HttpStatus.BAD_REQUEST);
-            }
+    // try {
+    // adminAuthenticationProvider.authenticate(
+    // new UsernamePasswordAuthenticationToken(
+    // administrator.getEmail(),
+    // loginRequest.getPassword(),
+    // administrator.getAuthorities()));
+    // } catch (Exception e) {
+    // throw new CustomException("Login or password is not valid",
+    // HttpStatus.BAD_REQUEST);
+    // }
 
-            if (!administrator.getIsActivated()) {
-                throw new CustomException("Activate your account to access secured endpoints", HttpStatus.FORBIDDEN);
-            }
+    // if (!administrator.getIsActivated()) {
+    // throw new CustomException("Activate your account to access secured
+    // endpoints", HttpStatus.FORBIDDEN);
+    // }
 
-            AuthenticationResponse tokenPair = jwtService.generateAdminTokenPair(administrator);
+    // AuthenticationResponse tokenPair =
+    // jwtService.generateAdminTokenPair(administrator);
 
-            adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administrator.getId())
-                    .accessToken(tokenPair.getAccessToken())
-                    .refreshToken(tokenPair.getRefreshToken()).build());
+    // adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administrator.getId())
+    // .accessToken(tokenPair.getAccessToken())
+    // .refreshToken(tokenPair.getRefreshToken()).build());
 
-            administratorDaoSQL.save(administrator);
+    // administratorDaoSQL.save(administrator);
 
-            return tokenPair;
-        } catch (CustomException e) {
-            throw new CustomException("Failed login: " + e.getMessage(), e.getStatus());
-        } catch (Exception e) {
-            throw new CustomException("Failed login: " + e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+    // return tokenPair;
+    // } catch (CustomException e) {
+    // throw new CustomException("Failed login: " + e.getMessage(), e.getStatus());
+    // } catch (Exception e) {
+    // throw new CustomException("Failed login: " + e.getMessage(),
+    // HttpStatus.CONFLICT);
+    // }
+    // }
 
     // public AuthenticationResponse loginCustomer(LoginRequest loginRequest) {
     // try {
@@ -628,28 +669,32 @@ public class AuthenticationService {
                             .accessToken(tokenPair.getAccessToken())
                             .refreshToken(tokenPair.getRefreshToken()).build());
                 }
-            } else if ((username = jwtService.extractUsername(refreshToken, ETokenRole.ADMIN)) != null &&
-                    adminAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
-                AdministratorSQL administratorSQL = administratorDaoSQL.findByEmail(username);
-                if (administratorSQL != null) {
-                    tokenPair = jwtService.generateAdminTokenPair(administratorSQL);
-                    adminAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administratorSQL.getId())
-                            .accessToken(tokenPair.getAccessToken())
-                            .refreshToken(tokenPair.getRefreshToken()).build());
-                }
-            } else if ((username = jwtService.extractUsername(refreshToken, ETokenRole.MANAGER)) != null &&
-                    managerAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
-                ManagerSQL managerSQL = managerDaoSQL.findByEmail(username);
-                if (managerSQL != null) {
-                    tokenPair = jwtService.generateManagerTokenPair(managerSQL);
-                    managerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
-                    managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).personId(managerSQL.getId())
-                            .accessToken(tokenPair.getAccessToken())
-                            .refreshToken(tokenPair.getRefreshToken())
-                            .build());
-                }
             }
+            // else if ((username = jwtService.extractUsername(refreshToken,
+            // ETokenRole.ADMIN)) != null &&
+            // adminAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
+            // AdministratorSQL administratorSQL =
+            // administratorDaoSQL.findByEmail(username);
+            // if (administratorSQL != null) {
+            // tokenPair = jwtService.generateAdminTokenPair(administratorSQL);
+            // adminAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+            // adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN).personId(administratorSQL.getId())
+            // .accessToken(tokenPair.getAccessToken())
+            // .refreshToken(tokenPair.getRefreshToken()).build());
+            // }
+            // } else if ((username = jwtService.extractUsername(refreshToken,
+            // ETokenRole.MANAGER)) != null &&
+            // managerAuthDaoSQL.findByRefreshToken(refreshToken) != null) {
+            // ManagerSQL managerSQL = managerDaoSQL.findByEmail(username);
+            // if (managerSQL != null) {
+            // tokenPair = jwtService.generateManagerTokenPair(managerSQL);
+            // managerAuthDaoSQL.deleteAllByRefreshToken(refreshToken);
+            // managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER).personId(managerSQL.getId())
+            // .accessToken(tokenPair.getAccessToken())
+            // .refreshToken(tokenPair.getRefreshToken())
+            // .build());
+            // }
+            // }
 
             if (username == null) {
                 throw new CustomException("Token invalid", HttpStatus.FORBIDDEN);
@@ -669,13 +714,13 @@ public class AuthenticationService {
     public void forgotPassword(String email) {
         try {
 
-            ERole role = commonService.findRoleByEmail(email);
+            // ERole role = commonService.findRoleByEmail(email);
 
-            if (role == null) {
+            if (usersServiceMySQL.getByEmail(email) == null) {
                 throw new CustomException("User not found", HttpStatus.BAD_REQUEST);
             }
 
-            String code = jwtService.generateRegisterKey(email, role, ETokenRole.FORGOT_PASSWORD);
+            String code = jwtService.generateRegisterKey(email, ETokenRole.FORGOT_PASSWORD);
             registerKeyDaoSQL.save(RegisterKey.builder().registerKey(code).build());
 
             Map<String, Object> args = new HashMap<>();
@@ -690,63 +735,64 @@ public class AuthenticationService {
         }
     }
 
-    public AuthenticationResponse resetPassword(String email, String owner, String encoded) {
+    public AuthenticationResponse resetPassword(String email, String encoded) {
         AuthenticationResponse authenticationResponse;
 
         try {
-            if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
+            // if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
 
-                AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
-                administratorSQL.setPassword(encoded);
-                administratorDaoSQL.save(administratorSQL);
-                adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
+            // AdministratorSQL administratorSQL =
+            // administratorServiceMySQL.getByEmail(email);
+            // administratorSQL.setPassword(encoded);
+            // administratorDaoSQL.save(administratorSQL);
+            // adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
 
-                AuthenticationResponse authentication = jwtService.generateAdminTokenPair(administratorSQL);
-                adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN)
-                        .accessToken(authentication.getAccessToken())
-                        .refreshToken(authentication.getRefreshToken())
-                        .id(administratorSQL.getId())
-                        .personId(administratorSQL.getId())
-                        .build());
+            // AuthenticationResponse authentication =
+            // jwtService.generateAdminTokenPair(administratorSQL);
+            // adminAuthDaoSQL.save(AuthSQL.builder().role(ERole.ADMIN)
+            // .accessToken(authentication.getAccessToken())
+            // .refreshToken(authentication.getRefreshToken())
+            // .id(administratorSQL.getId())
+            // .personId(administratorSQL.getId())
+            // .build());
 
-                authenticationResponse = authentication;
+            // authenticationResponse = authentication;
 
-            } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
+            // } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
 
-                ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
-                managerSQL.setPassword(encoded);
-                managerDaoSQL.save(managerSQL);
-                managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
+            // ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
+            // managerSQL.setPassword(encoded);
+            // managerDaoSQL.save(managerSQL);
+            // managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
 
-                AuthenticationResponse authentication = jwtService.generateManagerTokenPair(managerSQL);
-                managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER)
-                        .accessToken(authentication.getAccessToken())
-                        .refreshToken(authentication.getRefreshToken())
-                        .id(managerSQL.getId())
-                        .personId(managerSQL.getId())
-                        .build());
+            // AuthenticationResponse authentication =
+            // jwtService.generateManagerTokenPair(managerSQL);
+            // managerAuthDaoSQL.save(AuthSQL.builder().role(ERole.MANAGER)
+            // .accessToken(authentication.getAccessToken())
+            // .refreshToken(authentication.getRefreshToken())
+            // .id(managerSQL.getId())
+            // .personId(managerSQL.getId())
+            // .build());
 
-                authenticationResponse = authentication;
+            // authenticationResponse = authentication;
 
-            } else if (ERole.USER.equals(ERole.valueOf(owner))) {
+            // } else if (ERole.USER.equals(ERole.valueOf(owner))) {
 
-                UserSQL userSQL = usersServiceMySQL.getByEmail(email);
-                userSQL.setPassword(encoded);
-                userDaoSQL.save(userSQL);
-                userAuthDaoSQL.deleteAllByPersonId(userSQL.getId());
+            UserSQL userSQL = usersServiceMySQL.getByEmail(email);
+            userSQL.setPassword(encoded);
+            userDaoSQL.save(userSQL);
+            userAuthDaoSQL.deleteAllByPersonId(userSQL.getId());
 
-                AuthenticationResponse authentication = jwtService.generateUserTokenPair(userSQL);
+            AuthenticationResponse authentication = jwtService.generateUserTokenPair(userSQL);
 
-                userAuthDaoSQL.save(AuthSQL.builder().role(ERole.USER)
-                        .accessToken(authentication.getAccessToken())
-                        .refreshToken(authentication.getRefreshToken())
-                        .id(userSQL.getId())
-                        .build());
+            userAuthDaoSQL.save(AuthSQL.builder().role(ERole.USER)
+                    .accessToken(authentication.getAccessToken())
+                    .refreshToken(authentication.getRefreshToken())
+                    .id(userSQL.getId())
+                    .build());
 
-                authenticationResponse = authentication;
-            } else {
-                throw new CustomException("Token is invalid for current procedure", HttpStatus.FORBIDDEN);
-            }
+            authenticationResponse = authentication;
+
         } catch (CustomException e) {
             throw new CustomException("Failed reset: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
@@ -755,7 +801,7 @@ public class AuthenticationService {
         return authenticationResponse; // from auth info res/ to auth res
     }
 
-    public void signOut(String email, String owner) {
+    public void signOut(String email) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -763,18 +809,19 @@ public class AuthenticationService {
                 SecurityContextHolder.clearContext();
             }
 
-            if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
-                AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
-                adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
-            } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
-                ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
-                managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
-            } else if (ERole.USER.equals(ERole.valueOf(owner))) {
+
+            // if (ERole.ADMIN.equals(ERole.valueOf(owner))) {
+            //     AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(email);
+            //     adminAuthDaoSQL.deleteAllByPersonId(administratorSQL.getId());
+            // } else if (ERole.MANAGER.equals(ERole.valueOf(owner))) {
+            //     ManagerSQL managerSQL = managerServiceMySQL.getByEmail(email);
+            //     managerAuthDaoSQL.deleteAllByPersonId(managerSQL.getId());
+            // } else if (ERole.USER.equals(ERole.valueOf(owner))) {
                 UserSQL userSQL = usersServiceMySQL.getByEmail(email);
                 userAuthDaoSQL.deleteAllByPersonId(userSQL.getId());
-            } else {
-                throw new CustomException("Something went wrong...", HttpStatus.BAD_REQUEST);
-            }
+            // } else {
+            //     throw new CustomException("Something went wrong...", HttpStatus.BAD_REQUEST);
+            // }
         } catch (CustomException e) {
             throw new CustomException("Failed sign out: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {

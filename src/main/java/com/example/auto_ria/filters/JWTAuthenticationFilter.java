@@ -17,8 +17,6 @@ import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.auth.UserDetailsServiceImpl;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -40,8 +38,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     private ManagerAuthDaoSQL managerAuthDaoSQL;
     private UserAuthDaoSQL sellerAuthDaoSQL;
 
-    private AdministratorServiceMySQL administratorServiceMySQL;
-    private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
     @SuppressWarnings("null")
@@ -120,15 +116,9 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isInDbAndActivated(UserDetails userDetails, String jwt) {
-        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.ADMIN.name()))
-                && administratorServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
-            return adminAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.MANAGER.name()))
-                && managerServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
-            return managerAuthDaoSQL.findByAccessToken(jwt) != null;
-        } else if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.USER.name()))
+        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.USER.name()))
                 && usersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
-            return sellerAuthDaoSQL.findByAccessToken(jwt) != null;
+            return sellerAuthDaoSQL.findByAccessToken(jwt) != null; //todo auth dao for everyone
         }
         return false;
     }

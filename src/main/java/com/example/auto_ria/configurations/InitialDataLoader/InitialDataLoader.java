@@ -1,36 +1,47 @@
 package com.example.auto_ria.configurations.InitialDataLoader;
 
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.exceptions.CustomException;
-import com.example.auto_ria.models.requests.RegisterAdminRequest;
-import com.example.auto_ria.services.auth.AuthenticationService;
-import lombok.AllArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.stereotype.Component;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
+
+import org.springframework.core.env.Environment;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+
+import com.example.auto_ria.dao.user.UserDaoSQL;
+import com.example.auto_ria.enums.ERole;
+import com.example.auto_ria.exceptions.CustomException;
+import com.example.auto_ria.models.user.UserSQL;
+
+import lombok.AllArgsConstructor;
 
 @Component
 @AllArgsConstructor
 public class InitialDataLoader {
 
     private Environment environment;
-    private AdministratorDaoSQL administratorDaoSQL;
-    private AuthenticationService authenticationService;
+    private PasswordEncoder passwordEncoder;
+    private UserDaoSQL userDaoSQL;
 
     @PostConstruct
     public void loadInitialData() {
         try {
-            if (administratorDaoSQL.count() == 0) {
+            if (userDaoSQL.count() == 0) {
 
-                RegisterAdminRequest request = RegisterAdminRequest.builder()
+                UserSQL user = UserSQL.userBuilder()
                         .name(environment.getProperty("initial.admin.name"))
                         .lastName(environment.getProperty("initial.admin.lastName"))
                         .email(environment.getProperty("initial.admin.email"))
-                        .password(environment.getProperty("initial.admin.pass"))
+                        .password(passwordEncoder.encode(environment.getProperty("initial.admin.pass")))
+                        .roles(List.of(ERole.USER, ERole.ADMIN, ERole.ADMIN_GLOBAL))
+                        .avatar(null)
+                        .city(environment.getProperty("initial.admin.city"))
+                        .region(environment.getProperty("initial.admin.region"))
+                        .number(environment.getProperty("initial.admin.number"))
                         .build();
 
-                authenticationService.registerAdmin(request, "404E745266556A586E327234538762F413F4428472B4B625064536756685921");
+                userDaoSQL.save(user);
+
             }
         } catch (CustomException e) {
             throw new CustomException("Error while loading initial data" + e.getMessage(), e.getStatus());

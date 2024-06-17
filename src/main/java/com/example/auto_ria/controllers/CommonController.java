@@ -12,12 +12,8 @@ import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.auth.AuthSQL;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.JwtService;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,35 +26,10 @@ import lombok.AllArgsConstructor;
 
 public class CommonController {
 
-    private ManagerServiceMySQL managerServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
-    private AdministratorServiceMySQL administratorServiceMySQL;
     private AdminAuthDaoSQL adminAuthDaoSQL;
 
     private JwtService jwtService;
-
-    @SuppressWarnings("rawtypes")
-    @GetMapping("users/{id}")
-    public ResponseEntity getIdAll(@PathVariable String id) {
-        try {
-            ManagerSQL managerSQL = managerServiceMySQL.getById(Integer.parseInt(id)).getBody();
-            AdministratorSQL administratorSQL = administratorServiceMySQL.getById(id).getBody();
-            UserSQL userSQL = usersServiceMySQL.getById(id).getBody();
-
-            if (managerSQL != null) {
-                return ResponseEntity.ok(managerSQL);
-            } else if (administratorSQL != null) {
-                return ResponseEntity.ok(administratorSQL);
-            } else if (userSQL != null) {
-                return ResponseEntity.ok(userSQL);
-            } else {
-                throw new CustomException("No users found", HttpStatus.BAD_REQUEST);
-            }
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-
-    }
 
     @SuppressWarnings("rawtypes")
     @GetMapping("users/by-token")
@@ -70,17 +41,9 @@ public class CommonController {
             AuthSQL authSQL = adminAuthDaoSQL.findByAccessToken(token);
 
             int id = authSQL.getPersonId();
-            ERole role = authSQL.getRole();
 
-            if (role.equals(ERole.MANAGER)) {
-                return ResponseEntity.ok(managerServiceMySQL.getByIdAsResponse(id));
-            } else if (role.equals(ERole.ADMIN)) {
-                return ResponseEntity.ok(administratorServiceMySQL.getByIdAsResponse(id)); // fix
-            } else if (role.equals(ERole.USER)) {
-                return ResponseEntity.ok(usersServiceMySQL.getByIdAsResponse(id));
-            } else {
-                throw new CustomException("No users found", HttpStatus.BAD_REQUEST);
-            }
+            return ResponseEntity.ok(usersServiceMySQL.getByIdAsResponse(id));
+
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         } catch (Exception e) {

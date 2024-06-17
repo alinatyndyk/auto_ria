@@ -23,8 +23,6 @@ import com.example.auto_ria.dao.auth.AdminAuthDaoSQL;
 import com.example.auto_ria.dao.auth.ManagerAuthDaoSQL;
 import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ECurrency;
@@ -45,8 +43,6 @@ import lombok.SneakyThrows;
 public class CronConfiguration {
 
     private UserDaoSQL userDaoSQL;
-    private ManagerDaoSQL managerDaoSQL;
-    private AdministratorDaoSQL administratorDaoSQL;
 
     private UserAuthDaoSQL userAuthDaoSQL;
     private ManagerAuthDaoSQL managerAuthDaoSQL;
@@ -142,8 +138,8 @@ public class CronConfiguration {
             LocalDateTime twoDaysAgoDateTime = LocalDateTime.of(twoDaysAgo, LocalTime.MIDNIGHT);
 
             userDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-            administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
-            managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            // administratorDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
+            // managerDaoSQL.deleteAllByIsActivatedFalseAndCreatedAtBefore(twoDaysAgoDateTime);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }

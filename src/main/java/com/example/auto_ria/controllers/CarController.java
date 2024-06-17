@@ -66,7 +66,6 @@ public class CarController {
     private MixpanelService mixpanelService;
     private ProfanityFilterService profanityFilterService;
     private FMService mailer;
-    private ManagerServiceMySQL managerServiceMySQL;
     private CitiesService citiesService;
 
     private static final AtomicInteger validationFailureCounter = new AtomicInteger(0);
@@ -175,18 +174,19 @@ public class CarController {
     @GetMapping("/by-user/{id}/page/{page}")
     public ResponseEntity<Page<CarResponse>> getAllBySeller(
             @PathVariable("page") int page,
-            @PathVariable("id") int id,
-            HttpServletRequest request) {
+            @PathVariable("id") int id
+            // HttpServletRequest request
+            ) {
         try {
             UserSQL userSQL = usersServiceMySQL.getById(id);
 
-            if (commonService.extractManagerFromHeader(request) != null ||
-                    commonService.extractAdminFromHeader(request) != null ||
-                    commonService.extractUserFromHeader(request).getId() == id) {
-                return carsService.getByUser(userSQL, page);
-            } else {
+            // if (commonService.extractManagerFromHeader(request) != null ||
+            //         commonService.extractAdminFromHeader(request) != null ||
+            //         commonService.extractUserFromHeader(request).getId() == id) {
+            //     return carsService.getByUser(userSQL, page);
+            // } else {
                 return carsService.getByUserActivatedOnly(userSQL, page);
-            }
+            // }
 
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -243,7 +243,7 @@ public class CarController {
             HttpServletRequest request) {
         try {
             UserSQL user = commonService.extractUserFromHeader(request);
-            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request);
+            AdministratorSQL administratorSQL = commonService.extractAdminFromHeader(request); //todo if role admin 
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
@@ -261,7 +261,7 @@ public class CarController {
                     .description(carDTO.getDescription())
                     .build();
 
-            System.out.println("is premium checked");
+            System.out.println("is premium checked"); //todo
             if (administratorSQL == null ) {
                 //&& !carsService.findAllByUser(user).isEmpty()
                 System.out.println("is premium checked1");
@@ -285,7 +285,7 @@ public class CarController {
                             vars.put("name", user.getName());
                             email = user.getEmail();
                         } else if (administratorSQL != null) {
-                            vars.put("name", administratorSQL.getName());
+                            vars.put("name", administratorSQL.getName()); //
                             email = administratorSQL.getEmail();
                         } else {
                             throw new CustomException("Invalid token user", HttpStatus.FORBIDDEN);

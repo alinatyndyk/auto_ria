@@ -14,26 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.auto_ria.dto.requests.RegisterRequestAdminDTO;
-import com.example.auto_ria.dto.requests.RegisterRequestManagerDTO;
 import com.example.auto_ria.dto.requests.RegisterRequestUserDTO;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.requests.LoginRequest;
 import com.example.auto_ria.models.requests.RefreshRequest;
-import com.example.auto_ria.models.requests.RegisterAdminRequest;
-import com.example.auto_ria.models.requests.RegisterManagerRequest;
 import com.example.auto_ria.models.requests.RegisterUserRequest;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.AuthenticationService;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.otherApi.CitiesService;
-import com.example.auto_ria.services.user.AdministratorServiceMySQL;
-import com.example.auto_ria.services.user.ManagerServiceMySQL;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
@@ -50,8 +41,7 @@ public class AuthenticationController {
     private AuthenticationService authenticationService;
 
     private UsersServiceMySQLImpl usersServiceMySQL;
-    private AdministratorServiceMySQL administratorServiceMySQL;
-    private ManagerServiceMySQL managerServiceMySQL;
+
 
     private JwtService jwtService;
     private PasswordEncoder passwordEncoder;
@@ -132,105 +122,112 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("/register-manager")
-    public ResponseEntity<AuthenticationResponse> registerManager(
-            @ModelAttribute @Valid RegisterRequestManagerDTO registerRequestDTO,
-            HttpServletRequest request) {
-        try {
-            String code = request.getHeader("Register-key");
+    // @PostMapping("/register-manager")
+    // public ResponseEntity<AuthenticationResponse> registerManager(
+    // @ModelAttribute @Valid RegisterRequestManagerDTO registerRequestDTO,
+    // HttpServletRequest request) {
+    // try {
+    // String code = request.getHeader("Register-key");
 
-            if (code == null) {
-                throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
-            }
+    // if (code == null) {
+    // throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
+    // }
 
-            if (managerServiceMySQL.isManagerByEmailPresent(registerRequestDTO.getEmail())) {
-                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
-            }
+    // if
+    // (managerServiceMySQL.isManagerByEmailPresent(registerRequestDTO.getEmail()))
+    // {
+    // throw new CustomException("User with this email already exists",
+    // HttpStatus.BAD_REQUEST);
+    // }
 
-            String key = authenticationService.checkRegistrationKey(
-                    code,
-                    registerRequestDTO.getEmail(),
-                    ERole.MANAGER,
-                    ETokenRole.MANAGER_REGISTER);
+    // String key = authenticationService.checkRegistrationKey(
+    // code,
+    // registerRequestDTO.getEmail(),
+    // ERole.MANAGER,
+    // ETokenRole.MANAGER_REGISTER);
 
-            String fileName = null;
+    // String fileName = null;
 
-            if (registerRequestDTO.getAvatar() != null) {
-                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
-                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
-            }
+    // if (registerRequestDTO.getAvatar() != null) {
+    // fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+    // usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+    // }
 
-            RegisterManagerRequest registerRequest = RegisterManagerRequest.builder()
-                    .lastName(registerRequestDTO.getLastName())
-                    .name(registerRequestDTO.getName())
-                    .avatar(fileName)
-                    .password(registerRequestDTO.getPassword())
-                    .email(registerRequestDTO.getEmail())
-                    .build();
+    // RegisterManagerRequest registerRequest = RegisterManagerRequest.builder()
+    // .lastName(registerRequestDTO.getLastName())
+    // .name(registerRequestDTO.getName())
+    // .avatar(fileName)
+    // .password(registerRequestDTO.getPassword())
+    // .email(registerRequestDTO.getEmail())
+    // .build();
 
-            return authenticationService.registerManager(registerRequest, key);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // return authenticationService.registerManager(registerRequest, key);
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/code-admin")
-    public ResponseEntity<String> codeAdmin(
-            @RequestParam("email") String email) {
-        try {
-            System.out.println("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
-            Map<String, String> claims = new HashMap<>();
-            claims.put("username", email);
-            claims.put("role", ETokenRole.ADMIN_REGISTER.name());
+    // @PostMapping("/code-admin")
+    // public ResponseEntity<String> codeAdmin(
+    // @RequestParam("email") String email) {
+    // try {
+    // System.out.println("heyyyyyyyyyyyyyyyyyyyyyyyyyyyyy");
+    // Map<String, String> claims = new HashMap<>();
+    // claims.put("username", email);
+    // claims.put("role", ETokenRole.ADMIN_REGISTER.name());
 
-            String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.ADMIN_REGISTER);
-            System.out.println(187);
-            return authenticationService.codeAdmin(email, code);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // String code = jwtService.generateRegistrationCode(claims, email,
+    // ETokenRole.ADMIN_REGISTER);
+    // System.out.println(187);
+    // return authenticationService.codeAdmin(email, code);
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
-    @PostMapping("/register-admin")
-    public ResponseEntity<AuthenticationResponse> registerAdmin(
-            @ModelAttribute @Valid RegisterRequestAdminDTO registerRequestDTO,
-            HttpServletRequest request) {
-        try {
-            String code = request.getHeader("Register-key");
+    // @PostMapping("/register-admin")
+    // public ResponseEntity<AuthenticationResponse> registerAdmin(
+    // @ModelAttribute @Valid RegisterRequestAdminDTO registerRequestDTO,
+    // HttpServletRequest request) {
+    // try {
+    // String code = request.getHeader("Register-key");
 
-            if (code == null) {
-                throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
-            }
+    // if (code == null) {
+    // throw new CustomException("Register-key absent", HttpStatus.BAD_REQUEST);
+    // }
 
-            if (administratorServiceMySQL.isAdminByEmailPresent(registerRequestDTO.getEmail())) {
-                throw new CustomException("User with this email already exists", HttpStatus.BAD_REQUEST);
-            }
+    // if
+    // (administratorServiceMySQL.isAdminByEmailPresent(registerRequestDTO.getEmail()))
+    // {
+    // throw new CustomException("User with this email already exists",
+    // HttpStatus.BAD_REQUEST);
+    // }
 
-            String key = authenticationService.checkRegistrationKey(
-                    code,
-                    registerRequestDTO.getEmail(),
-                    ERole.ADMIN,
-                    ETokenRole.ADMIN_REGISTER);
+    // String key = authenticationService.checkRegistrationKey(
+    // code,
+    // registerRequestDTO.getEmail(),
+    // ERole.ADMIN,
+    // ETokenRole.ADMIN_REGISTER);
 
-            String fileName = null;
-            if (registerRequestDTO.getAvatar() != null) {
-                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
-                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
-            }
+    // String fileName = null;
+    // if (registerRequestDTO.getAvatar() != null) {
+    // fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+    // usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+    // }
 
-            RegisterAdminRequest registerRequest = RegisterAdminRequest.builder()
-                    .lastName(registerRequestDTO.getLastName())
-                    .name(registerRequestDTO.getName())
-                    .avatar(fileName)
-                    .password(registerRequestDTO.getPassword())
-                    .email(registerRequestDTO.getEmail())
-                    .build();
+    // RegisterAdminRequest registerRequest = RegisterAdminRequest.builder()
+    // .lastName(registerRequestDTO.getLastName())
+    // .name(registerRequestDTO.getName())
+    // .avatar(fileName)
+    // .password(registerRequestDTO.getPassword())
+    // .email(registerRequestDTO.getEmail())
+    // .build();
 
-            return authenticationService.registerAdmin(registerRequest, key);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
+    // return authenticationService.registerAdmin(registerRequest, key);
+    // } catch (CustomException e) {
+    // throw new CustomException(e.getMessage(), e.getStatus());
+    // }
+    // }
 
     // @PostMapping("/register-customer")
     // public ResponseEntity<String> registerCustomer(
@@ -285,7 +282,6 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> loginAll(@RequestBody LoginRequest loginRequest) {
         try {
 
-            System.out.println("login request*********" + loginRequest);
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder().build();
 
             UserSQL userSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
@@ -296,26 +292,30 @@ public class AuthenticationController {
                 authenticationResponse = authenticationService.login(loginRequest);
             }
 
-            ManagerSQL managerSQL = managerServiceMySQL.getByEmail(loginRequest.getEmail());
+            // ManagerSQL managerSQL =
+            // managerServiceMySQL.getByEmail(loginRequest.getEmail());
 
-            if (managerSQL != null && !managerSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (managerSQL != null && managerSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginManager(loginRequest);
-            }
+            // if (managerSQL != null && !managerSQL.getIsActivated().equals(true)) {
+            // throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            // } else if (managerSQL != null && managerSQL.getIsActivated().equals(true)) {
+            // authenticationResponse = authenticationService.loginManager(loginRequest);
+            // }
 
-            AdministratorSQL administratorSQL = administratorServiceMySQL.getByEmail(loginRequest.getEmail());
-            System.out.println("++++jjjadmin************" + administratorSQL);
+            // AdministratorSQL administratorSQL =
+            // administratorServiceMySQL.getByEmail(loginRequest.getEmail());
+            // System.out.println("++++jjjadmin************" + administratorSQL);
 
-            if (administratorSQL != null && !administratorSQL.getIsActivated().equals(true)) {
-                throw new CustomException("Activate your account", HttpStatus.LOCKED);
-            } else if (administratorSQL != null && administratorSQL.getIsActivated().equals(true)) {
-                authenticationResponse = authenticationService.loginAdmin(loginRequest);
-                System.out.println("authenticationResponse" + authenticationResponse);
-            }
+            // if (administratorSQL != null &&
+            // !administratorSQL.getIsActivated().equals(true)) {
+            // throw new CustomException("Activate your account", HttpStatus.LOCKED);
+            // } else if (administratorSQL != null &&
+            // administratorSQL.getIsActivated().equals(true)) {
+            // authenticationResponse = authenticationService.loginAdmin(loginRequest);
+            // System.out.println("authenticationResponse" + authenticationResponse);
+            // }
 
-            if (userSQL == null && managerSQL == null && administratorSQL == null) {
-                System.out.println("yes");
+            // if (userSQL == null && managerSQL == null && administratorSQL == null) {
+            if (userSQL == null) {
                 throw new CustomException("Login or password is not valid. Try again", HttpStatus.FORBIDDEN);
             }
 
@@ -394,9 +394,8 @@ public class AuthenticationController {
             Claims claims = jwtService.extractClaimsCycle(accessToken);
 
             String email = claims.get("sub").toString();
-            String owner = claims.get("iss").toString();
 
-            return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
+            return ResponseEntity.ok(authenticationService.resetPassword(email, encoded));
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -421,10 +420,9 @@ public class AuthenticationController {
             String accessToken = jwtService.extractTokenFromHeader(request);
             Claims claims = jwtService.extractClaimsCycle(accessToken);
 
-            String email = claims.get("sub").toString();
-            String owner = claims.get("iss").toString();
+            String email = claims.get("sub").toString(); //todo token delete iss
 
-            authenticationService.signOut(email, owner);
+            authenticationService.signOut(email);
 
             return ResponseEntity.ok("Signed out");
         } catch (CustomException e) {
@@ -449,7 +447,6 @@ public class AuthenticationController {
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String email = claims.get("sub").toString();
-            String owner = claims.get("role").toString();
             String tokenType = claims.get("recognition").toString();
 
             authenticationService.checkForgotKey(
@@ -457,7 +454,7 @@ public class AuthenticationController {
                     ETokenRole.valueOf(tokenType),
                     ETokenRole.FORGOT_PASSWORD);
 
-            return ResponseEntity.ok(authenticationService.resetPassword(email, owner, encoded));
+            return ResponseEntity.ok(authenticationService.resetPassword(email, encoded));
         } catch (CustomException e) {
             System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());

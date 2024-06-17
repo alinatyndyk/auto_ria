@@ -15,11 +15,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.EMail;
+import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.responses.user.UserResponse;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 
@@ -92,25 +91,17 @@ public class UsersServiceMySQLImpl {
         }
     }
 
-    public ResponseEntity<String> deleteById(String id, UserSQL user, AdministratorSQL administratorSQL,
-            ManagerSQL manager) {
+    public ResponseEntity<String> deleteById(String id, UserSQL user) {
         userDaoSQL.deleteById(Integer.valueOf(id));
 
         HashMap<String, Object> vars = new HashMap<>();
         vars.put("name", user.getName());
         vars.put("email", user.getEmail());
 
-        if (administratorSQL != null || manager != null) {
-            try {
-                mailer.sendEmail(user.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
-            } catch (Exception ignore) {
-            }
-        }
+        mailer.sendEmail(user.getEmail(), EMail.YOUR_ACCOUNT_BANNED, vars);
+        // todo 2 separate methods for ban and leave
 
-        try {
-            mailer.sendEmail(user.getEmail(), EMail.PLATFORM_LEAVE, vars);
-        } catch (Exception ignore) {
-        }
+        mailer.sendEmail(user.getEmail(), EMail.PLATFORM_LEAVE, vars);
 
         return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
     }
@@ -119,8 +110,7 @@ public class UsersServiceMySQLImpl {
         return user.getId() == user1.getId();
     }
 
-    
-    public ResponseEntity<UserSQL> update(int id, UserUpdateDTO userDTO, UserSQL userSQL) {
+    public ResponseEntity<UserSQL> update(int id, UserUpdateDTO userDTO) {
         try {
             UserSQL user = getById(String.valueOf(id)).getBody();
 
@@ -156,7 +146,6 @@ public class UsersServiceMySQLImpl {
         }
     }
 
-    
     public void updateAvatar(int id, String fileName) {
 
         UserSQL user = getById(String.valueOf(id)).getBody();
@@ -176,6 +165,17 @@ public class UsersServiceMySQLImpl {
     public boolean isUserByEmailPresent(String email) {
 
         return userDaoSQL.findUserByEmail(email) != null;
+    }
+
+    public ResponseEntity<Page<UserResponse>> findAllByRole(ERole role, int page) {
+
+        Pageable pageable = PageRequest.of(page, 2);
+        Page<UserSQL> userSQLPage = userDaoSQL.findAllByRole(role, pageable);
+
+        Page<UserResponse> userResponsePage = userSQLPage
+                .map(userSQL -> commonService.createUserResponse(userSQL));
+
+        return new ResponseEntity<>(userResponsePage, HttpStatus.OK); //todo to common service
     }
 
 }

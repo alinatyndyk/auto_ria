@@ -1,8 +1,6 @@
 package com.example.auto_ria.services;
 
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
-import com.example.auto_ria.dao.user.AdministratorDaoSQL;
-import com.example.auto_ria.dao.user.ManagerDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
@@ -11,8 +9,6 @@ import com.example.auto_ria.models.responses.user.AdminResponse;
 import com.example.auto_ria.models.responses.user.ManagerResponse;
 import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.socket.Session;
-import com.example.auto_ria.models.user.AdministratorSQL;
-import com.example.auto_ria.models.user.ManagerSQL;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.auth.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,8 +29,6 @@ public class CommonService {
 
     private UserDaoSQL userDaoSQL;
     private SessionDaoSQL sessionDaoSQL;
-    private ManagerDaoSQL managerDaoSQL;
-    private AdministratorDaoSQL administratorDaoSQL;
 
     public void transferAvatar(MultipartFile picture, String originalFileName) {
         try {
@@ -108,46 +102,46 @@ public class CommonService {
         return sellerSQL;
     }
 
-    public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
-        ManagerSQL managerSQL;
-        try {
-            managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.MANAGER));
-        } catch (Exception e) {
-            return null;
-        }
-        return managerSQL;
-    }
-
-    public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
-        AdministratorSQL administratorSQL;
-        try {
-            administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.ADMIN));
-        } catch (Exception e) {
-            return null;
-        }
-        return administratorSQL;
-    }
-
-    // public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
-    // return customerDaoSQL.findByEmail(extractEmailFromHeader(request,
-    // ETokenRole.CUSTOMER));
+    // public ManagerSQL extractManagerFromHeader(HttpServletRequest request) {
+    //     ManagerSQL managerSQL;
+    //     try {
+    //         managerSQL = managerDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.MANAGER));
+    //     } catch (Exception e) {
+    //         return null;
+    //     }
+    //     return managerSQL;
     // }
 
-    public ERole findRoleByEmail(String email) {
-        try {
-            if (administratorDaoSQL.findByEmail(email) != null) {
-                return ERole.ADMIN;
-            } else if (managerDaoSQL.findByEmail(email) != null) {
-                return ERole.MANAGER;
-            } else if (userDaoSQL.findUserByEmail(email) != null) {
-                return ERole.USER; // was seller and cus -> only user
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
-        }
-    }
+    // public AdministratorSQL extractAdminFromHeader(HttpServletRequest request) {
+    //     AdministratorSQL administratorSQL;
+    //     try {
+    //         administratorSQL = administratorDaoSQL.findByEmail(extractEmailFromHeader(request, ETokenRole.ADMIN));
+    //     } catch (Exception e) {
+    //         return null;
+    //     }
+    //     return administratorSQL;
+    // }
+
+    // // public CustomerSQL extractCustomerFromHeader(HttpServletRequest request) {
+    // // return customerDaoSQL.findByEmail(extractEmailFromHeader(request,
+    // // ETokenRole.CUSTOMER));
+    // // }
+
+    // public ERole findRoleByEmail(String email) {
+    //     try {
+    //         if (administratorDaoSQL.findByEmail(email) != null) {
+    //             return ERole.ADMIN;
+    //         } else if (managerDaoSQL.findByEmail(email) != null) {
+    //             return ERole.MANAGER;
+    //         } else if (userDaoSQL.findUserByEmail(email) != null) {
+    //             return ERole.USER; // was seller and cus -> only user
+    //         } else {
+    //             return null;
+    //         }
+    //     } catch (Exception e) {
+    //         throw new CustomException("Failed to get role: " + e.getMessage(), HttpStatus.CONFLICT);
+    //     }
+    // }
 
     // public CustomerResponse createCustomerResponse(CustomerSQL customer) {
     // try {
@@ -172,38 +166,38 @@ public class CommonService {
     // }
     // }
 
-    public ManagerResponse createManagerResponse(ManagerSQL manager) {
-        try {
-            return ManagerResponse.builder()
-                    .id(manager.getId())
-                    .name(manager.getName())
-                    .lastName(manager.getLastName())
-                    .avatar(manager.getAvatar())
-                    .role(ERole.MANAGER)
-                    .createdAt(manager.getCreatedAt())
-                    .build();
+    // public ManagerResponse createManagerResponse(ManagerSQL manager) {
+    //     try {
+    //         return ManagerResponse.builder()
+    //                 .id(manager.getId())
+    //                 .name(manager.getName())
+    //                 .lastName(manager.getLastName())
+    //                 .avatar(manager.getAvatar())
+    //                 .role(ERole.MANAGER)
+    //                 .createdAt(manager.getCreatedAt())
+    //                 .build();
 
-        } catch (Exception e) {
-            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-        }
-    }
+    //     } catch (Exception e) {
+    //         throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+    //     }
+    // }
 
-    public AdminResponse createAdminResponse(AdministratorSQL administratorSQL) {
-        try {
-            return AdminResponse.builder()
-                    .id(administratorSQL.getId())
-                    .name(administratorSQL.getName())
-                    .lastName(administratorSQL.getLastName())
-                    .avatar(administratorSQL.getAvatar())
-                    .role(ERole.ADMIN)
-                    .createdAt(administratorSQL.getCreatedAt())
-                    .email(administratorSQL.getEmail())
-                    .build();
+    // public AdminResponse createAdminResponse(AdministratorSQL administratorSQL) {
+    //     try {
+    //         return AdminResponse.builder()
+    //                 .id(administratorSQL.getId())
+    //                 .name(administratorSQL.getName())
+    //                 .lastName(administratorSQL.getLastName())
+    //                 .avatar(administratorSQL.getAvatar())
+    //                 .role(ERole.ADMIN)
+    //                 .createdAt(administratorSQL.getCreatedAt())
+    //                 .email(administratorSQL.getEmail())
+    //                 .build();
 
-        } catch (Exception e) {
-            throw new CustomException("Could not create response", HttpStatus.CONFLICT);
-        }
-    }
+    //     } catch (Exception e) {
+    //         throw new CustomException("Could not create response", HttpStatus.CONFLICT);
+    //     }
+    // }
 
     public UserResponse createUserResponse(UserSQL userSQL) {
         try {

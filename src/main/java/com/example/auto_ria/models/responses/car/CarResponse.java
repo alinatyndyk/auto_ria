@@ -1,11 +1,16 @@
 package com.example.auto_ria.models.responses.car;
 
+import java.time.LocalDate;
 import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EModel;
 import com.example.auto_ria.models.responses.user.UserCarResponse;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Builder;
 import lombok.Data;
@@ -29,11 +34,13 @@ public class CarResponse {
     private double priceEUR;
     private double priceUSD;
 
+    private LocalDate createdAt;
+
     @Builder
     public CarResponse(int id, EBrand brand, EModel model, int powerH, String city,
             String region, String price, ECurrency currency,
             List<String> photo, String description, UserCarResponse user,
-            double priceUAH, double priceEUR, double priceUSD) {
+            double priceUAH, double priceEUR, double priceUSD, LocalDate createdAt) {
         this.id = id;
         this.brand = brand;
         this.model = model;
@@ -51,5 +58,6 @@ public class CarResponse {
         this.priceUAH = priceUAH;
         this.priceEUR = priceEUR;
         this.priceUSD = priceUSD;
+        this.createdAt = createdAt;
     }
 }

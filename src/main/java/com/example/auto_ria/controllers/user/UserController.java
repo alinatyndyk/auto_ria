@@ -65,7 +65,7 @@ public class UserController {
                                               @RequestParam("avatar") MultipartFile avatar,
                                               HttpServletRequest request) {
         try {
-            AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
+            AdministratorSQL administrator = commonService.extractAdminFromHeader(request); //* todo has role adm or user check */
             UserSQL user = commonService.extractUserFromHeader(request);
             assert user != null;
             if (user.getId() != id || administrator == null) {
@@ -89,7 +89,7 @@ public class UserController {
         try {
             UserSQL user = commonService.extractUserFromHeader(request);
             ManagerSQL manager = commonService.extractManagerFromHeader(request);
-            AdministratorSQL administrator = commonService.extractAdminFromHeader(request);
+            AdministratorSQL administrator = commonService.extractAdminFromHeader(request); //todo separate or has role
 
             if (administrator == null && manager == null) {
                 if (user == null || !Integer.valueOf(id).equals(user.getId())) {

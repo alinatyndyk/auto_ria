@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface ChatDaoSQL extends JpaRepository<Chat, Integer> {
@@ -25,6 +26,7 @@ public interface ChatDaoSQL extends JpaRepository<Chat, Integer> {
     @Query("SELECT c FROM Chat c JOIN c.users u WHERE :userId IN (u)")
     List<Chat> findAllChatsByUserId(@Param("userId") int userId);
 
+
     @Query("SELECT c FROM Chat c JOIN c.users u WHERE :userId IN (u)")
     Page<Chat> findAllChatsByUserId(@Param("userId") int userId, Pageable pageable);
 
@@ -32,8 +34,10 @@ public interface ChatDaoSQL extends JpaRepository<Chat, Integer> {
     // Chat getByUser1IdAndUser2Id(@Param("user1Id") int user1Id, @Param("user2Id")
     // int user2Id);
 
-    @Query("SELECT c FROM Chat c JOIN c.users u WHERE :user1Id IN (u) AND :user2Id IN (u)")
-    Chat findByUsers(@Param("user1Id") int user1Id, @Param("user2Id") int user2Id);
+    // @Query("SELECT c FROM Chat c JOIN c.users u WHERE u.id IN :userIds GROUP BY c HAVING COUNT(u) = :size")
+    // Chat findByUsers(@Param("userIds") Collection<Integer> userIds, @Param("size") long size);
+
+    // Chat findByUsers(List<Integer> users);
 
     // Page<Chat> getByCustomerId(int customerId, Pageable pageable);
 

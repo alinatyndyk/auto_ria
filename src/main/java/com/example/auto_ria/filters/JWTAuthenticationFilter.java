@@ -1,10 +1,12 @@
 package com.example.auto_ria.filters;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.example.auto_ria.dao.auth.UserAuthDaoSQL;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.services.auth.JwtService;
 import com.example.auto_ria.services.auth.UserDetailsServiceImpl;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
@@ -64,7 +65,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+                System.out.println(userDetails + "********************");
                 if (jwtService.isTokenValid(jwt, userDetails)) {
+                    System.out.println(jwtService.isTokenValid(jwt, userDetails) + "********************");
+                    System.out.println(!isInDbAndActivated(userDetails, jwt) + "********************");
                     if (!isInDbAndActivated(userDetails, jwt)) {
                         throw new IllegalAccessException("Token invalid");
                     }
@@ -94,9 +98,23 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private boolean isInDbAndActivated(UserDetails userDetails, String jwt) {
-        if (userDetails.getAuthorities().contains(new SimpleGrantedAuthority(ERole.USER.name()))
+        if (hasAllowedRole(userDetails)
                 && usersServiceMySQL.getByEmail(userDetails.getUsername()).getIsActivated().equals(true)) {
             return userAuthDaoSQL.findByAccessToken(jwt) != null;
+        }
+        return false;
+    }
+
+    public static boolean hasAllowedRole(UserDetails userDetails) {
+        Set<String> allowedRoles = new HashSet<>();
+        allowedRoles.add("USER");
+        allowedRoles.add("ADMIN");
+        allowedRoles.add("MANAGER");
+
+        for (GrantedAuthority authority : userDetails.getAuthorities()) {
+            if (allowedRoles.contains(authority.getAuthority())) {
+                return true;
+            }
         }
         return false;
     }

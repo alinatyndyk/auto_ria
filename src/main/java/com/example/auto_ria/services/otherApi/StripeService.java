@@ -1,5 +1,15 @@
 package com.example.auto_ria.services.otherApi;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
 import com.example.auto_ria.dao.premium.PremiumPlanDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
@@ -8,21 +18,17 @@ import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.example.auto_ria.models.user.UserSQL;
 import com.stripe.Stripe;
 import com.stripe.exception.StripeException;
-import com.stripe.model.*;
+import com.stripe.model.Customer;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
+import com.stripe.model.Price;
+import com.stripe.model.Subscription;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.PaymentIntentCreateParams;
 import com.stripe.param.SubscriptionCreateParams;
 import com.stripe.param.SubscriptionUpdateParams;
-import lombok.AllArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
@@ -41,7 +47,9 @@ public class StripeService {
             String defaultSource;
 
             String stripeId = userSQL.getPaymentSource();
+
             boolean stripePresent = userSQL.isPaymentSourcePresent();
+
             if (stripeId == null) {
                 defaultSource = null;
             } else {
@@ -59,15 +67,19 @@ public class StripeService {
 
             if (body.isUseDefaultCard() && defaultSource == null) {
                 throw new CustomException("No default source is present. " +
-                        "Attach a card to your account to make your payments faster. Visit http*******", HttpStatus.BAD_REQUEST);
+                        "Attach a card to your account to make your payments faster. Visit http*******", // todo front
+                                                                                                         // url
+                        HttpStatus.BAD_REQUEST);
             }
 
             if (body.isSetAsDefaultCard() && defaultSource != null) {
                 throw new CustomException("Default source is already defined. " +
-                        "You can change it at any moment at - Http//3000/attach-card", HttpStatus.BAD_REQUEST);
+                        "You can change it at any moment at - Http//3000/attach-card", HttpStatus.BAD_REQUEST); // todo
+                                                                                                                // front
             }
 
-            if (body.isAutoPay() && !body.isSetAsDefaultCard() && !stripePresent) {
+            if (body.isAutoPay() && !body.isSetAsDefaultCard()) {
+                // if (body.isAutoPay() && !body.isSetAsDefaultCard() && !stripePresent) {
                 throw new CustomException("Subscription requires a default card", HttpStatus.BAD_REQUEST);
             }
 
@@ -81,7 +93,7 @@ public class StripeService {
                     paymentToken = body.getToken();
                     customerId = stripeId;
 
-                } else if (stripePresent) {
+                } else if (stripePresent && body.isSetAsDefaultCard()) {
                     System.out.println("first2");
                     assert stripeId != null;
                     Customer stripeCustomer = Customer.retrieve(stripeId);
@@ -100,8 +112,7 @@ public class StripeService {
                             CustomerCreateParams.builder()
                                     .setName(userSQL.getName() + userSQL.getLastName())
                                     .setEmail(userSQL.getEmail())
-                                    .build()
-                    );
+                                    .build());
                     paymentToken = body.getToken();
                     customerId = customer.getId();
 
@@ -116,8 +127,7 @@ public class StripeService {
                                     .setName(userSQL.getName() + userSQL.getLastName())
                                     .setEmail(userSQL.getEmail())
                                     .setSource(body.getToken())
-                                    .build()
-                    );
+                                    .build());
                     paymentToken = body.getToken();
                     customerId = customer.getId();
 
@@ -151,6 +161,7 @@ public class StripeService {
                         premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
                         premiumPlan.setSubId(subscription.getId());
                         premiumPlan.setActive(true);
+
                         premiumPlanDaoSQL.save(premiumPlan);
 
                     } else {
@@ -208,6 +219,7 @@ public class StripeService {
                         premiumPlan.setEndDate(LocalDate.now().plusMonths(1));
                         premiumPlan.setSubId(null);
                         premiumPlan.setActive(true);
+
                         premiumPlanDaoSQL.save(premiumPlan);
                     } else {
                         premiumPlanDaoSQL.save(PremiumPlan.builder()
@@ -222,10 +234,9 @@ public class StripeService {
                     }
                 }
 
-                System.out.println(224);
             } else {
-                System.out.println(225);
-                throw new CustomException("Source attachment fail: credential provided is null or invalid", HttpStatus.BAD_REQUEST);
+                throw new CustomException("Source attachment fail: credential provided is null or invalid",
+                        HttpStatus.BAD_REQUEST);
             }
         } catch (CustomException e) {
             System.out.println(228);

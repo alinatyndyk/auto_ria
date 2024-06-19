@@ -1,7 +1,9 @@
 package com.example.auto_ria.services.chat;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Service;
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.socket.MessageDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
@@ -46,9 +47,10 @@ public class ChatServiceMySQL {
             userList.add(user1Id);
             userList.add(user2Id);
 
+
             List<String> sessionList = new ArrayList<>();
-            sessionList.add(user1SessionId);
-            sessionList.add(user2SessionId);
+            sessionList.add(user1SessionId); // второго пока еще нет
+            sessionList.add(user2SessionId); // второго пока еще нет
 
             chatDaoSQL.save(Chat.builder()
                     .sessions(sessionList)
@@ -65,7 +67,11 @@ public class ChatServiceMySQL {
     }
 
     public String getRoomKey(String customerId, String sellerId) {
-        return customerId + "-" + sellerId;
+        if (customerId.compareTo(sellerId) < 0) {
+            return customerId + "-" + sellerId;
+        } else {
+            return sellerId + "-" + customerId;
+        }
     }
 
     public Page<MessageClass> getMessagesPage(String roomKey, int page) {
@@ -111,18 +117,23 @@ public class ChatServiceMySQL {
         // }
     }
 
-    public Chat getChatByUserIdFilterReciever(int id, int receiver) {
+    // public Chat getChatByUserIdFilterReciever(int id, int receiver) {
 
-        return chatDaoSQL.findByUsers(id, receiver);
+    // return chatDaoSQL.findByUsers(id, receiver);
 
-    }
+    // }
 
     public Chat getByRoomKey(String roomKey) {
         return chatDaoSQL.getByRoomKey(roomKey);
     }
 
-    public Chat getByUser1IdandUser2Id(int user1Id, int user2Id) {
-        return chatDaoSQL.findByUsers(user1Id, user2Id);
-    }
+    // public Chat getByUsers(int user1Id, int user2Id) {
+    // List<Integer> list = new ArrayList<>();
+    // list.add(user1Id);
+    // list.add(user2Id);
+    // System.out.println(list + "list ***************");
+
+    // return chatDaoSQL.findByUsers(list, Long.valueOf(list.size()));
+    // }
 
 }

@@ -76,6 +76,7 @@ public class StripeController {
 
     }
 
+    //todo only users auth
     @SneakyThrows
     @PostMapping("/add-payment-source")
     public ResponseEntity<String> addPaymentSource(
@@ -110,7 +111,7 @@ public class StripeController {
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("source", paymentToken);
-                stripeCustomer.update(params); /// turn into one model!
+                stripeCustomer.update(params); /// todo turn into one model!
             }
 
             return ResponseEntity.ok("Card attached successfully");

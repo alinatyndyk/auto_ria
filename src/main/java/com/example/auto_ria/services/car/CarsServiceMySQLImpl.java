@@ -134,18 +134,18 @@ public class CarsServiceMySQLImpl {
             }
             CarSQL carSQL = carDAO.findById(id).get();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (!carSQL.isActivated()) {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                if (authentication.getPrincipal() instanceof UserDetails) {
+                    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-            if (authentication.getPrincipal() instanceof UserDetails) {
-                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-                if (!carSQL.isActivated() && 
-                userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER")) &&
-                carSQL.getUser().getEmail() != userDetails.getUsername()) {
-                    throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
+                    if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER")) &&
+                            carSQL.getUser().getEmail() != userDetails.getUsername()) {
+                        throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);
+                    }
+                } else {
+                    throw new CustomException("The car is banned", HttpStatus.UNAUTHORIZED);
                 }
-            } else {
-                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
             CarResponse carResponse = formCarResponse(carSQL);

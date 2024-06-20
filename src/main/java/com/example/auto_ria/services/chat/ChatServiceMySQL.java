@@ -47,7 +47,6 @@ public class ChatServiceMySQL {
             userList.add(user1Id);
             userList.add(user2Id);
 
-
             List<String> sessionList = new ArrayList<>();
             sessionList.add(user1SessionId); // второго пока еще нет
             sessionList.add(user2SessionId); // второго пока еще нет
@@ -81,8 +80,8 @@ public class ChatServiceMySQL {
         return messageDaoSQL.getByChatId(chatId, pageable);
     }
 
-    public void save(Chat chat) {
-        chatDaoSQL.save(chat);
+    public Chat save(Chat chat) {
+        return chatDaoSQL.save(chat);
     }
 
     public MessageClass patchMessage(MessageClass messageClass, String content) {

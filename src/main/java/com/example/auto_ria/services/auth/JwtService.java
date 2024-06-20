@@ -1,8 +1,18 @@
 package com.example.auto_ria.services.auth;
 
-import com.example.auto_ria.enums.ERole;
+import java.security.Key;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import org.springframework.core.env.Environment;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Service;
+
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -12,15 +22,6 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.core.env.Environment;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
-import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
 @Service
 @AllArgsConstructor
@@ -101,7 +102,7 @@ public class JwtService {
             case MANAGER -> environment.getProperty("token.generation.key.manager");
             case ADMIN_REGISTER -> environment.getProperty("token.register.key.admin");
             case MANAGER_REGISTER -> environment.getProperty("token.register.key.manager");
-            case USER_ACTIVATE -> environment.getProperty("token.activate.key.user"); // mix seller/customer
+            case USER_ACTIVATE -> environment.getProperty("token.activate.key.user");
             case FORGOT_PASSWORD -> environment.getProperty("token.forgot.pass.key");
         };
 
@@ -124,51 +125,12 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRegisterKey(String email,ETokenRole role) {
-    // public String generateRegisterKey(String email, ERole roleModel, ETokenRole role) {
+    public String generateRegisterKey(String email, ETokenRole role) {
         Map<String, Object> args = new HashMap<>();
-        // args.put("role", roleModel);
         args.put("email", email);
         args.put("recognition", role);
         return generateRegisterKey(args, email, role);
     }
-
-    // public String generateToken(
-    //         Map<String, Object> extraClaims,
-    //         UserDetails userDetails) {
-    //     return Jwts
-    //             .builder()
-    //             .setClaims(extraClaims)
-    //             .setSubject(userDetails.getUsername())
-    //             .setIssuedAt(new Date(System.currentTimeMillis()))
-    //             .setIssuer(ERole.SELLER.name())
-    //             .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-    //             .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256) /// ??????????????
-    //             .compact();
-    // }
-
-    // public String generateToken(UserDetails userDetails) {
-    // return generateToken(new HashMap<>(), userDetails);
-    // }
-
-    // public String generateRefreshToken(
-    // Map<String, Object> extraClaims,
-    // UserDetails userDetails
-    // ) {
-    // return Jwts
-    // .builder()
-    // .setClaims(extraClaims)
-    // .setSubject(userDetails.getUsername())
-    // .setIssuedAt(new Date(System.currentTimeMillis()))
-    // .setIssuer(ERole.SELLER.name())
-    // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-    // .signWith(getSigningKey(ETokenRole.SELLER), SignatureAlgorithm.HS256)
-    // .compact();
-    // }
-
-    // public String generateRefreshToken(UserDetails userDetails) {
-    // return generateRefreshToken(new HashMap<>(), userDetails);
-    // }
 
     public String generateCode(
             ETokenRole issuer,

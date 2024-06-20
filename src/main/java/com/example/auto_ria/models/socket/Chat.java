@@ -29,6 +29,7 @@ public class Chat {
     @JoinTable(name = "chat_message", joinColumns = @JoinColumn(name = "chat_id"), inverseJoinColumns = @JoinColumn(name = "message_id"))
     private List<MessageClass> messages = new ArrayList<>();
 
+
     // private int user1Id;
     // private int user2Id;
 
@@ -54,6 +55,10 @@ public class Chat {
     private LocalDateTime updatedAt;
 
     public void addMessage(MessageClass message) {
+        if (messages == null) {
+            messages = new ArrayList<>();
+        }
         messages.add(message);
     }
+    
 }

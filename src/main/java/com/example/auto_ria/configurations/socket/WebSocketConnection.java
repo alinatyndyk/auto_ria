@@ -165,21 +165,33 @@ public class WebSocketConnection extends TextWebSocketHandler {
             System.out.println(sessionList + "session list");
 
             if (chat == null) {
-
                 List<Integer> userList = new ArrayList<>();
                 userList.add(authSQL.getPersonId());
                 userList.add(Integer.parseInt(receiverId));
                 System.out.println(userList + "user list *************************");
-                chat = Chat.builder().users(userList)
+                Chat chatNew = Chat.builder().users(userList)
                         .sessions(sessionList)
                         .users(userList)
                         .roomKey(roomKey)
                         .build();
+                // chatDaoSQL.save(chatNew);
+                // System.out.println(chatNew + "chat");
+                // chat = chatNew;
 
+                try {
+                    chatDaoSQL.save(chatNew);
+                    System.out.println(chatNew + "chat");
+                    chat = chatNew;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    System.out.println("Ошибка при сохранении нового чата: " + e.getMessage());
+                    throw new CustomException("Ошибка при сохранении нового чата", HttpStatus.INTERNAL_SERVER_ERROR);
+                }
             } else {
                 chat.setSessions(sessionList);
+                chatDaoSQL.save(chat);
             }
-            chatServiceMySQL.save(chat);
+
             System.out.println(chat + "NEW CHAT SAVED**************************");
 
             MessageClass messageClass = MessageClass.builder()
@@ -190,13 +202,22 @@ public class WebSocketConnection extends TextWebSocketHandler {
             messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
             messageClass.setReceiverId(receiverId);
             messageClass.setIsSeen(false);
-            System.out.println(197);
+            System.out.println(messageClass + "MESSAGE CLASS");
 
             MessageClass newMessage = messageDaoSQL.save(messageClass);
             System.out.println(newMessage + "NEW MAS");
-            chat.addMessage(newMessage);
+            
+            try {
+                System.out.println("before NEW CHAT with msg*********************");
+                chat.addMessage(newMessage);
+                System.out.println(chat + "NEW CHAT with msg*********************");
+                chatDaoSQL.save(chat);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println("Ошибка при сохранении нового чата 2: " + e.getMessage());
+                throw new CustomException("Ошибка при сохранении нового чата 2", HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-            chatDaoSQL.save(chat);
 
             for (String sess : chat.getSessions()) {
                 sendTextMessageIfSessionExists(sess, message.getPayload());

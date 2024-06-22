@@ -1,4 +1,4 @@
-import {Pageable, Sort} from "../pagable.interface";
+import { Pageable, Sort } from "../pagable.interface";
 
 export interface ICreateCar {
     brand: string;
@@ -34,7 +34,7 @@ export interface IUpdateInputCar {
 
 export interface IUpdateCarRequest {
     id: number,
-    car: IUpdateInputCar
+    car: Partial<IUpdateInputCar>
 }
 
 export interface ICar {
@@ -65,7 +65,7 @@ export interface ICar {
 }
 
 export interface ICarResponse {
-    content: ICar[];
+    content: CarsResponse[];
     pageable: Pageable;
     last: boolean;
     totalPages: number;
@@ -76,4 +76,36 @@ export interface ICarResponse {
     first: boolean;
     numberOfElements: number;
     empty: boolean;
+}
+
+export interface CarsResponse {
+    id: number;
+    brand: string; //todo enums
+    model: string;
+    powerH: number;
+    city: string;
+    region: string;
+    price: string;
+    currency: string;
+    photo: string[];
+    description: string;
+    isActivated: boolean,
+    user: UserCarResponse;
+    priceUAH: number;
+    priceEUR: number;
+    priceUSD: number;
+    createdAt: string; // Assuming createdAt is a string representation of a date
+}
+
+
+export interface UserCarResponse {
+    id: number;
+    name: string;
+    lastName: string;
+    city: string;
+    region: string;
+    number: string;
+    role: string;
+    avatar: string;
+    createdAt: string; // Assuming createdAt is a string representation of a date
 }

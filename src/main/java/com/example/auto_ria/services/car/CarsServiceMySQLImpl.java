@@ -376,6 +376,7 @@ public class CarsServiceMySQLImpl {
                     .price(carSQL.getPrice())
                     .currency(carSQL.getCurrency())
                     .photo(carSQL.getPhoto())
+                    .isActivated(carSQL.isActivated())
                     .user(UserCarResponse.builder()
                             .id(carSQL.getUser().getId())
                             .name(carSQL.getUser().getName())

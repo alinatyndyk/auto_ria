@@ -1,9 +1,9 @@
 import React, {FC} from 'react';
-import {ICar} from "../../interfaces";
+import {CarsResponse} from "../../interfaces";
 import {useAppNavigate} from "../../hooks";
 
 interface IProps {
-    car: ICar
+    car: CarsResponse
 }
 
 const Car: FC<IProps> = ({car}) => {

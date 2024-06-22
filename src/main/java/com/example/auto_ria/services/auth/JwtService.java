@@ -29,6 +29,7 @@ public class JwtService {
 
     private Environment environment;
 
+
     public String extractUsername(String jwt, ETokenRole role) {
         String claim;
         try {

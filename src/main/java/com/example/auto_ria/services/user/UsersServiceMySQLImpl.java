@@ -147,7 +147,6 @@ public class UsersServiceMySQLImpl {
         userDaoSQL.save(user);
     }
 
-
     public boolean isUserByNumberPresent(String number) {
 
         return userDaoSQL.findUserByNumber(number) != null;

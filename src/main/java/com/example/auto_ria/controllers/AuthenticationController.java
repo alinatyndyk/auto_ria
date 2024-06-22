@@ -90,6 +90,75 @@ public class AuthenticationController {
         }
     }
 
+    @PostMapping("/register-user/with-authority")
+    public ResponseEntity<AuthenticationResponse> registerUserWithAuth(
+            @ModelAttribute @Valid RegisterRequestUserDTO registerRequestDTO, HttpServletRequest request) {
+        try {
+
+            citiesService.isValidUkrainianCity(registerRequestDTO.getRegion(),
+                    registerRequestDTO.getCity());
+
+            if (usersServiceMySQL.isUserByNumberPresent(registerRequestDTO.getNumber())) {
+                throw new CustomException("User with this number already exists",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            if (usersServiceMySQL.isUserByEmailPresent(registerRequestDTO.getEmail())) {
+                throw new CustomException("User with this email already exists",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            String fileName = null;
+            if (registerRequestDTO.getAvatar() != null) {
+                fileName = registerRequestDTO.getAvatar().getOriginalFilename();
+                usersServiceMySQL.transferAvatar(registerRequestDTO.getAvatar(), fileName);
+            }
+
+            RegisterUserRequest registerRequest = new RegisterUserRequest(
+                    registerRequestDTO.getCity(),
+                    registerRequestDTO.getRegion(),
+                    registerRequestDTO.getName(),
+                    registerRequestDTO.getLastName(),
+                    registerRequestDTO.getEmail(),
+                    registerRequestDTO.getNumber(),
+                    fileName,
+                    registerRequestDTO.getPassword());
+
+            String key = registerRequestDTO.getCode();
+
+            if (key != null) {
+                Claims claims = jwtService.extractClaimsCycle(key);
+                if (claims.getIssuer().equals(ETokenRole.MANAGER_REGISTER.name())) {
+                    authenticationService.checkRegistrationKey(
+                            key,
+                            registerRequestDTO.getEmail(),
+                            ERole.MANAGER,
+                            ETokenRole.valueOf(claims.getIssuer()));
+
+                    return authenticationService.registerUserWithAuthority(registerRequest,
+                            registerRequestDTO.getCode(), ERole.MANAGER);
+                } else if (claims.getIssuer().equals(ETokenRole.ADMIN_REGISTER.name())) {
+                    authenticationService.checkRegistrationKey(
+                            key,
+                            registerRequestDTO.getEmail(),
+                            ERole.ADMIN,
+                            ETokenRole.valueOf(claims.getIssuer()));
+                    return authenticationService.registerUserWithAuthority(registerRequest,
+                            registerRequestDTO.getCode(), ERole.ADMIN);
+                } else {
+                    throw new CustomException("Invalid token for user creation",
+                            HttpStatus.BAD_REQUEST);
+                }
+            } else {
+                throw new CustomException("Auth key absent",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
     @PostMapping("/activate-user")
     public ResponseEntity<AuthenticationResponse> activateSeller(
             @RequestParam("code") String code) {

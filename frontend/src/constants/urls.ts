@@ -1,3 +1,5 @@
+import { IUserUpdateRequest } from "../interfaces/user/seller.interface";
+
 const baseURL = 'http://localhost:8080';
 const geoURL = 'http://geodb-free-service.wirefreethought.com/v1/geo/countries/UA';
 
@@ -18,7 +20,9 @@ const urls = {
         allModelsByBrand: (brand: string): string => `${cars}/${brands}/${brand}/models`,
         byId: (id: number): string => `${cars}/${id}`,
         deleteById: (id: number): string => `${cars}/${id}`,
-        bySeller: (id: number, page: number): string => `${cars}/by-seller/${id}/page/${page}`,
+        banById: (id: number): string => `${cars}/ban/${id}`,
+        unbanById: (id: number): string => `${cars}/activate/${id}`,
+        bySeller: (id: number, page: number): string => `${cars}/by-user/${id}/page/${page}`,
     },
     auth: {
         auth,
@@ -26,7 +30,8 @@ const urls = {
         signOut: (): string => `/api/v1/${auth}/sign-out`,
         refresh: (): string => `/api/v1/${auth}/refresh`,
 
-        registerSeller: (): string => `/api/v1/${auth}/register-seller/person`,
+        registerSeller: (): string => `/api/v1/${auth}/register-user`,
+        registerUserAuth: (): string => `/api/v1/${auth}/register-user/with-authority`,
         registerCustomer: (): string => `/api/v1/${auth}/register-customer`,
         registerManager: (): string => `/api/v1/${auth}/register-manager`,
         registerAdmin: (): string => `/api/v1/${auth}/register-admin`,
@@ -43,10 +48,10 @@ const urls = {
     },
 
     users: {
-        common,
-        getById: (id: number): string => `${common}/users/${id}`,
-        getByToken: (): string => `${common}/users/by-token`,
-
+        getById: (id: number): string => `/users/${id}`,
+        deleteById: (id: number): string => `/users/${id}`,
+        getByToken: (token: string): string => `/users/by-token/${token}`,
+        updateById: (id: number): string => `users/${id}`,
     },
 
     sellers: {

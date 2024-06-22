@@ -126,20 +126,21 @@ public class StripeController {
             @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request) {
         try {
-
+            System.out.println("IN VONTROLLER ///////////////////////");
+            
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
             String email = commonService.extractEmailFromHeader(request, ETokenRole.USER);
-
+            
             UserSQL sellerSQL = userDaoSQL.findUserByEmail(email);
-
+            
             if (sellerSQL == null) {
                 throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
             } else if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
                 throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
             }
-
+            
             stripeService.createPayment(body, sellerSQL);
-
+            
             sellerSQL.setAccountType(EAccountType.PREMIUM);
             userDaoSQL.save(sellerSQL);
             return ResponseEntity.ok("Premium bought successfully");

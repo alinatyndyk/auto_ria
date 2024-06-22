@@ -103,7 +103,7 @@ public class CommonService {
                     .avatar(userSQL.getAvatar())
                     .createdAt(userSQL.getCreatedAt())
                     .accountType(userSQL.getAccountType())
-                    .role(ERole.USER)
+                    .role(userSQL.getRoles().get(0))
                     .isPaymentSourcePresent(userSQL.isPaymentSourcePresent())
                     .build();
 

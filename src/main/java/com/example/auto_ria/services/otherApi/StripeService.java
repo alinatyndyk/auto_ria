@@ -108,11 +108,15 @@ public class StripeService {
 
                 } else if (!body.isSetAsDefaultCard()) {
                     System.out.println("first3");
-                    Customer customer = Customer.create(
-                            CustomerCreateParams.builder()
-                                    .setName(userSQL.getName() + userSQL.getLastName())
-                                    .setEmail(userSQL.getEmail())
-                                    .build());
+
+                    CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
+                            .setName(userSQL.getName() + userSQL.getLastName())
+                            .setEmail(userSQL.getEmail())
+                            .build();
+                    System.out.println(customerCreateParams + "customerCreateParams");
+                    Customer customer = Customer.create(customerCreateParams);
+                    System.out.println(customer + "CREATED");
+
                     paymentToken = body.getToken();
                     customerId = customer.getId();
 

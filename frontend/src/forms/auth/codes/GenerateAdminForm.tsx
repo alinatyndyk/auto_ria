@@ -22,12 +22,12 @@ const GenerateAdminForm: FC = () => {
     return (
         <div>
             Generate code for admin
-            {generateAdminErrors ? <div>{generateAdminErrors?.message}</div> : <div>{JSON.stringify(getResponse)}</div>}
+            {generateAdminErrors ? <div>{generateAdminErrors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'email'} {...register('email')} />
                 </div>
-                <button>Register</button>
+                <button>generate a new admin</button>
             </form>
         </div>
     );

@@ -11,7 +11,7 @@ const RegisterPage: FC = () => {
 
     let userComponent;
 
-    if (role == "SELLER") {
+    if (role == "SELLER") { //todo register user
         userComponent = <RegisterSellerForm/>
     } else if (role == "CUSTOMER") {
         userComponent = <RegisterCustomerForm/>

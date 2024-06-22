@@ -1,24 +1,39 @@
-import React, {FC} from 'react';
-import {Outlet} from "react-router";
-import {useAppNavigate} from "../hooks";
-import {Link} from "react-router-dom";
-import {ERole} from "../constants/role.enum";
-import {LogOutForm} from "../forms/auth/logs/LogOutForm";
+import React, { FC, useState } from 'react';
+import { Outlet } from "react-router";
+import { useAppDispatch, useAppNavigate } from "../hooks";
+import { Link } from "react-router-dom";
+import { ERole } from "../constants/role.enum";
+import { LogOutForm } from "../forms/auth/logs/LogOutForm";
+import { sellerActions } from '../redux/slices/seller.slice';
+import { securityService } from '../services/security.service';
+import { IUserResponse } from '../interfaces/user/seller.interface';
 
 const MainLayout: FC = () => {
 
     let authNavigationComponent;
+    const dispatch = useAppDispatch;
     const storedAuth = localStorage.getItem('isAuth');
 
+    const [authorization, setAuthorization] = useState<IUserResponse| null>(null);
+
     if (storedAuth === "true") {
-        authNavigationComponent = <div>
-            <button onClick={() => navigate("/profile")}>profile</button>
-            <LogOutForm/>
-        </div>
+        authNavigationComponent = (
+            <div>
+                <button onClick={() => navigate("/profile")}>Profile</button>
+                <LogOutForm />
+                <button onClick={() => {
+                    const decryptedAuth = securityService.decryptObject(storedAuth);
+                    setAuthorization(decryptedAuth);
+                    if (decryptedAuth?.id) {
+                        // dispatch(sellerActions.deleteById(decryptedAuth.id));
+                    }
+                }}>Delete my account</button>
+            </div>
+        );
     } else {
-        authNavigationComponent = <div style={{display: "flex"}}>
-            <div style={{display: "flex", columnGap: "20px"}}>
-                <Link to={`auth/register/${ERole.SELLER}`}>register seller</Link>
+        authNavigationComponent = <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", columnGap: "20px" }}>
+                <Link to={`auth/register/${ERole.USER}`}>register seller</Link>
                 <Link to={`auth/register/${ERole.CUSTOMER}`}>register customer</Link>
                 <Link to={`auth/register/${ERole.ADMIN}`}>register admin</Link>
                 <Link to={`auth/register/${ERole.MANAGER}`}>register manager</Link>
@@ -38,14 +53,14 @@ const MainLayout: FC = () => {
     const navigate = useAppNavigate();
     return (
         <div>
-            <div style={{display: 'flex', backgroundColor: "whitesmoke", justifyContent: "space-between"}}>
+            <div style={{ display: 'flex', backgroundColor: "whitesmoke", justifyContent: "space-between" }}>
                 <h3 onClick={() => navigate("/")}>Autoria</h3>
-                <button style={{height: "30px"}} onClick={() => navigate('/cars')}>cars</button>
+                <button style={{ height: "30px" }} onClick={() => navigate('/cars')}>cars</button>
                 {authNavigationComponent}
             </div>
-            <Outlet/>
+            <Outlet />
         </div>
     );
 };
 
-export {MainLayout};
+export { MainLayout };

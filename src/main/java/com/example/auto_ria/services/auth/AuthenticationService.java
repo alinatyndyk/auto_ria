@@ -29,7 +29,9 @@ import com.example.auto_ria.models.requests.LoginRequest;
 import com.example.auto_ria.models.requests.RefreshRequest;
 import com.example.auto_ria.models.requests.RegisterUserRequest;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
+import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.user.UserSQL;
+import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
@@ -46,7 +48,18 @@ public class AuthenticationService {
     private UserAuthenticationProvider sellerAuthenticationManager;
     private RegisterKeyDaoSQL registerKeyDaoSQL;
     private PasswordEncoder passwordEncoder;
+    private CommonService commonService;
     private FMService mailer;
+
+    // todo auth pre
+    public UserResponse getByToken(String token) {
+        AuthSQL authSQL = userAuthDaoSQL.findByAccessToken(token);
+        if (authSQL == null) {
+            throw new CustomException("Invalid access token", HttpStatus.BAD_REQUEST);
+        }
+        return commonService.createUserResponse(usersServiceMySQL.getById(authSQL.getPersonId()));
+
+    }
 
     public ResponseEntity<String> registerUser(RegisterUserRequest registerRequest) {
         try {
@@ -90,7 +103,8 @@ public class AuthenticationService {
         }
     }
 
-    public ResponseEntity<AuthenticationResponse> registerUserWithAuthority(RegisterUserRequest registerRequest, String key,
+    public ResponseEntity<AuthenticationResponse> registerUserWithAuthority(RegisterUserRequest registerRequest,
+            String key,
             ERole role) {
         try {
 
@@ -106,7 +120,7 @@ public class AuthenticationService {
                     .number(registerRequest.getNumber())
                     .build();
 
-            user.setIsActivated(false);
+            user.setIsActivated(true);
             userDaoSQL.save(user);
 
             AuthenticationResponse authenticationResponse = null;
@@ -125,9 +139,9 @@ public class AuthenticationService {
                 throw new CustomException("Unknown role", HttpStatus.CONFLICT);
             }
 
-             Map<String, Object> args = new HashMap<>();
-             args.put("name", user.getName() + user.getLastName());
-             mailer.sendEmail(user.getEmail(), EMail.WELCOME, args);
+            Map<String, Object> args = new HashMap<>();
+            args.put("name", user.getName() + user.getLastName());
+            mailer.sendEmail(user.getEmail(), EMail.WELCOME, args);
 
             registerKeyDaoSQL.delete(registerKeyDaoSQL.findByRegisterKey(key));
 

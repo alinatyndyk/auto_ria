@@ -1,10 +1,10 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ICreateCar, ICreateInputCar } from "../../interfaces";
 import { useAppDispatch, useAppSelector } from "../../hooks";
+import { ICreateCar, ICreateInputCar } from "../../interfaces";
+import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 import { carActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
-import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 
 export enum ECurrency {
     UAH = "UAH", EUR = "EUR", USD = "USD"

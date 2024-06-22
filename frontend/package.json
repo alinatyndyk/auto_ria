@@ -13,7 +13,11 @@
     "@types/node": "^16.18.62",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
+    "amqp-ts": "^1.8.0",
+    "axios": "^1.6.2",
     "crypto-js": "^4.2.0",
+    "joi": "^17.13.3",
+    "rabbitmq-client": "^4.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-hook-form": "^7.48.2",
@@ -28,10 +32,7 @@
     "stompjs": "^2.3.3",
     "swiper": "^11.0.5",
     "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4",
-    "amqp-ts": "^1.8.0",
-    "axios": "^1.6.2",
-    "rabbitmq-client": "^4.4.0"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",

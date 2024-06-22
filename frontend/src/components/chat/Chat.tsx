@@ -67,7 +67,7 @@ const Chat: FC = () => {
         if (outletParse.senderRole == ERole.CUSTOMER) {
             customerId = outletParse.senderId;
             sellerId = receiverId;
-        } else if (outletParse.senderRole == ERole.SELLER) {
+        } else if (outletParse.senderRole == ERole.USER) {
             sellerId = outletParse.senderId;
             customerId = receiverId;
         } else {
@@ -125,7 +125,7 @@ const Chat: FC = () => {
             if (outletParse.senderRole == ERole.CUSTOMER) {
                 customerId = outletParse.senderId;
                 sellerId = receiverId;
-            } else if (outletParse.senderRole == ERole.SELLER) {
+            } else if (outletParse.senderRole == ERole.USER) {
                 sellerId = outletParse.senderId;
                 customerId = receiverId;
             } else {

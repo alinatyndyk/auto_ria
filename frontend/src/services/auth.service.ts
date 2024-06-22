@@ -39,13 +39,16 @@ const authService = {
             "Content-Type": "multipart/form-data",
         }
     }),
-
+    registerUserAuth: (info: ISellerInput) => axiosService.post(urls.auth.registerUserAuth(), info, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        }
+    }),
     registerCustomer: (info: ICustomerInput) => axiosService.post(urls.auth.registerCustomer(), info, {
         headers: {
             "Content-Type": "multipart/form-data",
         }
     }),
-
     registerManager: (info: IManagerInput, code: string) => axiosService.post(urls.auth.registerManager(), info, {
         headers: {
             "Content-Type": "multipart/form-data",

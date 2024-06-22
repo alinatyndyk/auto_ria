@@ -19,7 +19,7 @@ const RegisterManagerForm: FC = () => {
     const registerSeller: SubmitHandler<IManagerInput> = async (customer: IManagerInput) => {
 
         if (code) {
-            const {payload} = await dispatch(authActions.registerManager({managerInput: customer, code: code}));
+            const {payload} = await dispatch(authActions.registerManager({managerInput: customer, code: code})); //todo register for everyone
             setResponse(String(payload));
 
             if (!errors) {
@@ -29,8 +29,6 @@ const RegisterManagerForm: FC = () => {
         } else {
             setResponse("No code provided in url");
         }
-
-
         // reset();
     }
     return (

@@ -42,7 +42,7 @@ const ChatPage: FC = () => {
                             }]); //display customer.payload in reverse
                         }
                     });
-            } else if (theme.role == ERole.SELLER) {
+            } else if (theme.role == ERole.USER) {
                 dispatch(sellerActions.getCustomerById(chat.customerId))
                     .then((customer) => {
 

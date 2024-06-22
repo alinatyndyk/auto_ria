@@ -1,8 +1,10 @@
 import React, {FC} from 'react';
 import {ISellerResponse} from "../../interfaces/user/seller.interface";
-import {CarForm, Cars} from "../cars";
+import {Cars} from "../cars";
 import {StripeCheckout} from "../stripe/StripeCheckout";
 import {ChatPage} from "../../pages/chat/ChatPage";
+import { CarForm } from '../../forms/car/CarForm';
+import { FindCarById } from '../../forms/car/FindCarById';
 
 interface IProps {
     seller: ISellerResponse
@@ -36,12 +38,15 @@ const SellerProfile: FC<IProps> = ({seller}) => {
                     <div>joined: {createdAt}</div>
 
                 </div>
+                <div style={{width: "500px"}}>
                 <StripeCheckout seller={seller}/>
+                </div>
             </div>
             <br/>
             <CarForm/>
-            <ChatPage/>
+            {/* <ChatPage/> */}
             <Cars sellerId={id}/>
+           
         </div>
     );
 };

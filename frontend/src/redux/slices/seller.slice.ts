@@ -1,19 +1,20 @@
-import {IError} from "../../interfaces";
-import {createAsyncThunk, createSlice, isRejectedWithValue} from "@reduxjs/toolkit";
-import {AxiosError} from "axios";
-import {ISellerResponse} from "../../interfaces/user/seller.interface";
-import {sellerService} from "../../services/seller.service";
-import {ICustomerResponse} from "../../interfaces/user/customer.interface";
-import {IAdminResponse} from "../../interfaces/user/admin.interface";
-import {IManagerResponse} from "../../interfaces/user/manager.interface";
-import {IMessage} from "../../components/cars";
+import { IError } from "../../interfaces";
+import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
+import { AxiosError } from "axios";
+import { ISellerResponse, IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
+import { sellerService } from "../../services/seller.service";
+import { ICustomerResponse } from "../../interfaces/user/customer.interface";
+import { IAdminResponse } from "../../interfaces/user/admin.interface";
+import { IManagerResponse } from "../../interfaces/user/manager.interface";
+import { IMessage } from "../../components/cars";
 import {
     IChatResponse,
     IChatsPageResponse,
     IGetChatMessagesRequest,
     IMessagePageResponse
 } from "../../interfaces/chat/message.interface";
-import {IGeoCitiesResponse, IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
+import { IGeoCitiesResponse, IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
+import { authService } from "../../services";
 
 interface IState {
     errors: IError | null,
@@ -24,7 +25,7 @@ interface IState {
     cities: IGeoCity[],
     totalPages: number,
     chatPage: number,
-    user: ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null
+    user: any | null //todo iuser
     customer: ICustomerResponse | null,
     seller: ISellerResponse | null,
     totalPagesMessages: number,
@@ -49,9 +50,22 @@ const initialState: IState = {
 
 const getById = createAsyncThunk<ISellerResponse, number>(
     'sellerSlice/getById',
-    async (id: number, {rejectWithValue}) => {
+    async (id: number, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getById(id);
+            const { data } = await sellerService.getById(id);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const deleteById = createAsyncThunk<String, number>(
+    'sellerSlice/deleteById',
+    async (id: number, { rejectWithValue }) => {
+        try {
+            const { data } = await sellerService.deleteById(id);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -62,9 +76,9 @@ const getById = createAsyncThunk<ISellerResponse, number>(
 
 const getCustomerById = createAsyncThunk<ICustomerResponse, number>(
     'sellerSlice/getCustomerById',
-    async (id: number, {rejectWithValue}) => {
+    async (id: number, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getCustomerById(id);
+            const { data } = await sellerService.getCustomerById(id);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -75,9 +89,23 @@ const getCustomerById = createAsyncThunk<ICustomerResponse, number>(
 
 const getSellerById = createAsyncThunk<ISellerResponse, number>(
     'sellerSlice/getSellerById',
-    async (id: number, {rejectWithValue}) => {
+    async (id: number, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getSellerById(id);
+            const { data } = await sellerService.getSellerById(id);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const updateById = createAsyncThunk<IUserResponse, IUserUpdateRequestWithId>(
+    'sellerSlice/updateById',
+    async ({id, body}, { rejectWithValue }) => {
+        try {
+            console.log(id, JSON.stringify(body), "update user slice info")
+            const { data } = await sellerService.updateById(id, body);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -88,10 +116,17 @@ const getSellerById = createAsyncThunk<ISellerResponse, number>(
 
 const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
     'sellerSlice/getByToken',
-    async (_, {rejectWithValue}) => {
+    async (_, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getByToken();
-            return data.body;
+
+            const token = authService.getAccessToken();
+            console.log("TOKEN SLICE" + token);
+            if (token === null) {
+                throw new Error("no token");
+            }
+            const { data } = await sellerService.getByToken(token);
+            console.log(JSON.stringify(data) + " data");
+            return data;
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -101,9 +136,9 @@ const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
 
 const getChatMessages = createAsyncThunk<IMessagePageResponse, IGetChatMessagesRequest>(
     'sellerSlice/getChatMessages',
-    async (info, {rejectWithValue}) => {
+    async (info, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getChatMessages(info);
+            const { data } = await sellerService.getChatMessages(info);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -114,9 +149,9 @@ const getChatMessages = createAsyncThunk<IMessagePageResponse, IGetChatMessagesR
 
 const getChatsByUserToken = createAsyncThunk<IChatsPageResponse, number>(
     'sellerSlice/getChatsByUserToken',
-    async (page: number, {rejectWithValue}) => {
+    async (page: number, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getChatsByUserToken(page);
+            const { data } = await sellerService.getChatsByUserToken(page);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -127,9 +162,9 @@ const getChatsByUserToken = createAsyncThunk<IChatsPageResponse, number>(
 
 const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
     'sellerSlice/getRegionsByPrefix',
-    async (prefix: string, {rejectWithValue}) => {
+    async (prefix: string, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getRegionsByPrefix(prefix);
+            const { data } = await sellerService.getRegionsByPrefix(prefix);
             return data.data;
         } catch (e) {
             const err = e as AxiosError;
@@ -140,9 +175,9 @@ const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
 
 const getRegionsPlaces = createAsyncThunk<IGeoCitiesResponse, string>(
     'sellerSlice/getRegionsPlaces',
-    async (regionId: string, {rejectWithValue}) => {
+    async (regionId: string, { rejectWithValue }) => {
         try {
-            const {data} = await sellerService.getRegionsPlaces(regionId);
+            const { data } = await sellerService.getRegionsPlaces(regionId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -186,13 +221,16 @@ const slice = createSlice({
                 state.user = action.payload;
                 state.trigger = !state.trigger;
             })
+            .addCase(deleteById.fulfilled, (state) => {
+                localStorage.clear();
+            })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 state.errors = action.payload as IError;
             })
 });
 
 
-const {actions, reducer: sellerReducer} = slice;
+const { actions, reducer: sellerReducer } = slice;
 
 const sellerActions = {
     ...actions,
@@ -203,7 +241,9 @@ const sellerActions = {
     getChatMessages,
     getChatsByUserToken,
     getRegionsByPrefix,
-    getRegionsPlaces
+    getRegionsPlaces,
+    updateById,
+    deleteById
 }
 
 export {

@@ -1,8 +1,8 @@
-import React, {FC, useEffect, useState} from 'react';
-import {useAppDispatch, useAppSelector} from "../../hooks";
-import {Car} from "./Car";
-import {carActions} from "../../redux/slices";
-import {useSearchParams} from "react-router-dom";
+import React, { FC, useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { Car } from "./Car";
+import { carActions } from "../../redux/slices";
+import { useSearchParams } from "react-router-dom";
 
 interface IProps {
     sellerId: number | null
@@ -19,8 +19,8 @@ export interface IMessage {
     createdAt: number[]
 }
 
-const Cars: FC<IProps> = ({sellerId}) => {
-    const {cars, pagesInTotal} = useAppSelector(state => state.carReducer);
+const Cars: FC<IProps> = ({ sellerId }) => {
+    const { cars, pagesInTotal } = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -32,9 +32,10 @@ const Cars: FC<IProps> = ({sellerId}) => {
 
         searchParams.set('page', getPage.toString());
         setSearchParams(searchParams);
-
+        console.log(sellerId + "sellerId");
         if (sellerId != null) {
-            dispatch(carActions.getBySeller({page: getPage, id: sellerId})).then(() => {
+            console.log(sellerId + "sellerId not null");
+            dispatch(carActions.getBySeller({ page: getPage, id: sellerId })).then(() => {
             });
         } else {
             dispatch(carActions.getAll(getPage));
@@ -66,9 +67,9 @@ const Cars: FC<IProps> = ({sellerId}) => {
     return (
         <div>
             Cars
-            {pagesInTotal == 0 && <div style={{color: "blue"}}>There are no cars to view</div>}
-            {cars.map(car => <Car key={car.id} car={car}/>)}
-            <div style={{display: 'flex'}}>
+            {pagesInTotal == 0 && <div style={{ color: "blue" }}>There are no cars to view</div>}
+            {cars.map(car => <Car key={car.id} car={car} />)}
+            <div style={{ display: 'flex' }}>
                 <button disabled={getButtons} onClick={() => prevPage()}>prev</button>
                 <button disabled={getNextButtons} onClick={() => nextPage()}>next</button>
                 <div>total: {pagesInTotal}</div>
@@ -77,4 +78,4 @@ const Cars: FC<IProps> = ({sellerId}) => {
     );
 };
 
-export {Cars};
+export { Cars };

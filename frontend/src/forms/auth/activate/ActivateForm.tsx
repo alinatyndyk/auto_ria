@@ -25,11 +25,12 @@ const ActivateForm: FC = () => {
 
         let payload;
 
-        if (role == ERole.SELLER) {
+        if (role == ERole.USER) {
             const res = await dispatch(authActions.activateSeller({code: code ?? ''}));
             payload = res.payload;
             setResponse(String(payload));
-        } else if (role == ERole.CUSTOMER) {
+        } else 
+        if (role == ERole.CUSTOMER) {
             const res = await dispatch(authActions.activateCustomer({code: code ?? ''}));
             payload = res.payload;
             setResponse(String(payload));

@@ -84,8 +84,30 @@ const registerSeller = createAsyncThunk<string, ISellerInput>(
     'authSlice/registerSeller',
     async (info, { rejectWithValue }) => {
         try {
-            const { data } = await authService.registerSeller(info);
-            return data;
+            if (info.code != null) {
+                console.log(info.code + "info code not null");
+                const { data } = await authService.registerUserAuth(info);
+                return data;
+            } else {
+                const { data } = await authService.registerSeller(info);
+                return data;
+            }
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const registerUserAuth = createAsyncThunk<IAuthResponse, ISellerInput>(
+    'authSlice/registerUserAuth',
+    async (info, { rejectWithValue }) => {
+        try {
+            if (info.code != null) {
+                console.log(info.code + "info code not null");
+                const { data } = await authService.registerUserAuth(info);
+                return data;
+            } 
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -266,11 +288,11 @@ const slice = createSlice({
             .addCase(forgotPassword.fulfilled, (state) => {
                 state.isAuth = false;
             })
-            .addCase(registerManager.fulfilled, (state, action) => {
-                state.isAuth = false;
+            .addCase(registerUserAuth.fulfilled, (state, action) => {
+                state.isAuth = true;
                 authService.setTokens({ ...action.payload });
                 localStorage.setItem('isAuth', JSON.stringify(true));
-                window.location.reload();
+                // window.location.reload();
             })
             .addCase(registerAdmin.fulfilled, (state, action) => {
                 state.isAuth = false;
@@ -304,6 +326,7 @@ const authActions = {
     refresh,
     signOut,
     registerSeller,
+    registerUserAuth,
     registerCustomer,
     registerManager,
     registerAdmin,

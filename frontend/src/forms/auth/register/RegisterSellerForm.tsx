@@ -1,17 +1,23 @@
-import React, {FC, useEffect, useState} from 'react';
-import {SubmitHandler, useForm} from "react-hook-form";
-import {useAppDispatch, useAppSelector} from "../../../hooks";
-import {ISellerInput} from "../../../interfaces/user/seller.interface";
-import {authActions} from "../../../redux/slices";
-import {sellerActions} from "../../../redux/slices/seller.slice";
-import {IGeoCity, IGeoRegion} from "../../../interfaces/geo.interface";
+import React, { FC, useEffect, useState } from 'react';
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
+import { ISellerInput } from "../../../interfaces/user/seller.interface";
+import { authActions } from "../../../redux/slices";
+import { sellerActions } from "../../../redux/slices/seller.slice";
+import { IGeoCity, IGeoRegion } from "../../../interfaces/geo.interface";
+import { IAuthResponse } from '../../../interfaces';
 
 const RegisterSellerForm: FC = () => {
     const dispatch = useAppDispatch();
+    const navigate = useAppNavigate();
 
-    const {reset, handleSubmit, register} = useForm<ISellerInput>();
-    const {errors} = useAppSelector(state => state.authReducer);
-    const {regions, cities} = useAppSelector(state => state.sellerReducer);
+    function isIAuthResponse(obj: any): obj is IAuthResponse {
+        return 'accessToken' in obj && 'refreshToken' in obj;
+    }
+
+    const { reset, handleSubmit, register } = useForm<ISellerInput>();
+    const { errors } = useAppSelector(state => state.authReducer);
+    const { regions, cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -30,15 +36,36 @@ const RegisterSellerForm: FC = () => {
 
     const [getResponse, setResponse] = useState('');
 
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
     const registerSeller: SubmitHandler<ISellerInput> = async (seller: ISellerInput) => {
         if (!getRegionInput || !getCityInput) {
             setResponse("Please specify the region and city");
         } else {
             seller.city = getCarCity;
             seller.region = getCarRegion;
-            const {payload} = await dispatch(authActions.registerSeller(seller));
-            setResponse(String(payload));
-            reset();
+
+            console.log(seller.code + " CODE");
+
+            if (code != null) {
+                seller.code = code;
+                const { payload } = await dispatch(authActions.registerUserAuth(seller)); //todo register for everyone
+                console.log(JSON.stringify(payload) + "PAYLOAD AUTH");
+                if (isIAuthResponse(payload)) {
+                    navigate('/profile');
+                } else {
+                    setResponse(String(payload));
+                }
+            } else {
+                const { payload } = await dispatch(authActions.registerSeller(seller)); //todo register for everyone
+                console.log(JSON.stringify(payload) + "PAYLOAD");
+
+                setResponse(String(payload));
+
+            }
+
+            // reset();
         }
 
     }
@@ -86,14 +113,14 @@ const RegisterSellerForm: FC = () => {
             {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(registerSeller)}>
                 <div>
-                    <input type="text" placeholder={'name'} {...register('name')}/>
+                    <input type="text" placeholder={'name'} {...register('name')} />
                 </div>
                 <div>
-                    <input type="text" placeholder={'last name'} {...register('lastName')}/>
+                    <input type="text" placeholder={'last name'} {...register('lastName')} />
                 </div>
                 <div>
                     <input placeholder={'region'} {...register('region')} value={getCarRegion} disabled={getRegionInput}
-                           autoComplete={"off"} type="text" onChange={handleInputChange}/>
+                        autoComplete={"off"} type="text" onChange={handleInputChange} />
                     <button onClick={() => {
                         setRegionInput(false);
                         setCarRegion('');
@@ -115,7 +142,7 @@ const RegisterSellerForm: FC = () => {
                 }
                 <div>
                     <input placeholder={'city'} {...register('city')} value={getCarCity} disabled={getCityInput}
-                           autoComplete={"off"} type="text" onChange={handleCityInputChange}/>
+                        autoComplete={"off"} type="text" onChange={handleCityInputChange} />
                     <button onClick={() => {
                         setCityInput(false);
                         setCarCity('');
@@ -142,17 +169,17 @@ const RegisterSellerForm: FC = () => {
                     </div>
                 }
                 <div>
-                    <input type="text" placeholder={'email'} {...register('email')}/>
+                    <input type="text" placeholder={'email'} {...register('email')} />
                 </div>
                 <div>
-                    <input type="text" placeholder={'number'} {...register('number')}/>
+                    <input type="text" placeholder={'number'} {...register('number')} />
                 </div>
                 <div>
-                    <input type="text" placeholder={'password'} {...register('password')}/>
+                    <input type="text" placeholder={'password'} {...register('password')} />
                 </div>
                 <div>
                     <input formEncType="multipart/form-data" type="file"
-                           placeholder={'avatar'} {...register('avatar')}/>
+                        placeholder={'avatar'} {...register('avatar')} />
                 </div>
                 <button>Register</button>
             </form>
@@ -160,4 +187,4 @@ const RegisterSellerForm: FC = () => {
     );
 };
 
-export {RegisterSellerForm};
+export { RegisterSellerForm };

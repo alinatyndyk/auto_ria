@@ -54,7 +54,6 @@ public class WebSocketConnection extends TextWebSocketHandler {
     public void afterConnectionEstablished(@NotNull WebSocketSession session) {
         try {
             sessionMap.put(session.getId(), session);
-            System.out.println(session.getId() + "session id ----------------------");
 
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
@@ -107,7 +106,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 Session session1 = Session.builder()
                         .sessionId(session.getId())
                         .userId(sessionUserId)
-                        // .isOnline(true) // fix
+                        .isOnline(true) // fix
                         .build();
 
                 sessionDaoSQL.save(session1);
@@ -154,45 +153,29 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
             Chat chat;
             String roomKey = chatServiceMySQL.getRoomKey(String.valueOf(authSQL.getPersonId()), receiverId);
-            System.out.println(roomKey + "ROOM KEY /////////////////////");
             chat = chatServiceMySQL.getByRoomKey(roomKey);
-
-            System.out.println(chat + "chat");
 
             List<String> sessionList = new ArrayList<>();
             sessionList.add(userSQL.getSession());
             sessionList.add(receiverSQL.getSession());
-            System.out.println(sessionList + "session list");
 
             if (chat == null) {
                 List<Integer> userList = new ArrayList<>();
                 userList.add(authSQL.getPersonId());
                 userList.add(Integer.parseInt(receiverId));
-                System.out.println(userList + "user list *************************");
                 Chat chatNew = Chat.builder().users(userList)
                         .sessions(sessionList)
                         .users(userList)
                         .roomKey(roomKey)
                         .build();
-                // chatDaoSQL.save(chatNew);
-                // System.out.println(chatNew + "chat");
-                // chat = chatNew;
 
-                try {
-                    chatDaoSQL.save(chatNew);
-                    System.out.println(chatNew + "chat");
-                    chat = chatNew;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    System.out.println("Ошибка при сохранении нового чата: " + e.getMessage());
-                    throw new CustomException("Ошибка при сохранении нового чата", HttpStatus.INTERNAL_SERVER_ERROR);
-                }
+                chatDaoSQL.save(chatNew);
+                chat = chatNew;
+
             } else {
                 chat.setSessions(sessionList);
                 chatDaoSQL.save(chat);
             }
-
-            System.out.println(chat + "NEW CHAT SAVED**************************");
 
             MessageClass messageClass = MessageClass.builder()
                     .content(message.getPayload())
@@ -202,22 +185,11 @@ public class WebSocketConnection extends TextWebSocketHandler {
             messageClass.setSenderId(String.valueOf(authSQL.getPersonId()));
             messageClass.setReceiverId(receiverId);
             messageClass.setIsSeen(false);
-            System.out.println(messageClass + "MESSAGE CLASS");
 
             MessageClass newMessage = messageDaoSQL.save(messageClass);
-            System.out.println(newMessage + "NEW MAS");
-            
-            try {
-                System.out.println("before NEW CHAT with msg*********************");
-                chat.addMessage(newMessage);
-                System.out.println(chat + "NEW CHAT with msg*********************");
-                chatDaoSQL.save(chat);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.out.println("Ошибка при сохранении нового чата 2: " + e.getMessage());
-                throw new CustomException("Ошибка при сохранении нового чата 2", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
 
+            chat.addMessage(newMessage);
+            chatDaoSQL.save(chat);
 
             for (String sess : chat.getSessions()) {
                 sendTextMessageIfSessionExists(sess, message.getPayload());
@@ -246,7 +218,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
         System.out.println("connection closed " + session.getId());
         sessionMap.remove(session.getId());
         Session session1 = sessionDaoSQL.getBySessionId(session.getId());
-        // session1.setOnline(false);
+        session1.setOnline(false);
         session1.setDisconnectedAt(LocalDateTime.now());
         sessionDaoSQL.save(session1);
     }

@@ -27,7 +27,7 @@ const GenerateManagerForm: FC = () => {
                 <div>
                     <input type="text" placeholder={'email'} {...register('email')}/>
                 </div>
-                <button>Register</button>
+                <button>generate a new manager</button>
             </form>
         </div>
     );

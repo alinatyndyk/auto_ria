@@ -1,4 +1,4 @@
-import {Pageable, Sort} from "../pagable.interface";
+import { Pageable, Sort } from "../pagable.interface";
 
 export interface ISellerInput {
     name: string,
@@ -9,6 +9,7 @@ export interface ISellerInput {
     number: string,
     password: string,
     avatar: File
+    code: string | null
 }
 
 export interface ISellerResponse {
@@ -39,3 +40,31 @@ export interface ISellerPageResponse {
     empty: boolean;
 }
 
+
+export interface IUserResponse {
+    id: number;
+    name: string;
+    lastName: string;
+    city: string;
+    region: string;
+    number: string;
+    avatar?: string | null;
+    accountType: 'BASIC' | 'PREMIUM';
+    role: 'USER' | 'ADMIN' | 'MANAGER';
+    isPaymentSourcePresent: boolean;
+    lastOnline?: string | null;
+    createdAt: string;
+}
+
+export interface IUserUpdateRequest {
+    city: string;
+    region: string;
+    number: string;
+    name: string;
+    lastName: string;
+}
+
+export interface IUserUpdateRequestWithId {
+    id: number;
+    body: Partial<IUserUpdateRequest>;
+}

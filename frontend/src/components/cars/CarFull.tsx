@@ -1,36 +1,38 @@
-import React, {FC, useEffect, useState} from 'react';
-import {Carousel} from "./Carousel";
-import {useParams} from "react-router";
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../../hooks";
-import {carActions} from "../../redux/slices";
+import React, { FC, useEffect, useState } from 'react';
+import { useParams } from "react-router";
+import { useAppDispatch, useAppNavigate, useAppSelector } from "../../hooks";
+import { carActions } from "../../redux/slices";
+import { Carousel } from "./Carousel";
 
 import moment from "moment";
-import {ERole} from "../../constants/role.enum";
-import {securityService} from "../../services/security.service";
-import {ISellerResponse} from "../../interfaces/user/seller.interface";
-import {ICustomerResponse} from "../../interfaces/user/customer.interface";
-import {IAdminResponse} from "../../interfaces/user/admin.interface";
-import {IManagerResponse} from "../../interfaces/user/manager.interface";
-import {SubmitHandler, useForm} from "react-hook-form";
-import {ICreateInputCar, IUpdateInputCar} from "../../interfaces";
-import {IGeoCity, IGeoRegion} from "../../interfaces/geo.interface";
-import {sellerActions} from "../../redux/slices/seller.slice";
-import {ECurrency} from "../../forms";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { ERole } from "../../constants/role.enum";
+import { ICreateInputCar, IUpdateInputCar } from "../../interfaces";
+import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
+import { IAdminResponse } from "../../interfaces/user/admin.interface";
+import { ICustomerResponse } from "../../interfaces/user/customer.interface";
+import { IManagerResponse } from "../../interfaces/user/manager.interface";
+import { ISellerResponse } from "../../interfaces/user/seller.interface";
+import { sellerActions } from "../../redux/slices/seller.slice";
+import { securityService } from "../../services/security.service";
+import { ECurrency } from '../../forms/car/CarForm';
 
 const CarFull: FC = () => {
 
-    const {carId} = useParams<{ carId: string }>();
+    const { carId } = useParams<{ carId: string }>();
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
     const [textButtonVisible, setTextButtonVisible] = useState(false);
-    const {reset, handleSubmit, register} = useForm<ICreateInputCar>();
+    const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
     const [authorization, setAuthorization] =
         useState<ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null>(null);
 
-    const {car} = useAppSelector(state => state.carReducer);
+    const { car } = useAppSelector(state => state.carReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
+
+    const [getBanResponse, setBanResponse] = useState('');
 
     const [isRegionVisible, setIsRegionVisible] = useState(true);
     const [isCityVisible, setIsCityVisible] = useState(true);
@@ -44,13 +46,15 @@ const CarFull: FC = () => {
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
 
-    const {carErrors} = useAppSelector(state => state.carReducer);
+    const { carErrors } = useAppSelector(state => state.carReducer);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
     const [getCurrencies, setCurrencies] = useState<ECurrency[]>([]);
     const [getResponse, setResponse] = useState('');
-    const {regions, cities} = useAppSelector(state => state.sellerReducer);
+    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+
+    console.log(authorization);
 
     useEffect(() => {
         setRegions(regions);
@@ -64,6 +68,7 @@ const CarFull: FC = () => {
         setCurrencies(Object.values(ECurrency));
     }, [])
 
+
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
@@ -76,7 +81,7 @@ const CarFull: FC = () => {
             const decryptedAuth = securityService.decryptObject(auth);
             setAuthorization(decryptedAuth);
 
-            if (decryptedAuth?.role == ERole.CUSTOMER) {
+            if (decryptedAuth?.role == ERole.CUSTOMER) { //todo chats
                 setTextButtonVisible(true);
             }
         }
@@ -84,8 +89,25 @@ const CarFull: FC = () => {
 
     }, []);
 
+    console.log(authorization + "auth");
+    console.log(JSON.stringify(authorization) + "auth");
+
     const deleteCar = (carId: number) => {
         dispatch(carActions.deleteById(carId));
+    }
+
+    const banCar = async (carId: number) => {
+        const { payload } = await dispatch(carActions.banById(carId));
+        const response = JSON.stringify(payload);
+        console.log(response + " PAYLOAD");
+        setBanResponse(response);
+    }
+
+    const unbanCar = async (carId: number) => {
+        const { payload } = await dispatch(carActions.unbanById(carId));
+        const response = JSON.stringify(payload);
+        console.log(response + " PAYLOAD");
+        setBanResponse(response);
     }
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -115,28 +137,48 @@ const CarFull: FC = () => {
         setIsCityVisible(false);
     };
 
+
     const save: SubmitHandler<IUpdateInputCar> = async (car: IUpdateInputCar) => {
-
-        car.city = getCarCity;
+        console.log(JSON.stringify(car) + "update car")
+        console.log(getCarRegion + "update car")
         car.region = getCarRegion;
+        car.city = getCarCity;
+        car.currency = getCurrency;
+        console.log(JSON.stringify(car) + "update car")
 
-        await dispatch(carActions.update({car, id: Number(carId)}))
+        const updatedCar: Partial<IUpdateInputCar> = {};
+
+        // Iterate over the keys in car object and add non-empty values to updatedCar
+        Object.keys(car).forEach(key => {
+            const value = car[key as keyof IUpdateInputCar];
+            if (value !== undefined && value !== null && value !== '') {
+                updatedCar[key as keyof IUpdateInputCar] = value;
+            }
+        });
+
+        console.log(getCarRegion + "get car region")
+
+        console.log(updatedCar + "updatedCar");
+        console.log(JSON.stringify(updatedCar) + "updatedCar json");
+
+        await dispatch(carActions.update({ car: updatedCar, id: Number(carId) }))
             .then((res) => {
                 const type = res.type;
                 const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
-                if (lastWord == "fulfilled") {
-                    setResponse("Car created successfully");
+                console.log(JSON.stringify(res.payload) + "result payload");
+
+                if (lastWord === "fulfilled") {
+                    setResponse("Car updated successfully");
                     setCarCity('');
                     setCarRegion('');
                     reset();
                 }
-            })
-    }
+            });
+    };
 
 
     if (car != null) {
-
         return (
             <div style={{
                 backgroundColor: "whitesmoke",
@@ -146,13 +188,13 @@ const CarFull: FC = () => {
                 <div> {car.photo.length > 0 ? <Carousel images={car.photo.map((src, id) => ({
                     id,
                     src: `http://localhost:8080/users/avatar/${src}`,
-                }))}/> : null}
+                }))} /> : null}
                     <div>{car.price} {car.currency}</div>
-                    <div style={{fontSize: "9px"}}>{car.region}, {car.city}</div>
+                    <div style={{ fontSize: "9px" }}>{car.region}, {car.city}</div>
                 </div>
                 <div>
                     <div>id: {car.id}</div>
-                    {authorization && authorization.id == car?.seller.id &&
+                    {authorization && authorization.id == car?.user.id &&
                         <button onClick={() => deleteCar(car?.id)}>delete</button>}
                     <div>brand: {car.brand}</div>
                     <div>model: {car.model}</div>
@@ -165,26 +207,24 @@ const CarFull: FC = () => {
                     <div>uah: {car.priceUAH}</div>
                 </div>
                 <div>desc: {car.description}</div>
-                <div>seller: {JSON.stringify(car.seller)}</div>
-                <div>{car.seller.createdAt}</div>
-                <div>{moment(car.seller.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
-                {car?.seller.role == ERole.ADMIN && <div style={{color: "blue"}}>The car is sold by AutoRio Services.
-                    Please use {car?.seller.number} for further information</div>}
+                <div>seller: {JSON.stringify(car.user)}</div>
+                <div>{car.user.createdAt}</div>
+                <div>{moment(car.user.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
+                {car?.user.role == ERole.ADMIN && <div style={{ color: "blue" }}>The car is sold by AutoRio Services.
+                    Please use {car?.user.number} for further information</div>}
                 {
-                    textButtonVisible && car?.seller.role == ERole.SELLER &&
-                    <button onClick={() => navigate(`/chats/${car?.seller.id}`)}>Text Seller</button>
+                    textButtonVisible && car?.user.role == ERole.USER &&
+                    <button onClick={() => navigate(`/chats/${car?.user.id}`)}>Text Seller</button>
                 }
-                <br/>
-                {authorization && authorization.id == car.seller.id
-                    || authorization && authorization.role == ERole.ADMIN
-                    &&
+                <br />
+                {authorization && (authorization.id == car.user.id || authorization.role === ERole.ADMIN) &&
 
                     <form onSubmit={handleSubmit(save)}>
                         <div>
                             <div>{getResponse ? getResponse : <div>{carErrors?.message}</div>}</div>
-                            <input placeholder={'region'} {...register('region', {value: getCarRegion})}
-                                   value={getCarRegion} disabled={getRegionInput}
-                                   autoComplete={"off"} type="text" onChange={handleInputChange}/>
+                            <input placeholder={'region'} {...register('region', { value: getCarRegion })}
+                                value={getCarRegion} disabled={getRegionInput}
+                                autoComplete={"off"} type="text" onChange={handleInputChange} />
                             <button onClick={() => {
                                 setRegionInput(false);
                                 setCarRegion('');
@@ -206,9 +246,9 @@ const CarFull: FC = () => {
                             </div>
                         }
                         <div>
-                            <input placeholder={'city'} {...register('city', {value: getCarCity})}
-                                   value={getCarCity} disabled={getCityInput}
-                                   autoComplete={"off"} type="text" onChange={handleCityInputChange}/>
+                            <input placeholder={'city'} {...register('city', { value: getCarCity })}
+                                value={getCarCity} disabled={getCityInput}
+                                autoComplete={"off"} type="text" onChange={handleCityInputChange} />
                             <button onClick={() => {
                                 setCityInput(false);
                                 setCarCity('');
@@ -235,14 +275,14 @@ const CarFull: FC = () => {
                             </div>
                         }
                         <div>
-                            <input type="number" placeholder={'price'} {...register('price')}/>
+                            <input type="number" placeholder={'price'} {...register('price')} />
                         </div>
                         <div>
                             <input autoComplete={"off"} type="text" readOnly={true} value={getCurrency}
-                                   placeholder={'currency'} {...register('currency', {value: getCurrency})}
-                                   onClick={() => {
-                                       setIsCurrencyVisible(true);
-                                   }}/>
+                                placeholder={'currency'} {...register('currency', { value: getCurrency })}
+                                onClick={() => {
+                                    setIsCurrencyVisible(true);
+                                }} />
                         </div>
                         {isCurrencyVisible && getCurrencies.map((curr) => {
                             return (
@@ -258,11 +298,26 @@ const CarFull: FC = () => {
                         })}
                         <div>
                             <input autoComplete={"off"} type="text"
-                                   placeholder={'description'} {...register('description')}/>
+                                placeholder={'description'} {...register('description')} />
                         </div>
                         <button>update</button>
                     </form>
                 }
+                <div>
+                    {authorization && (authorization.role === ERole.MANAGER || authorization.role === ERole.ADMIN) && (
+                        car.isActivated ? (
+                            <div>
+                                {getBanResponse ? getBanResponse : null}
+                                <button style={{ backgroundColor: "red", color: "white" }} onClick={() => banCar(car?.id)}>ban car</button>
+                            </div>
+                        ) : (
+                            <div>
+                                {getBanResponse ? getBanResponse : null}
+                                <button style={{ backgroundColor: "green", color: "white" }} onClick={() => unbanCar(car?.id)}>unban car</button>
+                            </div>
+                        )
+                    )}
+                </div>
             </div>
         );
     } else {
@@ -273,4 +328,4 @@ const CarFull: FC = () => {
 
 };
 
-export {CarFull};
+export { CarFull };

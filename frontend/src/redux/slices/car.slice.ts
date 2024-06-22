@@ -1,18 +1,18 @@
-import { ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest } from "../../interfaces";
+import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest } from "../../interfaces";
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { carService } from "../../services";
 import { AxiosError } from "axios";
 
 interface IState {
-    cars: ICar[],
-    car: ICar | null,
+    cars: CarsResponse[],
+    car: CarsResponse | null,
     brands: string[],
     models: string[],
     carErrors: IError | null,
     trigger: boolean,
     pageCurrent: number,
     pagesInTotal: number,
-    carForUpdate: ICar | null
+    carForUpdate: CarsResponse | null
 }
 
 const initialState: IState = {
@@ -40,7 +40,7 @@ const getAll = createAsyncThunk<ICarResponse, number>(
     }
 );
 
-const getById = createAsyncThunk<ICar, number>(
+const getById = createAsyncThunk<CarsResponse, number>(
     'carSlice/getById',
     async (carId: number, { rejectWithValue }) => {
         try {
@@ -58,6 +58,32 @@ const deleteById = createAsyncThunk(
     async (carId: number, { rejectWithValue }) => {
         try {
             const { data } = await carService.deleteById(carId);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const banById = createAsyncThunk(
+    'carSlice/banById',
+    async (carId: number, { rejectWithValue }) => {
+        try {
+            const { data } = await carService.banById(carId);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const unbanById = createAsyncThunk(
+    'carSlice/unbanById',
+    async (carId: number, { rejectWithValue }) => {
+        try {
+            const { data } = await carService.unbanById(carId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -160,9 +186,9 @@ const slice = createSlice({
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
             })
-            .addCase(update.fulfilled, () => {
-                window.location.reload();
-            })
+            // .addCase(update.fulfilled, () => {
+            //     window.location.reload();
+            // })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 if (action.type.startsWith("carSlice"))
                     state.carErrors = action.payload as IError;
@@ -177,6 +203,8 @@ const carActions = {
     getAll,
     getById,
     deleteById,
+    banById,
+    unbanById,
     getAllBrands,
     getAllModelsByBrand,
     getBySeller,

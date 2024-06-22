@@ -47,4 +47,5 @@ public class RegisterRequestUserDTO {
     private String password;
 
     private MultipartFile avatar = null;
+    private String code = null;
 }

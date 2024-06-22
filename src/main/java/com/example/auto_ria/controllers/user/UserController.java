@@ -24,6 +24,7 @@ import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.auth.AuthenticationService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +37,7 @@ public class UserController {
 
     private UsersServiceMySQLImpl usersServiceMySQL;
     private CommonService commonService;
+    private AuthenticationService authenticationService;
 
     @PreAuthorize("hasRole('ADMIN', 'MANAGER')")
     @GetMapping("/page/{page}")
@@ -43,6 +45,17 @@ public class UserController {
             @PathVariable("page") int page) {
         try {
             return usersServiceMySQL.getAll(page);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
+    @GetMapping("/by-token/{token}")
+    public ResponseEntity<UserResponse> getByAccessToken(@PathVariable("token") String token) {
+        try {
+            return new ResponseEntity<>(authenticationService.getByToken(token), HttpStatus.ACCEPTED);
+
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -65,6 +78,7 @@ public class UserController {
             @ModelAttribute UserUpdateDTO partialUser,
             HttpServletRequest request) {
         try {
+            System.out.println("in method");
             UserSQL user = commonService.extractUserFromHeader(request);
             UserSQL userById = usersServiceMySQL.getById(id);
 

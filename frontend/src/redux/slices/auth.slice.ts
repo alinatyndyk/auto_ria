@@ -15,6 +15,8 @@ import { ISellerInput } from "../../interfaces/user/seller.interface";
 import { ICustomerInput } from "../../interfaces/user/customer.interface";
 import { RegisterManagerPayload } from "../../interfaces/user/manager.interface";
 import { RegisterAdminPayload } from "../../interfaces/user/admin.interface";
+import { securityService } from "../../services/security.service";
+import { sellerService } from "../../services/seller.service";
 
 interface IState {
     errors: IError | null,
@@ -107,7 +109,7 @@ const registerUserAuth = createAsyncThunk<IAuthResponse, ISellerInput>(
                 console.log(info.code + "info code not null");
                 const { data } = await authService.registerUserAuth(info);
                 return data;
-            } 
+            }
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);

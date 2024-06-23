@@ -16,13 +16,9 @@ const sellerService = {
     deleteById: (id: number): IRes<String> => axiosService.delete(urls.users.deleteById(id)),
     getCustomerById: (id: number): IRes<ICustomerResponse> => axiosService.get(urls.customers.getById(id)),
     getSellerById: (id: number): IRes<ISellerResponse> => axiosService.get(urls.sellers.getById(id)),
-    updateById: (id: number, body: Partial<IUserUpdateRequest>): IRes<IUserResponse> => axiosService.patch(urls.users.updateById(id), {
-        body
-    }, {
-        headers: {
-                "Content-Type": "multipart/form-data"
-            }
-    }),
+    updateById: (id: number, body: Partial<IUserUpdateRequest>): IRes<IUserResponse> => axiosService.patch(urls.users.updateById(id), body),
+    // updateById: (id: number, car: Partial<IUpdateInputCar>): IRes<ICar> => axiosService.patch(urls.cars.byId(id), car),
+
     getByToken: (token: string): IRes<any> => axiosService.get(urls.users.getByToken(token)),
 
     getChatMessages: ({ sellerId, customerId, page }: IGetChatMessagesRequest):

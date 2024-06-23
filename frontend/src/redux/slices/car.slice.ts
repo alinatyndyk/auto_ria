@@ -12,7 +12,8 @@ interface IState {
     trigger: boolean,
     pageCurrent: number,
     pagesInTotal: number,
-    carForUpdate: CarsResponse | null
+    carForUpdate: CarsResponse | null,
+    errorGetById: IError | null
 }
 
 const initialState: IState = {
@@ -25,6 +26,7 @@ const initialState: IState = {
     trigger: false,
     pageCurrent: 0,
     pagesInTotal: 0,
+    errorGetById: null
 }
 
 const getAll = createAsyncThunk<ICarResponse, number>(
@@ -170,6 +172,9 @@ const slice = createSlice({
             })
             .addCase(getById.fulfilled, (state, action) => {
                 state.car = action.payload;
+            })
+            .addCase(getById.rejected, (state, action) => {
+                state.errorGetById = action.payload as IError;
             })
             .addCase(deleteById.fulfilled, () => {
                 window.location.href = "http://localhost:3000/profile";

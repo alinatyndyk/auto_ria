@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -75,10 +76,11 @@ public class UserController {
     @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @PatchMapping("/{id}")
     public ResponseEntity<UserResponse> patchUser(@PathVariable int id,
-            @ModelAttribute UserUpdateDTO partialUser,
+            @RequestBody UserUpdateDTO partialUser,
             HttpServletRequest request) {
         try {
-            System.out.println("in method");
+            System.out.println("В методе измениния юезера****************************");
+            System.out.println(partialUser + "partial user");
             UserSQL user = commonService.extractUserFromHeader(request);
             UserSQL userById = usersServiceMySQL.getById(id);
 
@@ -86,13 +88,17 @@ public class UserController {
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                System.out.println(userDetails.getUsername() == userById.getEmail());
+                System.out.println(userDetails.getUsername() + "///////////////////");
+                System.out.println(userById.getEmail() + "///////////////////");
 
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
-                    return usersServiceMySQL.update(id, partialUser, user);
+                    System.out.println("admin***************************");
+                    return usersServiceMySQL.update(id, partialUser, userById);
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("MANAGER"))
-                        && userDetails.getUsername() == userById.getEmail()) {
+                        && userDetails.getUsername().equals(userById.getEmail())) {
 
                     return usersServiceMySQL.update(id, partialUser, user);
 
@@ -179,36 +185,42 @@ public class UserController {
         try {
             UserSQL user = usersServiceMySQL.getById(Integer.valueOf(id));
 
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                System.out.println(userDetails.getUsername() == user.getEmail() + " Пользователь 2");
+                System.out.println(userDetails.getUsername().equals(user.getEmail()) + " Пользователь 3");
+                System.out.println(userDetails.getUsername() + user.getEmail() + " Пользователь 4");
 
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
-
+                    System.out.println("ADMIN****************");
+                    System.out.println(usersServiceMySQL.countByRole(ERole.ADMIN) + " NUMBER OF ADMINS");
+                    if (userDetails.getUsername().equals(user.getEmail())
+                            && usersServiceMySQL.countByRole(ERole.ADMIN) == 1) {
+                        throw new CustomException("At least one Administator has to remain in the DB",
+                                HttpStatus.UNAUTHORIZED);
+                    }
                     commonService.removeAvatar(user.getAvatar());
 
                     return usersServiceMySQL.deleteById(id, user, EMail.YOUR_ACCOUNT_BANNED);
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("MANAGER"))) {
-                    if (userDetails.getUsername() == user.getEmail()) {
+                    System.out.println("MANAGER****************");
+                    if (userDetails.getUsername().equals(user.getEmail())) {
+                        System.out.println("Вход в правильный метод");
                         commonService.removeAvatar(user.getAvatar());
 
                         return usersServiceMySQL.deleteById(id, user, EMail.PLATFORM_LEAVE);
-                    } else if (userDetails.getUsername() != user.getEmail()
-                            && user.getAuthorities().contains(ERole.USER)) {
-
-                        commonService.removeAvatar(user.getAvatar());
-                        return usersServiceMySQL.deleteById(id, user, EMail.YOUR_ACCOUNT_BANNED);
-
                     } else {
                         throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
                     }
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("USER"))
-                        && userDetails.getUsername() == user.getEmail()) {
+                        && userDetails.getUsername().equals(user.getEmail())) {
 
                     commonService.removeAvatar(user.getAvatar());
 

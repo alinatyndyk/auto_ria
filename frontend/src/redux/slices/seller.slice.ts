@@ -17,7 +17,10 @@ import { IGeoCitiesResponse, IGeoCity, IGeoRegion } from "../../interfaces/geo.i
 import { authService } from "../../services";
 
 interface IState {
+    userAuthotization: IUserResponse | ISellerResponse | ICustomerResponse | null,
     errors: IError | null,
+    errorGetById: IError | null;
+    errorDeleteById: IError | null;
     trigger: boolean,
     messages: IMessage[],
     chats: IChatResponse[],
@@ -33,7 +36,10 @@ interface IState {
 }
 
 const initialState: IState = {
+    userAuthotization: null,
     errors: null,
+    errorGetById: null,
+    errorDeleteById: null,
     trigger: false,
     messages: [],
     chats: [],
@@ -62,7 +68,7 @@ const getById = createAsyncThunk<ISellerResponse, number>(
 );
 
 const deleteById = createAsyncThunk<String, number>(
-    'sellerSlice/deleteById',
+    'sellerSlice/deletedById',
     async (id: number, { rejectWithValue }) => {
         try {
             const { data } = await sellerService.deleteById(id);
@@ -102,9 +108,10 @@ const getSellerById = createAsyncThunk<ISellerResponse, number>(
 
 const updateById = createAsyncThunk<IUserResponse, IUserUpdateRequestWithId>(
     'sellerSlice/updateById',
-    async ({id, body}, { rejectWithValue }) => {
+    async ({ id, body }, { rejectWithValue }) => {
         try {
             console.log(id, JSON.stringify(body), "update user slice info")
+            console.log(body, "BODY//////////////////////////////")
             const { data } = await sellerService.updateById(id, body);
             return data;
         } catch (e) {
@@ -114,7 +121,7 @@ const updateById = createAsyncThunk<IUserResponse, IUserUpdateRequestWithId>(
     }
 );
 
-const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse, void>(
+const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse | IUserResponse, void>(
     'sellerSlice/getByToken',
     async (_, { rejectWithValue }) => {
         try {
@@ -219,10 +226,14 @@ const slice = createSlice({
             })
             .addCase(getByToken.fulfilled, (state, action) => {
                 state.user = action.payload;
+                state.userAuthotization =  action.payload;
                 state.trigger = !state.trigger;
             })
-            .addCase(deleteById.fulfilled, (state) => {
+            .addCase(deleteById.fulfilled, () => {
                 localStorage.clear();
+            })
+            .addCase(deleteById.rejected, (state, action) => {
+                state.errorDeleteById = action.payload as IError;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 state.errors = action.payload as IError;

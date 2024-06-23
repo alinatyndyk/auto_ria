@@ -23,6 +23,8 @@ const SellerProfile: FC<IProps> = ({seller}) => {
         picture = avatar;
     }
 
+    
+
     return (
         <div>
             <div style={{display: "flex", columnGap: "20px"}}>

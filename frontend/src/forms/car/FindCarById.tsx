@@ -1,7 +1,8 @@
-import React, { FC, useState } from 'react';
+import { FC } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../../hooks';
 import { sellerActions } from '../../redux/slices/seller.slice';
+import { carActions } from '../../redux/slices';
 
 interface IFindCarById {
     id: number
@@ -9,26 +10,24 @@ interface IFindCarById {
 
 const FindCarById: FC = () => {
     const { reset, handleSubmit, register } = useForm<IFindCarById>();
-    const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
-    const {errors} = useAppSelector(state => state.sellerReducer);
-
-    const [getResponse, setResponse] = useState('');
+    const dispatch = useAppDispatch();
+    const { errorGetById } = useAppSelector(state => state.carReducer);
 
     const find: SubmitHandler<IFindCarById> = async (body: IFindCarById) => {
 
-        // const { payload } = await dispatch(sellerActions.getById(body.id));
-
-        // setResponse(String(payload));
-
-        navigate(`/cars/${body.id}`);
+        await dispatch(carActions.getById(body.id));
+        console.log(JSON.stringify(errorGetById) + "error by id");
+        if (errorGetById === null) {
+            navigate(`/cars/${body.id}`);
+        }
 
         reset();
     }
     return (
         <div>
             find car by id
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            {errorGetById && <div>{errorGetById?.message}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(find)}>
                 <div>
                     <input type="number" placeholder={'id'} {...register('id')} />
@@ -40,3 +39,4 @@ const FindCarById: FC = () => {
 };
 
 export { FindCarById };
+

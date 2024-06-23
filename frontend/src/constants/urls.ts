@@ -1,4 +1,5 @@
 import { IUserUpdateRequest } from "../interfaces/user/seller.interface";
+import { authService } from "../services";
 
 const baseURL = 'http://localhost:8080';
 const geoURL = 'http://geodb-free-service.wirefreethought.com/v1/geo/countries/UA';

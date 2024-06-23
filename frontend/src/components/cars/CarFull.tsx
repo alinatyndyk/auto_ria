@@ -7,6 +7,7 @@ import { Carousel } from "./Carousel";
 import moment from "moment";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ERole } from "../../constants/role.enum";
+import { ECurrency } from '../../forms/car/CarForm';
 import { ICreateInputCar, IUpdateInputCar } from "../../interfaces";
 import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 import { IAdminResponse } from "../../interfaces/user/admin.interface";
@@ -14,8 +15,7 @@ import { ICustomerResponse } from "../../interfaces/user/customer.interface";
 import { IManagerResponse } from "../../interfaces/user/manager.interface";
 import { ISellerResponse } from "../../interfaces/user/seller.interface";
 import { sellerActions } from "../../redux/slices/seller.slice";
-import { securityService } from "../../services/security.service";
-import { ECurrency } from '../../forms/car/CarForm';
+import { authService } from '../../services';
 
 const CarFull: FC = () => {
 
@@ -28,6 +28,7 @@ const CarFull: FC = () => {
         useState<ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null>(null);
 
     const { car } = useAppSelector(state => state.carReducer);
+    const { userAuthotization } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -68,26 +69,36 @@ const CarFull: FC = () => {
         setCurrencies(Object.values(ECurrency));
     }, [])
 
-
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
         }
 
-        const auth = localStorage.getItem("authorization");
+        // const auth = localStorage.getItem("authorization");
 
-        if (auth) {
+        // if (auth) {
 
-            const decryptedAuth = securityService.decryptObject(auth);
-            setAuthorization(decryptedAuth);
+        //     const decryptedAuth = securityService.decryptObject(auth);
+        //     setAuthorization(decryptedAuth);
 
-            if (decryptedAuth?.role == ERole.CUSTOMER) { //todo chats
-                setTextButtonVisible(true);
-            }
-        }
-
+        //     if (decryptedAuth?.role == ERole.CUSTOMER) { //todo chats
+        //         setTextButtonVisible(true);
+        //     }
+        // }
 
     }, []);
+
+    const { user } = useAppSelector(state => state.sellerReducer);
+
+    useEffect(() => {
+        const token = authService.getAccessToken();
+        if (token != null) {
+            dispatch(sellerActions.getByToken());
+        }
+
+        console.log(user + " userAuthotization/////////////////////////////////////")
+
+    }, [])
 
     console.log(authorization + "auth");
     console.log(JSON.stringify(authorization) + "auth");
@@ -185,6 +196,7 @@ const CarFull: FC = () => {
                 fontSize: "9px",
                 columnGap: "10px"
             }}>
+                <div>{JSON.stringify(user)} --  the user</div>
                 <div> {car.photo.length > 0 ? <Carousel images={car.photo.map((src, id) => ({
                     id,
                     src: `http://localhost:8080/users/avatar/${src}`,
@@ -194,7 +206,8 @@ const CarFull: FC = () => {
                 </div>
                 <div>
                     <div>id: {car.id}</div>
-                    {authorization && authorization.id == car?.user.id &&
+                    {/* {authorization && authorization.id == car?.user.id && */}
+                    {userAuthotization && userAuthotization.id == car?.user.id &&
                         <button onClick={() => deleteCar(car?.id)}>delete</button>}
                     <div>brand: {car.brand}</div>
                     <div>model: {car.model}</div>
@@ -217,7 +230,8 @@ const CarFull: FC = () => {
                     <button onClick={() => navigate(`/chats/${car?.user.id}`)}>Text Seller</button>
                 }
                 <br />
-                {authorization && (authorization.id == car.user.id || authorization.role === ERole.ADMIN) &&
+                {/* {authorization && (authorization.id == car.user.id || authorization.role === ERole.ADMIN) && */}
+                {userAuthotization && (userAuthotization.id == car.user.id || userAuthotization.role === ERole.ADMIN) &&
 
                     <form onSubmit={handleSubmit(save)}>
                         <div>
@@ -304,7 +318,8 @@ const CarFull: FC = () => {
                     </form>
                 }
                 <div>
-                    {authorization && (authorization.role === ERole.MANAGER || authorization.role === ERole.ADMIN) && (
+                    {/* {authorization && (authorization.role === ERole.MANAGER || authorization.role === ERole.ADMIN) && ( */}
+                    {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN) && (
                         car.isActivated ? (
                             <div>
                                 {getBanResponse ? getBanResponse : null}
@@ -329,3 +344,4 @@ const CarFull: FC = () => {
 };
 
 export { CarFull };
+

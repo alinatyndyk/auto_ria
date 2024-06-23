@@ -1,19 +1,23 @@
 import axios from "axios";
 
-import {baseURL, geoURL, urls} from "../constants";
-import {authService} from "./auth.service";
+import { baseURL, geoURL, urls } from "../constants";
+import { authService } from "./auth.service";
+import { useAppDispatch } from "../hooks";
+import { sellerActions } from "../redux/slices/seller.slice";
+import { securityService } from "./security.service";
 
-const axiosService = axios.create({baseURL});
-const axiosGeoService = axios.create({baseURL: geoURL});
+const axiosService = axios.create({ baseURL });
+const axiosGeoService = axios.create({ baseURL: geoURL });
 
 axiosService.interceptors.request.use(async (config) => {
 
     const access_token = authService.getAccessToken();
 
     if (config.url != urls.auth.refresh() && access_token) {
-        console.log("auth/refresh not equal")
         config.headers.Authorization = `Bearer ${access_token}`;
+
     }
+    console.log(JSON.stringify(config.headers));
     return config;
 });
 
@@ -24,7 +28,8 @@ axiosService.interceptors.response.use(
     },
     async (error) => {
         const refresh_token = authService.getRefreshToken();
-
+        console.log("INTER REFRESH")
+        console.log(error.response.status + "error st");
         if (error.response?.status === 423 && refresh_token && !isRefreshing) {
             isRefreshing = true;
 
@@ -35,7 +40,7 @@ axiosService.interceptors.response.use(
                 if (!refresh) {
                     throw new Error("refresh_token is required");
                 }
-                const {data} = await authService.refresh({refreshToken: refresh});
+                const { data } = await authService.refresh({ refreshToken: refresh });
                 authService.setTokens(data);
                 localStorage.setItem('isAuth', JSON.stringify(true));
 

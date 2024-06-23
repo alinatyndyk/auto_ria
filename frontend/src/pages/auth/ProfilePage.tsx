@@ -12,6 +12,7 @@ import { IUserUpdateRequest } from '../../interfaces/user/seller.interface';
 import { authActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
 import { FindCarById } from '../../forms/car/FindCarById';
+import { securityService } from '../../services/security.service';
 
 const ProfilePage: FC = () => {
 
@@ -95,13 +96,14 @@ const ProfilePage: FC = () => {
 
         await dispatch(sellerActions.updateById({ id: user.id, body: updatedUser }))
             .then((res) => {
+                console.log(JSON.stringify(res) + 'RES');
                 const type = res.type;
                 const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
                 console.log(JSON.stringify(res.payload) + "result payload");
 
                 if (lastWord === "fulfilled") {
-                    setResponse("Car updated successfully");
+                    setResponse("User updated successfully");
                     setCarCity('');
                     setCarRegion('');
                     reset();
@@ -113,6 +115,11 @@ const ProfilePage: FC = () => {
 
     useEffect(() => {
         dispatch(sellerActions.getByToken());
+        if (user) {
+            const obj = securityService.encryptObject(user)
+            localStorage.setItem("authorization", obj);
+            console.log(obj, "encryptet user from profile effect");
+        }
     }, []);
 
     let userComponent;

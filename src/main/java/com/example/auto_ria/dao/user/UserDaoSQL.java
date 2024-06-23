@@ -29,6 +29,9 @@ public interface UserDaoSQL extends JpaRepository<UserSQL, Integer> {
     @Query("SELECT u FROM UserSQL u JOIN u.roles r WHERE r = :role")
     List<UserSQL> findAllByRole(@Param("role") ERole role);
 
+    @Query("SELECT COUNT(u) FROM UserSQL u JOIN u.roles r WHERE r = :role")
+    Integer countByRole(@Param("role") ERole role);
+
     @Transactional
     void deleteAllByIsActivatedFalseAndCreatedAtBefore(LocalDateTime before);
 }

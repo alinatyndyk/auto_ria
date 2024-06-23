@@ -308,7 +308,6 @@ public class AuthenticationController {
     @PostMapping("/authenticate")
     public ResponseEntity<AuthenticationResponse> loginAll(@RequestBody LoginRequest loginRequest) {
         try {
-
             AuthenticationResponse authenticationResponse = AuthenticationResponse.builder().build();
 
             UserSQL userSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());

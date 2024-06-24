@@ -206,7 +206,6 @@ public class AuthenticationService {
 
     public ResponseEntity<String> codeAdmin(String email, String code) {
         try {
-            System.out.println(215);
             Map<String, Object> map = new HashMap<>();
             map.put("code", code);
             map.put("role", ERole.ADMIN.name());
@@ -311,7 +310,6 @@ public class AuthenticationService {
             mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Forgot password error" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }

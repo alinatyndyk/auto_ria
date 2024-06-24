@@ -20,10 +20,8 @@ public class Main {
 
         // Step 3: Serialize Proxy object to JSON
         String json = gson.toJson(proxy);
-        System.out.println("Serialized Proxy: " + json);
 
         // Step 4: Deserialize JSON back to Proxy object (example)
         Proxy deserializedProxy = gson.fromJson(json, Proxy.class);
-        System.out.println("Deserialized Proxy: " + deserializedProxy);
     }
 }

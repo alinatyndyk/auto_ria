@@ -1,15 +1,20 @@
-import React, {FC} from 'react';
-import {useAppDispatch, useAppNavigate} from "../../../hooks";
-import {authActions} from "../../../redux/slices";
+import React, { FC } from 'react';
+import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
+import { authActions } from "../../../redux/slices";
 
 const LogOutForm: FC = () => {
     const dispatch = useAppDispatch();
+    const { signOutErrors } = useAppSelector(state => state.authReducer);
+
 
     const navigate = useAppNavigate();
-    const logOut = async () => {
+    const logOut = () => {
 
-        await dispatch(authActions.signOut());
-        navigate('/auth/login');
+        dispatch(authActions.signOut());
+
+        if (signOutErrors === null) {
+            navigate('/auth/login');
+        }
     }
 
     return (
@@ -19,4 +24,4 @@ const LogOutForm: FC = () => {
     );
 };
 
-export {LogOutForm};
+export { LogOutForm };

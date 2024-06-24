@@ -126,7 +126,6 @@ public class StripeController {
             @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request) {
         try {
-            System.out.println("IN VONTROLLER ///////////////////////");
             
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
             String email = commonService.extractEmailFromHeader(request, ETokenRole.USER);
@@ -168,7 +167,6 @@ public class StripeController {
             return ResponseEntity.ok("Subscription canceled. " +
                     "Current subscription's expiry date: " + premiumPlan.getEndDate());
         } catch (CustomException e) {
-            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }

@@ -82,8 +82,6 @@ public class MixpanelService {
                 .build();
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
         String responseBody = response.body();
-        System.out.println(responseBody);
-        System.out.println("responseBody");
 
         String string = String.format("\"car_id\":\"%s\"", carId);
 

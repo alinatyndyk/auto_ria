@@ -1,8 +1,8 @@
 import React, {FC} from 'react';
-import {IManagerResponse} from "../../interfaces/user/manager.interface";
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
-    seller: IManagerResponse
+    seller: IUserResponse
 }
 
 const ManagerProfile: FC<IProps> = ({seller}) => {
@@ -12,7 +12,7 @@ const ManagerProfile: FC<IProps> = ({seller}) => {
     } = seller;
 
     let picture;
-    if (avatar == null) {
+    if (avatar === null) {
         picture = "channels4_profile.jpg";
     } else {
         picture = avatar;

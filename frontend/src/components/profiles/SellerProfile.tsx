@@ -1,5 +1,5 @@
 import React, {FC} from 'react';
-import {ISellerResponse} from "../../interfaces/user/seller.interface";
+import {ISellerResponse, IUserResponse} from "../../interfaces/user/seller.interface";
 import {Cars} from "../cars";
 import {StripeCheckout} from "../stripe/StripeCheckout";
 import {ChatPage} from "../../pages/chat/ChatPage";
@@ -7,7 +7,7 @@ import { CarForm } from '../../forms/car/CarForm';
 import { FindCarById } from '../../forms/car/FindCarById';
 
 interface IProps {
-    seller: ISellerResponse
+    seller: IUserResponse
 }
 
 const SellerProfile: FC<IProps> = ({seller}) => {
@@ -17,13 +17,13 @@ const SellerProfile: FC<IProps> = ({seller}) => {
     } = seller;
 
     let picture;
-    if (avatar == null) {
+    if (avatar === null) {
         picture = "channels4_profile.jpg";
     } else {
         picture = avatar;
     }
 
-    
+
 
     return (
         <div>

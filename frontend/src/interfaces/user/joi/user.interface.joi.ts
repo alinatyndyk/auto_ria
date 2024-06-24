@@ -7,7 +7,7 @@ const userResponseSchema = Joi.object({ //todo fix object
     city: Joi.string().allow(null),
     region: Joi.string().allow(null),
     number: Joi.string().allow(null),
-    avatar: Joi.string().uri().optional().allow(null), // avatar может быть null
+    avatar: Joi.string().optional().allow(null), // avatar может быть null
     accountType: Joi.string().valid('BASIC', 'PREMIUM').required(), // предполагая, что у вас есть два типа аккаунтов: BASIC и PREMIUM
     role: Joi.string().valid('USER', 'ADMIN', 'MANAGER').required(), // предполагая, что роли могут быть USER, ADMIN, MANAGER
     isPaymentSourcePresent: Joi.boolean().allow(null),

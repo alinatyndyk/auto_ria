@@ -1,11 +1,8 @@
-import React, { FC, useEffect } from 'react';
-import { IAdminResponse } from "../../interfaces/user/admin.interface";
-import { GenerateManagerForm } from "../../forms/auth/codes/GenerateManagerForm";
+import { FC } from 'react';
 import { GenerateAdminForm } from "../../forms/auth/codes/GenerateAdminForm";
-import CarPage from "../../pages/car/CarPage";
-import { IUserResponse } from '../../interfaces/user/seller.interface';
-import { Cars } from '../cars';
+import { GenerateManagerForm } from "../../forms/auth/codes/GenerateManagerForm";
 import { CarForm } from '../../forms/car/CarForm';
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
     seller: IUserResponse
@@ -19,7 +16,7 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
         id, avatar, name, lastName, role, region, city
     } = seller;
     let picture;
-    if (avatar == null) {
+    if (avatar === null) {
         picture = "channels4_profile.jpg";
     } else {
         picture = avatar;

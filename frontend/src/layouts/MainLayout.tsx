@@ -49,10 +49,7 @@ const MainLayout: FC = () => {
     } else {
         authNavigationComponent = <div style={{ display: "flex" }}>
             <div style={{ display: "flex", columnGap: "20px" }}>
-                <Link to={`auth/register/${ERole.USER}`}>register seller</Link>
-                <Link to={`auth/register/${ERole.CUSTOMER}`}>register customer</Link>
-                <Link to={`auth/register/${ERole.ADMIN}`}>register admin</Link>
-                <Link to={`auth/register/${ERole.MANAGER}`}>register manager</Link>
+                <Link to={`auth/register/${ERole.USER}`}>Register</Link>
                 <button style={{
                     alignItems: "center",
                     width: "100px",

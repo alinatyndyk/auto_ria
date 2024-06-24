@@ -10,10 +10,6 @@ import { ERole } from "../../constants/role.enum";
 import { ECurrency } from '../../forms/car/CarForm';
 import { ICreateInputCar, IUpdateInputCar } from "../../interfaces";
 import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
-import { IAdminResponse } from "../../interfaces/user/admin.interface";
-import { ICustomerResponse } from "../../interfaces/user/customer.interface";
-import { IManagerResponse } from "../../interfaces/user/manager.interface";
-import { ISellerResponse } from "../../interfaces/user/seller.interface";
 import { sellerActions } from "../../redux/slices/seller.slice";
 import { authService } from '../../services';
 
@@ -24,10 +20,8 @@ const CarFull: FC = () => {
     const navigate = useAppNavigate();
     const [textButtonVisible, setTextButtonVisible] = useState(false);
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
-    const [authorization, setAuthorization] =
-        useState<ISellerResponse | ICustomerResponse | IAdminResponse | IManagerResponse | null>(null);
 
-    const { car } = useAppSelector(state => state.carReducer);
+    const { car, errorGetMiddle, middleValue } = useAppSelector(state => state.carReducer);
     const { userAuthotization } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
@@ -55,8 +49,6 @@ const CarFull: FC = () => {
     const [getResponse, setResponse] = useState('');
     const { regions, cities } = useAppSelector(state => state.sellerReducer);
 
-    console.log(authorization);
-
     useEffect(() => {
         setRegions(regions);
     }, [regions])
@@ -72,19 +64,10 @@ const CarFull: FC = () => {
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
+
+            dispatch(carActions.getMiddleById(Number(carId)));
+
         }
-
-        // const auth = localStorage.getItem("authorization");
-
-        // if (auth) {
-
-        //     const decryptedAuth = securityService.decryptObject(auth);
-        //     setAuthorization(decryptedAuth);
-
-        //     if (decryptedAuth?.role == ERole.CUSTOMER) { //todo chats
-        //         setTextButtonVisible(true);
-        //     }
-        // }
 
     }, []);
 
@@ -95,13 +78,7 @@ const CarFull: FC = () => {
         if (token != null) {
             dispatch(sellerActions.getByToken());
         }
-
-        console.log(user + " userAuthotization/////////////////////////////////////")
-
     }, [])
-
-    console.log(authorization + "auth");
-    console.log(JSON.stringify(authorization) + "auth");
 
     const deleteCar = (carId: number) => {
         dispatch(carActions.deleteById(carId));
@@ -110,14 +87,12 @@ const CarFull: FC = () => {
     const banCar = async (carId: number) => {
         const { payload } = await dispatch(carActions.banById(carId));
         const response = JSON.stringify(payload);
-        console.log(response + " PAYLOAD");
         setBanResponse(response);
     }
 
     const unbanCar = async (carId: number) => {
         const { payload } = await dispatch(carActions.unbanById(carId));
         const response = JSON.stringify(payload);
-        console.log(response + " PAYLOAD");
         setBanResponse(response);
     }
 
@@ -150,16 +125,12 @@ const CarFull: FC = () => {
 
 
     const save: SubmitHandler<IUpdateInputCar> = async (car: IUpdateInputCar) => {
-        console.log(JSON.stringify(car) + "update car")
-        console.log(getCarRegion + "update car")
         car.region = getCarRegion;
         car.city = getCarCity;
         car.currency = getCurrency;
-        console.log(JSON.stringify(car) + "update car")
 
         const updatedCar: Partial<IUpdateInputCar> = {};
 
-        // Iterate over the keys in car object and add non-empty values to updatedCar
         Object.keys(car).forEach(key => {
             const value = car[key as keyof IUpdateInputCar];
             if (value !== undefined && value !== null && value !== '') {
@@ -167,17 +138,10 @@ const CarFull: FC = () => {
             }
         });
 
-        console.log(getCarRegion + "get car region")
-
-        console.log(updatedCar + "updatedCar");
-        console.log(JSON.stringify(updatedCar) + "updatedCar json");
-
         await dispatch(carActions.update({ car: updatedCar, id: Number(carId) }))
             .then((res) => {
                 const type = res.type;
                 const lastWord = type.substring(type.lastIndexOf("/") + 1);
-
-                console.log(JSON.stringify(res.payload) + "result payload");
 
                 if (lastWord === "fulfilled") {
                     setResponse("Car updated successfully");
@@ -206,8 +170,7 @@ const CarFull: FC = () => {
                 </div>
                 <div>
                     <div>id: {car.id}</div>
-                    {/* {authorization && authorization.id == car?.user.id && */}
-                    {userAuthotization && userAuthotization.id == car?.user.id &&
+                    {userAuthotization && userAuthotization.id === car?.user.id &&
                         <button onClick={() => deleteCar(car?.id)}>delete</button>}
                     <div>brand: {car.brand}</div>
                     <div>model: {car.model}</div>
@@ -216,22 +179,20 @@ const CarFull: FC = () => {
                 <div>
                     <div>usd: {car.priceUSD}</div>
                     <div>eur: {car.priceEUR}</div>
-                    -
                     <div>uah: {car.priceUAH}</div>
                 </div>
                 <div>desc: {car.description}</div>
                 <div>seller: {JSON.stringify(car.user)}</div>
                 <div>{car.user.createdAt}</div>
                 <div>{moment(car.user.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
-                {car?.user.role == ERole.ADMIN && <div style={{ color: "blue" }}>The car is sold by AutoRio Services.
+                {car?.user.role === ERole.ADMIN && <div style={{ color: "blue" }}>The car is sold by AutoRio Services.
                     Please use {car?.user.number} for further information</div>}
                 {
-                    textButtonVisible && car?.user.role == ERole.USER &&
+                    textButtonVisible && car?.user.role === ERole.USER &&
                     <button onClick={() => navigate(`/chats/${car?.user.id}`)}>Text Seller</button>
                 }
                 <br />
-                {/* {authorization && (authorization.id == car.user.id || authorization.role === ERole.ADMIN) && */}
-                {userAuthotization && (userAuthotization.id == car.user.id || userAuthotization.role === ERole.ADMIN) &&
+                {userAuthotization && (userAuthotization.id === car.user.id || userAuthotization.role === ERole.ADMIN) &&
 
                     <form onSubmit={handleSubmit(save)}>
                         <div>
@@ -318,7 +279,19 @@ const CarFull: FC = () => {
                     </form>
                 }
                 <div>
-                    {/* {authorization && (authorization.role === ERole.MANAGER || authorization.role === ERole.ADMIN) && ( */}
+                    <div>
+                        {userAuthotization && (userAuthotization.role === ERole.MANAGER
+                            || userAuthotization.role === ERole.ADMIN
+                            || userAuthotization.id === car.user.id) && (
+                                <div>
+                                    <div>Middle price in the region - premium</div>
+                                    <div>{errorGetMiddle?.message ? errorGetMiddle.message : null}</div>
+                                    <div>Middle in EUR: {middleValue?.middleInEUR}</div>
+                                    <div>Middle in UAH: {middleValue?.middleInUAH}</div>
+                                    <div>Middle in USD: {middleValue?.middleInUSD}</div>
+                                </div>
+                            )}
+                    </div>
                     {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN) && (
                         car.isActivated ? (
                             <div>

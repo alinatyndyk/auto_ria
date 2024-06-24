@@ -109,3 +109,10 @@ export interface UserCarResponse {
     avatar: string;
     createdAt: string; // Assuming createdAt is a string representation of a date
 }
+
+export interface IMiddleCarValues {
+    middleInUAH: number;
+    middleInEUR: number;
+    middleInUSD: number;
+}
+

@@ -1,11 +1,12 @@
 import { IRes } from "../types/axiosRes.type";
-import { CarsResponse, ICar, ICarResponse, ICreateCar, IUpdateInputCar } from "../interfaces";
+import { CarsResponse, ICar, ICarResponse, ICreateCar, IMiddleCarValues, IUpdateInputCar } from "../interfaces";
 import { axiosService } from "./axios.service";
 import { urls } from "../constants";
 
 const carService = {
     getAll: (page: number): IRes<ICarResponse> => axiosService.get(urls.cars.all(page)),
     getById: (id: number): IRes<CarsResponse> => axiosService.get(urls.cars.byId(id)),
+    getMiddleById: (id: number): IRes<IMiddleCarValues> => axiosService.get(urls.cars.byMiddleId(id)),
     deleteById: (id: number): IRes<String> => axiosService.delete(urls.cars.deleteById(id)),
     banById: (id: number): IRes<String> => axiosService.post(urls.cars.banById(id)),
     unbanById: (id: number): IRes<String> => axiosService.post(urls.cars.unbanById(id)),

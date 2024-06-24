@@ -78,23 +78,20 @@ public class StripeService {
                                                                                                                 // front
             }
 
-            if (body.isAutoPay() && !body.isSetAsDefaultCard()) {
-                // if (body.isAutoPay() && !body.isSetAsDefaultCard() && !stripePresent) {
+
+            if (body.isAutoPay() && !body.isSetAsDefaultCard() && !stripePresent) {
                 throw new CustomException("Subscription requires a default card", HttpStatus.BAD_REQUEST);
             }
 
             try {
                 if (stripePresent && defaultSource != null && body.isUseDefaultCard()) {
-                    System.out.println("first");
                     paymentToken = defaultSource;
                     customerId = stripeId;
                 } else if (stripePresent && !body.isSetAsDefaultCard()) {
-                    System.out.println("first1");
                     paymentToken = body.getToken();
                     customerId = stripeId;
 
                 } else if (stripePresent && body.isSetAsDefaultCard()) {
-                    System.out.println("first2");
                     assert stripeId != null;
                     Customer stripeCustomer = Customer.retrieve(stripeId);
 
@@ -107,15 +104,12 @@ public class StripeService {
                     customerId = stripeId;
 
                 } else if (!body.isSetAsDefaultCard()) {
-                    System.out.println("first3");
 
                     CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
                             .setName(userSQL.getName() + userSQL.getLastName())
                             .setEmail(userSQL.getEmail())
                             .build();
-                    System.out.println(customerCreateParams + "customerCreateParams");
                     Customer customer = Customer.create(customerCreateParams);
-                    System.out.println(customer + "CREATED");
 
                     paymentToken = body.getToken();
                     customerId = customer.getId();
@@ -125,7 +119,6 @@ public class StripeService {
 
                     userDaoSQL.save(userSQL);
                 } else if (body.isSetAsDefaultCard()) {
-                    System.out.println("first4");
                     Customer customer = Customer.create(
                             CustomerCreateParams.builder()
                                     .setName(userSQL.getName() + userSQL.getLastName())
@@ -243,17 +236,13 @@ public class StripeService {
                         HttpStatus.BAD_REQUEST);
             }
         } catch (CustomException e) {
-            System.out.println(228);
             throw new CustomException(e.getMessage(), e.getStatus());
         } catch (StripeException e) {
-            System.out.println(231);
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
             return;
         } catch (Exception e) {
-            System.out.println(235);
             throw new CustomException("Failed to create payment", HttpStatus.EXPECTATION_FAILED);
         }
-        System.out.println(238);
     }
 
     public void cancelSubscription(PremiumPlan premiumPlan) {

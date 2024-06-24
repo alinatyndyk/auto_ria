@@ -12,7 +12,7 @@ export enum ECurrency {
 
 const CarForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
-    const { carErrors, brands, models } = useAppSelector(state => state.carReducer);
+    const {brands, models, errorCreate } = useAppSelector(state => state.carReducer);
 
     useEffect(() => {
         dispatch(carActions.getAllBrands());
@@ -48,7 +48,7 @@ const CarForm: FC = () => {
     const [getBrand, setBrand] = useState('');
     const [getModel, setModel] = useState('');
 
-    const [getErrors, setErrors] = useState<undefined | string>(carErrors?.message);
+    // const [getErrors, setErrors] = useState<undefined | string>(carErrors?.message);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
@@ -56,12 +56,11 @@ const CarForm: FC = () => {
 
     const dispatch = useAppDispatch();
 
-    useEffect(() => {
-        setErrors(carErrors?.message);
-    }, [carErrors])
+    // useEffect(() => {
+    //     setErrors(carErrors?.message);
+    // }, [carErrors])
 
     const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
-        console.log(car, "car")
         let photos = [];
 
         for (let i = 0; i < car.pictures.length; i++) {
@@ -84,7 +83,7 @@ const CarForm: FC = () => {
                 const type = res.type;
                 const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
-                if (lastWord == "fulfilled") {
+                if (lastWord === "fulfilled") {
                     setResponse("Car created successfully");
                     setCarCity('');
                     setCarRegion('');
@@ -92,13 +91,11 @@ const CarForm: FC = () => {
                     setModel('');
                     reset();
 
-                    setErrors('');
+                    // setErrors('');
                 } else {
-                    setErrors(carErrors?.message);
+                    // setErrors(carErrors?.message);
                 }
 
-            }).catch((err) => {
-                console.log(err, "CATCH")
             });
     }
 
@@ -156,8 +153,7 @@ const CarForm: FC = () => {
 
     return (
         <div>
-            {/* <div>{getResponse ? getResponse : <div>{JSON.stringify(errors?.message)}</div>}</div> */}
-            <div>{getResponse ? getResponse : <div>{JSON.stringify(carErrors?.message)}</div>}</div>
+            <div>{getResponse ? getResponse : <div>{errorCreate?.message}</div>}</div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
                     <input style={{ cursor: 'pointer' }} type="text" readOnly={true} value={getBrand} placeholder={'brand'}
@@ -165,7 +161,6 @@ const CarForm: FC = () => {
                         onClick={() => {
 
                             setIsBrandsVisible(true);
-                            console.log(getBrands);
                         }} />
                 </div>
                 {

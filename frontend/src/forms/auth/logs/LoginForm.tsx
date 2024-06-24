@@ -1,16 +1,16 @@
-import React, {FC} from 'react';
-import {SubmitHandler, useForm} from "react-hook-form";
-import {IAuthRequest} from "../../../interfaces";
-import {useAppDispatch, useAppSelector} from "../../../hooks";
-import {authActions} from "../../../redux/slices";
-import {useNavigate} from "react-router";
-import {Link} from "react-router-dom";
+import { FC } from 'react';
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { Link } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
+import { IAuthRequest } from "../../../interfaces";
+import { authActions } from "../../../redux/slices";
 
 const LoginForm: FC = () => {
-    const {reset, handleSubmit, register} = useForm<IAuthRequest>();
+    const { reset, handleSubmit, register } = useForm<IAuthRequest>();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
-    const {errors} = useAppSelector(state => state.authReducer);
+    const { loginErrors } = useAppSelector(state => state.authReducer);
 
     const login: SubmitHandler<IAuthRequest> = async (info: IAuthRequest) => {
 
@@ -24,7 +24,6 @@ const LoginForm: FC = () => {
                 navigate('/profile');
             }
         });
-
     }
 
     return (
@@ -38,10 +37,10 @@ const LoginForm: FC = () => {
             <div>Log in here</div>
             <form onSubmit={handleSubmit(login)}>
                 <div>
-                    <input placeholder={"email"} {...register('email')}/>
+                    <input placeholder={"email"} {...register('email')} />
                 </div>
                 <div>
-                    <input placeholder={"password"} {...register('password')}/>
+                    <input placeholder={"password"} {...register('password')} />
                 </div>
                 <button style={{
                     color: "white",
@@ -53,9 +52,9 @@ const LoginForm: FC = () => {
                 </button>
             </form>
             <Link to={'/auth/forgot-password'}>Forgot password?</Link>
-            {errors ? <div>{errors?.message}</div> : <div></div>}
+            {loginErrors ? <div>{loginErrors?.message}</div> : null}
         </div>
     );
 };
 
-export {LoginForm};
+export { LoginForm };

@@ -324,7 +324,6 @@ public class AuthenticationController {
 
             return ResponseEntity.ok(authenticationResponse);
         } catch (CustomException e) {
-            System.out.println("yes here 2");
             throw new CustomException(e.getMessage(), e.getStatus());
         }
 
@@ -404,7 +403,6 @@ public class AuthenticationController {
                         HttpStatus.BAD_REQUEST);
             }
             String encoded = passwordEncoder.encode(newPassword);
-            System.out.println(encoded + "encoded");
 
             Claims claims = jwtService.extractClaimsCycle(code);
             String email = claims.get("sub").toString();
@@ -417,7 +415,6 @@ public class AuthenticationController {
 
             return ResponseEntity.ok(authenticationService.resetPassword(email, encoded));
         } catch (CustomException e) {
-            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), e.getStatus());
         }
 

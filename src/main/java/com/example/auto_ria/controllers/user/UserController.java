@@ -79,8 +79,7 @@ public class UserController {
             @RequestBody UserUpdateDTO partialUser,
             HttpServletRequest request) {
         try {
-            System.out.println("В методе измениния юезера****************************");
-            System.out.println(partialUser + "partial user");
+
             UserSQL user = commonService.extractUserFromHeader(request);
             UserSQL userById = usersServiceMySQL.getById(id);
 
@@ -88,12 +87,8 @@ public class UserController {
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                System.out.println(userDetails.getUsername() == userById.getEmail());
-                System.out.println(userDetails.getUsername() + "///////////////////");
-                System.out.println(userById.getEmail() + "///////////////////");
 
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
-                    System.out.println("admin***************************");
                     return usersServiceMySQL.update(id, partialUser, userById);
 
                 } else if (userDetails.getAuthorities().stream()
@@ -190,13 +185,8 @@ public class UserController {
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                System.out.println(userDetails.getUsername() == user.getEmail() + " Пользователь 2");
-                System.out.println(userDetails.getUsername().equals(user.getEmail()) + " Пользователь 3");
-                System.out.println(userDetails.getUsername() + user.getEmail() + " Пользователь 4");
 
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
-                    System.out.println("ADMIN****************");
-                    System.out.println(usersServiceMySQL.countByRole(ERole.ADMIN) + " NUMBER OF ADMINS");
                     if (userDetails.getUsername().equals(user.getEmail())
                             && usersServiceMySQL.countByRole(ERole.ADMIN) == 1) {
                         throw new CustomException("At least one Administator has to remain in the DB",
@@ -208,9 +198,7 @@ public class UserController {
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("MANAGER"))) {
-                    System.out.println("MANAGER****************");
                     if (userDetails.getUsername().equals(user.getEmail())) {
-                        System.out.println("Вход в правильный метод");
                         commonService.removeAvatar(user.getAvatar());
 
                         return usersServiceMySQL.deleteById(id, user, EMail.PLATFORM_LEAVE);

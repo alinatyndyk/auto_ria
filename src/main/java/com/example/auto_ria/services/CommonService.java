@@ -75,7 +75,6 @@ public class CommonService {
             String bearerToken = jwtService.extractTokenFromHeader(request);
             return jwtService.extractUsername(bearerToken, role);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Please sign in", HttpStatus.UNAUTHORIZED);
         }
 
@@ -116,7 +115,6 @@ public class CommonService {
             return userResponse;
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Could not create response", HttpStatus.CONFLICT);
         }
     }

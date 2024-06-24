@@ -120,7 +120,6 @@ public class WebSocketConnection extends TextWebSocketHandler {
             }
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Error connecting to ws", HttpStatus.CONFLICT);
         }
     }
@@ -208,14 +207,12 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 sessionMap.get(sessionId).sendMessage(new TextMessage(text));
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) {
-        System.out.println("connection closed " + session.getId());
         sessionMap.remove(session.getId());
         Session session1 = sessionDaoSQL.getBySessionId(session.getId());
         session1.setOnline(false);

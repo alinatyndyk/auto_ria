@@ -17,7 +17,6 @@ axiosService.interceptors.request.use(async (config) => {
         config.headers.Authorization = `Bearer ${access_token}`;
 
     }
-    console.log(JSON.stringify(config.headers));
     return config;
 });
 

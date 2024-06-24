@@ -154,8 +154,6 @@ public class CronConfiguration {
             LocalDate now = LocalDate.now();
             LocalDateTime nowDateTime = LocalDateTime.of(now, LocalTime.now()).minusHours(24);
 
-            System.out.println(nowDateTime + "*******************");
-            
             // userAuthDaoSQL.deleteAllByCreatedAtBefore(nowDateTime);
         } catch (Exception e) {
             throw new CustomException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

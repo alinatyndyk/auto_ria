@@ -1,11 +1,11 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
+import { IAuthResponse } from '../../../interfaces';
+import { IGeoCity, IGeoRegion } from "../../../interfaces/geo.interface";
 import { ISellerInput } from "../../../interfaces/user/seller.interface";
 import { authActions } from "../../../redux/slices";
 import { sellerActions } from "../../../redux/slices/seller.slice";
-import { IGeoCity, IGeoRegion } from "../../../interfaces/geo.interface";
-import { IAuthResponse } from '../../../interfaces';
 
 const RegisterSellerForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -16,7 +16,7 @@ const RegisterSellerForm: FC = () => {
     }
 
     const { reset, handleSubmit, register } = useForm<ISellerInput>();
-    const { errors } = useAppSelector(state => state.authReducer);
+    const { registerErrors } = useAppSelector(state => state.authReducer);
     const { regions, cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
@@ -46,26 +46,22 @@ const RegisterSellerForm: FC = () => {
             seller.city = getCarCity;
             seller.region = getCarRegion;
 
-            console.log(seller.code + " CODE");
-
             if (code != null) {
                 seller.code = code;
-                const { payload } = await dispatch(authActions.registerUserAuth(seller)); //todo register for everyone
-                console.log(JSON.stringify(payload) + "PAYLOAD AUTH");
+                const { payload } = await dispatch(authActions.registerUserAuth(seller));
+
                 if (isIAuthResponse(payload)) {
                     navigate('/profile');
                 } else {
                     setResponse(String(payload));
                 }
             } else {
-                const { payload } = await dispatch(authActions.registerSeller(seller)); //todo register for everyone
-                console.log(JSON.stringify(payload) + "PAYLOAD");
-
+                const { payload } = await dispatch(authActions.registerSeller(seller));
                 setResponse(String(payload));
 
             }
 
-            // reset();
+            reset();
         }
 
     }
@@ -106,11 +102,10 @@ const RegisterSellerForm: FC = () => {
         setIsCityVisible(false);
     };
 
-
     return (
         <div>
-            Register a seller
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            Register user
+            {registerErrors ? <div>{registerErrors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(registerSeller)}>
                 <div>
                     <input type="text" placeholder={'name'} {...register('name')} />

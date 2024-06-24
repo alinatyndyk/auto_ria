@@ -37,7 +37,7 @@ const ProfilePage: FC = () => {
     const { carErrors } = useAppSelector(state => state.carReducer);
 
     const [getResponse, setResponse] = useState('');
-    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+    const { regions, cities, errorUpdateById } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
         setRegions(regions);
@@ -75,15 +75,21 @@ const ProfilePage: FC = () => {
 
     const { user } = useAppSelector(state => state.sellerReducer);
 
+    useEffect(() => {
+        dispatch(sellerActions.getByToken());
+        if (user) {
+            const obj = securityService.encryptObject(user)
+            localStorage.setItem("authorization", obj);
+        }
+    }, []);
+
     const save: SubmitHandler<IUserUpdateRequest> = async (userToUpdate: IUserUpdateRequest) => {
 
         userToUpdate.region = getCarRegion;
         userToUpdate.city = getCarCity;
-        console.log(JSON.stringify(userToUpdate) + "update car")
 
         const updatedUser: Partial<IUserUpdateRequest> = {};
 
-        // Iterate over the keys in car object and add non-empty values to updatedCar
         Object.keys(userToUpdate).forEach(key => {
             const value = userToUpdate[key as keyof IUserUpdateRequest];
             if (value !== undefined && value !== null && value !== '') {
@@ -91,47 +97,34 @@ const ProfilePage: FC = () => {
             }
         });
 
-        console.log(getCarRegion + "get car region")
-        console.log(JSON.stringify(updatedUser) + "updatedCar json");
+        if (user !== null) {
 
-        await dispatch(sellerActions.updateById({ id: user.id, body: updatedUser }))
-            .then((res) => {
-                console.log(JSON.stringify(res) + 'RES');
-                const type = res.type;
-                const lastWord = type.substring(type.lastIndexOf("/") + 1);
+            await dispatch(sellerActions.updateById({ id: user.id, body: updatedUser }))
+                .then((res) => {
+                    const type = res.type;
+                    const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
-                console.log(JSON.stringify(res.payload) + "result payload");
-
-                if (lastWord === "fulfilled") {
-                    setResponse("User updated successfully");
-                    setCarCity('');
-                    setCarRegion('');
-                    reset();
-                }
-            });
+                    if (lastWord === "fulfilled") {
+                        setResponse("User updated successfully");
+                        setCarCity('');
+                        setCarRegion('');
+                        reset();
+                    }
+                });
+        }
     };
 
-
-
-    useEffect(() => {
-        dispatch(sellerActions.getByToken());
-        if (user) {
-            const obj = securityService.encryptObject(user)
-            localStorage.setItem("authorization", obj);
-            console.log(obj, "encryptet user from profile effect");
-        }
-    }, []);
 
     let userComponent;
 
     if (user === null) {
         userComponent = <div>Loading...
             <button onClick={() => dispatch(authActions.refresh())}>refresh</button></div>;
-    } else if (user.role == ERole.USER && validateUserSQL(user)) {
+    } else if (user.role === ERole.USER && validateUserSQL(user)) {
         userComponent = <SellerProfile seller={user} />;
-    } else if (user.role == ERole.ADMIN && validateUserSQL(user)) {
+    } else if (user.role === ERole.ADMIN && validateUserSQL(user)) {
         userComponent = <AdminProfile seller={user} />;
-    } else if (user.role == ERole.MANAGER && validateUserSQL(user)) {
+    } else if (user.role === ERole.MANAGER && validateUserSQL(user)) {
         userComponent = <ManagerProfile seller={user} />;
     } else {
         userComponent = <div>User type not recognized</div>;
@@ -147,7 +140,7 @@ const ProfilePage: FC = () => {
             <div>Change account info</div>
             <form onSubmit={handleSubmit(save)}>
                 <div>
-                    <div>{getResponse ? getResponse : <div>{carErrors?.message}</div>}</div>
+                    <div>{errorUpdateById?.message ? errorUpdateById.message : <div>{getResponse}</div>}</div>
                     <input placeholder={'region'} {...register('region', { value: getCarRegion })}
                         value={getCarRegion} disabled={getRegionInput}
                         autoComplete={"off"} type="text" onChange={handleInputChange} />

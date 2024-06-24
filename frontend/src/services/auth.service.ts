@@ -1,4 +1,4 @@
-import {IRes} from "../types/axiosRes.type";
+import { urls } from "../constants";
 import {
     IActivationCode,
     IAuthRequest,
@@ -11,12 +11,9 @@ import {
     INewPassword,
     IRefreshRequest,
 } from "../interfaces";
-import {axiosService} from "./axios.service";
-import {urls} from "../constants";
-import {ISellerInput} from "../interfaces/user/seller.interface";
-import {ICustomerInput} from "../interfaces/user/customer.interface";
-import {IManagerInput} from "../interfaces/user/manager.interface";
-import {IAdminInput} from "../interfaces/user/admin.interface";
+import { ISellerInput } from "../interfaces/user/seller.interface";
+import { IRes } from "../types/axiosRes.type";
+import { axiosService } from "./axios.service";
 
 const _accessTokenKey: string = 'access_token'
 const _refreshTokenKey: string = 'refresh_token'
@@ -42,32 +39,6 @@ const authService = {
     registerUserAuth: (info: ISellerInput) => axiosService.post(urls.auth.registerUserAuth(), info, {
         headers: {
             "Content-Type": "multipart/form-data",
-        }
-    }),
-    registerCustomer: (info: ICustomerInput) => axiosService.post(urls.auth.registerCustomer(), info, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-        }
-    }),
-    registerManager: (info: IManagerInput, code: string) => axiosService.post(urls.auth.registerManager(), info, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            "Register-key": code
-        }
-    }),
-
-    registerAdmin: (info: IAdminInput, code: string) => axiosService.post(urls.auth.registerAdmin(), info, {
-        headers: {
-            "Content-Type": "multipart/form-data",
-            "Register-key": code
-        }
-    }),
-
-    activateCustomer: (codeInterface: IActivationCode) => axiosService.post(urls.auth.activateCustomer(), {
-        code: codeInterface.code
-    }, {
-        headers: {
-            "Content-Type": "multipart/form-data"
         }
     }),
 
@@ -116,7 +87,7 @@ const authService = {
         }
     }),
 
-    setTokens: ({accessToken, refreshToken}: IAuthResponse) => {
+    setTokens: ({ accessToken, refreshToken }: IAuthResponse) => {
         localStorage.setItem(_accessTokenKey, accessToken);
         localStorage.setItem(_refreshTokenKey, refreshToken);
     },
@@ -137,4 +108,5 @@ const authService = {
 
 export {
     authService
-}
+};
+

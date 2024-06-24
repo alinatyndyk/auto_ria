@@ -1,12 +1,7 @@
-import { IError } from "../../interfaces";
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import { ISellerResponse, IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
-import { sellerService } from "../../services/seller.service";
-import { ICustomerResponse } from "../../interfaces/user/customer.interface";
-import { IAdminResponse } from "../../interfaces/user/admin.interface";
-import { IManagerResponse } from "../../interfaces/user/manager.interface";
 import { IMessage } from "../../components/cars";
+import { IError } from "../../interfaces";
 import {
     IChatResponse,
     IChatsPageResponse,
@@ -14,13 +9,16 @@ import {
     IMessagePageResponse
 } from "../../interfaces/chat/message.interface";
 import { IGeoCitiesResponse, IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
+import { IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
+import { sellerService } from "../../services/seller.service";
 
 interface IState {
-    userAuthotization: IUserResponse | ISellerResponse | ICustomerResponse | null,
+    userAuthotization: IUserResponse | null,
     errors: IError | null,
     errorGetById: IError | null;
     errorDeleteById: IError | null;
+    errorUpdateById: IError | null;
     trigger: boolean,
     messages: IMessage[],
     chats: IChatResponse[],
@@ -28,9 +26,7 @@ interface IState {
     cities: IGeoCity[],
     totalPages: number,
     chatPage: number,
-    user: any | null //todo iuser
-    customer: ICustomerResponse | null,
-    seller: ISellerResponse | null,
+    user: IUserResponse | null,
     totalPagesMessages: number,
     chatPageMessages: number
 }
@@ -40,6 +36,7 @@ const initialState: IState = {
     errors: null,
     errorGetById: null,
     errorDeleteById: null,
+    errorUpdateById: null,
     trigger: false,
     messages: [],
     chats: [],
@@ -49,12 +46,10 @@ const initialState: IState = {
     totalPages: 0,
     chatPageMessages: 0,
     totalPagesMessages: 0,
-    customer: null,
-    seller: null,
     user: null
 }
 
-const getById = createAsyncThunk<ISellerResponse, number>(
+const getById = createAsyncThunk<IUserResponse, number>(
     'sellerSlice/getById',
     async (id: number, { rejectWithValue }) => {
         try {
@@ -80,38 +75,10 @@ const deleteById = createAsyncThunk<String, number>(
     }
 );
 
-const getCustomerById = createAsyncThunk<ICustomerResponse, number>(
-    'sellerSlice/getCustomerById',
-    async (id: number, { rejectWithValue }) => {
-        try {
-            const { data } = await sellerService.getCustomerById(id);
-            return data;
-        } catch (e) {
-            const err = e as AxiosError;
-            return rejectWithValue(err.response?.data);
-        }
-    }
-);
-
-const getSellerById = createAsyncThunk<ISellerResponse, number>(
-    'sellerSlice/getSellerById',
-    async (id: number, { rejectWithValue }) => {
-        try {
-            const { data } = await sellerService.getSellerById(id);
-            return data;
-        } catch (e) {
-            const err = e as AxiosError;
-            return rejectWithValue(err.response?.data);
-        }
-    }
-);
-
 const updateById = createAsyncThunk<IUserResponse, IUserUpdateRequestWithId>(
     'sellerSlice/updateById',
     async ({ id, body }, { rejectWithValue }) => {
         try {
-            console.log(id, JSON.stringify(body), "update user slice info")
-            console.log(body, "BODY//////////////////////////////")
             const { data } = await sellerService.updateById(id, body);
             return data;
         } catch (e) {
@@ -121,18 +88,16 @@ const updateById = createAsyncThunk<IUserResponse, IUserUpdateRequestWithId>(
     }
 );
 
-const getByToken = createAsyncThunk<ISellerResponse | ICustomerResponse | IUserResponse, void>(
+const getByToken = createAsyncThunk<IUserResponse, void>(
     'sellerSlice/getByToken',
     async (_, { rejectWithValue }) => {
         try {
 
             const token = authService.getAccessToken();
-            console.log("TOKEN SLICE" + token);
             if (token === null) {
                 throw new Error("no token");
             }
             const { data } = await sellerService.getByToken(token);
-            console.log(JSON.stringify(data) + " data");
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -202,12 +167,6 @@ const slice = createSlice({
             .addCase(getById.fulfilled, (state, action) => {
                 state.user = action.payload;
             })
-            .addCase(getCustomerById.fulfilled, (state, action) => {
-                state.customer = action.payload;
-            })
-            .addCase(getSellerById.fulfilled, (state, action) => {
-                state.seller = action.payload;
-            })
             .addCase(getRegionsByPrefix.fulfilled, (state, action) => {
                 state.regions = action.payload;
             })
@@ -226,18 +185,27 @@ const slice = createSlice({
             })
             .addCase(getByToken.fulfilled, (state, action) => {
                 state.user = action.payload;
-                state.userAuthotization =  action.payload;
+                state.userAuthotization = action.payload;
                 state.trigger = !state.trigger;
             })
             .addCase(deleteById.fulfilled, () => {
                 localStorage.clear();
             })
-            .addCase(deleteById.rejected, (state, action) => {
-                state.errorDeleteById = action.payload as IError;
-            })
+            // .addMatcher(isRejectedWithValue(), (state, action) => {
+            //     state.errors = action.payload as IError;
+            // })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                state.errors = action.payload as IError;
+                if (action.type === "authSlice/getById/rejected") {
+                    state.errorGetById = action.payload as IError;
+                } else if (action.type === "authSlice/updateById/rejected") {
+                    state.errorUpdateById = action.payload as IError;
+                } else if (action.type === "authSlice/deleteById/rejected") {
+                    state.errorDeleteById = action.payload as IError;
+                } else {
+                    state.errors = action.payload as IError;
+                }
             })
+
 });
 
 
@@ -246,8 +214,6 @@ const { actions, reducer: sellerReducer } = slice;
 const sellerActions = {
     ...actions,
     getById,
-    getCustomerById,
-    getSellerById,
     getByToken,
     getChatMessages,
     getChatsByUserToken,
@@ -260,4 +226,5 @@ const sellerActions = {
 export {
     sellerActions,
     sellerReducer
-}
+};
+

@@ -7,8 +7,7 @@ const geoURL = 'http://geodb-free-service.wirefreethought.com/v1/geo/countries/U
 const cars = 'cars';
 const brands = 'brands';
 const auth = 'auth';
-const sellers = 'sellers';
-const customers = 'customers';
+const sellers = 'users';
 const common = 'common';
 const chats = 'chats';
 const regions = 'regions';
@@ -20,6 +19,7 @@ const urls = {
         allBrands: (): string => `${cars}/${brands}`,
         allModelsByBrand: (brand: string): string => `${cars}/${brands}/${brand}/models`,
         byId: (id: number): string => `${cars}/${id}`,
+        byMiddleId: (id: number): string => `${cars}/middle/${id}`,
         deleteById: (id: number): string => `${cars}/${id}`,
         banById: (id: number): string => `${cars}/ban/${id}`,
         unbanById: (id: number): string => `${cars}/activate/${id}`,
@@ -33,12 +33,8 @@ const urls = {
 
         registerSeller: (): string => `/api/v1/${auth}/register-user`,
         registerUserAuth: (): string => `/api/v1/${auth}/register-user/with-authority`,
-        registerCustomer: (): string => `/api/v1/${auth}/register-customer`,
-        registerManager: (): string => `/api/v1/${auth}/register-manager`,
-        registerAdmin: (): string => `/api/v1/${auth}/register-admin`,
 
-        activateCustomer: (): string => `/api/v1/${auth}/activate-customer-account`,
-        activateSeller: (): string => `/api/v1/${auth}/activate-seller-account`,
+        activateSeller: (): string => `/api/v1/${auth}/activate-user`,
 
         generateManager: (): string => `/api/v1/${auth}/code-manager`,
         generateAdmin: (): string => `/api/v1/${auth}/code-admin`,
@@ -58,13 +54,6 @@ const urls = {
     sellers: {
         sellers,
         all: (page: number): string => `${sellers}/page/${page}`,
-        getById: (id: number): string => `${sellers}/${id}`,
-    },
-
-    customers: {
-        customers,
-        all: (page: number): string => `${customers}/page/${page}`,
-        getById: (id: number): string => `${customers}/${id}`,
     },
 
     chats: {
@@ -88,7 +77,6 @@ export {
     cars,
     auth,
     sellers,
-    customers,
     chats,
     regions,
     urls

@@ -102,7 +102,6 @@ public class CarController {
             }
 
             carQueryParams.setActivated(true);
-            System.out.println(carsService.getAll(page, carQueryParams));
             return carsService.getAll(page, carQueryParams);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
@@ -293,7 +292,7 @@ public class CarController {
                 if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("USER"))
                         && !carsService.findAllByUser(user).isEmpty()) {
-                    carsService.isPremium(request);
+                            carsService.isPremium(request);
                 }
             } else {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);

@@ -17,7 +17,6 @@ const FindCarById: FC = () => {
     const find: SubmitHandler<IFindCarById> = async (body: IFindCarById) => {
 
         await dispatch(carActions.getById(body.id));
-        console.log(JSON.stringify(errorGetById) + "error by id");
         if (errorGetById === null) {
             navigate(`/cars/${body.id}`);
         }

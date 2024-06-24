@@ -32,9 +32,8 @@ const Cars: FC<IProps> = ({ sellerId }) => {
 
         searchParams.set('page', getPage.toString());
         setSearchParams(searchParams);
-        console.log(sellerId + "sellerId");
+        
         if (sellerId != null) {
-            console.log(sellerId + "sellerId not null");
             dispatch(carActions.getBySeller({ page: getPage, id: sellerId })).then(() => {
             });
         } else {
@@ -67,7 +66,7 @@ const Cars: FC<IProps> = ({ sellerId }) => {
     return (
         <div>
             Cars
-            {pagesInTotal == 0 && <div style={{ color: "blue" }}>There are no cars to view</div>}
+            {pagesInTotal === 0 && <div style={{ color: "blue" }}>There are no cars to view</div>}
             {cars.map(car => <Car key={car.id} car={car} />)}
             <div style={{ display: 'flex' }}>
                 <button disabled={getButtons} onClick={() => prevPage()}>prev</button>

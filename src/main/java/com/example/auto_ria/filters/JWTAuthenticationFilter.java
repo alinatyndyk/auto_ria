@@ -40,19 +40,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response,
             @NotNull FilterChain filterChain) throws IOException {
         try {
-            System.out.println("IN BACHEND**************************");
             String authorizationHeader = request.getHeader("Authorization");
             String authorizationParam = request.getParameter("auth");
-
-            Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                String headerName = headerNames.nextElement();
-                System.out.println("Header Name: " + headerName);
-                System.out.println("Header Value: " + request.getHeader(headerName));
-            }
-
-            System.out.println(authorizationHeader);
-            System.out.println(authorizationParam);
 
             if (authorizationHeader == null && authorizationParam == null) {
                 filterChain.doFilter(request, response);
@@ -64,8 +53,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            System.out.println("afte filter chain");
-
             String jwt;
 
             if (authorizationHeader != null) {
@@ -75,7 +62,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String userEmail = jwtService.extractUsername(jwt);
-            System.out.println(userEmail + "user email");
 
             if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
@@ -83,35 +69,26 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
                     if (!isInDbAndActivated(userDetails, jwt)) {
                         throw new IllegalAccessException("Token invalid");
                     }
-                    System.out.println(78);
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities());
 
-                    System.out.println(authenticationToken + "auth token");
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    System.out.println(authenticationToken + "auth token2");
 
                     SecurityContextHolder
                             .getContext()
                             .setAuthentication(authenticationToken);
-                    System.out.println(authenticationToken + "auth token3");
                 }
             }
-            System.out.println("94");
-            System.out.println(request);
 
             filterChain.doFilter(request, response);
         } catch (ExpiredJwtException e) {
-            System.out.println(e.getMessage() + "ExpiredJwtException");
             response.sendError(423);
         } catch (IllegalAccessException e) {
-            System.out.println(e.getMessage() + "IllegalAccessException");
             response.getWriter().write("Jwt invalid");
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
         } catch (Exception e) {
-            System.out.println(e.getMessage() + "Exception");
             response.getWriter().write(e.getMessage());
             response.setStatus(HttpStatus.EXPECTATION_FAILED.value());
         }

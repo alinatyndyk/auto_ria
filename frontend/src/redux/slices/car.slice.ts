@@ -1,4 +1,4 @@
-import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IUpdateCarRequest } from "../../interfaces";
+import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IMiddleCarValues, IUpdateCarRequest } from "../../interfaces";
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { carService } from "../../services";
 import { AxiosError } from "axios";
@@ -13,7 +13,15 @@ interface IState {
     pageCurrent: number,
     pagesInTotal: number,
     carForUpdate: CarsResponse | null,
+    errorGetAll: IError | null
     errorGetById: IError | null
+    errorDeleteById: IError | null
+    errorBanById: IError | null
+    errorUnbanById: IError | null
+    errorCreate: IError | null
+    errorUpdateById: IError | null
+    errorGetMiddle: IError | null
+    middleValue: IMiddleCarValues | null
 }
 
 const initialState: IState = {
@@ -26,7 +34,15 @@ const initialState: IState = {
     trigger: false,
     pageCurrent: 0,
     pagesInTotal: 0,
-    errorGetById: null
+    errorGetById: null,
+    errorGetAll: null,
+    errorDeleteById: null,
+    errorBanById: null,
+    errorUnbanById: null,
+    errorCreate: null,
+    errorUpdateById: null,
+    errorGetMiddle: null,
+    middleValue: null,
 }
 
 const getAll = createAsyncThunk<ICarResponse, number>(
@@ -47,6 +63,19 @@ const getById = createAsyncThunk<CarsResponse, number>(
     async (carId: number, { rejectWithValue }) => {
         try {
             const { data } = await carService.getById(carId);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getMiddleById = createAsyncThunk<IMiddleCarValues, number>(
+    'carSlice/getMiddleById',
+    async (carId: number, { rejectWithValue }) => {
+        try {
+            const { data } = await carService.getMiddleById(carId);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -180,23 +209,41 @@ const slice = createSlice({
                 window.location.href = "http://localhost:3000/profile";
             })
             .addCase(getAllBrands.fulfilled, (state, action) => {
-                console.log(action.payload)
                 state.brands = action.payload;
             })
             .addCase(getAllModelsByBrand.fulfilled, (state, action) => {
                 state.models = action.payload;
+            })
+            .addCase(getMiddleById.fulfilled, (state, action) => {
+                state.middleValue = action.payload;
             })
             .addCase(getBySeller.fulfilled, (state, action) => {
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
             })
-            // .addCase(update.fulfilled, () => {
-            //     window.location.reload();
-            // })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                if (action.type.startsWith("carSlice"))
+                if (action.type === "carSlice/getAll/rejected") {
+                    state.errorGetById = action.payload as IError;
+                } else if (action.type === "carSlice/getAll/rejected") {
+                    state.errorGetAll = action.payload as IError;
+                } else if (action.type === "carSlice/getById/rejected") {
+                    state.errorGetById = action.payload as IError;
+                } else if (action.type === "carSlice/deleteById/rejected") {
+                    state.errorDeleteById = action.payload as IError;
+                } else if (action.type === "carSlice/banById/rejected") {
+                    state.errorBanById = action.payload as IError;
+                } else if (action.type === "carSlice/unbanById/rejected") {
+                    state.errorUnbanById = action.payload as IError;
+                } else if (action.type === "carSlice/create/rejected") {
+                    state.errorCreate = action.payload as IError;
+                } else if (action.type === "carSlice/updateById/rejected") {
+                    state.errorUpdateById = action.payload as IError;
+                } else if (action.type === "carSlice/getMiddleById/rejected") {
+                    state.errorGetMiddle = action.payload as IError;
+                } else {
                     state.carErrors = action.payload as IError;
+                }
             })
 });
 
@@ -214,7 +261,8 @@ const carActions = {
     getAllModelsByBrand,
     getBySeller,
     create,
-    update
+    update,
+    getMiddleById,
 }
 
 export {

@@ -1,11 +1,11 @@
-import React, { FC, useState } from 'react';
 import axios from "axios";
+import { FC, useState } from 'react';
 import Stripe from "react-stripe-checkout";
-import { ISellerResponse } from "../../interfaces/user/seller.interface";
+import { IUserResponse } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
 
 interface IProps {
-    seller: ISellerResponse
+    seller: IUserResponse
 }
 
 const StripeCheckout: FC<IProps> = ({ seller }) => {
@@ -67,7 +67,6 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 
     const handleIsAutoPayWithSource = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
-            console.log("P")
             setAutoPay(true);
             setUseDefaultCard(true);
         } else {
@@ -86,7 +85,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
     const handleSetAsDefaultCard = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
             setAsDefaultCard(true);
-        } else if (autoPay && !seller.paymentSourcePresent) {
+        } else if (autoPay && !seller.isPaymentSourcePresent) {
             setAsDefaultCard(true);
         } else {
             setAsDefaultCard(false);
@@ -98,7 +97,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 
     let paymentComponent;
 
-    if (seller.paymentSourcePresent) {
+    if (seller.isPaymentSourcePresent) {
         paymentComponent = <div style={{ display: 'flex' }}>
             <label>{JSON.stringify(getErrors)}</label>
             <label>
@@ -131,7 +130,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                 }} onClick={() => payNow('')}>pay with default card</button>
             }
         </div>
-    } else if (!seller.paymentSourcePresent) {
+    } else if (!seller.isPaymentSourcePresent) {
         paymentComponent = <div>
             <div style={{ display: 'flex' }}>
                 <label>{JSON.stringify(getErrors)}</label>
@@ -191,3 +190,4 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 };
 
 export { StripeCheckout };
+

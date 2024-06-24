@@ -26,7 +26,7 @@ const Chat: FC = () => {
 
     const {receiverId} = useParams<{ receiverId: string }>();
 
-    if (receiverId == undefined) {
+    if (receiverId === undefined) {
         throw new Error("define a receiver")
     }
 
@@ -51,7 +51,6 @@ const Chat: FC = () => {
 
         if (outletContext.senderId != undefined) {
             const secret = securityService.encryptObject(outletContext);
-            console.log(secret, "secret")
             localStorage.setItem('chat-info-outlet', securityService.encryptObject(outletContext));
         }
 
@@ -64,10 +63,10 @@ const Chat: FC = () => {
         } else {
             throw new Error("Chat info absent");
         }
-        if (outletParse.senderRole == ERole.CUSTOMER) {
+        if (outletParse.senderRole === ERole.CUSTOMER) {
             customerId = outletParse.senderId;
             sellerId = receiverId;
-        } else if (outletParse.senderRole == ERole.USER) {
+        } else if (outletParse.senderRole === ERole.USER) {
             sellerId = outletParse.senderId;
             customerId = receiverId;
         } else {
@@ -75,7 +74,6 @@ const Chat: FC = () => {
         }
 
         if (sellerId && customerId) {
-            console.log(sellerId, customerId, "ids");
             dispatch(sellerActions.getChatMessages({
                 page: chatPageMessages,
                 sellerId: sellerId,
@@ -122,10 +120,10 @@ const Chat: FC = () => {
 
         if (outlet != null) {
             outletParse = securityService.decryptObject(outlet);
-            if (outletParse.senderRole == ERole.CUSTOMER) {
+            if (outletParse.senderRole === ERole.CUSTOMER) {
                 customerId = outletParse.senderId;
                 sellerId = receiverId;
-            } else if (outletParse.senderRole == ERole.USER) {
+            } else if (outletParse.senderRole === ERole.USER) {
                 sellerId = outletParse.senderId;
                 customerId = receiverId;
             } else {
@@ -134,13 +132,12 @@ const Chat: FC = () => {
         }
 
         if (sellerId && customerId) {
-            console.log(sellerId, customerId, "xxx");
             dispatch(sellerActions.getChatMessages({page: page, sellerId: sellerId, customerId: customerId}));
         }
     }
 
     useEffect(() => {
-        if (getChatMessages.length > 0 && messages.length == 0) {
+        if (getChatMessages.length > 0 && messages.length === 0) {
             setMoreBtn(true);
         } else {
 

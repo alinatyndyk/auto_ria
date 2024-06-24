@@ -220,7 +220,6 @@ public class JwtService {
 
     public boolean isKeyValid(String jwt, String email, ETokenRole role) {
         String username = extractUsername(jwt, role);
-        System.out.println(username + "user name");
         return (username.equals(email) && !isTokenExprired(jwt));
     }
 

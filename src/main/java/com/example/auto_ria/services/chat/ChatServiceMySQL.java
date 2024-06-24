@@ -130,7 +130,6 @@ public class ChatServiceMySQL {
     // List<Integer> list = new ArrayList<>();
     // list.add(user1Id);
     // list.add(user2Id);
-    // System.out.println(list + "list ***************");
 
     // return chatDaoSQL.findByUsers(list, Long.valueOf(list.size()));
     // }

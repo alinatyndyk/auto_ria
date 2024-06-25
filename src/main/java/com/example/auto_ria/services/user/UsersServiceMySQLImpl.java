@@ -78,8 +78,6 @@ public class UsersServiceMySQLImpl {
     }
 
     public UserSQL getById(int id) {
-        System.out.println(userDaoSQL.findById(id) + "find by id");
-        System.out.println(userDaoSQL.findById(id).isEmpty() + "find by id");
         if (userDaoSQL.findById(id).isEmpty()) {
             throw new CustomException("User doesnt exist", HttpStatus.BAD_REQUEST);
         }

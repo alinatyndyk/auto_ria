@@ -57,7 +57,6 @@ public class AuthenticationService {
         if (authSQL == null) {
             throw new CustomException("Invalid access token", HttpStatus.BAD_REQUEST);
         }
-        System.out.println(authSQL + "authSQL*******************");
         return commonService.createUserResponse(usersServiceMySQL.getById(authSQL.getPersonId()));
 
     }
@@ -311,7 +310,6 @@ public class AuthenticationService {
             mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             throw new CustomException("Forgot password error" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }

@@ -3,9 +3,11 @@ package com.example.auto_ria.configurations.socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -161,12 +163,13 @@ public class WebSocketConnection extends TextWebSocketHandler {
             if (chat == null) {
                 List<Integer> userList = new ArrayList<>();
                 userList.add(authSQL.getPersonId());
+
                 userList.add(Integer.parseInt(receiverId));
                 Chat chatNew = Chat.builder().users(userList)
-                        .sessions(sessionList)
-                        .users(userList)
-                        .roomKey(roomKey)
-                        .build();
+                .sessions(sessionList)
+                .users(userList)
+                .roomKey(roomKey)
+                .build();
 
                 chatDaoSQL.save(chatNew);
                 chat = chatNew;

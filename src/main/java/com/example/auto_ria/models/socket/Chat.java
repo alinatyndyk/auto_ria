@@ -12,7 +12,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -29,14 +31,7 @@ public class Chat {
     @JoinTable(name = "chat_message", joinColumns = @JoinColumn(name = "chat_id"), inverseJoinColumns = @JoinColumn(name = "message_id"))
     private List<MessageClass> messages = new ArrayList<>();
 
-
-    // private int user1Id;
-    // private int user2Id;
-
     private List<Integer> users = new ArrayList<>();
-
-    // private String user1SessionId;
-    // private String user2SessionId;
 
     private List<String> sessions = new ArrayList<>();
 

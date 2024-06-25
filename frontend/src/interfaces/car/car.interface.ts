@@ -80,7 +80,7 @@ export interface ICarResponse {
 
 export interface CarsResponse {
     id: number;
-    brand: string; //todo enums
+    brand: string;
     model: string;
     powerH: number;
     city: string;

@@ -134,7 +134,6 @@ const slice = createSlice({
                 state.cities = action.payload.data;
             })
             .addCase(getByToken.fulfilled, (state, action) => {
-                console.log(action.payload + "action payload 188");
                 state.user = action.payload;
                 state.userAuthotization = action.payload;
                 state.trigger = !state.trigger;
@@ -149,9 +148,7 @@ const slice = createSlice({
                     state.errorUpdateById = action.payload as IError;
                 } else if (action.type === "sellerSlice/deletedById/rejected") {
                     state.errorDeleteById = action.payload as IError;
-                } else if (action.type === "sellerSlice/getByToken/rejected") {
-                    console.log(JSON.stringify(action.payload) + "action payload 204");
-                } else {
+                }  else {
                     state.errors = action.payload as IError;
                 }
             })

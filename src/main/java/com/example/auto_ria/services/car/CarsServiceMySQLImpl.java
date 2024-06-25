@@ -278,7 +278,6 @@ public class CarsServiceMySQLImpl {
     }
 
     public ResponseEntity<CarResponse> post(@Valid CarDTO carDTO, UserSQL user) {
-        System.out.println("in service***********************");
         try {
             CarSQL car = CarSQL.builder()
                     .brand(carDTO.getBrand())
@@ -296,8 +295,7 @@ public class CarsServiceMySQLImpl {
             car.setUser(user);
 
             CarSQL carSQL = carDAO.save(car);
-            System.out.println(user + "user************************");
-            System.out.println(carSQL + "carssql************************");
+
 
             return new ResponseEntity<>(formCarResponse(carSQL), HttpStatus.ACCEPTED);
         } catch (Exception e) {

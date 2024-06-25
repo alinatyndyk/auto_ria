@@ -423,7 +423,6 @@ public class CarController {
                 }
             }
 
-            System.out.println("///////////////////// to service");
             return carsService.update(id, partialCar);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

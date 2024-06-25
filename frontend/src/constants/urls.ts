@@ -58,7 +58,7 @@ const urls = {
     geo: {
         regions,
         getRegionsByPrefix: (prefix: string): string => `${regions}?limit=10&offset=0&namePrefix=${prefix}`,
-        getRegionsPlaces: (regionId: string): string => `${regions}/${regionId}/places?limit=10&offset=0`, //todo all pages
+        getRegionsPlaces: (regionId: string): string => `${regions}/${regionId}/places?limit=10&offset=0`,
 
     }
 };

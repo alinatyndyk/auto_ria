@@ -1,15 +1,15 @@
 package com.example.auto_ria.services.chat;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.auto_ria.dao.socket.ChatDaoSQL;
@@ -18,10 +18,7 @@ import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.socket.Chat;
 import com.example.auto_ria.models.socket.MessageClass;
-import com.example.auto_ria.models.user.UserSQL;
-import com.example.auto_ria.services.CommonService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 @Service
@@ -30,13 +27,10 @@ public class ChatServiceMySQL {
 
     private ChatDaoSQL chatDaoSQL;
     private MessageDaoSQL messageDaoSQL;
-
-    private CommonService commonService;
     private UserDaoSQL userDaoSQL;
 
     public String createChatRoom(int user1Id, int user2Id, String user1SessionId, String user2SessionId) {
         try {
-
             if (userDaoSQL.findById(user1Id).isEmpty() || userDaoSQL.findById(user2Id).isEmpty()) {
                 throw new CustomException("Receiver doesnt exist", HttpStatus.BAD_REQUEST);
             }
@@ -48,8 +42,8 @@ public class ChatServiceMySQL {
             userList.add(user2Id);
 
             List<String> sessionList = new ArrayList<>();
-            sessionList.add(user1SessionId); // второго пока еще нет
-            sessionList.add(user2SessionId); // второго пока еще нет
+            sessionList.add(user1SessionId);
+            sessionList.add(user2SessionId);
 
             chatDaoSQL.save(Chat.builder()
                     .sessions(sessionList)
@@ -80,6 +74,19 @@ public class ChatServiceMySQL {
         return messageDaoSQL.getByChatId(chatId, pageable);
     }
 
+    public MessageClass getMessageById(int id) {
+        return messageDaoSQL.getById(id);
+    }
+
+    public Page<Chat> findChatsByUserId(int userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Chat> chatPage = chatDaoSQL.findAll(pageable);
+        List<Chat> filteredChats = chatPage.getContent().stream()
+                .filter(chat -> chat.getUsers().contains(userId))
+                .toList();
+        return new PageImpl<>(filteredChats, pageable, chatPage.getTotalElements());
+    }
+
     public Chat save(Chat chat) {
         return chatDaoSQL.save(chat);
     }
@@ -91,47 +98,19 @@ public class ChatServiceMySQL {
         return messageClass;
     }
 
-    public MessageClass hasAccessToMessage(int id, HttpServletRequest request) {
-
-        if (messageDaoSQL.findById(id).isEmpty()) {
-            throw new CustomException("Couldn't find message", HttpStatus.BAD_REQUEST);
-        }
-        MessageClass messageClass = messageDaoSQL.findById(id).get();
-
-        UserSQL userSQL = commonService.extractUserFromHeader(request);
-
-        if (Integer.parseInt(messageClass.getSenderId()) != userSQL.getId()) {
-            throw new CustomException("Cannot edit foreign message", HttpStatus.UNAUTHORIZED);
-        }
-
-        return messageClass;
+    public ResponseEntity<String> deleteMessage(int id) {
+        messageDaoSQL.deleteById(id);
+        return ResponseEntity.ok("deleted");
     }
 
-    public Page<Chat> getChatsByUserId(int id, int page) {
-        Pageable pageable = PageRequest.of(page, 2, Sort.by("updatedAt").descending());
-        // if (receiverRole.equals(ERole.CUSTOMER)) {
-        // return chatDaoSQL.getByCustomerId(id, pageable);
-        // } else {
-        return chatDaoSQL.findAllChatsByUserId(id, pageable);
-        // }
+    public ResponseEntity<String> seen(MessageClass messageClass) {
+        messageClass.setIsSeen(true);
+        messageDaoSQL.save(messageClass);
+        return ResponseEntity.ok("seen");
     }
-
-    // public Chat getChatByUserIdFilterReciever(int id, int receiver) {
-
-    // return chatDaoSQL.findByUsers(id, receiver);
-
-    // }
 
     public Chat getByRoomKey(String roomKey) {
         return chatDaoSQL.getByRoomKey(roomKey);
     }
-
-    // public Chat getByUsers(int user1Id, int user2Id) {
-    // List<Integer> list = new ArrayList<>();
-    // list.add(user1Id);
-    // list.add(user2Id);
-
-    // return chatDaoSQL.findByUsers(list, Long.valueOf(list.size()));
-    // }
 
 }

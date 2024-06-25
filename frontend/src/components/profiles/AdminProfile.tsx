@@ -48,3 +48,4 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
 };
 
 export { AdminProfile };
+

@@ -1,4 +1,4 @@
-import { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Outlet } from "react-router";
 import { Link } from "react-router-dom";
 import { ERole } from "../constants/role.enum";
@@ -10,31 +10,40 @@ import { securityService } from '../services/security.service';
 const MainLayout: FC = () => {
 
     let authNavigationComponent;
+    const navigate = useAppNavigate();
     const dispatch = useAppDispatch();
     const storedAuth = localStorage.getItem('isAuth');
     const AuthObj = localStorage.getItem('authorization');
 
     const { errorDeleteById } = useAppSelector(state => state.sellerReducer);
 
-    const [getDeleteResponse, setDeleteResponse] = useState('');
-
     const deleteAccount = async () => {
-        if (AuthObj !== null) {
+        if (AuthObj !== null && storedAuth === "true") {
             const decryptedAuth = securityService.decryptObject(AuthObj);
 
             if (decryptedAuth?.id) {
                 const id: number = decryptedAuth.id;
-                await dispatch(sellerActions.deleteById(id));
-                if (errorDeleteById?.message) {
-                    setDeleteResponse(errorDeleteById.message);
-                } 
-                // else {
-                //     localStorage.clear();
-                //     navigate("/cars");
-                // }
+                const { type } = await dispatch(sellerActions.deleteById(id));
+                if (type === "fulfilled") {
+                    navigate("/cars");
+                }
             }
         }
     };
+
+    const [showResponse, setShowResponse] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (errorDeleteById != null) {
+            setShowResponse(true);
+            const timer = setTimeout(() => {
+                setShowResponse(false);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+
+        }
+    }, [errorDeleteById]);
 
 
     if (storedAuth === "true") {
@@ -43,7 +52,13 @@ const MainLayout: FC = () => {
                 <button onClick={() => navigate("/profile")}>Profile</button>
                 <LogOutForm />
                 <button onClick={() => deleteAccount()}>Delete my account</button>
-                <div>{getDeleteResponse && <div style={{ fontSize: "7px", color: "red" }}>{getDeleteResponse}</div>}</div>
+                <div>
+                {errorDeleteById && showResponse ? (
+                    <div style={{
+                        color: "darkred"
+                    }}>{errorDeleteById?.message}</div>
+                ) : null}
+            </div>
             </div>
         );
     } else {
@@ -63,7 +78,6 @@ const MainLayout: FC = () => {
         </div>
     }
 
-    const navigate = useAppNavigate();
     return (
         <div>
             <div style={{ display: 'flex', backgroundColor: "whitesmoke", justifyContent: "space-between" }}>
@@ -77,3 +91,4 @@ const MainLayout: FC = () => {
 };
 
 export { MainLayout };
+

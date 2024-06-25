@@ -1,8 +1,8 @@
-import React, { FC, useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from "../../hooks";
-import { Car } from "./Car";
-import { carActions } from "../../redux/slices";
+import { FC, useEffect, useState } from 'react';
 import { useSearchParams } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import { carActions } from "../../redux/slices";
+import { Car } from "./Car";
 
 interface IProps {
     sellerId: number | null
@@ -13,7 +13,6 @@ export interface IMessage {
     content: string,
     senderId: number,
     receiverId: number,
-    chatId: number,
     isEdited: boolean | null,
     updatedAt: number[],
     createdAt: number[]

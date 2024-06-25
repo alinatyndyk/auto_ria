@@ -1,7 +1,5 @@
 package com.example.auto_ria.controllers;
 
-import static org.mockito.Mockito.description;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +32,7 @@ import com.example.auto_ria.currency_converter.ExchangeRateCache;
 import com.example.auto_ria.dto.CarDTO;
 import com.example.auto_ria.dto.requests.CarDTORequest;
 import com.example.auto_ria.dto.updateDTO.CarUpdateDTO;
+import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.EBrand;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.EModel;
@@ -169,8 +168,7 @@ public class CarController {
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))
-                        && userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("MANAGER"))) {
+                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
                     carsService.isPremium(request);
                 }
             } else {
@@ -266,7 +264,7 @@ public class CarController {
             @ModelAttribute @Valid CarDTORequest carDTO,
             HttpServletRequest request) {
         try {
-            UserSQL user = commonService.extractUserFromHeader(request);
+            UserSQL user;
 
             citiesService.isValidUkrainianCity(carDTO.getRegion(), carDTO.getCity());
 
@@ -288,16 +286,18 @@ public class CarController {
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+                user = usersServiceMySQL.getByEmail(userDetails.getUsername());
                 if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("USER"))
                         && !carsService.findAllByUser(user).isEmpty()) {
-                            carsService.isPremium(request);
+
+                    if (user.getAccountType().equals(EAccountType.BASIC)) {
+                        throw new CustomException("Premium plan required", HttpStatus.PAYMENT_REQUIRED);
+                    }
                 }
             } else {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
-
             String filteredText = profanityFilterService.containsProfanity(carDTO.getDescription());
 
             if (profanityFilterService.containsProfanityBoolean(filteredText, carDTO.getDescription())) {
@@ -361,9 +361,21 @@ public class CarController {
         try {
             CarSQL carSQL = carsService.extractById(id);
 
-            UserSQL userSQL = commonService.extractUserFromHeader(request);
+            UserSQL userSQL;
 
-            carsService.checkCredentials(request, id);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                userSQL = usersServiceMySQL.getByEmail(userDetails.getUsername());
+                if (userDetails.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("USER"))
+                        && !carsService.findAllByUser(userSQL).isEmpty()) {
+                    carsService.isPremium(request);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
+            }
 
             if (partialCar.getCity() != null || partialCar.getRegion() != null) {
                 citiesService.isValidUkrainianCity(partialCar.getRegion(), partialCar.getCity());
@@ -411,6 +423,7 @@ public class CarController {
                 }
             }
 
+            System.out.println("///////////////////// to service");
             return carsService.update(id, partialCar);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

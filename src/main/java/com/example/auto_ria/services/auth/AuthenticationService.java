@@ -57,6 +57,7 @@ public class AuthenticationService {
         if (authSQL == null) {
             throw new CustomException("Invalid access token", HttpStatus.BAD_REQUEST);
         }
+        System.out.println(authSQL + "authSQL*******************");
         return commonService.createUserResponse(usersServiceMySQL.getById(authSQL.getPersonId()));
 
     }
@@ -310,13 +311,13 @@ public class AuthenticationService {
             mailer.sendEmail(email, EMail.FORGOT_PASSWORD, args);
 
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             throw new CustomException("Forgot password error" + e.getMessage(), HttpStatus.EXPECTATION_FAILED);
         }
     }
 
     public AuthenticationResponse resetPassword(String email, String encoded) {
         AuthenticationResponse authenticationResponse;
-
         try {
 
             UserSQL userSQL = usersServiceMySQL.getByEmail(email);
@@ -324,22 +325,28 @@ public class AuthenticationService {
             userDaoSQL.save(userSQL);
             userAuthDaoSQL.deleteAllByPersonId(userSQL.getId());
 
-            AuthenticationResponse authentication = jwtService.generateUserTokenPair(userSQL);
+            if (userSQL.getRoles().contains(ERole.USER)) {
+                authenticationResponse = jwtService.generateUserTokenPair(userSQL);
+            } else if (userSQL.getRoles().contains(ERole.MANAGER)) {
+                authenticationResponse = jwtService.generateManagerTokenPair(userSQL);
+            } else if (userSQL.getRoles().contains(ERole.ADMIN)) {
+                authenticationResponse = jwtService.generateAdminTokenPair(userSQL);
+            } else {
+                throw new CustomException("Couldnt reset", HttpStatus.FORBIDDEN);
+            }
 
             userAuthDaoSQL.save(AuthSQL.builder().role(ERole.USER)
-                    .accessToken(authentication.getAccessToken())
-                    .refreshToken(authentication.getRefreshToken())
-                    .id(userSQL.getId())
+                    .accessToken(authenticationResponse.getAccessToken())
+                    .refreshToken(authenticationResponse.getRefreshToken())
+                    .personId(userSQL.getId())
                     .build());
-
-            authenticationResponse = authentication;
 
         } catch (CustomException e) {
             throw new CustomException("Failed reset: " + e.getMessage(), e.getStatus());
         } catch (Exception e) {
             throw new CustomException("Failed reset: " + e.getMessage(), HttpStatus.CONFLICT);
         }
-        return authenticationResponse; // from auth info res/ to auth res
+        return authenticationResponse;
     }
 
     public void signOut(String email) {

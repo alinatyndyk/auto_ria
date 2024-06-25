@@ -86,7 +86,7 @@ public class JwtService {
         try {
             claims = Jwts
                     .parserBuilder()
-                    .setSigningKey(getSigningKey(role)) // reset pass new key
+                    .setSigningKey(getSigningKey(role))
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
@@ -165,8 +165,8 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(issuer.name())
-                // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
+                // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))
                 .signWith(getSigningKey(issuer), SignatureAlgorithm.HS256)
                 .compact();
 

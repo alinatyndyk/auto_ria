@@ -7,7 +7,7 @@ import {IForgotPassword} from "../../../interfaces";
 const ForgotPasswordForm: FC = () => {
     const {handleSubmit, register} = useForm<IForgotPassword>();
     const dispatch = useAppDispatch();
-    const {errors} = useAppSelector(state => state.authReducer);
+    const {forgotPasswordErrors} = useAppSelector(state => state.authReducer);
 
     const [getResponse, setResponse] = useState('');
 
@@ -27,7 +27,7 @@ const ForgotPasswordForm: FC = () => {
             flexDirection: "column"
         }}>
             Restore your password here
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            {forgotPasswordErrors ? <div>{forgotPasswordErrors?.message}</div> : <div>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'email'} {...register('email')}/>

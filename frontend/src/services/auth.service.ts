@@ -68,6 +68,10 @@ const authService = {
 
     changePassword: (passInterface: INewPassword) => axiosService.post(urls.auth.changePassword(), {
         newPassword: passInterface.newPassword
+    }, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
     }),
 
     forgotPassword: (forgotInterface: IForgotPassword) => axiosService.post(urls.auth.forgotPassword(), {

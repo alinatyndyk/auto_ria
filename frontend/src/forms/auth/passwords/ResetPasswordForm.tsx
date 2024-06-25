@@ -1,13 +1,13 @@
-import React, {FC, useState} from 'react';
-import {SubmitHandler, useForm} from "react-hook-form";
-import {useAppDispatch, useAppNavigate, useAppSelector} from "../../../hooks";
-import {authActions} from "../../../redux/slices";
-import {IChangePassword} from "../../../interfaces";
+import { FC, useState } from 'react';
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
+import { IChangePassword } from "../../../interfaces";
+import { authActions } from "../../../redux/slices";
 
 const ResetPasswordForm: FC = () => {
-    const {handleSubmit, register} = useForm<IChangePassword>();
+    const { handleSubmit, register } = useForm<IChangePassword>();
     const dispatch = useAppDispatch();
-    const {errors} = useAppSelector(state => state.authReducer);
+    const { resetPasswordErrors } = useAppSelector(state => state.authReducer);
     const navigate = useAppNavigate();
 
     const params = new URLSearchParams(window.location.search);
@@ -23,9 +23,11 @@ const ResetPasswordForm: FC = () => {
             await dispatch(authActions.resetPassword({
                 newPassword: newPassword.newPassword,
                 code: code
-            })).catch((error) => {
-                setResponse(error.toString);
-            });
+            }))
+
+            if (!resetPasswordErrors) {
+                navigate("/profile");
+            }
         }
     }
     return (
@@ -34,15 +36,22 @@ const ResetPasswordForm: FC = () => {
                 <button onClick={() => navigate('/cars')}>Cars</button>
             </div>
             Activate seller
-            {errors ? <div>{errors?.message}</div> : <div>{getResponse}</div>}
+            {resetPasswordErrors ? <div>{resetPasswordErrors?.message}</div> : null}
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
-                    <input type="text" placeholder={'new password'} {...register('newPassword')}/>
+                    <input type="text" placeholder={'new password'} {...register('newPassword')} />
                 </div>
-                <button>reset</button>
+                <button style={{
+                    alignItems: "center",
+                    width: "100px",
+                    height: "30px",
+                    color: "white",
+                    border: "none",
+                    backgroundColor: "green",
+                }}>reset</button>
             </form>
         </div>
     );
 };
 
-export {ResetPasswordForm};
+export { ResetPasswordForm };

@@ -2,6 +2,7 @@ import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IMiddleCarValues,
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { carService } from "../../services";
 import { AxiosError } from "axios";
+import { useAppNavigate } from "../../hooks";
 
 interface IState {
     cars: CarsResponse[],
@@ -204,9 +205,6 @@ const slice = createSlice({
             })
             .addCase(getById.rejected, (state, action) => {
                 state.errorGetById = action.payload as IError;
-            })
-            .addCase(deleteById.fulfilled, () => {
-                window.location.href = "http://localhost:3000/profile";
             })
             .addCase(getAllBrands.fulfilled, (state, action) => {
                 state.brands = action.payload;

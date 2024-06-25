@@ -1,8 +1,8 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
-import { authActions } from "../../../redux/slices";
 import { IGenerateCode } from "../../../interfaces";
+import { authActions } from "../../../redux/slices";
 
 const GenerateAdminForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IGenerateCode>();

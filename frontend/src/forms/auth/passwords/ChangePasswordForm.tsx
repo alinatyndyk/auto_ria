@@ -1,8 +1,8 @@
-import React, { FC, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
-import { authActions } from "../../../redux/slices";
 import { INewPassword } from "../../../interfaces";
+import { authActions } from "../../../redux/slices";
 
 const ChangePasswordForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<INewPassword>();
@@ -10,13 +10,32 @@ const ChangePasswordForm: FC = () => {
     const { changePasswordErrors } = useAppSelector(state => state.authReducer);
     const navigate = useAppNavigate();
 
-    const [getResponse, setResponse] = useState('');
+    const [getResponse, setResponse] = useState<String | null>(null);
+    const [showResponse, setShowResponse] = useState<boolean>(false);
+
+    useEffect(() => {
+        if (getResponse != null) {
+            setShowResponse(true);
+            const timer = setTimeout(() => {
+                setShowResponse(false);
+                setResponse(null);
+            }, 5000);
+
+            return () => clearTimeout(timer);
+
+        }
+    }, [getResponse]);
 
     const activate: SubmitHandler<INewPassword> = async (newPassword: INewPassword) => {
 
-        const { payload } = await dispatch(authActions.changePassword(newPassword));
+        const { type } = await dispatch(authActions.changePassword(newPassword));
+        const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
-        setResponse(String(payload));
+        if (lastWord === "fulfilled") {
+            setResponse("Password changed successfully");
+        } else {
+            setResponse(null);
+        }
 
         reset();
     }
@@ -28,8 +47,14 @@ const ChangePasswordForm: FC = () => {
             <div>
                 Change password
             </div>
-            {/* {changePasswordErrors ? <div>{changePasswordErrors?.message + "err"}</div> : <div>{getResponse + "res"}</div>} */}
-            {changePasswordErrors ? <div>{changePasswordErrors?.message}</div> : <div>{getResponse}</div>}
+            {/* {changePasswordErrors ? <div>{changePasswordErrors?.message}</div> : <div>{getResponse}</div>} */}
+            <div>
+                {changePasswordErrors ? (
+                    <div>{changePasswordErrors?.message}</div>
+                ) : (
+                    showResponse && <div>{getResponse}</div>
+                )}
+            </div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder={'new password'} {...register('newPassword')} />

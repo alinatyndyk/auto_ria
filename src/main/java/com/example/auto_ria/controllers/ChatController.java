@@ -37,7 +37,6 @@ public class ChatController {
 
     private CommonService commonService;
     private ChatServiceMySQL chatServiceMySQL;
-    private MessageDaoSQL messageDaoSQL;
 
     @GetMapping("chat")
     public ResponseEntity<Chat> getChat(

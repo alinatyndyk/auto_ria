@@ -18,7 +18,6 @@ const CarFull: FC = () => {
     const { carId } = useParams<{ carId: string }>();
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
-    const [textButtonVisible, setTextButtonVisible] = useState(false);
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
 
     const { car, errorGetMiddle, middleValue } = useAppSelector(state => state.carReducer);
@@ -41,7 +40,7 @@ const CarFull: FC = () => {
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
 
-    const { carErrors } = useAppSelector(state => state.carReducer);
+    const { errorUpdateById, errorDeleteById, errorGetById } = useAppSelector(state => state.carReducer);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
@@ -64,9 +63,7 @@ const CarFull: FC = () => {
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
-
             dispatch(carActions.getMiddleById(Number(carId)));
-
         }
 
     }, []);
@@ -82,6 +79,9 @@ const CarFull: FC = () => {
 
     const deleteCar = (carId: number) => {
         dispatch(carActions.deleteById(carId));
+        if (!errorDeleteById) {
+            navigate("/profile");
+        }
     }
 
     const banCar = async (carId: number) => {
@@ -187,16 +187,12 @@ const CarFull: FC = () => {
                 <div>{moment(car.user.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
                 {car?.user.role === ERole.ADMIN && <div style={{ color: "blue" }}>The car is sold by AutoRio Services.
                     Please use {car?.user.number} for further information</div>}
-                {
-                    textButtonVisible && car?.user.role === ERole.USER &&
-                    <button onClick={() => navigate(`/chats/${car?.user.id}`)}>Text Seller</button>
-                }
                 <br />
                 {userAuthotization && (userAuthotization.id === car.user.id || userAuthotization.role === ERole.ADMIN) &&
 
                     <form onSubmit={handleSubmit(save)}>
                         <div>
-                            <div>{getResponse ? getResponse : <div>{carErrors?.message}</div>}</div>
+                            <div>{errorUpdateById ? errorUpdateById?.message : <div>{getResponse}</div>}</div>
                             <input placeholder={'region'} {...register('region', { value: getCarRegion })}
                                 value={getCarRegion} disabled={getRegionInput}
                                 autoComplete={"off"} type="text" onChange={handleInputChange} />
@@ -310,7 +306,9 @@ const CarFull: FC = () => {
         );
     } else {
         return (
-            <div>Error: invalid id</div>
+            <div>
+                error fetching car
+            </div>
         )
     }
 

@@ -13,6 +13,7 @@ import { authActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
 import { FindCarById } from '../../forms/car/FindCarById';
 import { securityService } from '../../services/security.service';
+import { error } from 'console';
 
 const ProfilePage: FC = () => {
 
@@ -33,8 +34,6 @@ const ProfilePage: FC = () => {
 
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
-
-    const { carErrors } = useAppSelector(state => state.carReducer);
 
     const [getResponse, setResponse] = useState('');
     const { regions, cities, errorUpdateById } = useAppSelector(state => state.sellerReducer);

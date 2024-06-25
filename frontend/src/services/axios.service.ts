@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { baseURL, geoURL, urls } from "../constants";
 import { authService } from "./auth.service";
@@ -20,39 +20,86 @@ axiosService.interceptors.request.use(async (config) => {
     return config;
 });
 
+// let isRefreshing = false;
+// axiosService.interceptors.response.use(
+//     (response) => {
+//         return response;
+//     },
+//     async (error) => {
+//         const refresh_token = authService.getRefreshToken();
+//         console.log("INTER REFRESH")
+//         console.log(error.response.status + "error st");
+//         if (error.response?.status === 423 && refresh_token && !isRefreshing) {
+//             isRefreshing = true;
+
+//             console.log("423 error");
+
+//             try {
+//                 const refresh = authService.getRefreshToken();
+//                 if (!refresh) {
+//                     throw new Error("refresh_token is required");
+//                 }
+//                 const { data } = await authService.refresh({ refreshToken: refresh });
+//                 authService.setTokens(data);
+//                 localStorage.setItem('isAuth', JSON.stringify(true));
+
+//                 // Resend the original request with the new token
+
+//                 return axiosService(error.config);
+//             } catch (e) {
+//                 authService.deleteTokens();
+//                 // return history.replace('/account?ExpSession=true');
+//             }
+//             isRefreshing = false;
+//         } else if (!refresh_token) {
+//             throw error;
+//         }
+//         return Promise.reject(error);
+//     }
+// );
+
 let isRefreshing = false;
+let failedQueue: { resolve: (token: string) => void; reject: (error: AxiosError) => void }[] = [];
+
+const processQueue = (error: AxiosError | null, token: string | null = null) => {
+    failedQueue.forEach(prom => {
+        if (error) {
+            prom.reject(error);
+        } else {
+            prom.resolve(token as string);
+        }
+    });
+
+    failedQueue = [];
+}
+
 axiosService.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     async (error) => {
         const refresh_token = authService.getRefreshToken();
-        console.log("INTER REFRESH")
-        console.log(error.response.status + "error st");
-        if (error.response?.status === 423 && refresh_token && !isRefreshing) {
-            isRefreshing = true;
-
-            console.log("423 error");
-
-            try {
-                const refresh = authService.getRefreshToken();
-                if (!refresh) {
-                    throw new Error("refresh_token is required");
+        if (error.response?.status === 423 && refresh_token) {
+            if (!isRefreshing) {
+                isRefreshing = true;
+                try {
+                    const { data } = await authService.refresh({ refreshToken: refresh_token });
+                    authService.setTokens(data);
+                    processQueue(null, data.access_token);
+                } catch (e) {
+                    processQueue(e as AxiosError, null);
+                    authService.deleteTokens();
+                } finally {
+                    isRefreshing = false;
                 }
-                const { data } = await authService.refresh({ refreshToken: refresh });
-                authService.setTokens(data);
-                localStorage.setItem('isAuth', JSON.stringify(true));
-
-                // Resend the original request with the new token
-
-                return axiosService(error.config);
-            } catch (e) {
-                authService.deleteTokens();
-                // return history.replace('/account?ExpSession=true');
             }
-            isRefreshing = false;
-        } else if (!refresh_token) {
-            throw error;
+
+            return new Promise((resolve, reject) => {
+                failedQueue.push({ resolve, reject });
+            }).then(token => {
+                error.config.headers.Authorization = `Bearer ${token}`;
+                return axiosService(error.config);
+            }).catch(err => {
+                return Promise.reject(err);
+            });
         }
         return Promise.reject(error);
     }

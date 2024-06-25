@@ -223,12 +223,12 @@ const slice = createSlice({
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({ ...action.payload });
-                window.location.reload();
+                // window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
                 state.isAuth = false;
                 authService.setTokens({ ...action.payload });
-                window.location.reload();
+                localStorage.setItem('isAuth', JSON.stringify(true));
             })
             .addCase(signOut.fulfilled, (state) => {
                 state.isAuth = false;
@@ -252,18 +252,23 @@ const slice = createSlice({
                     state.loginErrors = action.payload as IError;
                 } else if (action.type === "authSlice/activateSeller/rejected") {
                     state.activateSellerErrors = action.payload as IError;
-                } else if (action.type === "authSlice/registerUserAuth/rejected") {
-                    state.registerErrors = action.payload as IError;
+                } else if (action.type === "authSlice/logOut/rejected") {
+                    state.signOutErrors = action.payload as IError;
                 } else if (action.type === "authSlice/registerUserAuth/rejected") {
                     state.registerErrors = action.payload as IError;
                 } else if (action.type === "authSlice/registerSeller/rejected") {
                     state.registerErrors = action.payload as IError;
                 } else if (action.type === "authSlice/generateAdmin/rejected") {
                     state.generateAdminErrors = action.payload as IError;
+                } else if (action.type === "authSlice/generateManager/rejected") {
+                    state.generateManagerErrors = action.payload as IError;
                 } else if (action.type === "authSlice/changePassword/rejected") {
                     state.changePasswordErrors = action.payload as IError;
-                } else if (action.type === "authSlice/changePassword/rejected") {
-                    state.changePasswordErrors = action.payload as IError;
+                } else if (action.type === "authSlice/forgotPassword/rejected") {
+                    state.forgotPasswordErrors = action.payload as IError;
+                } else if (action.type === "authSlice/resetPassword/rejected") {
+                    state.isAuth = true;
+                    state.resetPasswordErrors = action.payload as IError;
                 } else {
                     state.errors = action.payload as IError;
                 }

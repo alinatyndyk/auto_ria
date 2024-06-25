@@ -1,4 +1,4 @@
-import React, {FC} from 'react';
+import { FC } from 'react';
 import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
@@ -8,7 +8,7 @@ interface IProps {
 const ManagerProfile: FC<IProps> = ({seller}) => {
 
     const {
-        id, avatar, name, lastName,
+        id, avatar, name, lastName, city, region
     } = seller;
 
     let picture;
@@ -29,6 +29,7 @@ const ManagerProfile: FC<IProps> = ({seller}) => {
                 Manager
                 <div>id: {id}</div>
                 <div>{name} {lastName}</div>
+                <div>{city} - {region}</div>
                 <img style={{height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px"}}
                      src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar"/>            </div>
             <br/>
@@ -36,4 +37,4 @@ const ManagerProfile: FC<IProps> = ({seller}) => {
     );
 };
 
-export {ManagerProfile};
+export { ManagerProfile };

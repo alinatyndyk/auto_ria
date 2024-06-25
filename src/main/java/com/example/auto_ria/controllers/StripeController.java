@@ -6,6 +6,9 @@ import java.util.Map;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,6 +27,7 @@ import com.example.auto_ria.models.requests.SetPaymentSourceRequest;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.otherApi.StripeService;
+import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import com.stripe.Stripe;
 import com.stripe.model.Customer;
 import com.stripe.param.CustomerCreateParams;
@@ -45,6 +49,7 @@ public class StripeController {
     private UserDaoSQL userDaoSQL;
     private FMService mailer;
     private StripeService stripeService;
+    private UsersServiceMySQLImpl usersServiceMySQL;
 
     @SneakyThrows
     @PostMapping("/webhooks/stripe")
@@ -76,42 +81,50 @@ public class StripeController {
 
     }
 
-    //todo only users auth
     @SneakyThrows
     @PostMapping("/add-payment-source")
     public ResponseEntity<String> addPaymentSource(
             @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request) {
         try {
-            UserSQL sellerSQL = commonService.extractUserFromHeader(request);
-            if (sellerSQL == null) {
-                throw new CustomException("Invalid token", HttpStatus.FORBIDDEN);
+            UserSQL userSQL;
+
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                userSQL = usersServiceMySQL.getByEmail(userDetails.getUsername());
+                if (userSQL == null) {
+                    throw new CustomException("Invalid token", HttpStatus.FORBIDDEN);
+                }
+            } else {
+                throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
 
-            boolean sourcePresent = sellerSQL.isPaymentSourcePresent();
+            boolean sourcePresent = userSQL.isPaymentSourcePresent();
             String paymentToken = body.getToken();
 
             if (!sourcePresent) {
                 Customer customer = Customer.create(
                         CustomerCreateParams.builder()
-                                .setName(sellerSQL.getName() + sellerSQL.getLastName())
-                                .setEmail(sellerSQL.getEmail())
+                                .setName(userSQL.getName() + userSQL.getLastName())
+                                .setEmail(userSQL.getEmail())
                                 .setSource(paymentToken)
                                 .build());
 
-                sellerSQL.setPaymentSource(customer.getId());
-                sellerSQL.setPaymentSourcePresent(true);
-                userDaoSQL.save(sellerSQL);
+                userSQL.setPaymentSource(customer.getId());
+                userSQL.setPaymentSourcePresent(true);
+                userDaoSQL.save(userSQL);
 
             } else {
-                String paymentSource = sellerSQL.getPaymentSource();
+                String paymentSource = userSQL.getPaymentSource();
                 Customer stripeCustomer = Customer.retrieve(paymentSource);
 
                 Map<String, Object> params = new HashMap<>();
                 params.put("source", paymentToken);
-                stripeCustomer.update(params); /// todo turn into one model!
+                stripeCustomer.update(params);
             }
 
             return ResponseEntity.ok("Card attached successfully");
@@ -126,20 +139,20 @@ public class StripeController {
             @RequestBody SetPaymentSourceRequest body,
             HttpServletRequest request) {
         try {
-            
+
             Stripe.apiKey = environment.getProperty("Stripe.ApiKey");
             String email = commonService.extractEmailFromHeader(request, ETokenRole.USER);
-            
+
             UserSQL sellerSQL = userDaoSQL.findUserByEmail(email);
-            
+
             if (sellerSQL == null) {
                 throw new CustomException("Invalid token", HttpStatus.BAD_REQUEST);
             } else if (sellerSQL.getAccountType().equals(EAccountType.PREMIUM)) {
                 throw new CustomException("Premium account is already bought", HttpStatus.BAD_REQUEST);
             }
-            
+
             stripeService.createPayment(body, sellerSQL);
-            
+
             sellerSQL.setAccountType(EAccountType.PREMIUM);
             userDaoSQL.save(sellerSQL);
             return ResponseEntity.ok("Premium bought successfully");

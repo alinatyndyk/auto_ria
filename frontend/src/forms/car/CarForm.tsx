@@ -12,7 +12,7 @@ export enum ECurrency {
 
 const CarForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
-    const {brands, models, errorCreate } = useAppSelector(state => state.carReducer);
+    const { brands, models, errorCreate } = useAppSelector(state => state.carReducer);
 
     useEffect(() => {
         dispatch(carActions.getAllBrands());
@@ -48,17 +48,11 @@ const CarForm: FC = () => {
     const [getBrand, setBrand] = useState('');
     const [getModel, setModel] = useState('');
 
-    // const [getErrors, setErrors] = useState<undefined | string>(carErrors?.message);
-
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
     const [getCurrencies, setCurrencies] = useState<ECurrency[]>([]);
 
     const dispatch = useAppDispatch();
-
-    // useEffect(() => {
-    //     setErrors(carErrors?.message);
-    // }, [carErrors])
 
     const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
         let photos = [];
@@ -90,10 +84,6 @@ const CarForm: FC = () => {
                     setBrand('');
                     setModel('');
                     reset();
-
-                    // setErrors('');
-                } else {
-                    // setErrors(carErrors?.message);
                 }
 
             });
@@ -153,7 +143,7 @@ const CarForm: FC = () => {
 
     return (
         <div>
-            <div>{getResponse ? getResponse : <div>{errorCreate?.message}</div>}</div>
+            <div>{errorCreate ? errorCreate?.message : <div>{getResponse}</div>}</div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
                     <input style={{ cursor: 'pointer' }} type="text" readOnly={true} value={getBrand} placeholder={'brand'}

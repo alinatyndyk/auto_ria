@@ -9,7 +9,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,14 +79,14 @@ public class UserController {
             HttpServletRequest request) {
         try {
 
-            UserSQL user = commonService.extractUserFromHeader(request);
+            UserSQL user;
             UserSQL userById = usersServiceMySQL.getById(id);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
+                user = usersServiceMySQL.getByEmail(userDetails.getUsername());
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
                     return usersServiceMySQL.update(id, partialUser, userById);
 
@@ -99,7 +98,7 @@ public class UserController {
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("USER"))
-                        && userDetails.getUsername() == userById.getEmail()) {
+                        && userDetails.getUsername().equals(userById.getEmail())) {
 
                     return usersServiceMySQL.update(id, partialUser, user);
 
@@ -179,7 +178,6 @@ public class UserController {
     public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
         try {
             UserSQL user = usersServiceMySQL.getById(Integer.valueOf(id));
-
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 

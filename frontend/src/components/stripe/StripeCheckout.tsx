@@ -1,6 +1,7 @@
 import axios from "axios";
 import { FC, useState } from 'react';
 import Stripe from "react-stripe-checkout";
+import { IError } from "../../interfaces";
 import { IUserResponse } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
 
@@ -13,7 +14,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
     const [getUseDefaultCard, setUseDefaultCard] = useState(false);
     const [getAsDefaultCard, setAsDefaultCard] = useState(false);
     const [autoPay, setAutoPay] = useState(false);
-    const [getErrors, setErrors] = useState();
+    const [getErrors, setErrors] = useState<String | null>();
 
     const payNow = async (token: any) => {
         try {
@@ -32,8 +33,8 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                 window.location.reload();
             }
         } catch (e) {
-            // @ts-ignore
-            setErrors(e.response.data);
+            const error = e as { response: { data: IError } };
+            setErrors(error.response.data.message);
         }
     }
 
@@ -51,8 +52,8 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                 window.location.reload();
             }
         } catch (e) {
-            // @ts-ignore
-            setErrors(e.response.data);
+            const error = e as { response: { data: IError } };
+            setErrors(error.response.data.message);
         }
     }
 
@@ -96,8 +97,9 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
         'pk_test_51Nf481Ae4RILjJWGS16n8CI5yhK3nWg0kTMZVvRTOgMOY4KBlgI21EcPsSj9tY4tfDTQWrlh1v0egnN0ozBT9ATQ00kuhJ8UrS'
 
     let paymentComponent;
+    const isPaymentSourcePresent = seller.isPaymentSourcePresent ?? false;
 
-    if (seller.isPaymentSourcePresent) {
+    if (!isPaymentSourcePresent) {
         paymentComponent = <div style={{ display: 'flex' }}>
             <label>{JSON.stringify(getErrors)}</label>
             <label>
@@ -130,7 +132,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                 }} onClick={() => payNow('')}>pay with default card</button>
             }
         </div>
-    } else if (!seller.isPaymentSourcePresent) {
+    } else if (isPaymentSourcePresent) {
         paymentComponent = <div>
             <div style={{ display: 'flex' }}>
                 <label>{JSON.stringify(getErrors)}</label>

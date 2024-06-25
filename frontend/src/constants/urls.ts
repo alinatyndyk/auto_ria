@@ -9,7 +9,6 @@ const brands = 'brands';
 const auth = 'auth';
 const sellers = 'users';
 const common = 'common';
-const chats = 'chats';
 const regions = 'regions';
 
 const urls = {
@@ -39,7 +38,7 @@ const urls = {
         generateManager: (): string => `/api/v1/${auth}/code-manager`,
         generateAdmin: (): string => `/api/v1/${auth}/code-admin`,
 
-        changePassword: (): string => `/api/v1/${auth}/change-password1`,
+        changePassword: (): string => `/api/v1/${auth}/change-passwords`,
         forgotPassword: (): string => `/api/v1/${auth}/forgot-password`,
         resetPassword: (): string => `/api/v1/${auth}/reset-password`,
     },
@@ -54,12 +53,6 @@ const urls = {
     sellers: {
         sellers,
         all: (page: number): string => `${sellers}/page/${page}`,
-    },
-
-    chats: {
-        chats,
-        getChatMessages: (page: number): string => `${chats}/page/${page}`,
-        getChatsByUserToken: (page: number): string => `${chats}/of-user/page/${page}`,
     },
 
     geo: {
@@ -77,7 +70,6 @@ export {
     cars,
     auth,
     sellers,
-    chats,
     regions,
     urls
 };

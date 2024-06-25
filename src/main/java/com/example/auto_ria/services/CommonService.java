@@ -83,7 +83,8 @@ public class CommonService {
     public UserSQL extractUserFromHeader(HttpServletRequest request) {
         UserSQL sellerSQL = null;
         try {
-            String email = extractEmailFromHeader(request, ETokenRole.USER);
+            // String email = extractEmailFromHeader(request, ETokenRole.USER);
+            String email = extractEmailFromHeader(request, ETokenRole.ADMIN); //todo fix
             sellerSQL = userDaoSQL.findByEmail(email);
         } catch (Exception ignore) {
         }

@@ -12,20 +12,11 @@ const ActivateForm: FC = () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
-    const [getResponse, setResponse] = useState('');
     const { activateSellerErrors } = useAppSelector(state => state.authReducer);
-
-    useEffect(() => {
-        if (code === undefined) {
-            setResponse("Error. Activation_Code_Absent");
-        }
-    }, [params])
 
     const activate = () => {
         if (role === ERole.USER) {
             dispatch(authActions.activateSeller({ code: code ?? '' }));
-        } else {
-            setResponse(`Invalid_Url: ${role}.`);
         }
 
         if (activateSellerErrors === null) {

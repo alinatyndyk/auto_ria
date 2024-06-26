@@ -35,9 +35,6 @@ public class UserSQL extends Person {
     )
     private List<CarSQL> cars = new ArrayList<>();
 
-    // @ElementCollection
-    // private List<String> sessions = new ArrayList<>();
-
     private String session;
 
     @Enumerated(EnumType.STRING)

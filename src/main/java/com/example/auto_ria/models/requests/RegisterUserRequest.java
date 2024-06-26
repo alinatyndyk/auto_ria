@@ -36,11 +36,12 @@ public class RegisterUserRequest {
     @Pattern(regexp = "^(\\d{3}[- .]?){2}\\d{4}$", message = "Invalid number")
     private String number;
 
+    @Builder.Default
     private String avatar = null;
 
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$",
-            message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. " +
-                    "At least 8 characters long")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$", message = "Invalid password. Must contain: uppercase letter, lowercase letter, number, special character. "
+            +
+            "At least 8 characters long")
     private String password;
 
 }

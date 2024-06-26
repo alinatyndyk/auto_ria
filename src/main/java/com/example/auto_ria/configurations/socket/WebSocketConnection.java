@@ -3,11 +3,9 @@ package com.example.auto_ria.configurations.socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +51,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     private static final Map<String, WebSocketSession> sessionMap = new HashMap<>();
 
     @Override
-    public void afterConnectionEstablished(@NotNull WebSocketSession session) {
+    public void afterConnectionEstablished(@SuppressWarnings("null") @NotNull WebSocketSession session) {
         try {
             sessionMap.put(session.getId(), session);
 
@@ -108,7 +106,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 Session session1 = Session.builder()
                         .sessionId(session.getId())
                         .userId(sessionUserId)
-                        .isOnline(true) // fix
+                        .isOnline(true)
                         .build();
 
                 sessionDaoSQL.save(session1);
@@ -127,7 +125,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(@NotNull WebSocketSession session, @NotNull TextMessage message) {
+    protected void handleTextMessage(@SuppressWarnings("null") @NotNull WebSocketSession session, @NotNull TextMessage message) {
         try {
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
@@ -166,10 +164,10 @@ public class WebSocketConnection extends TextWebSocketHandler {
 
                 userList.add(Integer.parseInt(receiverId));
                 Chat chatNew = Chat.builder().users(userList)
-                .sessions(sessionList)
-                .users(userList)
-                .roomKey(roomKey)
-                .build();
+                        .sessions(sessionList)
+                        .users(userList)
+                        .roomKey(roomKey)
+                        .build();
 
                 chatDaoSQL.save(chatNew);
                 chat = chatNew;
@@ -215,7 +213,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     }
 
     @Override
-    public void afterConnectionClosed(WebSocketSession session, @NotNull CloseStatus status) {
+    public void afterConnectionClosed(@SuppressWarnings("null") WebSocketSession session, @NotNull CloseStatus status) {
         sessionMap.remove(session.getId());
         Session session1 = sessionDaoSQL.getBySessionId(session.getId());
         session1.setOnline(false);

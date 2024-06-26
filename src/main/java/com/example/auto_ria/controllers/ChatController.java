@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,6 +41,7 @@ public class ChatController {
     private ChatServiceMySQL chatServiceMySQL;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @GetMapping("chat")
     public ResponseEntity<Chat> getChat(
             @RequestParam("user1Id") String user1Id,
@@ -94,6 +96,7 @@ public class ChatController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @GetMapping("/page/{page}")
     public ResponseEntity<Page<MessageClass>> getChatMessages(
             HttpServletRequest request,
@@ -135,6 +138,7 @@ public class ChatController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @PatchMapping("/message/{id}")
     public ResponseEntity<MessageClass> patch(
             @PathVariable int id,
@@ -168,6 +172,7 @@ public class ChatController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @DeleteMapping("/message/{id}")
     public ResponseEntity<String> delete(
             @PathVariable int id) {
@@ -199,6 +204,7 @@ public class ChatController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @PostMapping("/message/{id}")
     public ResponseEntity<String> seen(
             @PathVariable int id) {

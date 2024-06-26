@@ -8,7 +8,7 @@ export interface ICreateCar {
     region: string;
     price: string;
     description: string;
-    currency: string; //e
+    currency: string;
     pictures: File[];
 }
 
@@ -20,7 +20,7 @@ export interface ICreateInputCar {
     region: string;
     price: string;
     description: string;
-    currency: string; //e
+    currency: string;
     pictures: File[];
 }
 
@@ -94,7 +94,7 @@ export interface CarsResponse {
     priceUAH: number;
     priceEUR: number;
     priceUSD: number;
-    createdAt: string; // Assuming createdAt is a string representation of a date
+    createdAt: string;
 }
 
 
@@ -107,7 +107,7 @@ export interface UserCarResponse {
     number: string;
     role: string;
     avatar: string;
-    createdAt: string; // Assuming createdAt is a string representation of a date
+    createdAt: string;
 }
 
 export interface IMiddleCarValues {

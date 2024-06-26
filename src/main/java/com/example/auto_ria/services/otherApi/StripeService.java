@@ -67,15 +67,15 @@ public class StripeService {
 
             if (body.isUseDefaultCard() && defaultSource == null) {
                 throw new CustomException("No default source is present. " +
-                        "Attach a card to your account to make your payments faster. Visit http*******", // todo front
-                                                                                                         // url
+                        "Attach a card to your account to make your payments faster. Visit http*******",
+                                                                                                         
                         HttpStatus.BAD_REQUEST);
             }
 
             if (body.isSetAsDefaultCard() && defaultSource != null) {
                 throw new CustomException("Default source is already defined. " +
-                        "You can change it at any moment at - Http//3000/attach-card", HttpStatus.BAD_REQUEST); // todo
-                                                                                                                // front
+                        "You can change it at any moment at - Http//3000/attach-card", HttpStatus.BAD_REQUEST);
+                                                                                                               
             }
 
 

@@ -1,19 +1,18 @@
 import Joi from 'joi';
 
-const userResponseSchema = Joi.object({ //todo fix object
-    id: Joi.number().allow(null),
-    name: Joi.string().allow(null),
-    lastName: Joi.string().allow(null),
-    city: Joi.string().allow(null),
-    region: Joi.string().allow(null),
-    number: Joi.string().allow(null),
-    avatar: Joi.string().optional().allow(null), // avatar может быть null
-    accountType: Joi.string().valid('BASIC', 'PREMIUM').required(), // предполагая, что у вас есть два типа аккаунтов: BASIC и PREMIUM
-    role: Joi.string().valid('USER', 'ADMIN', 'MANAGER').required(), // предполагая, что роли могут быть USER, ADMIN, MANAGER
+const userResponseSchema = Joi.object({
+    id: Joi.number(),
+    name: Joi.string(),
+    lastName: Joi.string(),
+    city: Joi.string(),
+    region: Joi.string(),
+    number: Joi.string(),
+    avatar: Joi.string().allow(null),
+    accountType: Joi.string().valid('BASIC', 'PREMIUM').required(),
+    role: Joi.string().valid('USER', 'ADMIN', 'MANAGER').required(),
     isPaymentSourcePresent: Joi.boolean().allow(null),
-    paymentSourcePresent: Joi.boolean().allow(null),  // Allow paymentSourcePresent
-    lastOnline: Joi.array().items(Joi.number()).required().allow(null), // lastOnline может быть null
-    // createdAt: Joi.date().iso().required()
+    paymentSourcePresent: Joi.boolean().allow(null), 
+    lastOnline: Joi.array().items(Joi.number()).required().allow(null),
     createdAt: Joi.array().items(Joi.number()).required()
 });
 

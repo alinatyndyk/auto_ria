@@ -14,102 +14,6 @@
 					"name": "logins",
 					"item": [
 						{
-							"name": "sign in",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"jasjka@gmail.com\",\r\n    \"password\": \"Password123@#\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/authenticate/seller",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"authenticate",
-										"seller"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sign in Manager",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"daad@test.com\",\r\n    \"password\": \"password123\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/authenticate/manager",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"authenticate",
-										"manager"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sign in Admin",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"alinatyndyk777@gmail.com\",\r\n    \"password\": \"Password123@#\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/authenticate/admin",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"authenticate",
-										"admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "sign in All",
 							"request": {
 								"method": "POST",
@@ -194,38 +98,6 @@
 								}
 							},
 							"response": []
-						},
-						{
-							"name": "sign in Customer",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"email\": \"dssd@test.com\",\r\n    \"password\": \"password123\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/authenticate/customer",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"authenticate",
-										"customer"
-									]
-								}
-							},
-							"response": []
 						}
 					]
 				},
@@ -233,7 +105,7 @@
 					"name": "registers",
 					"item": [
 						{
-							"name": "register Seller",
+							"name": "register user",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -247,7 +119,7 @@
 										},
 										{
 											"key": "email",
-											"value": "alinatyndyk7777@gmail.com",
+											"value": "alinatyndyk77747@gmail.com",
 											"type": "text"
 										},
 										{
@@ -272,18 +144,13 @@
 										},
 										{
 											"key": "number",
-											"value": "3809675993",
+											"value": "3809675981",
 											"type": "text"
-										},
-										{
-											"key": "avatar",
-											"type": "file",
-											"src": "/C:/Users/User/Desktop/640px-Sign-check-icon.png"
 										}
 									]
 								},
 								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/register-seller/person",
+									"raw": "http://localhost:8080/api/v1/auth/register-user",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -293,187 +160,7 @@
 										"api",
 										"v1",
 										"auth",
-										"register-seller",
-										"person"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "register Manager",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Register-key",
-										"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3NzdAZ21haWwuY29tIiwiYXVkIjoiQURNSU4iLCJpYXQiOjE2OTIzMDg4NzUsImV4cCI6MTY5MjMxMjQ3NX0.rM1PeKlJse7s5YGAgS3rEKD6jH5cXGuP8ZbVzf6gzJM",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "name",
-											"value": "MANAger",
-											"type": "text"
-										},
-										{
-											"key": "email",
-											"value": "haisicraisi@gmail.com",
-											"type": "text"
-										},
-										{
-											"key": "avatar",
-											"type": "file",
-											"src": "/C:/Users/User/Desktop/m011t0434_c_abstract_shapes_04sep22.jpg"
-										},
-										{
-											"key": "password",
-											"value": "Password123#",
-											"type": "text"
-										},
-										{
-											"key": "key",
-											"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiTUFOQUdFUiIsInN1YiI6ImhhaXNpQGdtYWlsLmNvbSIsImlhdCI6MTY5MjMwMTI4NywiZXhwIjoxNjkyMzA0ODg3fQ.S05IEx-PcI7JNG6oj4zpIcbewr40IgLYVoDRDogOztY",
-											"type": "text",
-											"disabled": true
-										}
-									]
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/register-manager",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"register-manager"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "register Admin",
-							"request": {
-								"method": "POST",
-								"header": [
-									{
-										"key": "Register-key",
-										"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3NzdAZ21haWwuY29tIiwiYXVkIjoiQURNSU4iLCJpYXQiOjE2OTIzMDg4NzUsImV4cCI6MTY5MjMxMjQ3NX0.rM1PeKlJse7s5YGAgS3rEKD6jH5cXGuP8ZbVzf6gzJM",
-										"type": "text"
-									}
-								],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "name",
-											"value": "sjaasa",
-											"type": "text"
-										},
-										{
-											"key": "email",
-											"value": "alinatyndyk7777@gmail.com",
-											"type": "text"
-										},
-										{
-											"key": "avatar",
-											"type": "file",
-											"src": "/C:/Users/User/Desktop/960x0.webp"
-										},
-										{
-											"key": "password",
-											"value": "password123",
-											"type": "text"
-										},
-										{
-											"key": "lastName",
-											"value": "Papa",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/register-admin",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"register-admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "register Customer",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "name",
-											"value": "MANAger",
-											"type": "text"
-										},
-										{
-											"key": "email",
-											"value": "haisicraisi14@gmail.com",
-											"type": "text"
-										},
-										{
-											"key": "avatar",
-											"type": "file",
-											"src": "/C:/Users/User/Desktop/960x0.webp"
-										},
-										{
-											"key": "password",
-											"value": "Password123@#",
-											"type": "text"
-										},
-										{
-											"key": "lastName",
-											"value": "Math",
-											"type": "text"
-										},
-										{
-											"key": "city",
-											"value": "Chervonohrad",
-											"type": "text"
-										},
-										{
-											"key": "region",
-											"value": "Lviv Oblast",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/register-customer",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"register-customer"
+										"register-user"
 									]
 								}
 							},
@@ -484,102 +171,6 @@
 				{
 					"name": "refreshes",
 					"item": [
-						{
-							"name": "refresh",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJqYXNqa2FAZ21haWwuY29tIiwiaWF0IjoxNjkyMjAzMjUxLCJpc3MiOiJTRUxMRVIiLCJleHAiOjE2OTIyODk2NTF9.-mjxLkn1NPAXJwYBj56ieptZQkofDOB2BYOxG3uWim0\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:5678/api/v1/auth/refresh/seller",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "5678",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"refresh",
-										"seller"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "refresh Manager",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYWFkQHRlc3QuY29tIiwiaWF0IjoxNjkyMTg3ODQxLCJpc3MiOiJNQU5BR0VSIiwiZXhwIjoxNjkyMjc0MjQxfQ.l5M3Sx1rBmSYgEJeW0piE1Abieg0g8FuZHu3zukJYhM\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:5678/api/v1/auth/refresh/manager",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "5678",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"refresh",
-										"manager"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "refresh Admin",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTg0MzUwMzMsImlzcyI6IkFETUlOIiwiZXhwIjoxNjk4NTIxNDMzfQ.aNDLB-SZ4XDQhLshpV61QwBXrydIHxdvqGu0xvGthds\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/refresh/admin",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"refresh",
-										"admin"
-									]
-								}
-							},
-							"response": []
-						},
 						{
 							"name": "refresh All",
 							"request": {
@@ -607,38 +198,6 @@
 										"auth",
 										"refresh",
 										"admin"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "refresh Customer",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\r\n    \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkc3NkQHRlc3QuY29tIiwiaWF0IjoxNjkyMTg3ODg2LCJpc3MiOiJDVVNUT01FUiIsImV4cCI6MTY5MjI3NDI4Nn0.10fOfHctZnJMetmfsRM9KBDadfySJzoCXNUzAPS21uI\"\r\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "http://localhost:5678/api/v1/auth/refresh/customer",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "5678",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"refresh",
-										"customer"
 									]
 								}
 							},
@@ -746,7 +305,7 @@
 					"name": "activate account",
 					"item": [
 						{
-							"name": "register activate Seller",
+							"name": "register activate user",
 							"request": {
 								"method": "POST",
 								"header": [],
@@ -803,13 +362,13 @@
 										},
 										{
 											"key": "code",
-											"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJpYXQiOjE2OTY4ODIzMjksImlzcyI6IlNFTExFUl9BQ1RJVkFURSIsImV4cCI6MTY5Njg4NTkyOX0.azHPG_6Beiw2gF0vOFsWjDBZpMvglxZk22TWfbWyLSc",
+											"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiVVNFUiIsInJlY29nbml0aW9uIjoiVVNFUl9BQ1RJVkFURSIsImVtYWlsIjoiYWxpbmF0eW5keWs3NzcyN0BnbWFpbC5jb20iLCJzdWIiOiJhbGluYXR5bmR5azc3NzI3QGdtYWlsLmNvbSIsImlhdCI6MTcxODU0NDE4NCwiZXhwIjoxNzE4NTQ3Nzg0fQ.KSLqvdVRqvChAZCRqP8_flR5k08AEazNtpu4EXvRXBg",
 											"type": "text"
 										}
 									]
 								},
 								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/activate-seller-account",
+									"raw": "http://localhost:8080/api/v1/auth/activate-user",
 									"protocol": "http",
 									"host": [
 										"localhost"
@@ -819,87 +378,7 @@
 										"api",
 										"v1",
 										"auth",
-										"activate-seller-account"
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "register activate Customer",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "formdata",
-									"formdata": [
-										{
-											"key": "name",
-											"value": "Seller",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "email",
-											"value": "seller@gmail.com",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "password",
-											"value": "Password123@#",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "lastName",
-											"value": "xxx",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "city",
-											"value": "Bern",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "region",
-											"value": "DNIPRO",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "number",
-											"value": "3809675990",
-											"type": "text",
-											"disabled": true
-										},
-										{
-											"key": "avatar",
-											"type": "file",
-											"src": [],
-											"disabled": true
-										},
-										{
-											"key": "code",
-											"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJhdWQiOiJDVVNUT01FUl9BQ1RJVkFURSIsImlhdCI6MTY5Njg4MzE0MywiZXhwIjoxNjk2ODg2NzQzfQ.Lu8FMVBCvlSL1kUMsI8PArO7YNA5e5TpasvunArhDto",
-											"type": "text"
-										}
-									]
-								},
-								"url": {
-									"raw": "http://localhost:8080/api/v1/auth/activate-customer-account",
-									"protocol": "http",
-									"host": [
-										"localhost"
-									],
-									"port": "8080",
-									"path": [
-										"api",
-										"v1",
-										"auth",
-										"activate-customer-account"
+										"activate-user"
 									]
 								}
 							},
@@ -1247,14 +726,14 @@
 							"response": []
 						},
 						{
-							"name": "activate (for managers)",
+							"name": "activate",
 							"request": {
 								"auth": {
 									"type": "bearer",
 									"bearer": [
 										{
 											"key": "token",
-											"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzb21lc2VsbGVyQGdtYWlsLmNvbSIsImlhdCI6MTY5MjEyNTAwOSwiaXNzIjoiU0VMTEVSIiwiZXhwIjoxNjkyMTI4NjA5fQ.VkCCk9wi4iDoBJAhDi3PtlGT7EXNvGywX77qrHj_-w0",
+											"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTg1NTMzNjMsImlzcyI6IkFETUlOIiwiZXhwIjoxNzE4NTU2OTYzfQ.Z_iX4ZyJXoSP_OZgr38CB2xoecSITRGopfg9T9k97i4",
 											"type": "string"
 										}
 									]
@@ -1271,16 +750,16 @@
 									}
 								},
 								"url": {
-									"raw": "http://localhost:5678/cars/activate/5",
+									"raw": "http://localhost:8080/cars/activate/1",
 									"protocol": "http",
 									"host": [
 										"localhost"
 									],
-									"port": "5678",
+									"port": "8080",
 									"path": [
 										"cars",
 										"activate",
-										"5"
+										"1"
 									]
 								}
 							},
@@ -1407,6 +886,47 @@
 							"path": [
 								"cars",
 								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "view car",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "brand",
+									"value": "BMW",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8080/cars/viewed/9",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cars",
+								"viewed",
+								"9"
 							]
 						}
 					},
@@ -1653,47 +1173,6 @@
 					"response": []
 				},
 				{
-					"name": "view car",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "brand",
-									"value": "BMW",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/cars/viewed/9",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"cars",
-								"viewed",
-								"9"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "get brands",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -1827,326 +1306,7 @@
 			]
 		},
 		{
-			"name": "Customers",
-			"item": [
-				{
-					"name": "get customer by id",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTIyMDQzNTEsImlzcyI6IkFETUlOIiwiZXhwIjoxNjkyMjA3OTUxfQ.arau8hHQeUhJuDImwf4CULFIikvakp37lJ3s9wfC1kc",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:8080/sellers/2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"sellers",
-								"2"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Admins",
-			"item": [
-				{
-					"name": "get admins",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ2hnQHRlc3QuY29tIiwiaWF0IjoxNjkyMjkxODU4LCJpc3MiOiJBRE1JTiIsImV4cCI6MTY5MjI5NTQ1OH0.riY10-tLTk7MliWwd0efBMUyEbj-T3p1XRrmWaA2K2U",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/administrators/page/0",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"page",
-								"0"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create register key",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTIzMDY1NDgsImlzcyI6IkFETUlOIiwiZXhwIjoxNjkyMzEwMTQ4fQ.lFOywvCWxBwe6lOOMM-vdLwBW9dE_Douqtgbd2kiu_s",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "email",
-									"value": "alinatyndyk7777@gmail.com",
-									"type": "text"
-								},
-								{
-									"key": "role",
-									"value": "ADMIN",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/administrators/register-entity",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"register-entity"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get by id",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTIyODkzMjAsImlzcyI6IkFETUlOIiwiZXhwIjoxNjkyMjkyOTIwfQ.6Qsz2LRt6ecUPelN6RILZEysvhDj7rs08gRaql2FvrE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/administrators/2",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"2"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "delete",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ2hnQHRlc3QuY29tIiwiaWF0IjoxNjkyMjkyMDM2LCJpc3MiOiJBRE1JTiIsImV4cCI6MTY5MjI5NTYzNn0.-RaEkhuvYK_fobh8KhMbjeSkungPZXbrqh1Q4rs088I",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/administrators/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ2hnQHRlc3QuY29tIiwiaWF0IjoxNjkyMjkyMDM2LCJpc3MiOiJBRE1JTiIsImV4cCI6MTY5MjI5NTYzNn0.-RaEkhuvYK_fobh8KhMbjeSkungPZXbrqh1Q4rs088I",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "lastName",
-									"value": "admin lala",
-									"type": "text"
-								},
-								{
-									"key": "name",
-									"value": "ADMINIk",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/administrators/1",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "avatar",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZ2hnQHRlc3QuY29tIiwiaWF0IjoxNjkyMjkyMDM2LCJpc3MiOiJBRE1JTiIsImV4cCI6MTY5MjI5NTYzNn0.-RaEkhuvYK_fobh8KhMbjeSkungPZXbrqh1Q4rs088I",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "avatar",
-									"value": "",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "avatar",
-									"type": "file",
-									"src": "/C:/Users/User/Desktop/1647606268_11-amiel-club-p-kartinki-pro-ukrainu-11.jpg"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/administrators/change-avatar/3",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"administrators",
-								"change-avatar",
-								"3"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Managers",
-			"item": [
-				{
-					"name": "get managers",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkYWFkQHRlc3QuY29tIiwiaWF0IjoxNjkyMDk0MTU5LCJpc3MiOiJNQU5BR0VSIiwiZXhwIjoxNjkyMDk3NzU5fQ.hncVgW9x28dYGeD7Kid3g3TkTkch0tHh0DwMmtMyypc",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8080/managers/page/0",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"managers",
-								"page",
-								"0"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Sellers",
+			"name": "Users",
 			"item": [
 				{
 					"name": "get users",
@@ -2177,14 +1337,14 @@
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8080/sellers/page/0",
+							"raw": "http://localhost:8080/users/page/0",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"sellers",
+								"users",
 								"page",
 								"0"
 							]
@@ -2235,6 +1395,45 @@
 					"response": []
 				},
 				{
+					"name": "delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTkzMTY1ODUsImlzcyI6IlVTRVIiLCJleHAiOjE3MTkzMTY2NDV9.UduXZKAAXuMVgMEbkxdJYl3fQL1-niTmgSzIOQEkR1Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/users/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"users",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "get user by token",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
@@ -2245,7 +1444,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTIyMDQzNTEsImlzcyI6IkFETUlOIiwiZXhwIjoxNjkyMjA3OTUxfQ.arau8hHQeUhJuDImwf4CULFIikvakp37lJ3s9wfC1kc",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -2262,58 +1461,67 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:8080/sellers/2",
+							"raw": "http://localhost:8080/users/by-token/",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"sellers",
-								"2"
+								"users",
+								"by-token",
+								""
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "get users by id",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
+					"name": "patch user (only from front)",
 					"request": {
 						"auth": {
 							"type": "bearer",
 							"bearer": [
 								{
 									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE2OTIxMDMyMjEsImlzcyI6IkFETUlOIiwiZXhwIjoxNjkyMTA2ODIxfQ.vEtsoJ67VHllCFN4Maf92Tl_5kgl0Wprlp-SEMy8-Y4",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTkxNjc5MDksImlzcyI6IlVTRVIiLCJleHAiOjE3MTkxNzE1MDl9.oUrm2ZbdZRVyuIn6w_s3fbDZqCkD2XYxT2_-iLgJM_4",
 									"type": "string"
 								}
 							]
 						},
-						"method": "GET",
+						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "number",
-									"value": "1111111111",
+									"key": "region",
+									"value": "Khmelnytskyi Oblast",
 									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Kamianets-Podilskyi",
+									"type": "text"
+								},
+								{
+									"key": "name",
+									"value": "Init",
+									"type": "text",
+									"disabled": true
 								}
 							]
 						},
 						"url": {
-							"raw": "http://localhost:8080/sellers/8",
+							"raw": "http://localhost:8080/users/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
 							"port": "8080",
 							"path": [
-								"sellers",
-								"8"
+								"users",
+								"1"
 							]
 						}
 					},
@@ -2322,103 +1530,8 @@
 			]
 		},
 		{
-			"name": "Chats",
-			"item": [
-				{
-					"name": "rabbit",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJpYXQiOjE2OTIxMDM2MDYsImlzcyI6IlNFTExFUiIsImV4cCI6MTY5MjEwNzIwNn0.f2i-eh2Sw4bRUQEKO-1G6eicwgW83Pvozv9uywA_oPE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "number",
-									"value": "1111111111",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/sellers/8",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"sellers",
-								"8"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "rabbit Copy",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoYWlzaWNyYWlzaUBnbWFpbC5jb20iLCJpYXQiOjE2OTIxMDM2MDYsImlzcyI6IlNFTExFUiIsImV4cCI6MTY5MjEwNzIwNn0.f2i-eh2Sw4bRUQEKO-1G6eicwgW83Pvozv9uywA_oPE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "number",
-									"value": "1111111111",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:8080/chats/page/1?customerId=3&sellerId=7",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8080",
-							"path": [
-								"chats",
-								"page",
-								"1"
-							],
-							"query": [
-								{
-									"key": "customerId",
-									"value": "3"
-								},
-								{
-									"key": "sellerId",
-									"value": "7"
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
+			"name": "New Folder",
+			"item": []
 		},
 		{
 			"name": "get chat messages",
@@ -2470,6 +1583,58 @@
 			"response": []
 		},
 		{
+			"name": "get chats by user",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTkzNTI0MzgsImlzcyI6IlVTRVIiLCJleHAiOjE3MTkzNTYwMzh9.QE4nx-tGWK3RdO498_kc7qPE2QE9WhQZmA792ne6WNE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "sellerId",
+							"value": "2",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "customerId",
+							"value": "3",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/chats/of-user/page/0",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"chats",
+						"of-user",
+						"page",
+						"0"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "get chat by user",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -2480,7 +1645,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTkzNDc0MzIsImlzcyI6IlVTRVIiLCJleHAiOjE3MTkzNTEwMzJ9.KykNb8xXi1VDaBdFTVPTFlIiF7k8JAYCoutGByBjeio",
 							"type": "string"
 						}
 					]
@@ -2503,7 +1668,7 @@
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8080/chats/of-user/page/",
+					"raw": "http://localhost:8080/chats/chat?user1Id=1&user2Id=3",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -2511,9 +1676,76 @@
 					"port": "8080",
 					"path": [
 						"chats",
-						"of-user",
+						"chat"
+					],
+					"query": [
+						{
+							"key": "user1Id",
+							"value": "1"
+						},
+						{
+							"key": "user2Id",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get msgs of chat",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGluYXR5bmR5azc3N0BnbWFpbC5jb20iLCJpYXQiOjE3MTkzNTM4NDMsImlzcyI6IlVTRVIiLCJleHAiOjE3MTkzNTc0NDN9.0FefdGXqJ9cjpYiW_QYx-49KXe1P3zRcq_6S5IT7508",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "sellerId",
+							"value": "7",
+							"type": "text"
+						},
+						{
+							"key": "customerId",
+							"value": "3",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:8080/chats/page/1?user1Id=1&user2Id=3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"chats",
 						"page",
-						""
+						"1"
+					],
+					"query": [
+						{
+							"key": "user1Id",
+							"value": "1"
+						},
+						{
+							"key": "user2Id",
+							"value": "3"
+						}
 					]
 				}
 			},

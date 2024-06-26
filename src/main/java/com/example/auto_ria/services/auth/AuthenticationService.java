@@ -51,7 +51,6 @@ public class AuthenticationService {
     private CommonService commonService;
     private FMService mailer;
 
-    // todo auth pre
     public UserResponse getByToken(String token) {
         AuthSQL authSQL = userAuthDaoSQL.findByAccessToken(token);
         if (authSQL == null) {

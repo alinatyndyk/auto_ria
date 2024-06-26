@@ -75,6 +75,8 @@ const ProfilePage: FC = () => {
     const { user } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
+        setTimeout(() => {
+        }, 400);
         dispatch(sellerActions.getByToken());
         if (user) {
             const obj = securityService.encryptObject(user)

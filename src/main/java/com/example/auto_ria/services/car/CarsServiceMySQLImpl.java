@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
@@ -26,7 +25,6 @@ import com.example.auto_ria.enums.EAccountType;
 import com.example.auto_ria.enums.ECurrency;
 import com.example.auto_ria.enums.EMail;
 import com.example.auto_ria.enums.EModel;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.CarSQL;

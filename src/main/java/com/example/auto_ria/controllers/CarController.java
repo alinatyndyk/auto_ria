@@ -175,7 +175,6 @@ public class CarController {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
             CarSQL carSQL = carsService.extractById(id);
-            carsService.checkCredentials(request, id);
 
             if (!carSQL.isActivated()) {
                 throw new CustomException("The car is banned", HttpStatus.FORBIDDEN);

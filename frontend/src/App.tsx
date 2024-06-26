@@ -6,10 +6,9 @@ import { ForgotPasswordForm } from "./forms/auth/passwords/ForgotPasswordForm";
 import { ResetPasswordForm } from "./forms/auth/passwords/ResetPasswordForm";
 import { MainLayout } from "./layouts";
 import { LoginPage } from "./pages";
-import { ProfilePage } from "./pages/auth/ProfilePage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import CarPage from './pages/car/CarPage';
-
+import { ProfilePage } from "./pages/auth/ProfilePage";
 function App() {
     return (
         <Routes>

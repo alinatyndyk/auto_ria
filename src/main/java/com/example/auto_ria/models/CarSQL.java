@@ -48,11 +48,10 @@ public class CarSQL {
     private List<String> photo = new ArrayList<>();
 
     @JsonManagedReference
-    // @ManyToOne(cascade = CascadeType.ALL)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinTable(
             name = "seller_cars",
-            joinColumns = @JoinColumn(name = "car_id", nullable = false),  // Set nullable to false
+            joinColumns = @JoinColumn(name = "car_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "seller_id")
     )
     private UserSQL user;

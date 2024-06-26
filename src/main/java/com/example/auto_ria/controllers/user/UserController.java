@@ -140,7 +140,7 @@ public class UserController {
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("MANAGER"))
-                        && userDetails.getUsername() == userById.getEmail()) {
+                        && userDetails.getUsername().equals(userById.getEmail())) {
 
                     commonService.removeAvatar(userById.getAvatar());
 
@@ -152,7 +152,7 @@ public class UserController {
 
                 } else if (userDetails.getAuthorities().stream()
                         .anyMatch(a -> a.getAuthority().equals("USER"))
-                        && userDetails.getUsername() == userById.getEmail()) {
+                        && userDetails.getUsername().equals(userById.getEmail())) {
 
                     commonService.removeAvatar(userById.getAvatar());
 
@@ -174,6 +174,7 @@ public class UserController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id, HttpServletRequest request) {
         try {
@@ -184,7 +185,8 @@ public class UserController {
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
+                if (userDetails.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equals("ADMIN"))) {
                     if (userDetails.getUsername().equals(user.getEmail())
                             && usersServiceMySQL.countByRole(ERole.ADMIN) == 1) {
                         throw new CustomException("At least one Administator has to remain in the DB",

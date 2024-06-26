@@ -5,9 +5,7 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -174,6 +172,7 @@ public class AuthenticationController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/code-manager")
     public ResponseEntity<String> codeManager(
             @RequestParam("email") String email) {
@@ -240,6 +239,7 @@ public class AuthenticationController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/code-admin")
     public ResponseEntity<String> codeAdmin(
             @RequestParam("email") String email) {
@@ -312,7 +312,7 @@ public class AuthenticationController {
 
             UserSQL userSQL = usersServiceMySQL.getByEmail(loginRequest.getEmail());
 
-            if (userSQL != null && !userSQL.getIsActivated().equals(true)) {// ? equals !true -> false then?
+            if (userSQL != null && !userSQL.getIsActivated().equals(true)) {
                 throw new CustomException("Activate your account", HttpStatus.LOCKED);
             } else if (userSQL != null && userSQL.getIsActivated().equals(true)) {
                 authenticationResponse = authenticationService.login(loginRequest);
@@ -338,6 +338,7 @@ public class AuthenticationController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @PostMapping("/change-passwords")
     public ResponseEntity<AuthenticationResponse> changePassword(
             @RequestParam("newPassword") String newPassword,
@@ -373,6 +374,7 @@ public class AuthenticationController {
         }
     }
 
+    @PreAuthorize("hasRole('ADMIN', 'MANAGER', 'USER')")
     @PostMapping("/sign-out")
     public ResponseEntity<String> signOut(
             HttpServletRequest request) {
@@ -380,7 +382,7 @@ public class AuthenticationController {
             String accessToken = jwtService.extractTokenFromHeader(request);
             Claims claims = jwtService.extractClaimsCycle(accessToken);
 
-            String email = claims.get("sub").toString(); // todo token delete iss
+            String email = claims.get("sub").toString();
 
             authenticationService.signOut(email);
 

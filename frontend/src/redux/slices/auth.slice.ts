@@ -223,7 +223,6 @@ const slice = createSlice({
             .addCase(changePassword.fulfilled, (state, action) => {
                 state.isAuth = true;
                 authService.setTokens({ ...action.payload });
-                // window.location.reload();
             })
             .addCase(resetPassword.fulfilled, (state, action) => {
                 state.isAuth = false;

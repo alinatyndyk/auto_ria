@@ -18,7 +18,7 @@ import com.example.auto_ria.models.user.UserSQL;
 
 @Repository
 public interface CarDaoSQL
-        extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL> { //check git if doesnt work
+        extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL> {
 
     List<CarSQL> findByUser(UserSQL userSQLSQL);
 

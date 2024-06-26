@@ -20,7 +20,7 @@ const ActivateForm: FC = () => {
         }
 
         if (activateSellerErrors === null) {
-            navigate('/profile')
+            navigate('/profile');
         }
     }
     return (

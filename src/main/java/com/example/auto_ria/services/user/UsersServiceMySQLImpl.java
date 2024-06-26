@@ -108,7 +108,7 @@ public class UsersServiceMySQLImpl {
 
         mailer.sendEmail(user.getEmail(), deleteTypeMail, vars);
 
-        return new ResponseEntity<>("Success.User_deleted", HttpStatus.GONE);
+        return new ResponseEntity<>("Success.User_deleted", HttpStatus.OK);
     }
 
     public boolean doesBelongToSeller(UserSQL user, UserSQL user1) {
@@ -161,10 +161,13 @@ public class UsersServiceMySQLImpl {
     public void updateAvatar(int id, String fileName) {
 
         UserSQL user = getById(String.valueOf(id)).getBody();
-        assert user != null;
-        user.setAvatar(fileName);
+        if (user != null) {
+            user.setAvatar(fileName);
+            userDaoSQL.save(user);
+        } else {
+            throw new CustomException("No user found", HttpStatus.BAD_REQUEST);
+        }
 
-        userDaoSQL.save(user);
     }
 
     public boolean isUserByNumberPresent(String number) {
@@ -185,7 +188,7 @@ public class UsersServiceMySQLImpl {
         Page<UserResponse> userResponsePage = userSQLPage
                 .map(userSQL -> commonService.createUserResponse(userSQL));
 
-        return new ResponseEntity<>(userResponsePage, HttpStatus.OK); // todo to common service
+        return new ResponseEntity<>(userResponsePage, HttpStatus.OK);
     }
 
     public List<UserSQL> findAllByRole(ERole role) {

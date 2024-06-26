@@ -18,14 +18,20 @@ const MainLayout: FC = () => {
     const { errorDeleteById } = useAppSelector(state => state.sellerReducer);
 
     const deleteAccount = async () => {
+        console.log(AuthObj, storedAuth);
         if (AuthObj !== null && storedAuth === "true") {
             const decryptedAuth = securityService.decryptObject(AuthObj);
-
             if (decryptedAuth?.id) {
                 const id: number = decryptedAuth.id;
                 const { type } = await dispatch(sellerActions.deleteById(id));
-                if (type === "fulfilled") {
-                    navigate("/cars");
+                const lastWord = type.substring(type.lastIndexOf("/") + 1);
+                // console.log(lastWord, "last word");
+                // console.log(lastWord === "fulfilled");
+                if (lastWord === "fulfilled") {
+                    // console.log("fulfilled");
+                    setTimeout(() => {
+                        navigate("/cars");
+                      }, 300);
                 }
             }
         }
@@ -53,12 +59,12 @@ const MainLayout: FC = () => {
                 <LogOutForm />
                 <button onClick={() => deleteAccount()}>Delete my account</button>
                 <div>
-                {errorDeleteById && showResponse ? (
-                    <div style={{
-                        color: "darkred"
-                    }}>{errorDeleteById?.message}</div>
-                ) : null}
-            </div>
+                    {errorDeleteById && showResponse ? (
+                        <div style={{
+                            color: "darkred"
+                        }}>{errorDeleteById?.message}</div>
+                    ) : null}
+                </div>
             </div>
         );
     } else {

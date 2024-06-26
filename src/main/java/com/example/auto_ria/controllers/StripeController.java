@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,12 +30,12 @@ import com.example.auto_ria.services.CommonService;
 import com.example.auto_ria.services.otherApi.StripeService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
 import com.stripe.model.Customer;
 import com.stripe.param.CustomerCreateParams;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 
 @RestController
 @AllArgsConstructor
@@ -51,7 +52,7 @@ public class StripeController {
     private StripeService stripeService;
     private UsersServiceMySQLImpl usersServiceMySQL;
 
-    @SneakyThrows
+    @SuppressWarnings("unchecked")
     @PostMapping("/webhooks/stripe")
     public void handleInvoicePaymentFailedWebhook(@RequestBody Map<String, Object> event) {
         String type = (String) event.get("type");
@@ -81,7 +82,7 @@ public class StripeController {
 
     }
 
-    @SneakyThrows
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/add-payment-source")
     public ResponseEntity<String> addPaymentSource(
             @RequestBody SetPaymentSourceRequest body,
@@ -107,24 +108,35 @@ public class StripeController {
             String paymentToken = body.getToken();
 
             if (!sourcePresent) {
-                Customer customer = Customer.create(
-                        CustomerCreateParams.builder()
-                                .setName(userSQL.getName() + userSQL.getLastName())
-                                .setEmail(userSQL.getEmail())
-                                .setSource(paymentToken)
-                                .build());
+                try {
 
-                userSQL.setPaymentSource(customer.getId());
-                userSQL.setPaymentSourcePresent(true);
-                userDaoSQL.save(userSQL);
+                    Customer customer = Customer.create(
+                            CustomerCreateParams.builder()
+                                    .setName(userSQL.getName() + userSQL.getLastName())
+                                    .setEmail(userSQL.getEmail())
+                                    .setSource(paymentToken)
+                                    .build());
+                    userSQL.setPaymentSource(customer.getId());
+                    userSQL.setPaymentSourcePresent(true);
+                    userDaoSQL.save(userSQL);
+                } catch (StripeException e) {
+                    throw new CustomException("Couldnt create payment", HttpStatus.EXPECTATION_FAILED);
+                }
 
             } else {
                 String paymentSource = userSQL.getPaymentSource();
-                Customer stripeCustomer = Customer.retrieve(paymentSource);
 
-                Map<String, Object> params = new HashMap<>();
-                params.put("source", paymentToken);
-                stripeCustomer.update(params);
+                try {
+
+                    Customer stripeCustomer = Customer.retrieve(paymentSource);
+
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("source", paymentToken);
+                    stripeCustomer.update(params);
+                } catch (StripeException e) {
+                    throw new CustomException("Couldnt access payment info", HttpStatus.EXPECTATION_FAILED);
+
+                }
             }
 
             return ResponseEntity.ok("Card attached successfully");
@@ -133,7 +145,7 @@ public class StripeController {
         }
     }
 
-    @SneakyThrows
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/buy-premium")
     public ResponseEntity<String> getPremium(
             @RequestBody SetPaymentSourceRequest body,
@@ -161,7 +173,7 @@ public class StripeController {
         }
     }
 
-    @SneakyThrows
+    @PreAuthorize("hasRole('USER')")
     @PostMapping("/cancel-subscription")
     public ResponseEntity<String> cancel(
             HttpServletRequest request) {

@@ -10,7 +10,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.example.auto_ria.dao.socket.SessionDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
-import com.example.auto_ria.enums.ERole;
 import com.example.auto_ria.enums.ETokenRole;
 import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.user.UserResponse;
@@ -83,15 +82,14 @@ public class CommonService {
     public UserSQL extractUserFromHeader(HttpServletRequest request) {
         UserSQL sellerSQL = null;
         try {
-            // String email = extractEmailFromHeader(request, ETokenRole.USER);
-            String email = extractEmailFromHeader(request, ETokenRole.ADMIN); //todo fix
+            String email = extractEmailFromHeader(request, ETokenRole.USER);
             sellerSQL = userDaoSQL.findByEmail(email);
         } catch (Exception ignore) {
         }
         return sellerSQL;
     }
 
-     public UserResponse createUserResponse(UserSQL userSQL) {
+    public UserResponse createUserResponse(UserSQL userSQL) {
         try {
             UserResponse userResponse = UserResponse.builder()
                     .id(userSQL.getId())

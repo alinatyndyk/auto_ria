@@ -1,6 +1,5 @@
 package com.example.auto_ria.configurations.rabbitMq;
 
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
@@ -29,7 +28,6 @@ public class RabbitMQProducer {
         });
     }
 
-    @SneakyThrows
     public void sendMessage(String message, int sellerID, int customerID) {
         LOGGER.info(String.format("Message sent -> %s", message));
 

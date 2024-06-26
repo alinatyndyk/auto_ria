@@ -166,7 +166,6 @@ public class JwtService {
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setIssuer(issuer.name())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60))
-                // .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60))
                 .signWith(getSigningKey(issuer), SignatureAlgorithm.HS256)
                 .compact();
 

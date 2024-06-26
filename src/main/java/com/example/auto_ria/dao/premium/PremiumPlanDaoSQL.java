@@ -10,7 +10,6 @@ public interface PremiumPlanDaoSQL extends JpaRepository<PremiumPlan, Integer> {
 
     PremiumPlan findByCustomerId(String customerId);
 
-    // PremiumPlan findBySellerId(int sellerId);
     PremiumPlan findByUserId(int sellerId);
 
     @Transactional

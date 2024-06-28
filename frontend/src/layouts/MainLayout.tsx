@@ -25,10 +25,7 @@ const MainLayout: FC = () => {
                 const id: number = decryptedAuth.id;
                 const { type } = await dispatch(sellerActions.deleteById(id));
                 const lastWord = type.substring(type.lastIndexOf("/") + 1);
-                // console.log(lastWord, "last word");
-                // console.log(lastWord === "fulfilled");
                 if (lastWord === "fulfilled") {
-                    // console.log("fulfilled");
                     setTimeout(() => {
                         navigate("/cars");
                       }, 300);

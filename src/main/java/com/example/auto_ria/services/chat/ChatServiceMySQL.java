@@ -94,8 +94,7 @@ public class ChatServiceMySQL {
     public MessageClass patchMessage(MessageClass messageClass, String content) {
         messageClass.setContent(content);
         messageClass.setIsEdited(true);
-        messageDaoSQL.save(messageClass);
-        return messageClass;
+        return messageDaoSQL.save(messageClass);
     }
 
     public ResponseEntity<String> deleteMessage(int id) {

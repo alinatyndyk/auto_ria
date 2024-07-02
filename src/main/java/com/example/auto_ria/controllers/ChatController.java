@@ -66,6 +66,9 @@ public class ChatController {
             }
 
             String roomKey = chatServiceMySQL.getRoomKey(user1Id, user2Id);
+            System.out.println(roomKey);
+
+            System.out.println(chatServiceMySQL.getByRoomKey(roomKey));
 
             return ResponseEntity.ok(chatServiceMySQL.getByRoomKey(roomKey));
 
@@ -144,22 +147,20 @@ public class ChatController {
             @PathVariable int id,
             @RequestParam("content") String content) {
         try {
-
             MessageClass messageClass = chatServiceMySQL.getMessageById(id);
-
+            
             if (messageClass == null) {
                 throw new CustomException("No message found", HttpStatus.BAD_REQUEST);
-            }
-
+            }            
             UserSQL userSQL;
-
+            
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
+            
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
                 userSQL = usersServiceMySQL.getByEmail(userDetails.getUsername());
-                if (userSQL.getId() != Integer.parseInt(messageClass.getSenderId())
-                        || userSQL.getId() != Integer.parseInt(messageClass.getSenderId())) {
+
+                if (userSQL.getId() != Integer.parseInt(messageClass.getSenderId())) {
                     throw new CustomException("Unauthorized. Cannot access foreign message", HttpStatus.UNAUTHORIZED);
                 }
             } else {

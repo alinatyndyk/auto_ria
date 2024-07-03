@@ -1,0 +1,58 @@
+/* Car.css */
+
+.car-card {
+    position: relative;
+    display: flex;
+    background-color: whitesmoke;
+    height: 130px;
+    width: 300px; /* увеличиваем ширину карточки на 20px */
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: background-color 0.3s ease;
+  }
+  
+  .car-card:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .car-photo {
+    flex: 0 0 70%;
+    max-width: 70%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+  }
+  
+  .car-photo img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .car-details {
+    flex: 1;
+    padding-left: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .car-details div {
+    font-size: 7px; /* уменьшаем размер текста */
+    margin-bottom: 2px; /* уменьшаем расстояние между строками */
+  }
+  
+  .car-details .price {
+    font-size: 12px;
+    font-weight: bold;
+  }
+  
+  .car-details .location {
+    font-size: 10px;
+  }
+  

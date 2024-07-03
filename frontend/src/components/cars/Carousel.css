@@ -1,0 +1,63 @@
+.carousel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 20px; /* Добавлен отступ снизу */
+}
+
+.carousel-item {
+    flex: 1 0 33.33%; /* Равномерное распределение на 3 части */
+    position: relative;
+}
+
+.carousel-item img {
+    width: 100%;
+    display: block;
+    border-radius: 8px; /* Добавлены скругления у картинок */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для картинок */
+    transition: transform 0.3s ease; /* Плавное изменение при наведении */
+}
+
+.carousel-item img:hover {
+    transform: scale(1.05); /* Увеличение размера при наведении */
+}
+
+.current-image {
+    height: 250px; /* Установлено фиксированное значение высоты для текущей картинки */
+}
+
+.previous-image,
+.next-image {
+    height: 200px; /* Установлено фиксированное значение высоты для предыдущей и следующей картинок */
+    opacity: 0.6; /* Прозрачность для предыдущей и следующей картинок */
+}
+
+.carousel-button {
+    padding: 10px 20px;
+    background-color: dodgerblue;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.carousel-button:hover {
+    background-color: #0073e6;
+}
+
+.previous-button {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+}
+
+.next-button {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+}
+

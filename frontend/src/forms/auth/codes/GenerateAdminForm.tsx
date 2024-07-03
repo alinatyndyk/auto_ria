@@ -3,6 +3,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { IGenerateCode } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
+import './GenerateForm.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const GenerateAdminForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IGenerateCode>();
@@ -20,15 +23,19 @@ const GenerateAdminForm: FC = () => {
         reset();
     }
     return (
-        <div>
-            Generate code for admin
-            {generateAdminErrors ? <div>{generateAdminErrors?.message}</div> : <div>{getResponse}</div>}
-            <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
+        <div className="generate-form">
+            <div className="form-header">
+                <FontAwesomeIcon icon={faEnvelope} className="form-icon" />
+                <span className="form-title"> Generate code for admin</span>
+            </div>
+            {generateAdminErrors && <div className="error-message">{generateAdminErrors.message}</div>}
+            <form onSubmit={handleSubmit(activate)}>
                 <div>
-                    <input type="text" placeholder={'email'} {...register('email')} />
+                    <input type="text" placeholder="Email" {...register('email')} />
                 </div>
-                <button>generate a new admin</button>
+                <button type="submit">Generate a New Admin</button>
             </form>
+            {getResponse && <div>{getResponse}</div>}
         </div>
     );
 };

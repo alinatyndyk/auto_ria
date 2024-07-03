@@ -1,51 +1,79 @@
-import { FC } from 'react';
-import { GenerateAdminForm } from "../../forms/auth/codes/GenerateAdminForm";
-import { GenerateManagerForm } from "../../forms/auth/codes/GenerateManagerForm";
+import React, { FC } from 'react';
+import { GenerateAdminForm } from '../../forms/auth/codes/GenerateAdminForm';
+import { GenerateManagerForm } from '../../forms/auth/codes/GenerateManagerForm';
 import { CarForm } from '../../forms/car/CarForm';
 import { IUserResponse } from '../../interfaces/user/seller.interface';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUserCircle, faIdBadge, faKey, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
+import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
+import { FindCarById } from '../../forms/car/FindCarById';
 
 interface IProps {
-    seller: IUserResponse
+    seller: IUserResponse;
 }
 
-
 const AdminProfile: FC<IProps> = ({ seller }) => {
+    const { id, avatar, name, lastName, role, region, city } = seller;
 
+    // Determine the avatar picture URL
+    const picture = avatar === null ? 'channels4_profile.jpg' : avatar;
 
-    const {
-        id, avatar, name, lastName, role, region, city
-    } = seller;
-    let picture;
-    if (avatar === null) {
-        picture = "channels4_profile.jpg";
-    } else {
-        picture = avatar;
-    }
     return (
         <div style={{
-            backgroundColor: "whitesmoke",
-            fontSize: "9px",
-            columnGap: "10px"
+            backgroundColor: 'whitesmoke',
+            padding: '20px',
+            borderRadius: '8px',
+            gridTemplateColumns: 'auto 1fr',
+            columnGap: '20px',
+            fontSize: '16px',
         }}>
-            <div>
-                <div>
-                    <img style={{ height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px" }}
-                        src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar" /></div>
-                <div>id: {id}</div>
-                <div>{name} {lastName}</div>
-                <div>access: {role}</div>
-                <div>{region} -- {city}</div>
+            <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                <div style={{ display: 'flex', justifyContent: "space-between" }}>
+                    <div>
+                        <img
+                            style={{ height: '80px', width: '80px', borderRadius: '50%', marginRight: '10px' }}
+                            src={`http://localhost:8080/users/avatar/${picture}`}
+                            alt="Avatar"
+                        />
+                    </div>
+                    <div>
+                        <div style={{ marginBottom: '5px' }}>
+                            <FontAwesomeIcon icon={faIdBadge} style={{ marginRight: '5px' }} />
+                            <span>ID: {id}</span>
+                        </div>
+                        <div style={{ marginBottom: '5px' }}>
+                            <FontAwesomeIcon icon={faUserCircle} style={{ marginRight: '5px' }} />
+                            <span>{name} {lastName}</span>
+                        </div>
+                        <div style={{ marginBottom: '5px' }}>
+                            <FontAwesomeIcon icon={faKey} style={{ marginRight: '5px' }} />
+                            <span>Access: {role}</span>
+                        </div>
+                        <div style={{ marginBottom: '5px' }}>
+                            <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '5px' }} />
+                            <span>{region}, {city}</span>
+                        </div>
+                        <hr />
+                        <div>
+                            <UpdateUserForm />
+                            <br />
+                            <ChangePasswordForm />
+                            <br />
+                            <FindCarById />
+                        </div>
+                    </div>
+                </div>
+                <div style={{ marginTop: '20px' }}>
+                    <CarForm />
+                    <br />
+                    <GenerateManagerForm />
+                    <GenerateAdminForm />
+                </div>
             </div>
-            <br />
-            <GenerateManagerForm />
-            <br />
-            <GenerateAdminForm />
-            <br />
-            <div>Create new car</div>
-            <CarForm />
         </div>
     );
 };
-
 export { AdminProfile };
+
 

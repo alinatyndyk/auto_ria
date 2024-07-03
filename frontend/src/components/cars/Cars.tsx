@@ -1,8 +1,9 @@
-import { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { carActions } from "../../redux/slices";
 import { Car } from "./Car";
+import './Cars.css'; // импорт стилей
 
 interface IProps {
     sellerId: number | null
@@ -25,13 +26,12 @@ const Cars: FC<IProps> = ({ sellerId }) => {
 
     const [getButtons, setButtons] = useState(true);
     const [getNextButtons, setNextButtons] = useState(false);
-    let [getPage, setPage] = useState<number>(0);
+    let [getPage, setPage] = useState<number>(1);
 
     useEffect(() => {
-
         searchParams.set('page', getPage.toString());
         setSearchParams(searchParams);
-        
+
         if (sellerId != null) {
             dispatch(carActions.getBySeller({ page: getPage, id: sellerId })).then(() => {
             });
@@ -39,20 +39,18 @@ const Cars: FC<IProps> = ({ sellerId }) => {
             dispatch(carActions.getAll(getPage));
         }
 
-        if (getPage <= 0) {
+        if (getPage <= 1) {
             setButtons(true);
         } else {
             setButtons(false);
         }
 
-        if (getPage + 1 >= pagesInTotal) {
+        if (getPage >= pagesInTotal) {
             setNextButtons(true);
         } else {
             setNextButtons(false);
         }
-
     }, [getPage, sellerId, pagesInTotal])
-
 
     const prevPage = () => {
         setPage(prevState => prevState - 1);
@@ -63,14 +61,14 @@ const Cars: FC<IProps> = ({ sellerId }) => {
     };
 
     return (
-        <div>
-            Cars
-            {pagesInTotal === 0 && <div style={{ color: "blue" }}>There are no cars to view</div>}
+        <div className="cars-container">
+            <h2 className="cars-title">Cars</h2>
+            {pagesInTotal === 0 && <div className="no-cars-message">There are no cars to view</div>}
             {cars.map(car => <Car key={car.id} car={car} />)}
-            <div style={{ display: 'flex' }}>
-                <button disabled={getButtons} onClick={() => prevPage()}>prev</button>
-                <button disabled={getNextButtons} onClick={() => nextPage()}>next</button>
-                <div>total: {pagesInTotal}</div>
+            <div className="pagination">
+                <button disabled={getButtons} onClick={prevPage}>Prev</button>
+                <div className="pagination-info">Page {getPage} of {pagesInTotal}</div>
+                <button disabled={getNextButtons} onClick={nextPage}>Next</button>
             </div>
         </div>
     );

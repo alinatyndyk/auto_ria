@@ -1,0 +1,58 @@
+/* General styles */
+.find-car-by-id {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    background-color: #fff;
+}
+
+.find-car-by-id > div:first-child {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Input styles */
+.find-car-by-id input[type="number"] {
+    width: calc(100% - 80px);
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.find-car-by-id input[type="number"]:focus {
+    border-color: #007bff;
+}
+
+/* Button styles */
+.find-car-by-id button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.find-car-by-id button:hover {
+    background-color: #0056b3;
+}
+
+/* Error message styles */
+.find-car-by-id .errorMessage {
+    color: #dc3545;
+    font-size: 14px;
+    margin-top: 5px;
+}

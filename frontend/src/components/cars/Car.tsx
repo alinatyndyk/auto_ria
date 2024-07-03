@@ -1,13 +1,15 @@
+import { faBolt, faCar, faCircle, faDollarSign, faFileAlt, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FC } from 'react';
 import { useAppNavigate } from "../../hooks";
 import { CarsResponse } from "../../interfaces";
+import './Car.css'; // импорт стилей
 
 interface IProps {
     car: CarsResponse
 }
 
 const Car: FC<IProps> = ({ car }) => {
-
     const navigate = useAppNavigate();
 
     const {
@@ -17,27 +19,25 @@ const Car: FC<IProps> = ({ car }) => {
     } = car;
 
     return (
-        <div onClick={() => navigate(`/cars/${id}`)} style={{
-            display: "flex",
-            backgroundColor: "whitesmoke",
-            height: "130px", width: "220px",
-            fontSize: "9px",
-            columnGap: "10px"
-        }}>
-            <div>
-                <div>id: {id}</div>
-                <img height={"80px"} key={photo[0]} src={`http://localhost:8080/users/avatar/${photo[0]}`} alt='' />
-                <div>{price} {currency}</div>
-                <div style={{ fontSize: "9px" }}>{region}, {city}</div>
+        <div className="car-card" onClick={() => navigate(`/cars/${id}`)}>
+            <div className="car-photo">
+                <img src={`http://localhost:8080/users/avatar/${photo[0]}`} alt="" />
             </div>
-            <div>
-                <div>brand: {brand}</div>
-                <div>model: {model}</div>
-                <div>power (h): {powerH}</div>
+            <div className="car-details">
+            <div><FontAwesomeIcon icon={faCircle} /> {id}</div>
+            <div><FontAwesomeIcon icon={faCar} /> {brand}</div>
+            <div><FontAwesomeIcon icon={faFileAlt} /> {model}</div>
+            <div><FontAwesomeIcon icon={faBolt} /> {powerH}</div>
+            <div className="price">
+                <FontAwesomeIcon icon={faDollarSign} /> {price} {currency}
             </div>
-            <br />
+            <div className="location">
+                <FontAwesomeIcon icon={faGlobe} /> {region}, {city}
+            </div>
+        </div>
         </div>
     );
 };
 
 export { Car };
+

@@ -14,63 +14,13 @@ import { sellerActions } from "../../redux/slices/seller.slice";
 import { FindCarById } from '../../forms/car/FindCarById';
 import { securityService } from '../../services/security.service';
 import { error } from 'console';
+import { CarForm } from '../../forms';
+import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
+
 
 const ProfilePage: FC = () => {
 
     const dispatch = useAppDispatch();
-    const { reset, handleSubmit, register } = useForm<IUserUpdateRequest>();
-
-    const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
-    const [getCities, setCities] = useState<IGeoCity[]>([]);
-
-    const [isRegionVisible, setIsRegionVisible] = useState(true);
-    const [isCityVisible, setIsCityVisible] = useState(true);
-
-    const [getCarRegion, setCarRegion] = useState('');
-    const [getCarRegionId, setCarRegionId] = useState('');
-
-    const [getCityInputValue, setCityInputValue] = useState('');
-    const [getCarCity, setCarCity] = useState('');
-
-    const [getRegionInput, setRegionInput] = useState(false);
-    const [getCityInput, setCityInput] = useState(true);
-
-    const [getResponse, setResponse] = useState('');
-    const { regions, cities, errorUpdateById } = useAppSelector(state => state.sellerReducer);
-
-    useEffect(() => {
-        setRegions(regions);
-    }, [regions])
-
-    useEffect(() => {
-        setCities(cities);
-    }, [cities]);
-
-    const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!getRegionInput) setCarRegion(event.target.value);
-        await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
-    };
-
-    const handleRegionClick = (region: IGeoRegion) => {
-        setCarRegion(region.name);
-        setCarRegionId(region.isoCode);
-        setRegionInput(true);
-        setCityInput(false);
-        setIsRegionVisible(false);
-    };
-
-    const handleCityInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (!getCityInput) setCarCity(event.target.value);
-        setCityInputValue(event.target.value);
-        await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
-    };
-
-
-    const handleCityClick = (cityName: string) => {
-        setCarCity(cityName);
-        setCityInput(true);
-        setIsCityVisible(false);
-    };
 
     const { user } = useAppSelector(state => state.sellerReducer);
 
@@ -83,37 +33,6 @@ const ProfilePage: FC = () => {
             localStorage.setItem("authorization", obj);
         }
     }, []);
-
-    const save: SubmitHandler<IUserUpdateRequest> = async (userToUpdate: IUserUpdateRequest) => {
-
-        userToUpdate.region = getCarRegion;
-        userToUpdate.city = getCarCity;
-
-        const updatedUser: Partial<IUserUpdateRequest> = {};
-
-        Object.keys(userToUpdate).forEach(key => {
-            const value = userToUpdate[key as keyof IUserUpdateRequest];
-            if (value !== undefined && value !== null && value !== '') {
-                updatedUser[key as keyof IUserUpdateRequest] = value;
-            }
-        });
-
-        if (user !== null) {
-
-            await dispatch(sellerActions.updateById({ id: user.id, body: updatedUser }))
-                .then((res) => {
-                    const type = res.type;
-                    const lastWord = type.substring(type.lastIndexOf("/") + 1);
-
-                    if (lastWord === "fulfilled") {
-                        setResponse("User updated successfully");
-                        setCarCity('');
-                        setCarRegion('');
-                        reset();
-                    }
-                });
-        }
-    };
 
 
     let userComponent;
@@ -133,83 +52,7 @@ const ProfilePage: FC = () => {
 
     return (
         <div>
-            <div>Profile</div>
             {userComponent}
-            <hr />
-            <ChangePasswordForm />
-            <hr />
-            <div>Change account info</div>
-            <form onSubmit={handleSubmit(save)}>
-                <div>
-                    <div>{errorUpdateById?.message ? errorUpdateById.message : <div>{getResponse}</div>}</div>
-                    <input placeholder={'region'} {...register('region', { value: getCarRegion })}
-                        value={getCarRegion} disabled={getRegionInput}
-                        autoComplete={"off"} type="text" onChange={handleInputChange} />
-                    <button onClick={() => {
-                        setRegionInput(false);
-                        setCarRegion('');
-                        setIsRegionVisible(true);
-                        setCarCity('');
-                    }}>change region
-                    </button>
-                </div>
-                {isRegionVisible &&
-                    <div>
-                        {getRegions.map((region) => (
-                            <div key={region.isoCode} onClick={() => {
-                                handleRegionClick(region);
-                                setResponse('');
-                            }}>
-                                {region.name}
-                            </div>
-                        ))}
-                    </div>
-                }
-                <div>
-                    <input placeholder={'city'} {...register('city', { value: getCarCity })}
-                        value={getCarCity} disabled={getCityInput}
-                        autoComplete={"off"} type="text" onChange={handleCityInputChange} />
-                    <button onClick={() => {
-                        setCityInput(false);
-                        setCarCity('');
-                        setIsCityVisible(true);
-                    }}>change city
-                    </button>
-                </div>
-                {isCityVisible &&
-                    <div>
-                        {isCityVisible && getCities.map((city) => {
-                            if (city.name.toLowerCase().startsWith(getCityInputValue.toLowerCase())) {
-                                return (
-                                    <div
-                                        key={city.name}
-                                        onClick={() => {
-                                            handleCityClick(city.name);
-                                            setResponse('');
-                                        }}>
-                                        {city.name}
-                                    </div>
-                                );
-                            }
-                        })}
-                    </div>
-                }
-                <div>
-                    <input autoComplete={"off"} type="text"
-                        placeholder={'number'} {...register('number')} />
-                </div>
-                <div>
-                    <input autoComplete={"off"} type="text"
-                        placeholder={'name'} {...register('name')} />
-                </div>
-                <div>
-                    <input autoComplete={"off"} type="text"
-                        placeholder={'lastName'} {...register('lastName')} />
-                </div>
-                <button>update user info</button>
-            </form>
-            <hr />
-            <FindCarById />
         </div>
 
     );

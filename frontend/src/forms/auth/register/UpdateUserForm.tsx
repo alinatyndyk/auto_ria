@@ -1,12 +1,10 @@
 import { FC } from 'react';
-import { LoginForm } from "../../forms";
-
-const LoginPage: FC = () => {
+const UpdateUserForm: FC = () => {
 
     // if (localStorage.getItem("isAuth") != undefined && localStorage.getItem("isAuth") === "true") {
         return (
         <div>
-            <LoginForm />
+            
         </div>
     );
 // } else {
@@ -16,5 +14,4 @@ const LoginPage: FC = () => {
 //     }
 };
 
-export { LoginPage };
-
+export { UpdateUserForm };

@@ -1,0 +1,94 @@
+.carFull {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 20px; /* Space between carousel and info section */
+}
+
+.carFull__carousel {
+    flex: 1;
+}
+
+.carFull__info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 300px; /* Ensure the info section doesn't expand too wide */
+}
+
+.carFull__price, .carFull__location, .carFull__details div, .carFull__desc div {
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Space between icon and text */
+}
+
+.carFull__price {
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.carFull__location {
+    font-size: 10px;
+    color: #555;
+}
+
+.carFull__details, .carFull__desc {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.carFull__pricesBox, .carFull__middleValueBox {
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+.carFull__prices div, .carFull__middleValueBox div {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.carFull__deleteButton {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 5px;
+    width: fit-content; /* Makes the button only as wide as its content */
+}
+
+.carFull__deleteButton:hover {
+    background-color: darkred;
+}
+
+.carFull__unbanButton {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 5px;
+    width: fit-content; /* Makes the button only as wide as its content */
+}
+
+.carFull__unbanButton:hover {
+    background-color: darkgreen;
+}
+
+.carFull__updateForm {
+    flex: 1 0 100%; /* Ensure the update form spans the full width below the carousel */
+    margin-top: 20px; /* Space between the info section and the update form */
+}

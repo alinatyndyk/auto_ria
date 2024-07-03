@@ -3,6 +3,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
 import { INewPassword } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
+import './PasswordForm.css'; // Importing CSS file for styling
 
 const ChangePasswordForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<INewPassword>();
@@ -22,12 +23,10 @@ const ChangePasswordForm: FC = () => {
             }, 5000);
 
             return () => clearTimeout(timer);
-
         }
     }, [getResponse]);
 
     const activate: SubmitHandler<INewPassword> = async (newPassword: INewPassword) => {
-
         const { type } = await dispatch(authActions.changePassword(newPassword));
         const lastWord = type.substring(type.lastIndexOf("/") + 1);
 
@@ -38,31 +37,30 @@ const ChangePasswordForm: FC = () => {
         }
 
         reset();
-    }
+    };
+
     return (
-        <div>
-            <div>
-                <button onClick={() => navigate('/cars')}>Cars</button>
+        <div className="password-form">
+            <div className="form-header">
+                Change Password
             </div>
-            <div>
-                Change password
+            <div className="error-message">
+                {changePasswordErrors && <div>{changePasswordErrors.message}</div>}
+                {showResponse && <div>{getResponse}</div>}
             </div>
-            {/* {changePasswordErrors ? <div>{changePasswordErrors?.message}</div> : <div>{getResponse}</div>} */}
-            <div>
-                {changePasswordErrors ? (
-                    <div>{changePasswordErrors?.message}</div>
-                ) : (
-                    showResponse && <div>{getResponse}</div>
-                )}
-            </div>
-            <form encType="multipart/form-data" onSubmit={handleSubmit(activate)}>
-                <div>
-                    <input type="text" placeholder={'new password'} {...register('newPassword')} />
+            <form onSubmit={handleSubmit(activate)} className="password-form">
+                <div className="form-group">
+                    <input
+                        type="password"
+                        placeholder="Enter new password"
+                        {...register('newPassword', { required: true })}
+                    />
                 </div>
-                <button>change password</button>
+                <button type="submit" className="form-button">Change Password</button>
             </form>
         </div>
     );
 };
 
 export { ChangePasswordForm };
+

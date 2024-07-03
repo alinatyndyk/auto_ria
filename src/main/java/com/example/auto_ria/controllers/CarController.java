@@ -79,6 +79,7 @@ public class CarController {
             @RequestParam Map<String, String> queryParams) {
         try {
             CarSQL carQueryParams = new CarSQL();
+            page = page - 1;
 
             for (Map.Entry<String, String> entry : queryParams.entrySet()) {
                 String fieldName = entry.getKey();

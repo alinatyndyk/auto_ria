@@ -1,124 +1,101 @@
 import React, { FC, useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useAppDispatch, useAppSelector } from "../../hooks";
-import { ICreateCar, ICreateInputCar } from "../../interfaces";
-import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
-import { carActions } from "../../redux/slices";
-import { sellerActions } from "../../redux/slices/seller.slice";
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { useAppDispatch, useAppSelector } from '../../hooks';
+import { ICreateCar, ICreateInputCar } from '../../interfaces';
+import { IGeoCity, IGeoRegion } from '../../interfaces/geo.interface';
+import { carActions } from '../../redux/slices';
+import { sellerActions } from '../../redux/slices/seller.slice';
+import styles from './CarForm.module.css'; // импорт стилей из модуля
 
 export enum ECurrency {
-    UAH = "UAH", EUR = "EUR", USD = "USD"
+    UAH = 'UAH',
+    EUR = 'EUR',
+    USD = 'USD',
 }
 
 const CarForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
     const { brands, models, errorCreate } = useAppSelector(state => state.carReducer);
-
-    useEffect(() => {
-        dispatch(carActions.getAllBrands());
-    }, [useAppDispatch]);
-
-
+    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+    const dispatch = useAppDispatch();
 
     const [getResponse, setResponse] = useState('');
-
-    const { regions, cities } = useAppSelector(state => state.sellerReducer);
-
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
-
     const [isRegionVisible, setIsRegionVisible] = useState(true);
     const [isCityVisible, setIsCityVisible] = useState(true);
-
     const [getCarRegion, setCarRegion] = useState('');
     const [getCarRegionId, setCarRegionId] = useState('');
-
     const [getCityInputValue, setCityInputValue] = useState('');
     const [getCarCity, setCarCity] = useState('');
-
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
-
     const [getBrands, setBrands] = useState<string[]>([]);
     const [isBrandsVisible, setIsBrandsVisible] = useState(false);
-
     const [getModels, setModels] = useState<string[]>([]);
     const [isModelsVisible, setIsModelsVisible] = useState(false);
-
     const [getBrand, setBrand] = useState('');
     const [getModel, setModel] = useState('');
-
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
     const [getCurrencies, setCurrencies] = useState<ECurrency[]>([]);
 
-    const dispatch = useAppDispatch();
-
-    const save: SubmitHandler<ICreateInputCar> = async (car: ICreateInputCar) => {
-        let photos = [];
-
-        for (let i = 0; i < car.pictures.length; i++) {
-            photos.push(car.pictures[i])
-        }
-
-        car.city = getCarCity;
-        car.region = getCarRegion;
-        car.brand = getBrand;
-        car.model = getModel;
-
-        const updatedCar: ICreateCar = {
-            ...car,
-            pictures: photos
-        };
-
-
-        await dispatch(carActions.create(updatedCar))
-            .then((res) => {
-                const type = res.type;
-                const lastWord = type.substring(type.lastIndexOf("/") + 1);
-
-                if (lastWord === "fulfilled") {
-                    setResponse("Car created successfully");
-                    setCarCity('');
-                    setCarRegion('');
-                    setBrand('');
-                    setModel('');
-                    reset();
-                }
-
-            });
-    }
-
     useEffect(() => {
+        dispatch(carActions.getAllBrands());
         setCurrencies(Object.values(ECurrency));
-    }, [])
-
-    const handleModels = async (brand: string) => {
-        await dispatch(carActions.getAllModelsByBrand(brand));
-    };
+    }, [dispatch]);
 
     useEffect(() => {
         setModels(models);
-    }, [models])
+    }, [models]);
 
     useEffect(() => {
         setBrands(brands);
-    }, [brands])
+    }, [brands]);
 
     useEffect(() => {
         setRegions(regions);
-    }, [regions])
+    }, [regions]);
 
     useEffect(() => {
         setCities(cities);
     }, [cities]);
 
+    const save: SubmitHandler<ICreateInputCar> = async car => {
+        let photos = [];
+        for (let i = 0; i < car.pictures.length; i++) {
+            photos.push(car.pictures[i]);
+        }
+        car.city = getCarCity;
+        car.region = getCarRegion;
+        car.brand = getBrand;
+        car.model = getModel;
+        const updatedCar: ICreateCar = {
+            ...car,
+            pictures: photos,
+        };
+        await dispatch(carActions.create(updatedCar)).then(res => {
+            const type = res.type;
+            const lastWord = type.substring(type.lastIndexOf('/') + 1);
+            if (lastWord === 'fulfilled') {
+                setResponse('Car created successfully');
+                setCarCity('');
+                setCarRegion('');
+                setBrand('');
+                setModel('');
+                reset();
+            }
+        });
+    };
+
+    const handleModels = async (brand: string) => {
+        await dispatch(carActions.getAllModelsByBrand(brand));
+    };
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getRegionInput) setCarRegion(event.target.value);
         await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
     };
-
 
     const handleRegionClick = (region: IGeoRegion) => {
         setCarRegion(region.name);
@@ -134,7 +111,6 @@ const CarForm: FC = () => {
         await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
     };
 
-
     const handleCityClick = (cityName: string) => {
         setCarCity(cityName);
         setCityInput(true);
@@ -142,143 +118,216 @@ const CarForm: FC = () => {
     };
 
     return (
-        <div>
+        <div className={styles.carForm}>
+            <div>Create new car</div>
             <div>{errorCreate ? errorCreate?.message : <div>{getResponse}</div>}</div>
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
-                    <input style={{ cursor: 'pointer' }} type="text" readOnly={true} value={getBrand} placeholder={'brand'}
+                    <input
+                        className={styles.input}
+                        type="text"
+                        readOnly={true}
+                        value={getBrand}
+                        placeholder={'Brand'}
                         {...register('brand')}
                         onClick={() => {
-
                             setIsBrandsVisible(true);
-                        }} />
+                        }}
+                    />
                 </div>
-                {
-                    isBrandsVisible &&
-                    <div style={{ cursor: 'pointer' }}>
-                        {getBrands.map((brand) => (
-                            <div key={brand} onClick={() => {
-
-                                setBrand(brand);
-                                setModel('');
-                                handleModels(brand);
-                                setIsBrandsVisible(false);
-                            }}>
+                {isBrandsVisible && (
+                    <div className={styles.dropdown}>
+                        {getBrands.map(brand => (
+                            <div
+                                key={brand}
+                                onClick={() => {
+                                    setBrand(brand);
+                                    setModel('');
+                                    handleModels(brand);
+                                    setIsBrandsVisible(false);
+                                }}
+                            >
                                 {brand}
                             </div>
                         ))}
                     </div>
-                }
+                )}
                 <div>
-                    <input style={{ cursor: 'pointer' }} autoComplete={"off"} readOnly={true} value={getModel} type="text"
-                        placeholder={'model'} {...register('model', { value: getModel })}
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        readOnly={true}
+                        value={getModel}
+                        type="text"
+                        placeholder={'Model'}
+                        {...register('model', { value: getModel })}
                         onClick={() => {
                             setIsModelsVisible(true);
-                        }} />
+                        }}
+                    />
                 </div>
-                {isModelsVisible &&
-                    <div style={{ cursor: 'pointer' }}>
-                        {getModels.map((model) => (
-                            <div key={model} onClick={() => {
-                                setModel(model);
-                                setIsModelsVisible(false);
-                            }}>
+                {isModelsVisible && (
+                    <div className={styles.dropdown}>
+                        {getModels.map(model => (
+                            <div
+                                key={model}
+                                onClick={() => {
+                                    setModel(model);
+                                    setIsModelsVisible(false);
+                                }}
+                            >
                                 {model}
                             </div>
                         ))}
                     </div>
-                }
+                )}
                 <div>
-                    <input autoComplete={"off"} type="number" placeholder={'powerH'} {...register('powerH', {
-                        pattern: /^[0-9]*$/,
-                    })} />
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        type="number"
+                        placeholder={'PowerH'}
+                        {...register('powerH', {
+                            pattern: /^[0-9]*$/,
+                        })}
+                    />
                 </div>
                 <div>
-                    <input placeholder={'region'} {...register('region', { value: getCarRegion })}
-                        value={getCarRegion} disabled={getRegionInput}
-                        autoComplete={"off"} type="text" onChange={handleInputChange} />
-                    <button onClick={() => {
-                        setRegionInput(false);
-                        setCarRegion('');
-                        setIsRegionVisible(true);
-                        setCarCity('');
-                    }}>change region
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        placeholder={'Region'}
+                        {...register('region', { value: getCarRegion })}
+                        value={getCarRegion}
+                        disabled={getRegionInput}
+                        type="text"
+                        onChange={handleInputChange}
+                    />
+                    <button
+                        className={styles.changeButton}
+                        onClick={() => {
+                            setRegionInput(false);
+                            setCarRegion('');
+                            setIsRegionVisible(true);
+                            setCarCity('');
+                        }}
+                    >
+                        Change Region
                     </button>
                 </div>
-                {isRegionVisible &&
-                    <div>
-                        {getRegions.map((region) => (
-                            <div key={region.isoCode} onClick={() => {
-                                handleRegionClick(region);
-                                setResponse('');
-                            }}>
+                {isRegionVisible && (
+                    <div className={styles.dropdown}>
+                        {getRegions.map(region => (
+                            <div
+                                key={region.isoCode}
+                                onClick={() => {
+                                    handleRegionClick(region);
+                                    setResponse('');
+                                }}
+                            >
                                 {region.name}
                             </div>
                         ))}
                     </div>
-                }
+                )}
                 <div>
-                    <input placeholder={'city'} {...register('city', { value: getCarCity })}
-                        value={getCarCity} disabled={getCityInput}
-                        autoComplete={"off"} type="text" onChange={handleCityInputChange} />
-                    <button onClick={() => {
-                        setCityInput(false);
-                        setCarCity('');
-                        setIsCityVisible(true);
-                    }}>change city
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        placeholder={'City'}
+                        {...register('city', { value: getCarCity })}
+                        value={getCarCity}
+                        disabled={getCityInput}
+                        type="text"
+                        onChange={handleCityInputChange}
+                    />
+                    <button
+                        className={styles.changeButton}
+                        onClick={() => {
+                            setCityInput(false);
+                            setCarCity('');
+                            setIsCityVisible(true);
+                        }}
+                    >
+                        Change City
                     </button>
                 </div>
-                {isCityVisible &&
-                    <div>
-                        {isCityVisible && getCities.map((city) => {
-                            if (city.name.toLowerCase().startsWith(getCityInputValue.toLowerCase())) {
-                                return (
-                                    <div
-                                        key={city.name}
-                                        onClick={() => {
-                                            handleCityClick(city.name);
-                                            setResponse('');
-                                        }}>
-                                        {city.name}
-                                    </div>
-                                );
-                            }
-                        })}
+                {isCityVisible && (
+                    <div className={styles.dropdown}>
+                        {isCityVisible &&
+                            getCities.map(city => {
+                                if (city.name.toLowerCase().startsWith(getCityInputValue.toLowerCase())) {
+                                    return (
+                                        <div
+                                            key={city.name}
+                                            onClick={() => {
+                                                handleCityClick(city.name);
+                                                setResponse('');
+                                            }}
+                                        >
+                                            {city.name}
+                                        </div>
+                                    );
+                                }
+                            })}
                     </div>
-                }
+                )}
                 <div>
-                    <input type="number" placeholder={'price'} {...register('price')} />
+                    <input className={styles.input} type="number" placeholder={'Price'} {...register('price')} />
                 </div>
                 <div>
-                    <input autoComplete={"off"} type="text" readOnly={true} value={getCurrency}
-                        placeholder={'currency'} {...register('currency', { value: getCurrency })}
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        type="text"
+                        readOnly={true}
+                        value={getCurrency}
+                        placeholder={'Currency'}
+                        {...register('currency', { value: getCurrency })}
                         onClick={() => {
                             setIsCurrencyVisible(true);
-                        }} />
+                        }}
+                    />
                 </div>
-                {isCurrencyVisible && getCurrencies.map((curr) => {
-                    return (
-                        <div
-                            key={curr}
-                            onClick={() => {
-                                setCurrency(curr);
-                                setIsCurrencyVisible(false);
-                            }}>
-                            {curr}
-                        </div>
-                    );
-                })}
+                {isCurrencyVisible && (
+                    <div className={styles.dropdown}>
+                        {getCurrencies.map(curr => (
+                            <div
+                                key={curr}
+                                onClick={() => {
+                                    setCurrency(curr);
+                                    setIsCurrencyVisible(false);
+                                }}
+                            >
+                                {curr}
+                            </div>
+                        ))}
+                    </div>
+                )}
                 <div>
-                    <input formEncType="multipart/form-data" type="file" multiple={true}
-                        placeholder={'pictures'} {...register('pictures')} />
+                    <input
+                        className={styles.input}
+                        formEncType="multipart/form-data"
+                        type="file"
+                        multiple={true}
+                        placeholder={'Pictures'}
+                        {...register('pictures')}
+                    />
                 </div>
                 <div>
-                    <input autoComplete={"off"} type="text" placeholder={'description'} {...register('description')} />
+                    <input
+                        className={styles.input}
+                        autoComplete={'off'}
+                        type="text"
+                        placeholder={'Description'}
+                        {...register('description')}
+                    />
                 </div>
-                <button>save</button>
+                <button className={styles.submitButton}>Save</button>
             </form>
         </div>
     );
 };
 
 export { CarForm };
+

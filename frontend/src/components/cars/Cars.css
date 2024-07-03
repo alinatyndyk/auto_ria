@@ -1,0 +1,52 @@
+/* Cars.css */
+
+.cars-container {
+    background-color: white; /* белый фон контейнера */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* тень контейнера */
+    max-height: 400px; /* максимальная высота контейнера */
+    overflow-y: auto; /* добавляем вертикальную прокрутку при необходимости */
+  }
+  
+  .cars-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #343a40; /* темно-серый цвет текста */
+  }
+  
+  .no-cars-message {
+    color: blue;
+    margin-bottom: 20px;
+  }
+  
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+  
+  .pagination button {
+    padding: 8px 16px;
+    background-color: #007bff; /* синий цвет кнопок пагинации */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .pagination button:disabled {
+    background-color: #6c757d; /* серый цвет для отключенных кнопок */
+    cursor: not-allowed;
+  }
+  
+  .pagination button:hover:not(:disabled) {
+    background-color: #0056b3; /* темно-синий цвет при наведении */
+  }
+  
+  .pagination-info {
+    color: #6c757d; /* серый цвет текста информации о пагинации */
+    font-size: 1rem;
+  }
+  

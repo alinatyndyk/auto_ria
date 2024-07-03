@@ -1,0 +1,82 @@
+/* MainLayout.css */
+
+.main-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* минимальная высота, чтобы контент занимал всю высоту экрана */
+    background-color: whitesmoke; /* светлый фон основного контейнера */
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #343a40; /* темный фон заголовка */
+    color: white; /* белый цвет текста */
+    border-bottom: 1px solid #555d66; /* темная граница снизу */
+  }
+  
+  .header h3 {
+    cursor: pointer;
+    margin: 0;
+  }
+  
+  .header button {
+    height: 30px;
+    padding: 0 10px;
+    background-color: #007bff; /* синий цвет кнопки */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px; /* отступ между кнопками */
+  }
+  
+  .header button:last-child {
+    background-color: #6c757d; /* серый фон кнопки Cars */
+  }
+  
+  .header button:hover {
+    background-color: #0056b3; /* темно-синий при наведении */
+  }
+  
+  .auth-links {
+    display: flex;
+    gap: 10px; /* горизонтальный отступ между элементами */
+    align-items: center;
+  }
+  
+  .auth-links a {
+    text-decoration: none;
+    color: #007bff; /* синий цвет ссылок */
+  }
+  
+  .auth-links a:hover {
+    text-decoration: underline; /* подчеркивание при наведении */
+  }
+  
+  .auth-links button {
+    width: 100px;
+    height: 30px;
+    padding: 0 10px;
+    color: white;
+    border: none;
+    background-color: #28a745; /* зеленый цвет кнопки */
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .auth-links button:hover {
+    background-color: #218838; /* темно-зеленый при наведении */
+  }
+  
+  .error-message {
+    color: #dc3545; /* красный цвет текста ошибки */
+  }
+  
+  .profile-actions {
+    display: flex;
+    gap: 10px; /* горизонтальный отступ между элементами */
+  }
+  

@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.example.auto_ria.enums.ETokenRole;
+import com.example.auto_ria.exceptions.CustomException;
 import com.example.auto_ria.models.responses.auth.AuthenticationResponse;
 
 import io.jsonwebtoken.Claims;
@@ -22,13 +24,13 @@ import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import io.jsonwebtoken.MalformedJwtException;
 
 @Service
 @AllArgsConstructor
 public class JwtService {
 
     private Environment environment;
-
 
     public String extractUsername(String jwt, ETokenRole role) {
         String claim;
@@ -233,7 +235,11 @@ public class JwtService {
     }
 
     public boolean isTokenExprired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (MalformedJwtException e) {
+            throw new CustomException("The activation key is invalid", HttpStatus.FORBIDDEN);
+        }
     }
 
     private Date extractExpiration(String token) {

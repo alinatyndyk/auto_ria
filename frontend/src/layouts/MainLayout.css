@@ -1,82 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
 /* MainLayout.css */
 
 .main-layout {
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* минимальная высота, чтобы контент занимал всю высоту экрана */
-    background-color: whitesmoke; /* светлый фон основного контейнера */
-  }
-  
-  .header {
+    background-color: #f0f0f0; /* светло-серый фон основного контейнера */
+    font-family: 'Montserrat', sans-serif; /* добавляем шрифт Montserrat */
+    color: #333; /* темно-серый цвет текста */
+}
+
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
-    background-color: #343a40; /* темный фон заголовка */
-    color: white; /* белый цвет текста */
-    border-bottom: 1px solid #555d66; /* темная граница снизу */
-  }
-  
-  .header h3 {
+    padding: 20px; /* увеличим отступы для большего пространства */
+    background-color: transparent; /* прозрачный фон заголовка */
+    color: #333; /* темно-серый цвет текста */
+    border-bottom: 1px solid #ddd; /* светло-серая граница снизу */
+    transition: border-bottom 0.3s ease; /* добавим плавный переход */
+}
+
+.header h3 {
     cursor: pointer;
     margin: 0;
-  }
-  
-  .header button {
-    height: 30px;
-    padding: 0 10px;
-    background-color: #007bff; /* синий цвет кнопки */
-    color: white;
+    font-size: 1.6rem; /* уменьшим размер заголовка */
+    font-weight: 300; /* тонкий шрифт */
+}
+
+.header button {
+    height: 36px;
+    padding: 0 16px;
+    font-family: 'Montserrat', sans-serif; 
+    color: #333; /* темно-серый цвет текста */
+    background-color: transparent; /* прозрачный фон кнопки */
     border: none;
-    border-radius: 4px;
     cursor: pointer;
-    margin-left: 10px; /* отступ между кнопками */
-  }
-  
-  .header button:last-child {
-    background-color: #6c757d; /* серый фон кнопки Cars */
-  }
-  
-  .header button:hover {
-    background-color: #0056b3; /* темно-синий при наведении */
-  }
-  
-  .auth-links {
+    font-size: 0.9rem; /* уменьшим размер текста кнопки */
+    font-weight: 300; /* тонкий шрифт */
+    position: relative; /* чтобы линия была относительно кнопки */
+    transition: color 0.3s ease; /* добавим плавный переход */
+}
+
+.header button:hover {
+    color: #000; /* черный цвет текста при наведении */
+}
+
+.header button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #000; /* черная линия снизу */
+    transform: scaleX(0); /* начнем без линии */
+    transition: transform 0.3s ease; /* добавим плавный переход */
+}
+
+.header button:hover::before {
+    transform: scaleX(1); /* покажем линию при наведении */
+}
+
+.auth-links {
     display: flex;
-    gap: 10px; /* горизонтальный отступ между элементами */
+    gap: 16px; /* увеличим горизонтальный отступ между элементами */
     align-items: center;
-  }
-  
-  .auth-links a {
-    text-decoration: none;
-    color: #007bff; /* синий цвет ссылок */
-  }
-  
-  .auth-links a:hover {
-    text-decoration: underline; /* подчеркивание при наведении */
-  }
-  
-  .auth-links button {
-    width: 100px;
-    height: 30px;
-    padding: 0 10px;
-    color: white;
+}
+
+.auth-links button {
+    height: 36px;
+    padding: 0 16px;
+    font-family: 'Montserrat', sans-serif; 
+    color: #333; /* темно-серый цвет текста */
+    background-color: transparent; /* прозрачный фон кнопки */
     border: none;
-    background-color: #28a745; /* зеленый цвет кнопки */
-    border-radius: 4px;
     cursor: pointer;
-  }
-  
-  .auth-links button:hover {
-    background-color: #218838; /* темно-зеленый при наведении */
-  }
-  
-  .error-message {
-    color: #dc3545; /* красный цвет текста ошибки */
-  }
-  
-  .profile-actions {
+    font-size: 0.9rem; /* уменьшим размер текста кнопки */
+    font-weight: 300; /* тонкий шрифт */
+    position: relative; /* чтобы линия была относительно кнопки */
+    transition: color 0.3s ease; /* добавим плавный переход */
+}
+
+.auth-links button:hover {
+    color: #666; /* серый цвет текста при наведении */
+}
+
+.auth-links button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: #666; /* светло-серая линия снизу */
+    transform: scaleX(0); /* начнем без линии */
+    transition: transform 0.3s ease; /* добавим плавный переход */
+}
+
+.auth-links button:hover::before {
+    transform: scaleX(1); /* покажем линию при наведении */
+}
+
+.error-message {
+    color: #e74c3c; /* красный цвет текста ошибки */
+    font-size: 0.8rem; /* уменьшим размер текста ошибки */
+}
+
+.profile-actions {
     display: flex;
-    gap: 10px; /* горизонтальный отступ между элементами */
-  }
-  
+    gap: 16px; /* увеличим горизонтальный отступ между элементами */
+}  

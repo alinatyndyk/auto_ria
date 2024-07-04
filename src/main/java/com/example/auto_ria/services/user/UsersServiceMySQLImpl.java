@@ -170,6 +170,11 @@ public class UsersServiceMySQLImpl {
 
     }
 
+    public UserSQL save(UserSQL userSQL) {
+        return userDaoSQL.save(userSQL);
+
+    }
+
     public boolean isUserByNumberPresent(String number) {
 
         return userDaoSQL.findUserByNumber(number) != null;

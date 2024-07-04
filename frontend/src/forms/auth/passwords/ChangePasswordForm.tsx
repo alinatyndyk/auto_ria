@@ -5,6 +5,7 @@ import { INewPassword } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
 import './PasswordForm.css'; // Importing CSS file for styling
 
+
 const ChangePasswordForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<INewPassword>();
     const dispatch = useAppDispatch();
@@ -48,7 +49,7 @@ const ChangePasswordForm: FC = () => {
                 {changePasswordErrors && <div>{changePasswordErrors.message}</div>}
                 {showResponse && <div>{getResponse}</div>}
             </div>
-            <form onSubmit={handleSubmit(activate)} className="password-form">
+            <form onSubmit={handleSubmit(activate)} className="password">
                 <div className="form-group">
                     <input
                         type="password"

@@ -1,4 +1,4 @@
-.carUpdateForm {
+.carForm {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -30,8 +30,7 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     max-height: 150px;
     overflow-y: auto;
-    width: "400px"; /* Изменено на 100% */
-    max-width: calc(100% - 2px); /* Изменено на max-width */
+    width: "400px";
 }
 
 .dropdown div {

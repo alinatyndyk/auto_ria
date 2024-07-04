@@ -19,6 +19,7 @@ interface IState {
     cities: IGeoCity[],
     totalPages: number,
     user: IUserResponse | null,
+    isUserLoading: boolean
 }
 
 const initialState: IState = {
@@ -32,7 +33,8 @@ const initialState: IState = {
     regions: [],
     cities: [],
     totalPages: 0,
-    user: null
+    user: null,
+    isUserLoading: false
 }
 
 const getById = createAsyncThunk<IUserResponse, number>(
@@ -124,7 +126,11 @@ const slice = createSlice({
     reducers: {},
     extraReducers: builder =>
         builder
+            .addCase(getById.pending, (state) => {
+                state.isUserLoading = true;
+            })
             .addCase(getById.fulfilled, (state, action) => {
+                state.isUserLoading = false;
                 state.user = action.payload;
             })
             .addCase(getRegionsByPrefix.fulfilled, (state, action) => {
@@ -133,7 +139,11 @@ const slice = createSlice({
             .addCase(getRegionsPlaces.fulfilled, (state, action) => {
                 state.cities = action.payload.data;
             })
+            .addCase(getByToken.pending, (state) => {
+                state.isUserLoading = true;
+            })
             .addCase(getByToken.fulfilled, (state, action) => {
+                state.isUserLoading = false;
                 state.user = action.payload;
                 state.userAuthotization = action.payload;
                 state.trigger = !state.trigger;
@@ -143,12 +153,13 @@ const slice = createSlice({
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 if (action.type === "sellerSlice/getById/rejected") {
+                    state.isUserLoading = false;
                     state.errorGetById = action.payload as IError;
                 } else if (action.type === "sellerSlice/updateById/rejected") {
                     state.errorUpdateById = action.payload as IError;
                 } else if (action.type === "sellerSlice/deletedById/rejected") {
                     state.errorDeleteById = action.payload as IError;
-                }  else {
+                } else {
                     state.errors = action.payload as IError;
                 }
             })

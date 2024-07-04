@@ -1,19 +1,21 @@
 import { FC } from 'react';
-import { LoginForm } from "../../forms";
+import LoginForm from '../../forms/auth/logs/LoginForm';
+import { useAppSelector } from '../../hooks';
+import ErrorForbidden from '../error/ErrorForbidden';
 
 const LoginPage: FC = () => {
 
-    // if (localStorage.getItem("isAuth") != undefined && localStorage.getItem("isAuth") === "true") {
-        return (
-        <div>
+    const { isAuth } = useAppSelector(state => state.authReducer);
+
+    if (isAuth) {
+        return <ErrorForbidden cause='You are already logged in' />
+    }
+
+    return (
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>
             <LoginForm />
         </div>
     );
-// } else {
-//         <div>
-//             The login page couldn't be accessed
-//         </div>
-//     }
 };
 
 export { LoginPage };

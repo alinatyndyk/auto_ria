@@ -1,20 +1,21 @@
 import React, { FC } from 'react';
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
 import { authActions } from "../../../redux/slices";
+import ErrorForbidden from '../../../pages/error/ErrorForbidden';
 
 const LogOutForm: FC = () => {
     const dispatch = useAppDispatch();
-    const { signOutErrors } = useAppSelector(state => state.authReducer);
-
 
     const navigate = useAppNavigate();
-    const logOut = () => {
+    const logOut = async () => {
 
-        dispatch(authActions.signOut());
+        try {
+            await dispatch(authActions.signOut()).unwrap();
+            navigate('/cars');
+        } catch (err) {
+            console.log("err");
+            navigate('/errors/forbidden', { state: { cause: 'Auth token is either fully expired, invalid, or doesn\'t exist' } });        }
 
-        if (signOutErrors === null) {
-            navigate('/auth/login');
-        }
     }
 
     return (

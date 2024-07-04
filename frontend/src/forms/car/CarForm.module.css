@@ -1,10 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
+
 .carForm {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
-    border: 1px solid #ccc;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0; /* светло-серый фон */
+    color: #333; /* темно-серый текст */
+    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
 }
 
 .inputContainer {
@@ -12,65 +16,43 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
+    position: relative; /* чтобы абсолютно позиционировать кнопку */
 }
 
 .input {
     flex: 1;
     padding: 10px;
     margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: none; /* убираем стандартную границу */
+    background-color: transparent; /* прозрачный фон */
+    color: #333; /* темно-серый текст */
+    border-bottom: 1px solid #ccc; /* светло-серая линия снизу */
+    transition: border-color 0.3s ease; /* плавное изменение цвета линии */
+    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
 }
 
-.dropdown {
-    position: absolute;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    max-height: 150px;
-    overflow-y: auto;
-    width: "400px";
+.input:hover {
+    border-color: #666; /* серая линия при наведении */
 }
 
-.dropdown div {
-    padding: 8px;
+.changeButton,
+.submitButton,
+.saveButton {
+    padding: 8px 16px; /* уменьшенные отступы */
+    background-color: #f0f0f0; /* светло-серый фон */
+    color: #333;
+    border: none; /* убираем обводку */
+    border-radius: 4px; /* закругленные углы */
+    font-size: 14px; /* уменьшенный размер шрифта */
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* тень */
     transition: background-color 0.3s ease;
+    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
 }
 
-.dropdown div:hover {
-    background-color: #f0f0f0;
+.changeButton:hover,
+.submitButton:hover,
+.saveButton:hover {
+    background-color: #ccc; /* светло-серый фон при наведении */
 }
 
-.changeButton {
-    padding: 10px;
-    background-color: dodgerblue;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.changeButton:hover {
-    background-color: #0073e6;
-}
-
-.submitButton {
-    width: 100%;
-    padding: 10px;
-    background-color: dodgerblue;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 20px;
-}
-
-.submitButton:hover {
-    background-color: #0073e6;
-}

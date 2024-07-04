@@ -162,7 +162,7 @@ const UpdateUserForm: FC = () => {
                     <input className="input" autoComplete={"off"} type="text"
                         placeholder={'lastName'} {...register('lastName')} />
                 </div>
-                <button className="submitButton">update user info</button>
+                <button className="submitButton">Update account information</button>
             </form>
         </div>
     );

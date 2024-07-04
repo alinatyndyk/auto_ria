@@ -1,6 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300&display=swap');
-
-.update-user-form {
+.carForm {
     max-width: 400px;
     margin: 0 auto;
     padding: 20px;
@@ -56,31 +54,18 @@
     background-color: #ccc; /* светло-серый фон при наведении */
 }
 
-.dropdown {
-    position: absolute;
-    z-index: 999; /* чтобы dropdown был поверх остальных элементов */
-    border: 1px solid #ccc; /* светлая граница */
-    border-radius: 4px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-height: 200px;
-    overflow-y: auto;
-    background-color: #fff; /* белый фон */
-    color: #333; /* темный цвет текста */
-    font-family: 'Montserrat', sans-serif;
+.columnContainer {
+    display: flex;
+    flex-direction: column; /* располагаем элементы в столбик */
 }
 
-.dropdown div {
-    padding: 8px;
+.columnItem {
+    padding: 8px 0; /* отступы между элементами в столбике */
     cursor: pointer;
-    color: #333; /* темный цвет текста */
+    transition: background-color 0.3s ease;
+    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
 }
 
-.dropdown div:hover {
-    background-color: #ccc; /* светлая подсветка при наведении */
-}
-
-.errorMessage {
-    color: #dc3545; /* красный цвет текста ошибки */
-    margin-top: 5px;
-    font-size: 12px;
+.columnItem:hover {
+    background-color: #ddd; /* светло-серый фон при наведении */
 }

@@ -7,6 +7,7 @@ import { useAppNavigate } from "../../hooks";
 interface IState {
     cars: CarsResponse[],
     car: CarsResponse | null,
+    isCarLoading: boolean;
     brands: string[],
     models: string[],
     carErrors: IError | null,
@@ -28,6 +29,7 @@ interface IState {
 const initialState: IState = {
     cars: [],
     car: null,
+    isCarLoading: false,
     brands: [],
     models: [],
     carErrors: null,
@@ -200,10 +202,16 @@ const slice = createSlice({
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
             })
+            .addCase(getById.pending, (state) => {
+                // state.errorGetById = null;
+                state.isCarLoading = true;
+            })
             .addCase(getById.fulfilled, (state, action) => {
+                state.isCarLoading = false;
                 state.car = action.payload;
             })
             .addCase(getById.rejected, (state, action) => {
+                state.isCarLoading = false;
                 state.errorGetById = action.payload as IError;
             })
             .addCase(getAllBrands.fulfilled, (state, action) => {
@@ -221,7 +229,7 @@ const slice = createSlice({
                 state.pagesInTotal = action.payload.totalPages;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
-                if (action.type === "carSlice/getAll/rejected") {
+                if (action.type === "carSlice/getById/rejected") {
                     state.errorGetById = action.payload as IError;
                 } else if (action.type === "carSlice/getAll/rejected") {
                     state.errorGetAll = action.payload as IError;

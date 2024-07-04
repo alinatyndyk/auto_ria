@@ -1,11 +1,14 @@
 package com.example.auto_ria.controllers;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -30,6 +33,7 @@ import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -161,6 +165,7 @@ public class AuthenticationController {
     public ResponseEntity<AuthenticationResponse> activateSeller(
             @RequestParam("code") String code) {
         try {
+
             if (jwtService.isTokenExprired(code)) {
                 throw new CustomException("Activation key expired. Your account has been deleted",
                         HttpStatus.FORBIDDEN);
@@ -183,7 +188,52 @@ public class AuthenticationController {
 
             String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.MANAGER_REGISTER);
 
+            if (!usersServiceMySQL.getByEmail(email).equals(null)) {
+                throw new CustomException("User with this email already exists. Do you want to change their role?",
+                        HttpStatus.BAD_REQUEST);
+            }
+
             return authenticationService.codeManager(email, code);
+        } catch (CustomException e) {
+            throw new CustomException(e.getMessage(), e.getStatus());
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/to-auth")
+    public ResponseEntity<String> toManager(
+            @RequestParam("email") String email,
+            @RequestParam("role") String role) {
+        try {
+
+            for (ERole eRole : ERole.values()) {
+                if (!eRole.name().equalsIgnoreCase(role)) {
+                    throw new CustomException("Invalid role",
+                            HttpStatus.BAD_REQUEST);
+                }
+            }
+
+            if (usersServiceMySQL.getByEmail(email).equals(null)) {
+                throw new CustomException("User with this email already exists. Do you want to change their role?",
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            UserSQL user = usersServiceMySQL.getByEmail(email);
+            user.getRoles().clear();
+
+            List<ERole> roles = new ArrayList<>();
+
+            if (ERole.MANAGER.name() == role) {
+                roles.add(ERole.MANAGER);
+            } else if (ERole.ADMIN.name() == role) {
+                roles.add(ERole.ADMIN);
+            }
+
+            user.setRoles(roles);
+
+            usersServiceMySQL.save(user);
+
+            return ResponseEntity.ok("User role updated successfully");
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

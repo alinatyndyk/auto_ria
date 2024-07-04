@@ -16,7 +16,6 @@ interface IProps {
 const AdminProfile: FC<IProps> = ({ seller }) => {
     const { id, avatar, name, lastName, role, region, city } = seller;
 
-    // Determine the avatar picture URL
     const picture = avatar === null ? 'channels4_profile.jpg' : avatar;
 
     return (
@@ -55,20 +54,15 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
                             <span>{region}, {city}</span>
                         </div>
                         <hr />
-                        <div>
-                            <UpdateUserForm />
-                            <br />
-                            <ChangePasswordForm />
-                            <br />
-                            <FindCarById />
-                        </div>
+                        <br />
+                        <FindCarById />
+                        <br />
+                        <GenerateManagerForm />
+                        <GenerateAdminForm />
                     </div>
                 </div>
-                <div style={{ marginTop: '20px' }}>
+                <div style={{ marginTop: '20px'}}>
                     <CarForm />
-                    <br />
-                    <GenerateManagerForm />
-                    <GenerateAdminForm />
                 </div>
             </div>
         </div>

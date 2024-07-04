@@ -56,3 +56,24 @@
     font-size: 14px;
     margin-top: 5px;
 }
+
+.form-container {
+    position: relative;
+}
+
+.hover-text {
+    position: absolute;
+    bottom: -100px;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: none;
+}
+
+
+.form-container:hover .hover-text {
+    display: block;
+}

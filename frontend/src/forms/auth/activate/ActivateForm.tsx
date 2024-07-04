@@ -4,6 +4,9 @@ import { ERole } from "../../../constants/role.enum";
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
 import { authActions } from "../../../redux/slices";
 
+import '../logs/LoginForm.css';
+import ErrorForbidden from '../../../pages/error/ErrorForbidden';
+
 const ActivateForm: FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
@@ -15,25 +18,31 @@ const ActivateForm: FC = () => {
     const { activateSellerErrors } = useAppSelector(state => state.authReducer);
 
     const activate = () => {
+
+        if (!code) {
+            return <ErrorForbidden cause='Your activation link lacks a code' />
+        }
+
         if (role === ERole.USER) {
-            dispatch(authActions.activateSeller({ code: code ?? '' }));
+            dispatch(authActions.activateSeller({ code: code }));
         }
 
         if (activateSellerErrors === null) {
             navigate('/profile');
         }
     }
+
     return (
-        <div>
-            <div>
-                <button onClick={() => navigate('/cars')}>Cars</button>
+        <div style={{display: "flex", justifyContent: "center", margin: "20px"}}>
+            <div className="login-form">
+                <div className="form-header">Activate my account</div>
+                {activateSellerErrors ? <div className="error-message">{activateSellerErrors?.message}</div> : null}
+                <button onClick={() => activate()} className="submit-button">Activate my account</button>
             </div>
-            Activate my account
-            {activateSellerErrors ? <div>{activateSellerErrors?.message}</div> : null}
-            <button onClick={() => activate()}>Activate my account</button>
         </div>
     );
 };
 
 export { ActivateForm };
+
 

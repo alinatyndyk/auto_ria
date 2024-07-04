@@ -94,7 +94,7 @@ const signOut = createAsyncThunk<void, void>(
 );
 
 const registerSeller = createAsyncThunk<string, ISellerInput>(
-    'authSlice/registerSeller',
+    'authSlice/-',
     async (info, { rejectWithValue }) => {
         try {
             if (info.code != null) {
@@ -144,6 +144,19 @@ const generateManager = createAsyncThunk<void, IGenerateCode>(
     async (email, { rejectWithValue }) => {
         try {
             const { data } = await authService.generateManager(email);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const toManager = createAsyncThunk<void, IGenerateCode>(
+    'authSlice/toManager',
+    async (email, { rejectWithValue }) => {
+        try {
+            const { data } = await authService.toManager(email);
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -259,7 +272,8 @@ const slice = createSlice({
                     state.registerErrors = action.payload as IError;
                 } else if (action.type === "authSlice/generateAdmin/rejected") {
                     state.generateAdminErrors = action.payload as IError;
-                } else if (action.type === "authSlice/generateManager/rejected") {
+                } else if ((action.type === "authSlice/generateManager/rejected")
+                    || (action.type === "authSlice/toManager/rejected")) {
                     state.generateManagerErrors = action.payload as IError;
                 } else if (action.type === "authSlice/changePassword/rejected") {
                     state.changePasswordErrors = action.payload as IError;
@@ -286,6 +300,7 @@ const authActions = {
     registerUserAuth,
     activateSeller,
     generateManager,
+    toManager,
     generateAdmin,
     changePassword,
     forgotPassword,

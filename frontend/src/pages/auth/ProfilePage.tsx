@@ -1,20 +1,15 @@
-import { FC, useEffect, useState } from 'react';
-import { SubmitHandler, useForm } from 'react-hook-form';
+import { FC, useEffect } from 'react';
+import LoadingPage from '../../components/LoadingPage';
 import { AdminProfile } from "../../components/profiles/AdminProfile";
 import { ManagerProfile } from "../../components/profiles/ManagerProfile";
 import { SellerProfile } from "../../components/profiles/SellerProfile";
 import { ERole } from "../../constants/role.enum";
-import { ChangePasswordForm } from "../../forms/auth/passwords/ChangePasswordForm";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import { IGeoCity, IGeoRegion } from '../../interfaces/geo.interface';
 import { validateUserSQL } from '../../interfaces/user/joi/user.interface.joi';
-import { IUserUpdateRequest } from '../../interfaces/user/seller.interface';
-import { authActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
-import { FindCarById } from '../../forms/car/FindCarById';
 import { securityService } from '../../services/security.service';
-import { error } from 'console';
-import { CarForm } from '../../forms';
+import ErrorForbidden from '../error/ErrorForbidden';
+import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
 import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
 
 
@@ -22,29 +17,30 @@ const ProfilePage: FC = () => {
 
     const dispatch = useAppDispatch();
 
-    const { user } = useAppSelector(state => state.sellerReducer);
+    const { user, isUserLoading, errorGetById } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
-        setTimeout(() => {
-        }, 400);
-        dispatch(sellerActions.getByToken());
+            dispatch(sellerActions.getByToken());
         if (user) {
             const obj = securityService.encryptObject(user)
             localStorage.setItem("authorization", obj);
         }
     }, []);
 
+    if (isUserLoading) {
+        return <LoadingPage />
+    }
+    if (errorGetById) {
+        return <ErrorForbidden cause='The account couldnt be found' />
+    }
 
     let userComponent;
 
-    if (user === null) {
-        userComponent = <div>Loading...
-            <button onClick={() => dispatch(authActions.refresh())}>refresh</button></div>;
-    } else if (user.role === ERole.USER && validateUserSQL(user)) {
+    if (user?.role === ERole.USER && validateUserSQL(user)) {
         userComponent = <SellerProfile seller={user} />;
-    } else if (user.role === ERole.ADMIN && validateUserSQL(user)) {
+    } else if (user?.role === ERole.ADMIN && validateUserSQL(user)) {
         userComponent = <AdminProfile seller={user} />;
-    } else if (user.role === ERole.MANAGER && validateUserSQL(user)) {
+    } else if (user?.role === ERole.MANAGER && validateUserSQL(user)) {
         userComponent = <ManagerProfile seller={user} />;
     } else {
         userComponent = <div>User type not recognized</div>;
@@ -53,6 +49,14 @@ const ProfilePage: FC = () => {
     return (
         <div>
             {userComponent}
+            <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
+                <h2>Change your account information</h2>
+                <div style={{ margin: "20px", display: "flex", columnGap: "20px" }}>
+                    <UpdateUserForm />
+                    <br />
+                    <ChangePasswordForm />
+                </div>
+            </div>
         </div>
 
     );

@@ -113,7 +113,7 @@ const CarUpdateForm: FC = () => {
 
 
     return (
-        <form className="carUpdateForm" onSubmit={handleSubmit(save)}>
+        <form className="carForm" onSubmit={handleSubmit(save)}>
             <div className="inputContainer">
                 <div>{errorUpdateById ? errorUpdateById?.message : <div>{getResponse}</div>}</div>
             </div>
@@ -192,7 +192,7 @@ const CarUpdateForm: FC = () => {
                 <input className="input" autoComplete={"off"} type="text"
                     placeholder={'description'} {...register('description')} />
             </div>
-            <button className="submitButton">update</button>
+            <button className="submitButton">Update car information</button>
         </form>
     );
 };

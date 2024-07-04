@@ -1,4 +1,5 @@
 import { urls } from "../constants";
+import { ERole } from "../constants/role.enum";
 import {
     IActivationCode,
     IAuthRequest,
@@ -52,6 +53,15 @@ const authService = {
 
     generateManager: (emailInterface: IGenerateCode) => axiosService.post(urls.auth.generateManager(), {
         email: emailInterface.email
+    }, {
+        headers: {
+            "Content-Type": "multipart/form-data"
+        }
+    }),
+
+    toManager: (emailInterface: IGenerateCode) => axiosService.post(urls.auth.toManager(), {
+        email: emailInterface.email,
+        role: ERole.MANAGER
     }, {
         headers: {
             "Content-Type": "multipart/form-data"

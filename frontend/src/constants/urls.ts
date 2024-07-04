@@ -36,6 +36,7 @@ const urls = {
         activateSeller: (): string => `/api/v1/${auth}/activate-user`,
 
         generateManager: (): string => `/api/v1/${auth}/code-manager`,
+        toManager: (): string => `/api/v1/${auth}/to-auth`,
         generateAdmin: (): string => `/api/v1/${auth}/code-admin`,
 
         changePassword: (): string => `/api/v1/${auth}/change-passwords`,

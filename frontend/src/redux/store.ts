@@ -1,12 +1,14 @@
-import {combineReducers} from "redux";
-import {configureStore} from "@reduxjs/toolkit";
-import {authReducer, carReducer} from "./slices";
-import {sellerReducer} from "./slices/seller.slice";
+import { combineReducers } from "redux";
+import { configureStore } from "@reduxjs/toolkit";
+import { authReducer, carReducer } from "./slices";
+import { sellerReducer } from "./slices/seller.slice";
+import { chatReducer } from "./slices/chat.slice";
 
 const rootReducer = combineReducers({
     carReducer: carReducer,
     sellerReducer: sellerReducer,
-    authReducer: authReducer
+    authReducer: authReducer,
+    chatReducer: chatReducer
 })
 
 const setupStore = () => configureStore({

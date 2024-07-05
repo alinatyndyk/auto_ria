@@ -4,13 +4,14 @@ import { AdminProfile } from "../../components/profiles/AdminProfile";
 import { ManagerProfile } from "../../components/profiles/ManagerProfile";
 import { SellerProfile } from "../../components/profiles/SellerProfile";
 import { ERole } from "../../constants/role.enum";
+import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
+import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { validateUserSQL } from '../../interfaces/user/joi/user.interface.joi';
 import { sellerActions } from "../../redux/slices/seller.slice";
 import { securityService } from '../../services/security.service';
 import ErrorForbidden from '../error/ErrorForbidden';
-import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
-import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
+import { ChatsPage } from '../WebSocketComponents';
 
 
 const ProfilePage: FC = () => {
@@ -20,7 +21,7 @@ const ProfilePage: FC = () => {
     const { user, isUserLoading, errorGetById } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
-            dispatch(sellerActions.getByToken());
+        dispatch(sellerActions.getByToken());
         if (user) {
             const obj = securityService.encryptObject(user)
             localStorage.setItem("authorization", obj);
@@ -56,6 +57,9 @@ const ProfilePage: FC = () => {
                     <br />
                     <ChangePasswordForm />
                 </div>
+            </div>
+            <div>
+                <ChatsPage />
             </div>
         </div>
 

@@ -13,6 +13,7 @@ import { authService } from '../../services';
 import LoadingPage from '../LoadingPage';
 import './CarFull.css';
 import { Carousel } from "./Carousel";
+import { Chat } from '../../pages/WebSocketComponent';
 
 const CarFull: FC = () => {
     const { carId } = useParams<{ carId: string }>();
@@ -60,7 +61,7 @@ const CarFull: FC = () => {
     };
 
     if (isCarLoading) {
-        return <LoadingPage/>;
+        return <LoadingPage />;
     }
 
     if (!car) {
@@ -128,6 +129,7 @@ const CarFull: FC = () => {
                     )
                 )}
             </div>
+            <Chat receiver={car.user}/>
         </div>
     );
 };

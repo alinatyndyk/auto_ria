@@ -10,6 +10,7 @@ const auth = 'auth';
 const sellers = 'users';
 const common = 'common';
 const regions = 'regions';
+const chats = 'chats';
 
 const urls = {
     cars: {
@@ -54,6 +55,10 @@ const urls = {
     sellers: {
         sellers,
         all: (page: number): string => `${sellers}/page/${page}`,
+    },
+    chats: {
+        chats,
+        getChatsByUser: (page: number): string => `/page/${page}`,
     },
 
     geo: {

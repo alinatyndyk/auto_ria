@@ -263,6 +263,12 @@ public class AuthenticationController {
 
             String code = jwtService.generateRegistrationCode(claims, email,
                     ETokenRole.ADMIN_REGISTER);
+
+            if (!usersServiceMySQL.getByEmail(email).equals(null)) {
+                throw new CustomException("User with this email already exists. Do you want to change their role?",
+                        HttpStatus.BAD_REQUEST);
+            }
+
             return authenticationService.codeAdmin(email, code);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());

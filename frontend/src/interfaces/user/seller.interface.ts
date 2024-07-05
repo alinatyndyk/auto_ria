@@ -51,7 +51,7 @@ export interface IUserResponse {
     avatar?: string | null;
     accountType: 'BASIC' | 'PREMIUM';
     role: 'USER' | 'ADMIN' | 'MANAGER';
-    isPaymentSourcePresent: boolean;
+    paymentSourcePresent: boolean;
     lastOnline?: string | null;
     createdAt: string;
 }

@@ -1,8 +1,8 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../hooks';
-import { ICreateCar, ICreateInputCar } from '../../interfaces';
-import { IGeoCity, IGeoRegion } from '../../interfaces/geo.interface';
+import { ICreateCar, ICreateInputCar, IError } from '../../interfaces';
+import { EGeoState, IGeoCity, IGeoRegion } from '../../interfaces/geo.interface';
 import { carActions } from '../../redux/slices';
 import { sellerActions } from '../../redux/slices/seller.slice';
 import styles from './CarForm.module.css'; // импорт стилей из модуля
@@ -15,8 +15,8 @@ export enum ECurrency {
 
 const CarForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
-    const { brands, models, errorCreate } = useAppSelector(state => state.carReducer);
-    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+    const { brands, models } = useAppSelector(state => state.carReducer);
+    const { carCreateRegions: regions, carCreateCities: cities } = useAppSelector(state => state.sellerReducer);
     const dispatch = useAppDispatch();
 
     const [getResponse, setResponse] = useState('');
@@ -74,18 +74,21 @@ const CarForm: FC = () => {
             ...car,
             pictures: photos,
         };
-        await dispatch(carActions.create(updatedCar)).then(res => {
-            const type = res.type;
-            const lastWord = type.substring(type.lastIndexOf('/') + 1);
-            if (lastWord === 'fulfilled') {
-                setResponse('Car created successfully');
-                setCarCity('');
-                setCarRegion('');
-                setBrand('');
-                setModel('');
-                reset();
-            }
-        });
+        const { payload, type } = await dispatch(carActions.create(updatedCar));
+
+        const lastWord = type.substring(type.lastIndexOf('/') + 1);
+        if (lastWord === 'fulfilled') {
+            setResponse('Car created successfully');
+            setCarCity('');
+            setCarRegion('');
+            setBrand('');
+            setModel('');
+            reset();
+        } else {
+            const x = payload as IError;
+            setResponse(String(x.message));
+        }
+
     };
 
     const handleModels = async (brand: string) => {
@@ -94,7 +97,7 @@ const CarForm: FC = () => {
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getRegionInput) setCarRegion(event.target.value);
-        await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
+        await dispatch(sellerActions.getRegionsByPrefix({ info: event.target.value, stateToFill: EGeoState.CAR_CREATE }));
     };
 
     const handleRegionClick = (region: IGeoRegion) => {
@@ -108,7 +111,7 @@ const CarForm: FC = () => {
     const handleCityInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getCityInput) setCarCity(event.target.value);
         setCityInputValue(event.target.value);
-        await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
+        await dispatch(sellerActions.getRegionsPlaces({ info: getCarRegionId, stateToFill: EGeoState.CAR_CREATE }));
     };
 
     const handleCityClick = (cityName: string) => {
@@ -120,7 +123,9 @@ const CarForm: FC = () => {
     return (
         <div className={styles.carForm}>
             <div>Create new car</div>
-            <div>{errorCreate ? errorCreate?.message : <div>{getResponse}</div>}</div>
+            {getResponse === "Car created successfully" ?
+                <div style={{ color: 'green', fontSize: '10px' }}>{getResponse}</div>
+                : <div style={{ color: 'darkred', fontSize: '10px' }}>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
                 <div>
                     <input

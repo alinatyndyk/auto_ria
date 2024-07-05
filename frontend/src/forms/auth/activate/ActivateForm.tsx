@@ -17,23 +17,24 @@ const ActivateForm: FC = () => {
 
     const { activateSellerErrors } = useAppSelector(state => state.authReducer);
 
-    const activate = () => {
+    const [activateError, setActivateError] = useState<string>();
+
+    const activate = async () => {
 
         if (!code) {
             return <ErrorForbidden cause='Your activation link lacks a code' />
         }
 
-        if (role === ERole.USER) {
-            dispatch(authActions.activateSeller({ code: code }));
-        }
-
-        if (activateSellerErrors === null) {
-            navigate('/profile');
-        }
+            if (role === ERole.USER) {
+                try {
+                    await dispatch(authActions.activateSeller({ code })).unwrap();
+                    navigate('/profile');
+                } catch (err) {}
+            }
     }
 
     return (
-        <div style={{display: "flex", justifyContent: "center", margin: "20px"}}>
+        <div style={{ display: "flex", justifyContent: "center", margin: "20px" }}>
             <div className="login-form">
                 <div className="form-header">Activate my account</div>
                 {activateSellerErrors ? <div className="error-message">{activateSellerErrors?.message}</div> : null}

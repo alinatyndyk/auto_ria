@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/too
 import { AxiosError } from "axios";
 import { IMessage } from "../../components/cars";
 import { IError } from "../../interfaces";
-import { IGeoCitiesResponse, IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
+import { EGeoState, IGeoCitiesResponse, IGeoCity, IGeoCityForState, IGeoRegion, IGeoRegionForState, IGeoStateRequest } from "../../interfaces/geo.interface";
 import { IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
 import { sellerService } from "../../services/seller.service";
@@ -15,8 +15,14 @@ interface IState {
     errorUpdateById: IError | null;
     trigger: boolean,
     messages: IMessage[],
-    regions: IGeoRegion[],
-    cities: IGeoCity[],
+    carCreateRegions: IGeoRegion[],
+    carCreateCities: IGeoCity[],
+    carUpdateRegions: IGeoRegion[],
+    carUpdateCities: IGeoCity[],
+    userCreateRegions: IGeoRegion[],
+    userCreateCities: IGeoCity[],
+    userUpdateRegions: IGeoRegion[],
+    userUpdateCities: IGeoCity[],
     totalPages: number,
     user: IUserResponse | null,
     isUserLoading: boolean
@@ -30,8 +36,14 @@ const initialState: IState = {
     errorUpdateById: null,
     trigger: false,
     messages: [],
-    regions: [],
-    cities: [],
+    carCreateRegions: [],
+    carCreateCities: [],
+    carUpdateRegions: [],
+    carUpdateCities: [],
+    userCreateRegions: [],
+    userCreateCities: [],
+    userUpdateRegions: [],
+    userUpdateCities: [],
     totalPages: 0,
     user: null,
     isUserLoading: false
@@ -94,12 +106,13 @@ const getByToken = createAsyncThunk<IUserResponse, void>(
     }
 );
 
-const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
+const getRegionsByPrefix = createAsyncThunk<IGeoRegionForState, IGeoStateRequest>(
     'sellerSlice/getRegionsByPrefix',
-    async (prefix: string, { rejectWithValue }) => {
+    async ({ info, stateToFill }, { rejectWithValue }) => {
         try {
-            const { data } = await sellerService.getRegionsByPrefix(prefix);
-            return data.data;
+            const { data } = await sellerService.getRegionsByPrefix(info);
+            const result: IGeoRegionForState = { regions: data.data, stateToFill }
+            return result;
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -107,12 +120,13 @@ const getRegionsByPrefix = createAsyncThunk<IGeoRegion[], string>(
     }
 );
 
-const getRegionsPlaces = createAsyncThunk<IGeoCitiesResponse, string>(
+const getRegionsPlaces = createAsyncThunk<IGeoCityForState, IGeoStateRequest>(
     'sellerSlice/getRegionsPlaces',
-    async (regionId: string, { rejectWithValue }) => {
+    async ({ info, stateToFill }, { rejectWithValue }) => {
         try {
-            const { data } = await sellerService.getRegionsPlaces(regionId);
-            return data;
+            const { data } = await sellerService.getRegionsPlaces(info);
+            const result: IGeoCityForState = { cities: data.data, stateToFill }
+            return result;
         } catch (e) {
             const err = e as AxiosError;
             return rejectWithValue(err.response?.data);
@@ -134,10 +148,28 @@ const slice = createSlice({
                 state.user = action.payload;
             })
             .addCase(getRegionsByPrefix.fulfilled, (state, action) => {
-                state.regions = action.payload;
+                const { regions, stateToFill } = action.payload;
+                if (stateToFill === EGeoState.CAR_CREATE) {
+                    state.carCreateRegions = regions;
+                } else if (stateToFill === EGeoState.CAR_UPDATE) {
+                    state.carUpdateRegions = regions;
+                } else if (stateToFill === EGeoState.USER_CREATE) {
+                    state.userCreateRegions = regions;
+                } else if (stateToFill === EGeoState.USER_UPDATE) {
+                    state.userUpdateRegions = regions;
+                }
             })
             .addCase(getRegionsPlaces.fulfilled, (state, action) => {
-                state.cities = action.payload.data;
+                const { cities, stateToFill } = action.payload;
+                if (stateToFill === EGeoState.CAR_CREATE) {
+                    state.carCreateCities = cities;
+                } else if (stateToFill === EGeoState.CAR_UPDATE) {
+                    state.carUpdateCities = cities;
+                } else if (stateToFill === EGeoState.USER_CREATE) {
+                    state.userCreateCities = cities;
+                } else if (stateToFill === EGeoState.USER_UPDATE) {
+                    state.userUpdateCities = cities;
+                }
             })
             .addCase(getByToken.pending, (state) => {
                 state.isUserLoading = true;

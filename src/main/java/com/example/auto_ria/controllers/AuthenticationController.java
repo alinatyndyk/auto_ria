@@ -1,6 +1,7 @@
 package com.example.auto_ria.controllers;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import com.example.auto_ria.services.otherApi.CitiesService;
 import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -166,12 +168,13 @@ public class AuthenticationController {
             @RequestParam("code") String code) {
         try {
 
-            if (jwtService.isTokenExprired(code)) {
-                throw new CustomException("Activation key expired. Your account has been deleted",
-                        HttpStatus.FORBIDDEN);
-            }
+            jwtService.isTokenExprired(code);
+
             String email = jwtService.extractUsername(code, ETokenRole.USER_ACTIVATE);
             return authenticationService.activateUser(email, code);
+        } catch (ExpiredJwtException e) {
+            throw new CustomException("Activation key expired. Your account has been deleted",
+                    HttpStatus.FORBIDDEN);
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
@@ -194,46 +197,6 @@ public class AuthenticationController {
             }
 
             return authenticationService.codeManager(email, code);
-        } catch (CustomException e) {
-            throw new CustomException(e.getMessage(), e.getStatus());
-        }
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/to-auth")
-    public ResponseEntity<String> toManager(
-            @RequestParam("email") String email,
-            @RequestParam("role") String role) {
-        try {
-
-            for (ERole eRole : ERole.values()) {
-                if (!eRole.name().equalsIgnoreCase(role)) {
-                    throw new CustomException("Invalid role",
-                            HttpStatus.BAD_REQUEST);
-                }
-            }
-
-            if (usersServiceMySQL.getByEmail(email).equals(null)) {
-                throw new CustomException("User with this email already exists. Do you want to change their role?",
-                        HttpStatus.BAD_REQUEST);
-            }
-
-            UserSQL user = usersServiceMySQL.getByEmail(email);
-            user.getRoles().clear();
-
-            List<ERole> roles = new ArrayList<>();
-
-            if (ERole.MANAGER.name() == role) {
-                roles.add(ERole.MANAGER);
-            } else if (ERole.ADMIN.name() == role) {
-                roles.add(ERole.ADMIN);
-            }
-
-            user.setRoles(roles);
-
-            usersServiceMySQL.save(user);
-
-            return ResponseEntity.ok("User role updated successfully");
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }

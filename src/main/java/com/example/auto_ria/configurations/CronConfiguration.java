@@ -98,7 +98,7 @@ public class CronConfiguration {
         try {
             List<PremiumPlan> premiumPlans = premiumPlanDaoSQL.findAll();
             premiumPlans.forEach(premiumPlan -> {
-                if (premiumPlan.getEndDate().isAfter(LocalDate.now())) {
+                if (premiumPlan.getEndDate().isBefore(LocalDate.now())) {
 
                     premiumPlan.setActive(false);
                     premiumPlanDaoSQL.save(premiumPlan);

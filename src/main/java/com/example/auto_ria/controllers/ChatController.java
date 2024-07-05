@@ -66,9 +66,6 @@ public class ChatController {
             }
 
             String roomKey = chatServiceMySQL.getRoomKey(user1Id, user2Id);
-            System.out.println(roomKey);
-
-            System.out.println(chatServiceMySQL.getByRoomKey(roomKey));
 
             return ResponseEntity.ok(chatServiceMySQL.getByRoomKey(roomKey));
 

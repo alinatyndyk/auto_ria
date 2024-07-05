@@ -86,7 +86,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
     const handleSetAsDefaultCard = (event: { target: { checked: any; }; }) => {
         if (event.target.checked) {
             setAsDefaultCard(true);
-        } else if (autoPay && !seller.isPaymentSourcePresent) {
+        } else if (autoPay && !seller.paymentSourcePresent) {
             setAsDefaultCard(true);
         } else {
             setAsDefaultCard(false);
@@ -97,9 +97,9 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
         'pk_test_51Nf481Ae4RILjJWGS16n8CI5yhK3nWg0kTMZVvRTOgMOY4KBlgI21EcPsSj9tY4tfDTQWrlh1v0egnN0ozBT9ATQ00kuhJ8UrS'
 
     let paymentComponent;
-    const isPaymentSourcePresent = seller.isPaymentSourcePresent ?? false;
+    const isPaymentSourcePresent = seller.paymentSourcePresent ?? false;
 
-    if (!isPaymentSourcePresent) {
+    if (isPaymentSourcePresent) {
         paymentComponent = <div style={{ display: 'flex' }}>
             <label>{JSON.stringify(getErrors)}</label>
             <label>
@@ -132,7 +132,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                 }} onClick={() => payNow('')}>pay with default card</button>
             }
         </div>
-    } else if (isPaymentSourcePresent) {
+    } else if (!isPaymentSourcePresent) {
         paymentComponent = <div>
             <div style={{ display: 'flex' }}>
                 <label>{JSON.stringify(getErrors)}</label>
@@ -146,12 +146,12 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     subscription?
                 </label>
             </div>
-            <Stripe
-                stripeKey={stripeKeyPublish}
-                token={payNow}
-                email={seller.id.toString()}
-                description={"Buy AutoRia premium"}
-            />
+                <Stripe
+                    stripeKey={stripeKeyPublish}
+                    token={payNow}
+                    // email={seller.id.toString()}
+                    description={"Buy AutoRia premium"}
+                />
         </div>
     } else {
         paymentComponent = <div>Could not extract payment method...</div>
@@ -185,6 +185,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     stripeKey={stripeKeyPublish}
                     token={addCard}
                     description={"Bind a card to AutoRia"}
+
                 />
             </div>
         </div>

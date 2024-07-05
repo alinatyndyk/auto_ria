@@ -17,13 +17,10 @@ const FindCarById: FC = () => {
     const [isHovered, setIsHovered] = useState(false);
 
     const find: SubmitHandler<IFindCarById> = async (body: IFindCarById) => {
-        console.log(JSON.stringify(body));
         try {
             await dispatch(carActions.getById(body.id)).unwrap();
             navigate(`/cars/${body.id}`);
         } catch (err) {
-            console.log(JSON.stringify(err));
-        } finally {
             reset();
         }
     };

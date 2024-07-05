@@ -1,13 +1,12 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useParams } from 'react-router-dom';
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../hooks";
 import { ICreateInputCar, IUpdateInputCar } from "../../interfaces";
-import { IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
+import { EGeoState, IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 import { carActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
 import './CarUpdateForm.css';
-import { authService } from '../../services';
-import { useParams } from 'react-router-dom';
 
 export enum ECurrency {
     UAH = "UAH", EUR = "EUR", USD = "USD"
@@ -34,13 +33,13 @@ const CarUpdateForm: FC = () => {
     const [getRegionInput, setRegionInput] = useState(false);
     const [getCityInput, setCityInput] = useState(true);
 
-    const { errorUpdateById, errorDeleteById, errorGetById } = useAppSelector(state => state.carReducer);
+    const { errorUpdateById } = useAppSelector(state => state.carReducer);
 
     const [isCurrencyVisible, setIsCurrencyVisible] = useState(false);
     const [getCurrency, setCurrency] = useState<ECurrency>(ECurrency.EUR);
     const [getCurrencies, setCurrencies] = useState<ECurrency[]>([]);
     const [getResponse, setResponse] = useState('');
-    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+    const { carUpdateRegions: regions, carUpdateCities: cities } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
         setRegions(regions);
@@ -57,7 +56,7 @@ const CarUpdateForm: FC = () => {
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getRegionInput) setCarRegion(event.target.value);
-        await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
+        await dispatch(sellerActions.getRegionsByPrefix({ info: event.target.value, stateToFill: EGeoState.CAR_UPDATE }));
     };
 
 
@@ -72,7 +71,7 @@ const CarUpdateForm: FC = () => {
     const handleCityInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getCityInput) setCarCity(event.target.value);
         setCityInputValue(event.target.value);
-        await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
+        await dispatch(sellerActions.getRegionsPlaces({ info: getCarRegionId, stateToFill: EGeoState.CAR_UPDATE }));
     };
 
 
@@ -198,3 +197,4 @@ const CarUpdateForm: FC = () => {
 };
 
 export { CarUpdateForm };
+

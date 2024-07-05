@@ -13,7 +13,6 @@ const LogOutForm: FC = () => {
             await dispatch(authActions.signOut()).unwrap();
             navigate('/cars');
         } catch (err) {
-            console.log("err");
             navigate('/errors/forbidden', { state: { cause: 'Auth token is either fully expired, invalid, or doesn\'t exist' } });        }
 
     }

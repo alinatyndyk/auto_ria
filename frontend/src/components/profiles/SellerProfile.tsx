@@ -36,14 +36,13 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
                     <div style={{ fontSize: "9px" }}>◉ {region}, {city}</div>
                     <div>account: {accountType}</div>
                     <div>joined: {createdAt}</div>
-
+                    <div style={{ width: "500px" }}>
+                        <StripeCheckout seller={seller} />
+                    </div>
                 </div>
-                <div style={{ width: "500px" }}>
-                    <StripeCheckout seller={seller} />
-                </div>
+                <CarForm />
             </div>
             <br />
-            <CarForm />
             <Cars sellerId={id} />
 
         </div>

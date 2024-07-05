@@ -1,13 +1,11 @@
-import React, { FC } from 'react';
+import { faIdBadge, faKey, faMapMarkerAlt, faUserCircle } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FC } from 'react';
 import { GenerateAdminForm } from '../../forms/auth/codes/GenerateAdminForm';
 import { GenerateManagerForm } from '../../forms/auth/codes/GenerateManagerForm';
 import { CarForm } from '../../forms/car/CarForm';
-import { IUserResponse } from '../../interfaces/user/seller.interface';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUserCircle, faIdBadge, faKey, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
-import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
-import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
 import { FindCarById } from '../../forms/car/FindCarById';
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
     seller: IUserResponse;

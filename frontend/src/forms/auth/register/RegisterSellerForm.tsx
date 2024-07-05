@@ -2,7 +2,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../../../hooks';
 import { IAuthResponse, IError } from '../../../interfaces';
-import { IGeoCity, IGeoRegion } from '../../../interfaces/geo.interface';
+import { EGeoState, IGeoCity, IGeoRegion } from '../../../interfaces/geo.interface';
 import { ISellerInput } from '../../../interfaces/user/seller.interface';
 import { authActions } from '../../../redux/slices';
 import { sellerActions } from '../../../redux/slices/seller.slice';
@@ -18,7 +18,7 @@ const RegisterSellerForm: FC = () => {
 
     const { reset, handleSubmit, register } = useForm<ISellerInput>();
     const { registerErrors } = useAppSelector(state => state.authReducer);
-    const { regions, cities } = useAppSelector(state => state.sellerReducer);
+    const { userCreateRegions: regions, userCreateCities: cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -88,7 +88,7 @@ const RegisterSellerForm: FC = () => {
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getRegionInput) setCarRegion(event.target.value);
-        await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
+        await dispatch(sellerActions.getRegionsByPrefix({ info: event.target.value, stateToFill: EGeoState.USER_CREATE }));
     };
 
     const handleRegionClick = (region: IGeoRegion) => {
@@ -102,7 +102,7 @@ const RegisterSellerForm: FC = () => {
     const handleCityInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getCityInput) setCarCity(event.target.value);
         setCityInputValue(event.target.value);
-        await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
+        await dispatch(sellerActions.getRegionsPlaces({ info: getCarRegionId, stateToFill: EGeoState.USER_CREATE }));
     };
 
     const handleCityClick = (cityName: string) => {
@@ -218,3 +218,4 @@ const RegisterSellerForm: FC = () => {
 };
 
 export { RegisterSellerForm };
+

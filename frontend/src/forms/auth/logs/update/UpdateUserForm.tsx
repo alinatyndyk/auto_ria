@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../../../../hooks';
-import { IGeoCity, IGeoRegion } from '../../../../interfaces/geo.interface';
+import { EGeoState, IGeoCity, IGeoRegion } from '../../../../interfaces/geo.interface';
 import { IUserUpdateRequest } from '../../../../interfaces/user/seller.interface';
 import { sellerActions } from '../../../../redux/slices/seller.slice';
 import './UpdateUserForm.css'; // Import your CSS file
@@ -26,7 +26,7 @@ const UpdateUserForm: FC = () => {
     const [getCityInput, setCityInput] = useState(true);
 
     const [getResponse, setResponse] = useState('');
-    const { regions, cities, errorUpdateById } = useAppSelector(state => state.sellerReducer);
+    const { userUpdateRegions: regions, userUpdateCities: cities, errorUpdateById } = useAppSelector(state => state.sellerReducer);
 
     useEffect(() => {
         setRegions(regions);
@@ -38,7 +38,7 @@ const UpdateUserForm: FC = () => {
 
     const handleInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getRegionInput) setCarRegion(event.target.value);
-        await dispatch(sellerActions.getRegionsByPrefix(event.target.value));
+        await dispatch(sellerActions.getRegionsByPrefix({ info: event.target.value, stateToFill: EGeoState.USER_UPDATE }));
     };
 
     const handleRegionClick = (region: IGeoRegion) => {
@@ -52,7 +52,7 @@ const UpdateUserForm: FC = () => {
     const handleCityInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         if (!getCityInput) setCarCity(event.target.value);
         setCityInputValue(event.target.value);
-        await dispatch(sellerActions.getRegionsPlaces(getCarRegionId));
+        await dispatch(sellerActions.getRegionsPlaces({ info: getCarRegionId, stateToFill: EGeoState.USER_UPDATE }));
     };
 
     const handleCityClick = (cityName: string) => {
@@ -168,4 +168,4 @@ const UpdateUserForm: FC = () => {
     );
 };
 
-export {UpdateUserForm};
+export { UpdateUserForm };

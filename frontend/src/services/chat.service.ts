@@ -22,7 +22,7 @@ const _refreshTokenKey: string = 'refresh_token'
 const _isAuth: string = 'isAuth'
 
 const chatService = {
-    getChatsByUser: (page: number): IRes<IChatsResponse> => axiosService.get(urls.cars.all(page)),
+    getChatsByUser: (page: number): IRes<IChatsResponse> => axiosService.get(urls.chats.getChatsByUser(page)),
 }
 
 export {

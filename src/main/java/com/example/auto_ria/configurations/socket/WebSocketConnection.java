@@ -3,9 +3,11 @@ package com.example.auto_ria.configurations.socket;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -125,7 +127,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
     }
 
     @Override
-    protected void handleTextMessage(@SuppressWarnings("null") @NotNull WebSocketSession session, @NotNull TextMessage message) {
+    protected void handleTextMessage(@SuppressWarnings("null") @NotNull WebSocketSession session,
+            @NotNull TextMessage message) {
         try {
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
@@ -191,8 +194,13 @@ public class WebSocketConnection extends TextWebSocketHandler {
             chat.addMessage(newMessage);
             chatDaoSQL.save(chat);
 
+            Set<String> usedSessions = new HashSet<>();
+
             for (String sess : chat.getSessions()) {
-                sendTextMessageIfSessionExists(sess, message.getPayload());
+                if (!usedSessions.contains(sess)) {
+                    sendTextMessageIfSessionExists(sess, message.getPayload());
+                    usedSessions.add(sess);
+                }
             }
 
         } catch (CustomException e) {

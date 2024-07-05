@@ -59,6 +59,7 @@ const ProfilePage: FC = () => {
                 </div>
             </div>
             <div>
+                <div>Your chats</div>
                 <ChatsPage />
             </div>
         </div>

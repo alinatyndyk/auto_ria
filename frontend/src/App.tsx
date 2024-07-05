@@ -10,6 +10,7 @@ import { RegisterPage } from "./pages/auth/RegisterPage";
 import CarPage from './pages/car/CarPage';
 import { ProfilePage } from "./pages/auth/ProfilePage";
 import ErrorForbidden from "./pages/error/ErrorForbidden";
+import { Chat } from "./pages/WebSocketComponent";
 function App() {
     return (
         <Routes>
@@ -24,6 +25,7 @@ function App() {
                 <Route path={'auth/reset-password/'} element={<ResetPasswordForm />} />
                 <Route path={'auth/activate-account/:role'} element={<ActivateForm />} />
                 <Route path={'errors/forbidden'} element={<ErrorForbidden cause="Forbidden access."/>} />
+                <Route path={'chat'} element={<Chat/>} />
             </Route>
         </Routes>
     );

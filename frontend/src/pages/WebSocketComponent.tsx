@@ -1,51 +1,39 @@
-import React, { FC, useEffect, useMemo, useState } from 'react';
-// import {useAppDispatch, useAppSelector} from "../../hooks";
-// import {sellerActions} from "../../redux/slices/seller.slice";
-// import {IMessage} from "../cars";
-// import {authService} from "../../services";
-import { useParams } from "react-router";
-import { useAppDispatch, useAppSelector } from '../hooks';
+import React, { FC, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation } from "react-router";
 import { IMessage } from '../components/cars';
 import { authService } from '../services';
 import { IUserResponse } from '../interfaces/user/seller.interface';
-import { UserCarResponse } from '../interfaces';
 import { securityService } from '../services/security.service';
+import './Chat.css'; // Import the CSS file
 
 interface INewMessage {
     content: string;
 }
 
-interface IProps {
-    cause: string
-}
-
-const Chat: FC<{ receiver: UserCarResponse }> = ({ receiver }) => {
-
-    // const {messages, chatPage, totalPages, chats} = useAppSelector(state => state.sellerReducer);
-    // const dispatch = useAppDispatch();
+const Chat: FC = () => {
+    const location = useLocation();
+    const { user: receiver } = location.state as { user: IUserResponse };
 
     const [inputValue, setInputValue] = useState('');
-    const [getMoreBtn, setMoreBtn] = useState(false);
-    const [getChatMessages, setChatMessages] = useState<IMessage[]>([]);
+    const [msg, setMsg] = useState<any[]>([]);
 
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
-    // const sendMessage = (message: INewMessage) => {
-    //     if (socket.readyState === WebSocket.OPEN) {
-    //         socket.send(message.content);
-    //     }
-    // };
+    const auth = authService.getAccessToken();
+
+    // Update WebSocket URL to use the actual receiver.id
+    const socket = useMemo(() => new WebSocket(`ws://localhost:8080/chat?receiverId=${receiver.id}&auth=${auth}`), [auth, receiver.id]);
 
     const sendMessage = (message: INewMessage) => {
         if (socket.readyState === WebSocket.OPEN) {
             const me = localStorage.getItem("authorization") ?? '';
-            console.log(me + 'me')
             const sender = securityService.decryptObject(me);
-            console.log(sender + 'sender')
             const messageObject = {
                 content: message.content,
-                name: sender.name,  // Replace with actual name
-                id: sender.id,  // Replace with actual name
-                time: new Date().toISOString()  // Example for current time
+                name: sender.name,
+                senderId: sender.id,
+                receiverId: receiver.id,
+                time: new Date().toISOString()
             };
             socket.send(JSON.stringify(messageObject));
         }
@@ -57,72 +45,59 @@ const Chat: FC<{ receiver: UserCarResponse }> = ({ receiver }) => {
         setInputValue('');
     };
 
-    // useEffect(() => {
-    //     dispatch(sellerActions.getChatMessages(chatPage));
-    //     setChatMessages(messages);
-    // }, [])
-
-    const [msg, setMsg] = useState([]);
-    const auth = authService.getAccessToken();
-
-    const socket = useMemo(() =>
-        new WebSocket(`ws://localhost:8080/chat?receiverId=1&auth=${auth}`), [auth, receiver.id]);
-
     useEffect(() => {
-
         socket.onopen = () => {
             console.log('WebSocket connected');
         };
 
         socket.onmessage = (event) => {
-            const message = event.data; //as i NEWMESG
-            console.log('Received message:', message);
+            const message = event.data;
             const obj = JSON.parse(message);
-  
-            console.log(obj.id === receiver.id);
-            //validate msg object
-            if (obj.id === receiver.id) {
-                //@ts-ignore
-                setMsg(prevState => [...prevState, obj.content]);
-            }
+            const me = localStorage.getItem("authorization") ?? '';
+            const sender = securityService.decryptObject(me);
 
+            // Update the condition to check for correct sender and receiver
+            if (
+                (obj.senderId === receiver.id && obj.receiverId === sender.id) ||
+                (obj.senderId === sender.id && obj.receiverId === receiver.id)
+            ) {
+                setMsg(prevState => [...prevState, obj]);
+            }
         };
 
         socket.onclose = () => {
             console.log('WebSocket disconnected');
-        }
+        };
 
         return () => {
             if (socket && socket.readyState !== WebSocket.CLOSED) {
                 socket.close();
             }
         };
+    }, [receiver.id, socket]);
 
-    }, []);
-    // const getMore = () => {
-    //     const page = chatPage + 1;
-    //     dispatch(sellerActions.getChatMessages(page));
-    // }
+    useEffect(() => {
+        if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        }
+    }, [msg]);
 
-    // useEffect(() => {
-    //     if (getChatMessages.length > 0 && messages.length == 0) {
-    //         setMoreBtn(true);
-    //     } else {
-    //         setChatMessages(prevState => [...[...messages].reverse(), ...prevState]);
-    //     }
-    // }, [messages]);
+    const me = localStorage.getItem("authorization") ?? '';
+    const currentUser = securityService.decryptObject(me);
 
     return (
-        <div>
-            <div>Chat</div>
-            {/* <button disabled={getMoreBtn} onClick={() => getMore()}>show more</button> */}
-            {/* {getChatMessages.map((message: IMessage, index) => (
-                <div key={index}>{message.content}</div>
-            ))} */}
-            {msg.map((message, index) => (
-                <div key={index}>{message}</div>
-            ))}
-            <form onSubmit={handleFormSubmit}>
+        <div className="chat-wrapper">
+            <div className="chat-header">Chat</div>
+            <div className="chat-container" ref={chatContainerRef}>
+                {msg.map((message, index) => (
+                    <div key={index} className="message-container">
+                        <div className={message.senderId === currentUser.id ? 'message me' : 'message other'}>
+                            {message.content}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            <form className="chat-footer" onSubmit={handleFormSubmit}>
                 <input type="text" value={inputValue} onChange={(e) => setInputValue(e.target.value)} />
                 <button disabled={!inputValue.trim().length} type="submit">Send</button>
             </form>
@@ -131,3 +106,5 @@ const Chat: FC<{ receiver: UserCarResponse }> = ({ receiver }) => {
 }
 
 export { Chat };
+
+

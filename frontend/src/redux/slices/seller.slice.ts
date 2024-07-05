@@ -25,6 +25,7 @@ interface IState {
     userUpdateCities: IGeoCity[],
     totalPages: number,
     user: IUserResponse | null,
+    userConvesation: IUserResponse | null,
     isUserLoading: boolean
 }
 
@@ -46,11 +47,25 @@ const initialState: IState = {
     userUpdateCities: [],
     totalPages: 0,
     user: null,
+    userConvesation: null,
     isUserLoading: false
 }
 
 const getById = createAsyncThunk<IUserResponse, number>(
     'sellerSlice/getById',
+    async (id: number, { rejectWithValue }) => {
+        try {
+            const { data } = await sellerService.getById(id);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const getUserConversation = createAsyncThunk<IUserResponse, number>(
+    'sellerSlice/getUserConversation',
     async (id: number, { rejectWithValue }) => {
         try {
             const { data } = await sellerService.getById(id);
@@ -143,6 +158,9 @@ const slice = createSlice({
             .addCase(getById.pending, (state) => {
                 state.isUserLoading = true;
             })
+            .addCase(getUserConversation.fulfilled, (state, action) => {
+                state.userConvesation = action.payload;
+            })
             .addCase(getById.fulfilled, (state, action) => {
                 state.isUserLoading = false;
                 state.user = action.payload;
@@ -204,6 +222,7 @@ const { actions, reducer: sellerReducer } = slice;
 const sellerActions = {
     ...actions,
     getById,
+    getUserConversation,
     getByToken,
     getRegionsByPrefix,
     getRegionsPlaces,

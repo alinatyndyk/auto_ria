@@ -14,6 +14,7 @@ import LoadingPage from '../LoadingPage';
 import './CarFull.css';
 import { Carousel } from "./Carousel";
 import { Chat } from '../../pages/WebSocketComponent';
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 const CarFull: FC = () => {
     const { carId } = useParams<{ carId: string }>();
@@ -59,6 +60,13 @@ const CarFull: FC = () => {
         const response = JSON.stringify(payload);
         setBanResponse(response);
     };
+
+    const navigateToChat = () => {
+        if (car !== null) {
+            const user = car.user as IUserResponse;
+            navigate("/chat", { state: { user } });
+        }
+    }
 
     if (isCarLoading) {
         return <LoadingPage />;
@@ -129,7 +137,7 @@ const CarFull: FC = () => {
                     )
                 )}
             </div>
-            <Chat receiver={car.user}/>
+            <button onClick={navigateToChat}>Send the seller a message!</button>
         </div>
     );
 };

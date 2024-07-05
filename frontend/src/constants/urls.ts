@@ -58,7 +58,7 @@ const urls = {
     },
     chats: {
         chats,
-        getChatsByUser: (page: number): string => `/page/${page}`,
+        getChatsByUser: (page: number): string => `${chats}/of-user/page/${page}`,
     },
 
     geo: {

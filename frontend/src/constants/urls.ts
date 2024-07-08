@@ -10,7 +10,6 @@ const auth = 'auth';
 const sellers = 'users';
 const common = 'common';
 const regions = 'regions';
-const chats = 'chats';
 
 const urls = {
     cars: {
@@ -55,11 +54,6 @@ const urls = {
     sellers: {
         sellers,
         all: (page: number): string => `${sellers}/page/${page}`,
-    },
-    chats: {
-        chats,
-        getChatsByUser: (page: number): string => `${chats}/of-user/page/${page}`,
-        getMsgsOfChat: (page: number, yourId: number, secondId: number): string => `${chats}/page/${page}?user1Id=${yourId}&user2Id=${secondId}`,
     },
 
     geo: {

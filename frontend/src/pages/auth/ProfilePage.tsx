@@ -11,7 +11,6 @@ import { useAppSelector } from "../../hooks";
 import { validateUserSQL } from '../../interfaces/user/joi/user.interface.joi';
 import { IUserResponse } from '../../interfaces/user/seller.interface';
 import { securityService } from '../../services/security.service';
-import { ChatsPage } from '../WebSocketComponents';
 import ErrorForbidden from '../error/ErrorForbidden';
 
 
@@ -69,10 +68,6 @@ const ProfilePage: FC = () => {
                     <br />
                     <ChangePasswordForm />
                 </div>
-            </div>
-            <div>
-                <div>Your chats</div>
-                <ChatsPage />
             </div>
         </div>
 

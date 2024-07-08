@@ -59,13 +59,6 @@ const CarFull: FC = () => {
         setBanResponse(response);
     };
 
-    const navigateToChat = () => {
-        if (car !== null) {
-            const user = car.user as IUserResponse;
-            navigate("/chat", { state: { user } });
-        }
-    }
-
     if (isCarLoading) {
         return <LoadingPage />;
     }
@@ -125,8 +118,6 @@ const CarFull: FC = () => {
                         <div><FontAwesomeIcon icon={faHryvnia} /> uah: {middleValue?.middleInUAH}</div>
                     </div>
                 )}
-                {userAuthotization && car.user.id !== userAuthotization.id ?
-                    <button className="chat-button" onClick={navigateToChat}>Send a message!</button> : null}
                 {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN) && (
                     car.isActivated ? (
                         <div>

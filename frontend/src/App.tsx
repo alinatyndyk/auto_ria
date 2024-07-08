@@ -6,7 +6,6 @@ import { ForgotPasswordForm } from "./forms/auth/passwords/ForgotPasswordForm";
 import { ResetPasswordForm } from "./forms/auth/passwords/ResetPasswordForm";
 import { MainLayout } from "./layouts";
 import { LoginPage } from "./pages";
-import { ChatPage } from "./pages/ChatPage";
 import { ProfilePage } from "./pages/auth/ProfilePage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import CarPage from './pages/car/CarPage';
@@ -25,7 +24,6 @@ function App() {
                 <Route path={'auth/reset-password/'} element={<ResetPasswordForm />} />
                 <Route path={'auth/activate-account/:role'} element={<ActivateForm />} />
                 <Route path={'errors/forbidden'} element={<ErrorForbidden cause="Forbidden access." />} />
-                <Route path={'chat'} element={<ChatPage />} />
             </Route>
         </Routes>
     );

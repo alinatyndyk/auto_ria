@@ -3,7 +3,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../../../hooks';
 import { IAuthResponse, IError } from '../../../interfaces';
 import { EGeoState, IGeoCity, IGeoRegion } from '../../../interfaces/geo.interface';
-import { ISellerInput } from '../../../interfaces/user/seller.interface';
+import { ISellerInput, IUserResponse } from '../../../interfaces/user/seller.interface';
 import { authActions } from '../../../redux/slices';
 import { sellerActions } from '../../../redux/slices/seller.slice';
 import './RegisterSellerForm.css';
@@ -18,7 +18,7 @@ const RegisterSellerForm: FC = () => {
 
     const { reset, handleSubmit, register } = useForm<ISellerInput>();
     const { registerErrors } = useAppSelector(state => state.authReducer);
-    const { user, userCreateRegions: regions, userCreateCities: cities } = useAppSelector(state => state.sellerReducer);
+    const {userCreateRegions: regions, userCreateCities: cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -53,7 +53,9 @@ const RegisterSellerForm: FC = () => {
                     const { payload } = await dispatch(authActions.registerUserAuth(seller));
 
                     if (isIAuthResponse(payload)) {
-                        navigate('/profile', {state: {user}});
+                        await dispatch(sellerActions.getByToken()).then((res) => {
+                            navigate('/profile', { state: { receiver: res.payload as IUserResponse } });
+                        })
                         setResponse('');
                     } else {
                         setResponse(String(payload));

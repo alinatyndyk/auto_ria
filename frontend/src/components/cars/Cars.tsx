@@ -9,16 +9,6 @@ interface IProps {
     sellerId: number | null
 }
 
-export interface IMessage {
-    id: number,
-    content: string,
-    senderId: number,
-    receiverId: number,
-    isEdited: boolean | null,
-    updatedAt: number[],
-    createdAt: number[]
-}
-
 const Cars: FC<IProps> = ({ sellerId }) => {
     const { cars, pagesInTotal } = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();

@@ -1,9 +1,7 @@
-import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IMiddleCarValues, IUpdateCarRequest } from "../../interfaces";
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
-import { carService } from "../../services";
 import { AxiosError } from "axios";
-import { useAppNavigate } from "../../hooks";
-import { act } from "@testing-library/react";
+import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IMiddleCarValues, IUpdateCarRequest } from "../../interfaces";
+import { carService } from "../../services";
 
 interface IState {
     cars: CarsResponse[],
@@ -274,4 +272,4 @@ const carActions = {
 export {
     carActions,
     carReducer
-}
+};

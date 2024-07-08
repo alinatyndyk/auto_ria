@@ -1,11 +1,11 @@
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { IGenerateCode } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
 import './GenerateForm.css';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const GenerateAdminForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IGenerateCode>();

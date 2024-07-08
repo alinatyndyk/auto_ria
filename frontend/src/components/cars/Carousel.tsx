@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import './Carousel.css';
 
 export type Image = {
@@ -13,7 +13,7 @@ const Carousel: React.FC<{ images: Image[] }> = ({ images }) => {
     useEffect(() => {
         const transitionTimeout = setTimeout(() => {
             setTransitioning(false);
-        }, 500); 
+        }, 500);
 
         return () => clearTimeout(transitionTimeout);
     }, [currentIndex]);

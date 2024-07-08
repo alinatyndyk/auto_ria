@@ -1,12 +1,11 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from "react-router-dom";
 import App from './App';
+import { MyContextProvider } from "./Context";
+import './index.css';
+import { setupStore } from "./redux";
 import reportWebVitals from './reportWebVitals';
-import {Provider} from 'react-redux';
-import {setupStore} from "./redux";
-import {BrowserRouter} from "react-router-dom";
-import {MyContextProvider} from "./Context";
 
 
 const root = ReactDOM.createRoot(
@@ -19,7 +18,7 @@ root.render(
     <Provider store={store}>
         <BrowserRouter>
             <MyContextProvider>
-                <App/>
+                <App />
             </MyContextProvider>
         </BrowserRouter>
     </Provider>

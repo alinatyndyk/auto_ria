@@ -5,7 +5,6 @@ import { useParams } from "react-router";
 import { ERole } from "../../constants/role.enum";
 import { CarUpdateForm } from '../../forms/car/CarUpdateForm';
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../hooks";
-import { IUserResponse } from '../../interfaces/user/seller.interface';
 import ErrorForbidden from '../../pages/error/ErrorForbidden';
 import { carActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";

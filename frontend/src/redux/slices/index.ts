@@ -1,2 +1,2 @@
-export * from './car.slice';
 export * from './auth.slice';
+export * from './car.slice';

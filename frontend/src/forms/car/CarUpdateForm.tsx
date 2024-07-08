@@ -1,7 +1,7 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useParams } from 'react-router-dom';
-import { useAppDispatch, useAppNavigate, useAppSelector } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 import { ICreateInputCar, IUpdateInputCar } from "../../interfaces";
 import { EGeoState, IGeoCity, IGeoRegion } from "../../interfaces/geo.interface";
 import { carActions } from "../../redux/slices";
@@ -15,7 +15,6 @@ export enum ECurrency {
 const CarUpdateForm: FC = () => {
     const { carId } = useParams<{ carId: string }>();
     const dispatch = useAppDispatch();
-    const navigate = useAppNavigate();
     const { reset, handleSubmit, register } = useForm<ICreateInputCar>();
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);

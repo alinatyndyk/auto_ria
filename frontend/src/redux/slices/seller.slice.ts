@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 import { IError } from "../../interfaces";
-import { EGeoState, IGeoCitiesResponse, IGeoCity, IGeoCityForState, IGeoRegion, IGeoRegionForState, IGeoStateRequest } from "../../interfaces/geo.interface";
+import { EGeoState, IGeoCity, IGeoCityForState, IGeoRegion, IGeoRegionForState, IGeoStateRequest } from "../../interfaces/geo.interface";
 import { IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
 import { sellerService } from "../../services/seller.service";

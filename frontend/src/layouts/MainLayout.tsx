@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ERole } from '../constants/role.enum';
 import { LogOutForm } from '../forms/auth/logs/LogOutForm';
@@ -17,7 +17,7 @@ const MainLayout: FC = () => {
 
     const deleteAccount = async () => {
 
-        setTimeout(() => {}, 300);
+        setTimeout(() => { }, 300);
 
         if (AuthObj !== null && storedAuth === 'true') {
             const decryptedAuth = securityService.decryptObject(AuthObj);

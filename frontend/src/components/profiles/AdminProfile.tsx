@@ -16,7 +16,7 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
 
     const picture = avatar === null ? 'channels4_profile.jpg' : avatar;
 
-    const date = createdAt.slice(0,3);
+    const date = createdAt.slice(0, 3);
     const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
 
     return (
@@ -63,7 +63,7 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
                         <GenerateAdminForm />
                     </div>
                 </div>
-                <div style={{ marginTop: '20px'}}>
+                <div style={{ marginTop: '20px' }}>
                     <CarForm />
                 </div>
             </div>

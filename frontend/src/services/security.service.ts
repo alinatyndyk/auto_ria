@@ -1,5 +1,5 @@
-import AES from 'crypto-js/aes';
 import Crypto from 'crypto-js';
+import AES from 'crypto-js/aes';
 
 const secretKey = 'YourSecretKey';
 
@@ -18,4 +18,4 @@ const securityService = {
 
 export {
     securityService
-}
+};

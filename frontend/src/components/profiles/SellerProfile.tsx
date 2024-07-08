@@ -21,7 +21,7 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
         picture = avatar;
     }
 
-    const date = createdAt.slice(0,3);
+    const date = createdAt.slice(0, 3);
     const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
 
     return (

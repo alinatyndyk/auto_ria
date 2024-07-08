@@ -1,5 +1,5 @@
-import { combineReducers } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
+import { combineReducers } from "redux";
 import { authReducer, carReducer } from "./slices";
 import { sellerReducer } from "./slices/seller.slice";
 
@@ -18,11 +18,9 @@ type AppStore = ReturnType<typeof setupStore>
 type AppDispatch = AppStore['dispatch']
 
 export type {
-    RootState,
-    AppStore,
-    AppDispatch
-}
+    AppDispatch, AppStore, RootState
+};
 
 export {
     setupStore
-}
+};

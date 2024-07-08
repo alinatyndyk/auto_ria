@@ -1,7 +1,7 @@
-import { IRes } from "../types/axiosRes.type";
-import { CarsResponse, ICar, ICarResponse, ICreateCar, IMiddleCarValues, IUpdateInputCar } from "../interfaces";
-import { axiosService } from "./axios.service";
 import { urls } from "../constants";
+import { CarsResponse, ICar, ICarResponse, ICreateCar, IMiddleCarValues, IUpdateInputCar } from "../interfaces";
+import { IRes } from "../types/axiosRes.type";
+import { axiosService } from "./axios.service";
 
 const carService = {
     getAll: (page: number): IRes<ICarResponse> => axiosService.get(urls.cars.all(page)),
@@ -23,4 +23,4 @@ const carService = {
 
 export {
     carService
-}
+};

@@ -1,8 +1,9 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
-import { authActions } from '../../../redux/slices';
 import { IForgotPassword } from '../../../interfaces';
+import ErrorForbidden from '../../../pages/error/ErrorForbidden';
+import { authActions } from '../../../redux/slices';
 import '../logs/LoginForm.css';
 
 
@@ -18,8 +19,12 @@ const ForgotPasswordForm: FC = () => {
         setResponse(String(payload));
     };
 
+    if (localStorage.getItem("isAuth") === "true") {
+        return <ErrorForbidden cause='You are already logged in' />
+    }
+
     return (
-        <div style={{display: 'flex', justifyContent: 'center', margin: '20px'}}>
+        <div style={{ display: 'flex', justifyContent: 'center', margin: '20px' }}>
             <div className="login-form">
                 <div className="form-header">Restore your password here</div>
                 {forgotPasswordErrors ? (
@@ -48,3 +53,4 @@ const ForgotPasswordForm: FC = () => {
 };
 
 export { ForgotPasswordForm };
+

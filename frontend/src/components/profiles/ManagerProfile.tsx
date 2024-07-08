@@ -1,7 +1,6 @@
 import { FC } from 'react';
-import { IUserResponse } from '../../interfaces/user/seller.interface';
 import { FindCarById } from '../../forms/car/FindCarById';
-import { disconnect } from 'process';
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
     seller: IUserResponse

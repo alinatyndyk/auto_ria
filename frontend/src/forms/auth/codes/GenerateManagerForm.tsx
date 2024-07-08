@@ -1,10 +1,10 @@
-import React, { FC, useState } from 'react';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { FC, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
+import { IGenerateCode } from '../../../interfaces';
 import { authActions } from '../../../redux/slices';
-import { IError, IGenerateCode } from '../../../interfaces';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import './GenerateForm.css';
 
 const GenerateManagerForm: FC = () => {

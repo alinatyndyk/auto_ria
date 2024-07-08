@@ -1,35 +1,32 @@
-import { FC } from 'react';
-import { useAppNavigate, useAppSelector } from '../hooks';
+import React, { FC } from 'react';
+import { useAppNavigate } from '../hooks';
 import { IUserResponse } from '../interfaces/user/seller.interface';
-import { Chat } from './WebSocketComponent';
+import './ChatCard.css'; // Import the CSS file
 
 interface IProps {
-    chat: IUserResponse
+    chat: IUserResponse;
 }
 
 const ChatCard: FC<IProps> = ({ chat }) => {
-
     const navigate = useAppNavigate();
 
-    const { userConvesation: user } = useAppSelector(state => state.sellerReducer);
-
+    const picture = chat.avatar === null ? 'channels4_profile.jpg' : chat.avatar;
 
     return (
-        <div onClick={() => {
-            console.log(`=> Your chat with ${user?.name}`)
-            navigate("/chat", { state: { user: chat } });
-        }}>
-            <hr />
-            <div>{chat?.id}</div>
-            <div className="car-photo">
-                <img src={`http://localhost:8080/users/avatar/${user?.avatar}`} alt="" />
+        <div className="chat-card-container">
+        {/* <div onClick={() => navigate("/chat", { state: { user: chat } })} className="chat-card-container"> */}
+            <div className="chat-card-photo">
+                <img src={`http://localhost:8080/users/avatar/${picture}`} alt="User Avatar" />
             </div>
-            <div>{chat?.name} {chat?.lastName}</div>
-            <div>{chat?.number}</div>
-            <div>{chat?.city} -- {chat?.region}</div>
+            <div className="chat-card-details">
+                <div className="chat-card-name">{chat.name} {chat.lastName}</div>
+                <div className="chat-card-location">{chat.city} -- {chat.region}</div>
+            </div>
         </div>
     );
 };
 
 export { ChatCard };
+
+
 

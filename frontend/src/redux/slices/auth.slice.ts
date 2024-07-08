@@ -28,7 +28,7 @@ interface IState {
     resetPasswordErrors: IError | null,
     trigger: boolean,
     isAuth: boolean,
-    authId: number
+    authId: number,
 }
 
 const initialState: IState = {
@@ -46,7 +46,7 @@ const initialState: IState = {
     forgotPasswordErrors: null,
     resetPasswordErrors: null,
     trigger: false,
-    authId: 0
+    authId: 0,
 }
 
 const login = createAsyncThunk<IAuthResponse, IAuthRequest>(
@@ -244,6 +244,7 @@ const slice = createSlice({
             })
             .addCase(signOut.fulfilled, (state) => {
                 state.isAuth = false;
+
                 localStorage.clear();
             })
             .addCase(activateSeller.fulfilled, (state, action) => {

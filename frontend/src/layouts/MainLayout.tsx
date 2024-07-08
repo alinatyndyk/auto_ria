@@ -14,13 +14,12 @@ const MainLayout: FC = () => {
     const AuthObj = localStorage.getItem('authorization');
 
     const { errorDeleteById } = useAppSelector((state) => state.sellerReducer);
-    const { isAuth } = useAppSelector((state) => state.authReducer);
 
     const deleteAccount = async () => {
 
         setTimeout(() => {}, 300);
 
-        if (AuthObj !== null && storedAuth === 'true' && isAuth === true) {
+        if (AuthObj !== null && storedAuth === 'true') {
             const decryptedAuth = securityService.decryptObject(AuthObj);
             if (decryptedAuth?.id) {
                 const id: number = decryptedAuth.id;

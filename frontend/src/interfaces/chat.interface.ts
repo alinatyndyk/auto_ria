@@ -40,3 +40,23 @@ export interface IChatsResponse {
     numberOfElements: number;
     empty: boolean;
 }
+
+export interface IMsgsOfChatRequest {
+    page: number,
+    yourId: number,
+    secondId: number
+}
+
+export interface IMsgsOfChatResponse {
+    content: MessageClass[];
+    pageable: Pageable;
+    last: boolean;
+    totalPages: number;
+    totalElements: number;
+    size: number;
+    number: number;
+    sort: Sort;
+    first: boolean;
+    numberOfElements: number;
+    empty: boolean;
+}

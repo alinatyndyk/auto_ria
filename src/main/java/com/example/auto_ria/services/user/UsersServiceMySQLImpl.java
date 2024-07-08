@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.auto_ria.dao.CarDaoSQL;
+import com.example.auto_ria.dao.socket.ChatDaoSQL;
 import com.example.auto_ria.dao.user.UserDaoSQL;
 import com.example.auto_ria.dto.updateDTO.UserUpdateDTO;
 import com.example.auto_ria.enums.EMail;
@@ -22,6 +24,7 @@ import com.example.auto_ria.mail.FMService;
 import com.example.auto_ria.models.responses.user.UserResponse;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.CommonService;
+import com.example.auto_ria.services.car.CarsServiceMySQLImpl;
 
 import lombok.AllArgsConstructor;
 
@@ -31,6 +34,8 @@ public class UsersServiceMySQLImpl {
 
     private UserDaoSQL userDaoSQL;
     private CommonService commonService;
+    private CarDaoSQL carDaoSQL;
+    private ChatDaoSQL chatDaoSQL;
     private FMService mailer;
 
     public ResponseEntity<Page<UserResponse>> getAll(int page) {
@@ -101,6 +106,8 @@ public class UsersServiceMySQLImpl {
 
     public ResponseEntity<String> deleteById(String id, UserSQL user, EMail deleteTypeMail) {
         userDaoSQL.deleteById(Integer.valueOf(id));
+
+        carDaoSQL.deleteAllByUser(user);
 
         HashMap<String, Object> vars = new HashMap<>();
         vars.put("name", user.getName());

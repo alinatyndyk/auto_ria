@@ -92,3 +92,21 @@
     flex: 1 0 100%; /* Ensure the update form spans the full width below the carousel */
     margin-top: 20px; /* Space between the info section and the update form */
 }
+
+/* ChatCardButton.css */
+
+.chat-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.chat-button:hover {
+    background-color: #0056b3;
+}
+

@@ -46,8 +46,7 @@ const ChangePasswordForm: FC = () => {
                 Change Password
             </div>
             <div className="error-message">
-                {changePasswordErrors && <div>{changePasswordErrors.message}</div>}
-                {showResponse && <div>{getResponse}</div>}
+            {showResponse ? <div>{getResponse}</div> : (changePasswordErrors ? <div>{changePasswordErrors.message}</div> : null)}
             </div>
             <form onSubmit={handleSubmit(activate)} className="password">
                 <div className="form-group">

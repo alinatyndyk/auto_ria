@@ -68,7 +68,7 @@ public class ChatServiceMySQL {
     }
 
     public Page<MessageClass> getMessagesPage(String roomKey, int page) {
-        Pageable pageable = PageRequest.of(page, 2, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(page, 6, Sort.by("id").descending());
         int chatId = getByRoomKey(roomKey).getId();
 
         return messageDaoSQL.getByChatId(chatId, pageable);
@@ -79,8 +79,9 @@ public class ChatServiceMySQL {
     }
 
     public Page<Chat> findChatsByUserId(int userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, 10);
         Page<Chat> chatPage = chatDaoSQL.findAll(pageable);
+
         List<Chat> filteredChats = chatPage.getContent().stream()
                 .filter(chat -> chat.getUsers().contains(userId))
                 .toList();

@@ -117,3 +117,10 @@
     background-color: #ccc;
     cursor: not-allowed;
 }
+
+
+.loading-spinner {
+    text-align: center;
+    margin-bottom: 10px;
+}
+

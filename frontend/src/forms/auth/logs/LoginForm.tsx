@@ -6,6 +6,8 @@ import { useAppDispatch, useAppSelector } from '../../../hooks';
 import { IAuthRequest } from '../../../interfaces';
 import { authActions } from '../../../redux/slices';
 import './LoginForm.css'; // Import your CSS file for styling if needed
+import { sellerActions } from '../../../redux/slices/seller.slice';
+import { IUserResponse } from '../../../interfaces/user/seller.interface';
 
 const LoginForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IAuthRequest>();
@@ -20,8 +22,10 @@ const LoginForm: FC = () => {
 
             if (lastWord !== 'fulfilled') {
                 reset();
-            } else {
-                navigate('/profile');
+            } else if (lastWord === "fulfilled" && localStorage.getItem("access_token") !== null) {
+                dispatch(sellerActions.getByToken()).then((res) => {
+                    navigate('/profile', { state: { receiver: res.payload as IUserResponse } });
+                })
             }
         });
     };

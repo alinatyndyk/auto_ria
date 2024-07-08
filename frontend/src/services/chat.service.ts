@@ -12,7 +12,7 @@ import {
     INewPassword,
     IRefreshRequest,
 } from "../interfaces";
-import { IChatsResponse } from "../interfaces/chat.interface";
+import { IChatsResponse, IMsgsOfChatResponse } from "../interfaces/chat.interface";
 import { ISellerInput } from "../interfaces/user/seller.interface";
 import { IRes } from "../types/axiosRes.type";
 import { axiosService } from "./axios.service";
@@ -23,6 +23,7 @@ const _isAuth: string = 'isAuth'
 
 const chatService = {
     getChatsByUser: (page: number): IRes<IChatsResponse> => axiosService.get(urls.chats.getChatsByUser(page)),
+    getMsgsOfChat: (page: number, yourId: number, secondId: number): IRes<IMsgsOfChatResponse> => axiosService.get(urls.chats.getMsgsOfChat(page, yourId, secondId)),
 }
 
 export {

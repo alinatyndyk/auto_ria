@@ -1,15 +1,11 @@
 package com.example.auto_ria.controllers;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,7 +31,6 @@ import com.example.auto_ria.services.user.UsersServiceMySQLImpl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -191,8 +186,8 @@ public class AuthenticationController {
 
             String code = jwtService.generateRegistrationCode(claims, email, ETokenRole.MANAGER_REGISTER);
 
-            if (!usersServiceMySQL.getByEmail(email).equals(null)) {
-                throw new CustomException("User with this email already exists. Do you want to change their role?",
+            if (usersServiceMySQL.getByEmail(email) != null) {
+                throw new CustomException("User with this email already exists",
                         HttpStatus.BAD_REQUEST);
             }
 
@@ -264,8 +259,8 @@ public class AuthenticationController {
             String code = jwtService.generateRegistrationCode(claims, email,
                     ETokenRole.ADMIN_REGISTER);
 
-            if (!usersServiceMySQL.getByEmail(email).equals(null)) {
-                throw new CustomException("User with this email already exists. Do you want to change their role?",
+            if (usersServiceMySQL.getByEmail(email) != null) {
+                throw new CustomException("User with this email already exists",
                         HttpStatus.BAD_REQUEST);
             }
 

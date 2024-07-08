@@ -6,6 +6,7 @@ import { useParams } from "react-router";
 import { ERole } from "../../constants/role.enum";
 import { CarUpdateForm } from '../../forms/car/CarUpdateForm';
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../hooks";
+import { IUserResponse } from '../../interfaces/user/seller.interface';
 import ErrorForbidden from '../../pages/error/ErrorForbidden';
 import { carActions } from "../../redux/slices";
 import { sellerActions } from "../../redux/slices/seller.slice";
@@ -13,8 +14,6 @@ import { authService } from '../../services';
 import LoadingPage from '../LoadingPage';
 import './CarFull.css';
 import { Carousel } from "./Carousel";
-import { Chat } from '../../pages/WebSocketComponent';
-import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 const CarFull: FC = () => {
     const { carId } = useParams<{ carId: string }>();
@@ -76,6 +75,10 @@ const CarFull: FC = () => {
         return <ErrorForbidden cause='Car doesn`t exist or is banned' />;
     }
 
+    const date = car.user.createdAt.slice(0,3);
+    const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
+
+
     return (
         <div className="carFull">
             <div className="carFull__carousel">
@@ -94,7 +97,7 @@ const CarFull: FC = () => {
                 <div className="carFull__price"><FontAwesomeIcon icon={faDollarSign} /> {car.price} {car.currency}</div>
                 <div className="carFull__location"><FontAwesomeIcon icon={faLocationArrow} /> {car.region}, {car.city}</div>
                 <div className="carFull__details">
-                    {userAuthotization && userAuthotization.id === car?.user.id &&
+                    {userAuthotization && ((userAuthotization.role === ERole.USER || userAuthotization.role === ERole.ADMIN || userAuthotization.id === car?.user.id )) &&
                         <button className="carFull__deleteButton" onClick={() => deleteCar(car?.id)}>delete</button>}
                     <div><FontAwesomeIcon icon={faCar} /> brand: {car.brand}</div>
                     <div><FontAwesomeIcon icon={faCar} /> model: {car.model}</div>
@@ -110,11 +113,11 @@ const CarFull: FC = () => {
                 <div className="carFull__desc">
                     <div><FontAwesomeIcon icon={faInfoCircle} /> desc: {car.description}</div>
                     <div><FontAwesomeIcon icon={faUser} /> seller: {car.user.name + " " + car.user.lastName}</div>
-                    <div><FontAwesomeIcon icon={faClock} /> {moment(car.user.createdAt).format("YYYY-MM-DD HH:mm:ss")}</div>
+                    <div><FontAwesomeIcon icon={faClock} /> {formattedNumbers}</div>
                 </div>
                 {car?.user.role === ERole.ADMIN && <div style={{ color: "blue" }}>The car is sold by AutoRio Services.
                     Please use {car?.user.number} for further information</div>}
-                {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN || userAuthotization.id === car.user.id) && (
+                {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN || userAuthotization.accountType == 'PREMIUM') && (
                     <div className="carFull__middleValueBox">
                         <div>Middle price in the region - premium</div>
                         <div>{errorGetMiddle?.message ? errorGetMiddle.message : null}</div>
@@ -123,6 +126,8 @@ const CarFull: FC = () => {
                         <div><FontAwesomeIcon icon={faHryvnia} /> uah: {middleValue?.middleInUAH}</div>
                     </div>
                 )}
+                {userAuthotization && ((userAuthotization.role === ERole.USER || userAuthotization.role === ERole.ADMIN)) && car.user.id !== userAuthotization.id ?
+                    <button className="chat-button" onClick={navigateToChat}>Send a message!</button> : null}
                 {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN) && (
                     car.isActivated ? (
                         <div>
@@ -137,7 +142,6 @@ const CarFull: FC = () => {
                     )
                 )}
             </div>
-            <button onClick={navigateToChat}>Send the seller a message!</button>
         </div>
     );
 };

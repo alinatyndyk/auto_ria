@@ -12,8 +12,8 @@ interface IChildren {
 const ThemeContext =
     createContext<any>({});
 
-export const MyContextProvider: FC<IChildren> = ({children}) => {
-    const {user} = useAppSelector(state => state.sellerReducer);
+export const MyContextProvider: FC<IChildren> = ({ children }) => {
+    const { user } = useAppSelector(state => state.sellerReducer);
     const [theme, setTheme] =
         useState<IUserResponse | string>("");
 
@@ -24,9 +24,8 @@ export const MyContextProvider: FC<IChildren> = ({children}) => {
             dispatch(sellerActions.getByToken());
         }
 
-        localStorage.setItem("authorization", securityService.encryptObject(user));
-
         if (user != null) {
+            localStorage.setItem("authorization", securityService.encryptObject(user));
             setTheme(user);
         }
     }, [user]);

@@ -32,6 +32,7 @@ import com.example.auto_ria.models.socket.MessageClass;
 import com.example.auto_ria.models.socket.Session;
 import com.example.auto_ria.models.user.UserSQL;
 import com.example.auto_ria.services.chat.ChatServiceMySQL;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.validation.constraints.NotNull;
 
@@ -129,6 +130,7 @@ public class WebSocketConnection extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(@SuppressWarnings("null") @NotNull WebSocketSession session,
             @NotNull TextMessage message) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
             String uri = Objects.requireNonNull(session.getUri()).toString();
 
@@ -180,8 +182,10 @@ public class WebSocketConnection extends TextWebSocketHandler {
                 chatDaoSQL.save(chat);
             }
 
+            MessagePayload messagePayload = objectMapper.readValue(message.getPayload(), MessagePayload.class);
+
             MessageClass messageClass = MessageClass.builder()
-                    .content(message.getPayload())
+                    .content(messagePayload.getContent())
                     .chatId(chat.getId())
                     .build();
 

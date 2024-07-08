@@ -25,7 +25,7 @@ function App() {
                 <Route path={'auth/reset-password/'} element={<ResetPasswordForm />} />
                 <Route path={'auth/activate-account/:role'} element={<ActivateForm />} />
                 <Route path={'errors/forbidden'} element={<ErrorForbidden cause="Forbidden access."/>} />
-                <Route path={'chat'} element={<Chat/>} />
+                {/* <Route path={'chat'} element={<Chat/>} /> */}
             </Route>
         </Routes>
     );

@@ -20,7 +20,9 @@ import com.example.auto_ria.models.user.UserSQL;
 public interface CarDaoSQL
         extends JpaRepository<CarSQL, Integer>, JpaSpecificationExecutor<CarSQL> {
 
-    List<CarSQL> findByUser(UserSQL userSQLSQL);
+    List<CarSQL> findByUser(UserSQL userSQL);
+
+    void deleteAllByUser(UserSQL userSQL);
 
     Page<CarSQL> findAllByUser(UserSQL userSQL, Pageable pageable);
 

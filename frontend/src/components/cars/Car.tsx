@@ -24,6 +24,7 @@ const Car: FC<IProps> = ({ car }) => {
                 <img src={`http://localhost:8080/users/avatar/${photo[0]}`} alt="" />
             </div>
             <div className="car-details">
+            <div>{car.user.id} USER</div>
             <div><FontAwesomeIcon icon={faCircle} /> {id}</div>
             <div><FontAwesomeIcon icon={faCar} /> {brand}</div>
             <div><FontAwesomeIcon icon={faFileAlt} /> {model}</div>

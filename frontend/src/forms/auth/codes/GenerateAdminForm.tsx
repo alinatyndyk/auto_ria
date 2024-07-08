@@ -28,14 +28,13 @@ const GenerateAdminForm: FC = () => {
                 <FontAwesomeIcon icon={faEnvelope} className="form-icon" />
                 <span className="form-title"> Generate code for admin</span>
             </div>
-            {generateAdminErrors && <div className="error-message">{generateAdminErrors.message}</div>}
+            {generateAdminErrors ? <div className="error-message">{generateAdminErrors.message}</div> : <div>{getResponse}</div>}
             <form onSubmit={handleSubmit(activate)}>
                 <div>
                     <input type="text" placeholder="Email" {...register('email')} />
                 </div>
                 <button type="submit">Generate a New Admin</button>
             </form>
-            {getResponse && <div>{getResponse}</div>}
         </div>
     );
 };

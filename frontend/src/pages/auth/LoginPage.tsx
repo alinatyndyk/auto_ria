@@ -5,9 +5,7 @@ import ErrorForbidden from '../error/ErrorForbidden';
 
 const LoginPage: FC = () => {
 
-    const { isAuth } = useAppSelector(state => state.authReducer);
-
-    if (isAuth) {
+    if (localStorage.getItem("isAuth") === "true") {
         return <ErrorForbidden cause='You are already logged in' />
     }
 

@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { FC } from 'react';
 import { useAppNavigate } from "../../hooks";
 import { CarsResponse } from "../../interfaces";
-import './Car.css'; // импорт стилей
+import './Car.css';
 
 interface IProps {
     car: CarsResponse

@@ -10,9 +10,9 @@ import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordFor
 import { useAppSelector } from "../../hooks";
 import { validateUserSQL } from '../../interfaces/user/joi/user.interface.joi';
 import { IUserResponse } from '../../interfaces/user/seller.interface';
+import { securityService } from '../../services/security.service';
 import { ChatsPage } from '../WebSocketComponents';
 import ErrorForbidden from '../error/ErrorForbidden';
-import { securityService } from '../../services/security.service';
 
 
 const ProfilePage: FC = () => {
@@ -38,9 +38,6 @@ const ProfilePage: FC = () => {
         }
     }, [user]);
 
-    if (user === null && receiver === undefined) {
-        return <ErrorForbidden cause='Could not access profile. Please log in' />;
-    }
 
     if (isUserLoading) {
         return <LoadingPage />;

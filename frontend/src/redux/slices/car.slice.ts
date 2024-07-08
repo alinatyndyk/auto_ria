@@ -3,6 +3,7 @@ import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/too
 import { carService } from "../../services";
 import { AxiosError } from "axios";
 import { useAppNavigate } from "../../hooks";
+import { act } from "@testing-library/react";
 
 interface IState {
     cars: CarsResponse[],
@@ -203,7 +204,6 @@ const slice = createSlice({
                 state.pagesInTotal = action.payload.totalPages;
             })
             .addCase(getById.pending, (state) => {
-                // state.errorGetById = null;
                 state.isCarLoading = true;
             })
             .addCase(getById.fulfilled, (state, action) => {

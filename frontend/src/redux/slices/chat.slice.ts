@@ -73,9 +73,6 @@ const slice = createSlice({
                 state.msgsOfChat = action.payload.content;
                 state.pageMsgsCurrent = action.payload.pageable.pageNumber;
                 state.pagesMsgsInTotal = action.payload.totalPages;
-
-                console.log(JSON.stringify(action.payload.content) + "paulaos");
-
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 if (action.type === "chatlice/getChatsbyUser/rejected") {

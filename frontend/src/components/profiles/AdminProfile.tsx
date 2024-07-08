@@ -12,9 +12,12 @@ interface IProps {
 }
 
 const AdminProfile: FC<IProps> = ({ seller }) => {
-    const { id, avatar, name, lastName, role, region, city } = seller;
+    const { id, avatar, name, lastName, role, region, city, createdAt } = seller;
 
     const picture = avatar === null ? 'channels4_profile.jpg' : avatar;
+
+    const date = createdAt.slice(0,3);
+    const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
 
     return (
         <div style={{
@@ -50,6 +53,7 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
                         <div style={{ marginBottom: '5px' }}>
                             <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '5px' }} />
                             <span>{region}, {city}</span>
+                            <div>joined : {formattedNumbers}</div>
                         </div>
                         <hr />
                         <br />

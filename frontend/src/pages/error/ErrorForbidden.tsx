@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import './Forbidden.css'; // Импорт стилей
+import './Forbidden.css';
 import { useLocation } from 'react-router-dom';
 
 interface IProps {
@@ -13,7 +13,6 @@ const ErrorForbidden: FC<IProps> = ({ cause }) => {
         <div className="forbidden-container">
             <h1 className="forbidden-title">403</h1>
             <p className="forbidden-message">Forbidden endpoint</p>
-            {/* <p className="forbidden-message">Cause: {cause ? cause : causeState}</p> */}
             <p className="forbidden-message">Cause:  {cause === 'Forbidden access.' && causeState !== null ? causeState : cause}</p>
         </div>
     );

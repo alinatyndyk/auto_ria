@@ -1,6 +1,5 @@
 import { faCar, faClock, faDollarSign, faEuroSign, faHorseHead, faHryvnia, faInfoCircle, faLocationArrow, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import moment from "moment";
 import { FC, useEffect, useState } from 'react';
 import { useParams } from "react-router";
 import { ERole } from "../../constants/role.enum";
@@ -75,7 +74,7 @@ const CarFull: FC = () => {
         return <ErrorForbidden cause='Car doesn`t exist or is banned' />;
     }
 
-    const date = car.user.createdAt.slice(0,3);
+    const date = car.user.createdAt.slice(0, 3);
     const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
 
 
@@ -97,7 +96,7 @@ const CarFull: FC = () => {
                 <div className="carFull__price"><FontAwesomeIcon icon={faDollarSign} /> {car.price} {car.currency}</div>
                 <div className="carFull__location"><FontAwesomeIcon icon={faLocationArrow} /> {car.region}, {car.city}</div>
                 <div className="carFull__details">
-                    {userAuthotization && ((userAuthotization.role === ERole.USER || userAuthotization.role === ERole.ADMIN || userAuthotization.id === car?.user.id )) &&
+                    {userAuthotization && ((userAuthotization.role === ERole.USER || userAuthotization.role === ERole.ADMIN || userAuthotization.id === car?.user.id)) &&
                         <button className="carFull__deleteButton" onClick={() => deleteCar(car?.id)}>delete</button>}
                     <div><FontAwesomeIcon icon={faCar} /> brand: {car.brand}</div>
                     <div><FontAwesomeIcon icon={faCar} /> model: {car.model}</div>
@@ -126,7 +125,7 @@ const CarFull: FC = () => {
                         <div><FontAwesomeIcon icon={faHryvnia} /> uah: {middleValue?.middleInUAH}</div>
                     </div>
                 )}
-                {userAuthotization && ((userAuthotization.role === ERole.USER || userAuthotization.role === ERole.ADMIN)) && car.user.id !== userAuthotization.id ?
+                {userAuthotization && car.user.id !== userAuthotization.id ?
                     <button className="chat-button" onClick={navigateToChat}>Send a message!</button> : null}
                 {userAuthotization && (userAuthotization.role === ERole.MANAGER || userAuthotization.role === ERole.ADMIN) && (
                     car.isActivated ? (

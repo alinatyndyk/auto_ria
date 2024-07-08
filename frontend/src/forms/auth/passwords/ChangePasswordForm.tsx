@@ -1,16 +1,15 @@
 import { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { INewPassword } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
-import './PasswordForm.css'; // Importing CSS file for styling
+import './PasswordForm.css';
 
 
 const ChangePasswordForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<INewPassword>();
     const dispatch = useAppDispatch();
     const { changePasswordErrors } = useAppSelector(state => state.authReducer);
-    const navigate = useAppNavigate();
 
     const [getResponse, setResponse] = useState<String | null>(null);
     const [showResponse, setShowResponse] = useState<boolean>(false);
@@ -46,7 +45,7 @@ const ChangePasswordForm: FC = () => {
                 Change Password
             </div>
             <div className="error-message">
-            {showResponse ? <div>{getResponse}</div> : (changePasswordErrors ? <div>{changePasswordErrors.message}</div> : null)}
+                {showResponse ? <div>{getResponse}</div> : (changePasswordErrors ? <div>{changePasswordErrors.message}</div> : null)}
             </div>
             <form onSubmit={handleSubmit(activate)} className="password">
                 <div className="form-group">

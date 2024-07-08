@@ -1,7 +1,9 @@
 package com.example.auto_ria.services.chat;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -79,13 +81,21 @@ public class ChatServiceMySQL {
     }
 
     public Page<Chat> findChatsByUserId(int userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, 10);
-        Page<Chat> chatPage = chatDaoSQL.findAll(pageable);
-
-        List<Chat> filteredChats = chatPage.getContent().stream()
+        Pageable pageable = PageRequest.of(page, size);
+    
+        List<Chat> allChats = chatDaoSQL.findAll();
+    
+        List<Chat> filteredChats = allChats.stream()
                 .filter(chat -> chat.getUsers().contains(userId))
-                .toList();
-        return new PageImpl<>(filteredChats, pageable, chatPage.getTotalElements());
+                .sorted(Comparator.comparing(Chat::getUpdatedAt).reversed())
+                .collect(Collectors.toList());
+    
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), filteredChats.size());
+    
+        List<Chat> paginatedChats = filteredChats.subList(start, end);
+    
+        return new PageImpl<>(paginatedChats, pageable, filteredChats.size());
     }
 
     public Chat save(Chat chat) {

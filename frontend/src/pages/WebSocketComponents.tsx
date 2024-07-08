@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../hooks';
 import { IUserResponse } from '../interfaces/user/seller.interface';
 import { chatActions } from '../redux/slices/chat.slice';
@@ -11,53 +11,58 @@ const ChatsPage: FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useAppNavigate();
 
-    const { chatsByUser, pageCurrent, pagesInTotal } = useAppSelector(state => state.chatReducer);
-    const { userConvesation, user } = useAppSelector(state => state.sellerReducer);
+    const { chatsByUser, pagesInTotal } = useAppSelector(state => state.chatReducer);
+    const { user } = useAppSelector(state => state.sellerReducer);
 
     const [getUsers, setUsers] = useState<IUserResponse[]>([]);
-    const [currentPage, setCurrentPage] = useState<number>(0);
+    const [getPage, setPage] = useState<number>(1);
 
     useEffect(() => {
-        dispatch(chatActions.getChatsByUser(currentPage));
-    }, []);
+        dispatch(chatActions.getChatsByUser(getPage - 1));
+    }, [getPage]);
 
     useEffect(() => {
         if (chatsByUser.length > 0) {
-            let meEncr: IUserResponse;
+            let meEncr: IUserResponse | null = null;
             const meDecr = localStorage.getItem("authorization");
             if (meDecr !== null) {
                 meEncr = securityService.decryptObject(meDecr);
             } else if (user !== null) {
                 meEncr = user;
             } else {
-                navigate("/errors/forbidden", { state: { cause: "Couldnt access profile. Please log in" } });
+                navigate("/errors/forbidden", { state: { cause: "Couldn't access profile. Please log in" } });
+                return;
             }
+
+            const newUsers: IUserResponse[] = [];
+            let promises: Promise<any>[] = [];
 
             chatsByUser.forEach(chat => {
                 chat.users.forEach(userId => {
-                    if ((userId !== meEncr.id || userId !== user?.id) && !getUsers.find(user => user.id === userId)) {
-                        dispatch(sellerActions.getUserConversation(userId));
+                    if (userId !== meEncr!.id && userId !== user?.id) {
+                        const promise = dispatch(sellerActions.getUserConversation(userId)).then((res) => {
+                            newUsers.push(res.payload as IUserResponse);
+                        });
+                        promises.push(promise);
                     }
                 });
             });
-        }
-    }, [chatsByUser, getUsers]);
 
-    useEffect(() => {
-        if (userConvesation && !getUsers.find(user => user.id === userConvesation.id)) {
-            setUsers(prevState => [...prevState, userConvesation]);
+            Promise.all(promises).then(() => setUsers(newUsers));
+        } else {
+            setUsers([]);
         }
-    }, [userConvesation, getUsers]);
+    }, [chatsByUser, dispatch, navigate, user]);
 
-    const handleNextPage = () => {
-        if (currentPage < pagesInTotal - 1) {
-            setCurrentPage(prevPage => prevPage + 1);
+    const prevPage = () => {
+        if (getPage > 1) {
+            setPage(prevState => prevState - 1);
         }
     };
 
-    const handlePrevPage = () => {
-        if (currentPage > 0) {
-            setCurrentPage(prevPage => prevPage - 1);
+    const nextPage = () => {
+        if (getPage < pagesInTotal) {
+            setPage(prevState => prevState + 1);
         }
     };
 
@@ -75,11 +80,11 @@ const ChatsPage: FC = () => {
                 ))}
             </div>
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                <button onClick={handlePrevPage} disabled={currentPage === 0} style={{ backgroundColor: '#007bff', color: '#ffffff', padding: '10px 20px', margin: '0 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', outline: 'none', opacity: currentPage === 0 ? 0.5 : 1 }} className={currentPage === 0 ? "disabled" : ""}>Previous</button>
-                <button onClick={handleNextPage} disabled={currentPage === pagesInTotal - 1} style={{ backgroundColor: '#007bff', color: '#ffffff', padding: '10px 20px', margin: '0 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', outline: 'none', opacity: currentPage === pagesInTotal - 1 ? 0.5 : 1 }} className={currentPage === pagesInTotal - 1 ? "disabled" : ""}>Next</button>
+                <button onClick={prevPage} disabled={getPage === 1} style={{ backgroundColor: '#007bff', color: '#ffffff', padding: '10px 20px', margin: '0 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', outline: 'none', opacity: getPage === 1 ? 0.5 : 1 }} className={getPage === 1 ? "disabled" : ""}>Previous</button>
+                <button onClick={nextPage} disabled={getPage === pagesInTotal} style={{ backgroundColor: '#007bff', color: '#ffffff', padding: '10px 20px', margin: '0 10px', borderRadius: '4px', border: 'none', cursor: 'pointer', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', outline: 'none', opacity: getPage === pagesInTotal ? 0.5 : 1 }} className={getPage === pagesInTotal ? "disabled" : ""}>Next</button>
             </div>
             <div style={{ color: '#999999', textAlign: 'center', marginTop: '10px' }}>
-                {`Page ${currentPage + 1} of ${pagesInTotal}`}
+                {`Page ${getPage} of ${pagesInTotal}`}
             </div>
             {selectedChat && <Chat key={selectedChat?.id} chat={selectedChat} />}
         </div>
@@ -87,6 +92,7 @@ const ChatsPage: FC = () => {
 };
 
 export { ChatsPage };
+
 
 
 

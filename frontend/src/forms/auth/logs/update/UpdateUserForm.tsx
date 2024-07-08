@@ -4,7 +4,7 @@ import { useAppDispatch, useAppNavigate, useAppSelector } from '../../../../hook
 import { EGeoState, IGeoCity, IGeoRegion } from '../../../../interfaces/geo.interface';
 import { IUserUpdateRequest } from '../../../../interfaces/user/seller.interface';
 import { sellerActions } from '../../../../redux/slices/seller.slice';
-import './UpdateUserForm.css'; // Import your CSS file
+import './UpdateUserForm.css';
 
 const UpdateUserForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IUserUpdateRequest>();

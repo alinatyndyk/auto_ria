@@ -13,7 +13,7 @@ const Carousel: React.FC<{ images: Image[] }> = ({ images }) => {
     useEffect(() => {
         const transitionTimeout = setTimeout(() => {
             setTransitioning(false);
-        }, 500); // Adjust timing to match CSS transition duration
+        }, 500); 
 
         return () => clearTimeout(transitionTimeout);
     }, [currentIndex]);

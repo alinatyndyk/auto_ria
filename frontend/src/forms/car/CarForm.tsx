@@ -5,7 +5,7 @@ import { ICreateCar, ICreateInputCar, IError } from '../../interfaces';
 import { EGeoState, IGeoCity, IGeoRegion } from '../../interfaces/geo.interface';
 import { carActions } from '../../redux/slices';
 import { sellerActions } from '../../redux/slices/seller.slice';
-import styles from './CarForm.module.css'; // импорт стилей из модуля
+import styles from './CarForm.module.css';
 
 export enum ECurrency {
     UAH = 'UAH',

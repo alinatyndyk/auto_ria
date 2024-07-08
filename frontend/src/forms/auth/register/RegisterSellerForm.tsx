@@ -6,7 +6,7 @@ import { EGeoState, IGeoCity, IGeoRegion } from '../../../interfaces/geo.interfa
 import { ISellerInput } from '../../../interfaces/user/seller.interface';
 import { authActions } from '../../../redux/slices';
 import { sellerActions } from '../../../redux/slices/seller.slice';
-import './RegisterSellerForm.css'; // Import your CSS file for styling
+import './RegisterSellerForm.css';
 
 const RegisterSellerForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -54,7 +54,7 @@ const RegisterSellerForm: FC = () => {
 
                     if (isIAuthResponse(payload)) {
                         navigate('/profile');
-                        setResponse(''); // Reset response state on successful navigation
+                        setResponse('');
                     } else {
                         setResponse(String(payload));
                     }

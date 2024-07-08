@@ -5,7 +5,7 @@ import { authActions } from '../../../redux/slices';
 import { IError, IGenerateCode } from '../../../interfaces';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import './GenerateForm.css'; // Import your CSS file for this form
+import './GenerateForm.css';
 
 const GenerateManagerForm: FC = () => {
     const { reset, handleSubmit, register } = useForm<IGenerateCode>();

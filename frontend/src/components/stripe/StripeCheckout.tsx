@@ -101,7 +101,6 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 
     if (isPaymentSourcePresent) {
         paymentComponent = <div style={{ display: 'flex' }}>
-            <label>{JSON.stringify(getErrors)}</label>
             <label>
                 <input onChange={handleIsAutoPayWithSource} type="checkbox" /> You want to be charged automatically
                 and
@@ -115,6 +114,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     {autoPay ? <div style={{ color: 'maroon' }}>Subscriptions *require* default cards for monthly
                         payments</div> : null}
                 </div>
+                <label>{getErrors}</label>
             </label>
 
             {!getUseDefaultCard ?
@@ -146,12 +146,12 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     subscription?
                 </label>
             </div>
-                <Stripe
-                    stripeKey={stripeKeyPublish}
-                    token={payNow}
-                    // email={seller.id.toString()}
-                    description={"Buy AutoRia premium"}
-                />
+            <Stripe
+                stripeKey={stripeKeyPublish}
+                token={payNow}
+                email={seller.id.toString()}
+                description={"Buy AutoRia premium"}
+            />
         </div>
     } else {
         paymentComponent = <div>Could not extract payment method...</div>

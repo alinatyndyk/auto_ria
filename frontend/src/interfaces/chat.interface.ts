@@ -8,8 +8,8 @@ export interface MessageClass {
     chatId: number;
     isEdited: boolean;
     isSeen: boolean;
-    updatedAt: any; // Assuming LocalDateTime is serialized as string in ISO format
-    createdAt: any; // Assuming LocalDateTime is serialized as string in ISO format;
+    updatedAt: any;
+    createdAt: any;
 }
 
 
@@ -21,8 +21,8 @@ export interface IChatResponse {
     notSeenUser1: number;
     notSeenUser2: number;
     roomKey: string;
-    createdAt: any; // Assuming LocalDateTime is serialized as string in ISO format
-    updatedAt: any; // Assuming LocalDateTime is serialized as string in ISO format
+    createdAt: any;
+    updatedAt: any; 
 
     addMessage(message: MessageClass): void;
 }

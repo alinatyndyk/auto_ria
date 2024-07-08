@@ -3,7 +3,7 @@ import { SubmitHandler, useForm } from 'react-hook-form';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
 import { authActions } from '../../../redux/slices';
 import { IForgotPassword } from '../../../interfaces';
-import '../logs/LoginForm.css'; // Import your CSS file for styling if needed
+import '../logs/LoginForm.css';
 
 
 const ForgotPasswordForm: FC = () => {

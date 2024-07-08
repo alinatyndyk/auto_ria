@@ -1,9 +1,9 @@
-import React, { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { carActions } from "../../redux/slices";
 import { Car } from "./Car";
-import './Cars.css'; // импорт стилей
+import './Cars.css';
 
 interface IProps {
     sellerId: number | null
@@ -28,13 +28,12 @@ const Cars: FC<IProps> = ({ sellerId }) => {
     const [getNextButtons, setNextButtons] = useState(false);
     let [getPage, setPage] = useState<number>(1);
 
+
     useEffect(() => {
         searchParams.set('page', getPage.toString());
         setSearchParams(searchParams);
-
         if (sellerId != null) {
-            dispatch(carActions.getBySeller({ page: getPage, id: sellerId })).then(() => {
-            });
+            dispatch(carActions.getBySeller({ page: getPage - 1, id: sellerId }));
         } else {
             dispatch(carActions.getAll(getPage));
         }
@@ -60,6 +59,7 @@ const Cars: FC<IProps> = ({ sellerId }) => {
         setPage(prevState => prevState + 1);
     };
 
+
     return (
         <div className="cars-container">
             <h2 className="cars-title">Cars</h2>
@@ -75,3 +75,4 @@ const Cars: FC<IProps> = ({ sellerId }) => {
 };
 
 export { Cars };
+

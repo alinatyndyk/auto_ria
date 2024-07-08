@@ -21,7 +21,8 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
         picture = avatar;
     }
 
-
+    const date = createdAt.slice(0,3);
+    const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
 
     return (
         <div>
@@ -35,7 +36,7 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
                     <div>✆ {number}</div>
                     <div style={{ fontSize: "9px" }}>◉ {region}, {city}</div>
                     <div>account: {accountType}</div>
-                    <div>joined: {createdAt}</div>
+                    <div>joined: {formattedNumbers}</div>
                     <div style={{ width: "500px" }}>
                         <StripeCheckout seller={seller} />
                     </div>

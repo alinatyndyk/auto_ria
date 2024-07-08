@@ -250,6 +250,7 @@ public class CarsServiceMySQLImpl {
 
             Pageable pageable = PageRequest.of(page, 2);
             Page<CarSQL> carsPage = carDAO.findAllByUserAndActivatedTrue(user, pageable);
+            System.out.println(carsPage + "car page--------------------");
 
             Page<CarResponse> carResponsesPage = carsPage.map(this::formCarResponse);
 

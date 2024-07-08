@@ -1,7 +1,6 @@
 import React, { FC } from 'react';
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
 import { authActions } from "../../../redux/slices";
-import ErrorForbidden from '../../../pages/error/ErrorForbidden';
 
 const LogOutForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -13,6 +12,7 @@ const LogOutForm: FC = () => {
             await dispatch(authActions.signOut()).unwrap();
             navigate('/cars');
         } catch (err) {
+            //todo to login and delete all tokens
             navigate('/errors/forbidden', { state: { cause: 'Auth token is either fully expired, invalid, or doesn\'t exist' } });        }
 
     }

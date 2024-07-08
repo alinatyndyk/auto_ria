@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../hooks';
 import { IAuthRequest } from '../../../interfaces';
 import { authActions } from '../../../redux/slices';
-import './LoginForm.css'; // Import your CSS file for styling if needed
+import './LoginForm.css';
 import { sellerActions } from '../../../redux/slices/seller.slice';
 import { IUserResponse } from '../../../interfaces/user/seller.interface';
 

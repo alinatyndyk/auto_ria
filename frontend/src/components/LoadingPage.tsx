@@ -1,4 +1,3 @@
-// LoadingPage.tsx
 import React, { FC } from 'react';
 import './LoadingPage.css';
 

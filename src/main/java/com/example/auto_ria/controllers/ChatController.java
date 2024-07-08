@@ -81,6 +81,7 @@ public class ChatController {
         try {
 
             UserSQL user;
+
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
             if (authentication.getPrincipal() instanceof UserDetails) {

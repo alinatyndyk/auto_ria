@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import { IMessage } from "../../components/cars";
 import { IError } from "../../interfaces";
 import { EGeoState, IGeoCitiesResponse, IGeoCity, IGeoCityForState, IGeoRegion, IGeoRegionForState, IGeoStateRequest } from "../../interfaces/geo.interface";
 import { IUserResponse, IUserUpdateRequestWithId } from "../../interfaces/user/seller.interface";
@@ -14,7 +13,6 @@ interface IState {
     errorDeleteById: IError | null;
     errorUpdateById: IError | null;
     trigger: boolean,
-    messages: IMessage[],
     carCreateRegions: IGeoRegion[],
     carCreateCities: IGeoCity[],
     carUpdateRegions: IGeoRegion[],
@@ -36,7 +34,6 @@ const initialState: IState = {
     errorDeleteById: null,
     errorUpdateById: null,
     trigger: false,
-    messages: [],
     carCreateRegions: [],
     carCreateCities: [],
     carUpdateRegions: [],

@@ -3,6 +3,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useAppDispatch, useAppNavigate, useAppSelector } from "../../../hooks";
 import { IChangePassword } from "../../../interfaces";
 import { authActions } from "../../../redux/slices";
+import ErrorForbidden from '../../../pages/error/ErrorForbidden';
+import { sellerActions } from '../../../redux/slices/seller.slice';
+import { IUserResponse } from '../../../interfaces/user/seller.interface';
 
 const ResetPasswordForm: FC = () => {
     const { handleSubmit, register } = useForm<IChangePassword>();
@@ -13,20 +16,20 @@ const ResetPasswordForm: FC = () => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
 
-    const [getResponse, setResponse] = useState('');
-
     const activate: SubmitHandler<IChangePassword> = async (newPassword: IChangePassword) => {
 
         if (!code) {
-            setResponse("Error. Register code not provided");
+            return <ErrorForbidden cause='No code for activation'/>
         } else {
             await dispatch(authActions.resetPassword({
                 newPassword: newPassword.newPassword,
                 code: code
             }))
-
-            if (!resetPasswordErrors) {
-                navigate("/profile");
+                
+                if (!resetPasswordErrors) {
+                    dispatch(sellerActions.getByToken()).then((res) => {
+                    navigate('/profile', { state: { receiver: res.payload as IUserResponse } });
+                })
             }
         }
     }

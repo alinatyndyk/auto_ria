@@ -18,7 +18,7 @@ const RegisterSellerForm: FC = () => {
 
     const { reset, handleSubmit, register } = useForm<ISellerInput>();
     const { registerErrors } = useAppSelector(state => state.authReducer);
-    const { userCreateRegions: regions, userCreateCities: cities } = useAppSelector(state => state.sellerReducer);
+    const { user, userCreateRegions: regions, userCreateCities: cities } = useAppSelector(state => state.sellerReducer);
 
     const [getRegions, setRegions] = useState<IGeoRegion[]>([]);
     const [getCities, setCities] = useState<IGeoCity[]>([]);
@@ -53,7 +53,7 @@ const RegisterSellerForm: FC = () => {
                     const { payload } = await dispatch(authActions.registerUserAuth(seller));
 
                     if (isIAuthResponse(payload)) {
-                        navigate('/profile');
+                        navigate('/profile', {state: {user}});
                         setResponse('');
                     } else {
                         setResponse(String(payload));

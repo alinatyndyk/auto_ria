@@ -120,7 +120,7 @@ const Chat: FC<IProps> = ({ chat: receiver }) => {
                             (obj.senderId === receiver?.id && obj.receiverId === sender.id) ||
                             (obj.senderId === sender.id && obj.receiverId === receiver?.id)
                         ) {
-                            setMsg(prevState => [...prevState, obj]);
+                            setMsg(prevState => [obj, ...prevState]);
                         }
                     } else {
                         navigate("/errors/forbidden", { state: { cause: "Couldnt access messages. Please log in" } })

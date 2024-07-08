@@ -6,6 +6,8 @@ import { authActions } from "../../../redux/slices";
 
 import '../logs/LoginForm.css';
 import ErrorForbidden from '../../../pages/error/ErrorForbidden';
+import { sellerActions } from '../../../redux/slices/seller.slice';
+import { IUserResponse } from '../../../interfaces/user/seller.interface';
 
 const ActivateForm: FC = () => {
     const dispatch = useAppDispatch();
@@ -17,20 +19,21 @@ const ActivateForm: FC = () => {
 
     const { activateSellerErrors } = useAppSelector(state => state.authReducer);
 
-    const [activateError, setActivateError] = useState<string>();
-
     const activate = async () => {
 
         if (!code) {
             return <ErrorForbidden cause='Your activation link lacks a code' />
         }
 
-            if (role === ERole.USER) {
-                try {
-                    await dispatch(authActions.activateSeller({ code })).unwrap();
-                    navigate('/profile');
-                } catch (err) {}
-            }
+        if (role === ERole.USER) {
+            try {
+                await dispatch(authActions.activateSeller({ code })).unwrap();
+                dispatch(sellerActions.getByToken()).then((res) => {
+                    navigate('/profile', { state: { receiver: res.payload as IUserResponse } });
+                })
+                navigate('/profile');
+            } catch (err) { }
+        }
     }
 
     return (

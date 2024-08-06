@@ -1,6 +1,8 @@
 import { FC } from 'react';
-import { GenerateManagerForm } from '../../forms/auth/codes/GenerateManagerForm';
-import { GenerateAdminForm } from '../../forms/auth/codes/GenerateAdminForm';
+import { GenerateManagerForm } from '../forms/auth/codes/GenerateManagerForm';
+import { GenerateAdminForm } from '../forms/auth/codes/GenerateAdminForm';
+import './CarPanel.css';
+
 
 const CarPanel: FC = () => {
     return (

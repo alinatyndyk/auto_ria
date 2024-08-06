@@ -1,11 +1,10 @@
 import { FC, useEffect, useState } from 'react';
 import { useSearchParams } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks";
+import { CarsResponse } from '../../interfaces';
 import { carActions } from "../../redux/slices";
 import { Car } from "./Car";
 import './Cars.css';
-import { CarsResponse } from '../../interfaces';
-import { getSearchParamsForLocation } from 'react-router-dom/dist/dom';
 
 interface IProps {
     sellerId: number | null

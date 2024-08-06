@@ -14,7 +14,7 @@ import CarProfilePage from "./components/cars/CarProfilePage";
 import { StripeCheckout } from "./components/stripe/StripeCheckout";
 import { ChangeAccountInfoPage } from "./pages/ChangeAccountInfoPage";
 import { CodePanel } from "./components/CodePanel";
-import { CarPanel } from "./components/cars/CarPanel";
+import { CarPanel } from "./components/CarPanel";
 function App() {
     return (
         <Routes>

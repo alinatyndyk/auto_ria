@@ -8,22 +8,28 @@ interface IProps {
 
 const SellerProfile: FC<IProps> = ({ seller }) => {
     const navigate = useAppNavigate();
-    const { premiumBoughtToggle } = useAppSelector(state => state.sellerReducer);
+    const { premiumBoughtToggle, updateUserToggle, updateUser } = useAppSelector(state => state.sellerReducer);
 
     const [displayedAccountType, setDisplayedAccountType] = useState<string>(seller.accountType);
+    const [profile, setProfile] = useState<IUserResponse>(seller);
 
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
-    } = seller;
+    } = profile;
 
     let picture = avatar ?? "channels4_profile.jpg";
 
     useEffect(() => {
-        // Update displayed account type if the user has bought premium
         if (premiumBoughtToggle && accountType === "BASIC") {
             setDisplayedAccountType("PREMIUM");
         }
     }, [premiumBoughtToggle, accountType]);
+
+    useEffect(() => {
+        if (updateUserToggle) {
+            setProfile(updateUser as IUserResponse);
+        }
+    }, [updateUserToggle, updateUser]);
 
     const authNavigationComponent = (
         <div className="profile-actions">
@@ -33,8 +39,8 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
         </div>
     );
 
-    const date = createdAt.slice(0, 10); // Adjusted to slice date properly
-    const formattedNumbers = `${date.slice(0, 10)}`; // Format date properly
+    const date = createdAt.slice(0, 10);
+    const formattedNumbers = `${date.slice(0, 10)}`;
 
     return (
         <div>

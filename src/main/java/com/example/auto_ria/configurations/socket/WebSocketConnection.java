@@ -163,10 +163,8 @@ public class WebSocketConnection extends TextWebSocketHandler {
             sessionList.add(userSQL.getSession());
             sessionList.add(receiverSQL.getSession());
 
-            System.out.println(chat + "////////////////////////////////////////////");
             
             if (chat == null) {
-                System.out.println("if null " + "////////////////////////////////////////////");
                 List<Integer> userList = new ArrayList<>();
                 userList.add(authSQL.getPersonId());
 

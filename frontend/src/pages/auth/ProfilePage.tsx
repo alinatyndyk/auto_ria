@@ -5,8 +5,6 @@ import { AdminProfile } from "../../components/profiles/AdminProfile";
 import { ManagerProfile } from "../../components/profiles/ManagerProfile";
 import { SellerProfile } from "../../components/profiles/SellerProfile";
 import { ERole } from "../../constants/role.enum";
-import { UpdateUserForm } from '../../forms/auth/logs/update/UpdateUserForm';
-import { ChangePasswordForm } from '../../forms/auth/passwords/ChangePasswordForm';
 import { useAppSelector } from "../../hooks";
 import { validateUserSQL } from '../../interfaces/user/joi/user.interface.joi';
 import { IUserResponse } from '../../interfaces/user/seller.interface';

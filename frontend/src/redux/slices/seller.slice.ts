@@ -9,6 +9,8 @@ import { sellerService } from "../../services/seller.service";
 interface IState {
     userAuthotization: IUserResponse | null,
     errors: IError | null,
+    updateUserToggle: boolean,
+    updateUser: IUserResponse | null,
     errorGetById: IError | null;
     errorDeleteById: IError | null;
     errorUpdateById: IError | null;
@@ -31,6 +33,8 @@ interface IState {
 const initialState: IState = {
     userAuthotization: null,
     errors: null,
+    updateUserToggle: false,
+    updateUser: null,
     errorGetById: null,
     errorDeleteById: null,
     errorUpdateById: null,
@@ -156,11 +160,17 @@ const slice = createSlice({
         toggle: (state) => {
             state.premiumBoughtToggle = !state.premiumBoughtToggle;
         },
+        userUpdateToggle: (state) => {
+            state.updateUserToggle = !state.updateUserToggle;
+        },
     },
     extraReducers: builder =>
         builder
             .addCase(getById.pending, (state) => {
                 state.isUserLoading = true;
+            })
+            .addCase(updateById.fulfilled, (state, action) => {
+                state.updateUser = action.payload;
             })
             .addCase(getUserConversation.fulfilled, (state, action) => {
                 state.userConvesation = action.payload;

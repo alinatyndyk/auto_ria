@@ -5,88 +5,51 @@
 .main-layout {
     display: flex;
     flex-direction: column;
-    min-height: 100vh; /* минимальная высота, чтобы контент занимал всю высоту экрана */
-    background-color: #f0f0f0; /* светло-серый фон основного контейнера */
-    font-family: 'Montserrat', sans-serif; /* добавляем шрифт Montserrat */
-    color: #333; /* темно-серый цвет текста */
+    min-height: 100vh;
+    background-color: #f0f0f0;
+    font-family: 'Montserrat', sans-serif;
+    color: #333;
 }
 
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px; /* увеличим отступы для большего пространства */
-    background-color: transparent; /* прозрачный фон заголовка */
-    color: #333; /* темно-серый цвет текста */
-    border-bottom: 1px solid #ddd; /* светло-серая граница снизу */
-    transition: border-bottom 0.3s ease; /* добавим плавный переход */
+    padding: 20px;
+    background-color: transparent;
+    color: #333;
+    border-bottom: 1px solid #ddd;
+    transition: border-bottom 0.3s ease;
 }
 
 .header h3 {
     cursor: pointer;
     margin: 0;
-    font-size: 1.6rem; /* уменьшим размер заголовка */
-    font-weight: 300; /* тонкий шрифт */
+    font-size: 1.6rem;
+    font-weight: 300;
 }
 
-.header button {
-    height: 36px;
-    padding: 0 16px;
-    font-family: 'Montserrat', sans-serif; 
-    color: #333; /* темно-серый цвет текста */
-    background-color: transparent; /* прозрачный фон кнопки */
-    border: none;
-    cursor: pointer;
-    font-size: 0.9rem; /* уменьшим размер текста кнопки */
-    font-weight: 300; /* тонкий шрифт */
-    position: relative; /* чтобы линия была относительно кнопки */
-    transition: color 0.3s ease; /* добавим плавный переход */
-}
-
-.header button:hover {
-    color: #000; /* черный цвет текста при наведении */
-}
-
-.header button::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: #000; /* черная линия снизу */
-    transform: scaleX(0); /* начнем без линии */
-    transition: transform 0.3s ease; /* добавим плавный переход */
-}
-
-.header button:hover::before {
-    transform: scaleX(1); /* покажем линию при наведении */
-}
-
-.auth-links {
-    display: flex;
-    gap: 16px; /* увеличим горизонтальный отступ между элементами */
-    align-items: center;
-}
-
+.header button,
 .auth-links button {
     height: 36px;
     padding: 0 16px;
-    font-family: 'Montserrat', sans-serif; 
-    color: #333; /* темно-серый цвет текста */
-    background-color: transparent; /* прозрачный фон кнопки */
+    font-family: 'Montserrat', sans-serif;
+    color: #333;
+    background-color: transparent;
     border: none;
     cursor: pointer;
-    font-size: 0.9rem; /* уменьшим размер текста кнопки */
-    font-weight: 300; /* тонкий шрифт */
-    position: relative; /* чтобы линия была относительно кнопки */
-    transition: color 0.3s ease; /* добавим плавный переход */
+    font-size: 0.9rem;
+    font-weight: 300;
+    position: relative;
+    transition: color 0.3s ease;
 }
 
+.header button:hover,
 .auth-links button:hover {
-    color: #666; /* серый цвет текста при наведении */
+    color: #000;
 }
 
+.header button::before,
 .auth-links button::before {
     content: '';
     position: absolute;
@@ -94,33 +57,35 @@
     left: 0;
     width: 100%;
     height: 1px;
-    background-color: #666; /* светло-серая линия снизу */
-    transform: scaleX(0); /* начнем без линии */
-    transition: transform 0.3s ease; /* добавим плавный переход */
+    background-color: #666;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
 }
 
+.header button:hover::before,
 .auth-links button:hover::before {
-    transform: scaleX(1); /* покажем линию при наведении */
+    transform: scaleX(1);
 }
 
-.error-message {
-    color: #e74c3c; /* красный цвет текста ошибки */
-    font-size: 0.8rem; /* уменьшим размер текста ошибки */
-}
-
-.profile-actions {
+.auth-links {
     display: flex;
-    gap: 16px; /* увеличим горизонтальный отступ между элементами */
+    gap: 16px;
+    align-items: center;
 }
 
-/* MainLayout.css */
+.auth-links button.active-tab {
+    color: #000;
+}
 
-/* Container for profile menu */
+.auth-links button.active-tab::before {
+    background-color: #000;
+    transform: scaleX(1);
+}
+
 .profile-menu {
     position: relative;
 }
 
-/* Style for profile button */
 .profile-button {
     display: flex;
     align-items: center;
@@ -130,7 +95,6 @@
     padding: 5px;
 }
 
-/* Style for profile avatar */
 .profile-avatar {
     height: 30px;
     width: 30px;
@@ -138,29 +102,26 @@
     margin-right: 10px;
 }
 
-/* Dropdown menu styling */
 .dropdown-menu {
     display: none;
     position: absolute;
-    top: 100%; /* Position below the profile button */
-    right: 0; /* Align right edge of the menu with the profile button */
+    top: 100%;
+    right: 0;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    max-height: 300px; /* Adjust height as needed */
-    overflow-y: auto; /* Adds scroll if content exceeds max height */
-    min-width: 200px; /* Ensure the menu has a minimum width */
+    max-height: 300px;
+    overflow-y: auto;
+    min-width: 200px;
 }
 
-/* Show the dropdown menu on hover */
 .profile-menu:hover .dropdown-menu {
     display: block;
 }
 
-/* Styling for menu buttons */
 .dropdown-menu button {
     display: block;
     background: transparent;
@@ -170,86 +131,19 @@
     text-align: left;
     cursor: pointer;
     font-size: 14px;
-    box-sizing: border-box; /* Ensures padding does not affect the width */
+    box-sizing: border-box;
 }
 
-/* Change background on hover */
 .dropdown-menu button:hover {
     background-color: #f1f1f1;
 }
 
-/* Style for authentication links */
-.auth-links {
-    display: flex;
-    align-items: center;
-}
-
-.auth-links button {
-    margin-left: 10px;
-}
-
-/* Error message styling */
 .error-message {
-    color: red;
+    color: #e74c3c;
+    font-size: 0.8rem;
     margin-top: 10px;
 }
 
-.auth-links {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-}
-
-.auth-links button {
-    position: relative;
-    padding: 10px;
-    background-color: transparent;
-    border: none;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 300;
-    color: #333;
-    cursor: pointer;
-    outline: none;
-    transition: color 0.3s ease;
-}
-
-/* Style for the active tab */
-.auth-links button.active-tab {
-    color: #000; /* Active tab text color */
-}
-
-.auth-links button.active-tab::before,
-.auth-links button:hover::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: #000; /* Black underline for active and hovered states */
-    transform: scaleX(1);
-    transition: transform 0.3s ease;
-}
-
-/* Ensure hover underline does not conflict with active state */
-.auth-links button:hover {
-    color: #000; /* Black text color on hover */
-}
-
-.auth-links button::before {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: transparent; /* Default state without underline */
-    transform: scaleX(0); /* Hide underline initially */
-    transition: transform 0.3s ease, background-color 0.3s ease;
-}
-
-/* Styles for modal and overlay */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -288,6 +182,7 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 14px;
+    transition: opacity 0.3s ease;
 }
 
 .modal-button.confirm {
@@ -298,8 +193,4 @@
 .modal-button.cancel {
     background-color: #6c757d;
     color: white;
-}
-
-.modal-button:hover {
-    opacity: 0.9;
 }

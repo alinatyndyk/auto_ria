@@ -3,34 +3,34 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    margin-bottom: 20px; /* Добавлен отступ снизу */
+    margin-bottom: 20px;
 }
 
 .carousel-item {
-    flex: 1 0 33.33%; /* Равномерное распределение на 3 части */
+    flex: 1 0 33.33%;
     position: relative;
 }
 
 .carousel-item img {
     width: 100%;
     display: block;
-    border-radius: 8px; /* Добавлены скругления у картинок */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Тень для картинок */
-    transition: transform 0.3s ease; /* Плавное изменение при наведении */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
 }
 
 .carousel-item img:hover {
-    transform: scale(1.05); /* Увеличение размера при наведении */
+    transform: scale(1.05);
 }
 
 .current-image {
-    height: 250px; /* Установлено фиксированное значение высоты для текущей картинки */
+    height: 250px;
 }
 
 .previous-image,
 .next-image {
-    height: 200px; /* Установлено фиксированное значение высоты для предыдущей и следующей картинок */
-    opacity: 0.6; /* Прозрачность для предыдущей и следующей картинок */
+    height: 200px;
+    opacity: 0.6;
 }
 
 .carousel-button {

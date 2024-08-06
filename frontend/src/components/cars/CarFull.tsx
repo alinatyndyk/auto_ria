@@ -22,7 +22,7 @@ const CarFull: FC = () => {
     const { userAuthotization } = useAppSelector(state => state.sellerReducer);
 
     const [getBanResponse, setBanResponse] = useState('');
-    const { errorDeleteById, carForUpdate } = useAppSelector(state => state.carReducer);
+    const { errorDeleteById } = useAppSelector(state => state.carReducer);
 
     const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
     const [showPhotoSelection, setShowPhotoSelection] = useState<boolean>(false);
@@ -36,7 +36,7 @@ const CarFull: FC = () => {
 
     useEffect(() => {
         if (car) {
-            dispatch(carActions.getMiddleById(Number(car.id)));  // Fetch middle prices whenever car changes
+            dispatch(carActions.getMiddleById(Number(car.id))); 
             setCarPhotos(car.photo);
         }
     }, [dispatch, car]);
@@ -237,3 +237,4 @@ const CarFull: FC = () => {
 };
 
 export { CarFull };
+

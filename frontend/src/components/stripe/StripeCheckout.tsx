@@ -1,12 +1,12 @@
 import axios from "axios";
 import { useState } from 'react';
 import Stripe from "react-stripe-checkout";
+import { useAppDispatch } from "../../hooks";
 import { IError } from "../../interfaces";
+import { sellerActions } from "../../redux/slices/seller.slice";
 import { authService } from "../../services";
 import useTheme from "../hooks/useTheme";
-import { useAppDispatch } from "../../hooks";
-import { sellerActions } from "../../redux/slices/seller.slice";
-import styles from './StripeCheckout.module.css'; // Import CSS module
+import styles from './StripeCheckout.module.css';
 
 const StripeCheckout = () => {
     const seller = useTheme();
@@ -49,10 +49,6 @@ const StripeCheckout = () => {
                 }
             });
 
-            if (response.status === 200) {
-                // Assuming you want to reload the page after adding a card
-                window.location.reload();
-            }
         } catch (e) {
             const error = e as { response: { data: IError } };
             setErrors(String(error.response.data.message));
@@ -152,3 +148,4 @@ const StripeCheckout = () => {
 };
 
 export { StripeCheckout };
+

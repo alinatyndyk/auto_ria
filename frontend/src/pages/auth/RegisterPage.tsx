@@ -1,6 +1,6 @@
-import React, { FC } from 'react';
-import { RegisterSellerForm } from "../../forms/auth/register/RegisterSellerForm";
+import { FC } from 'react';
 import { useParams } from "react-router";
+import { RegisterSellerForm } from "../../forms/auth/register/RegisterSellerForm";
 import ErrorForbidden from '../error/ErrorForbidden';
 
 const RegisterPage: FC = () => {
@@ -10,9 +10,9 @@ const RegisterPage: FC = () => {
     let userComponent;
 
     if (role === "USER") {
-        userComponent = <RegisterSellerForm/>
+        userComponent = <RegisterSellerForm />
     } else {
-        userComponent = <ErrorForbidden cause='User type wasn*t recognized'/>
+        userComponent = <ErrorForbidden cause='User type wasn*t recognized' />
     }
 
     return (

@@ -1,28 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
 .cars-container {
-    background-color: #ffffff; /* Белый фон контейнера */
+    background-color: #ffffff;
     padding: 20px;
-    border: 1px solid #ddd; /* Легкая граница вокруг контейнера */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    overflow-y: auto; /* Добавляем вертикальную прокрутку при необходимости */
-    width: 100%; /* Ширина 100% для заполнения доступного пространства */
-    box-sizing: border-box; /* Включаем отступы и границы в общую ширину и высоту */
-    margin: 0; /* Убираем внешние отступы */
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0;
 }
 
 .cars-title {
-    font-size: 1.5rem; /* Размер шрифта заголовка */
+    font-size: 1.5rem;
     margin-bottom: 20px;
-    color: #343a40; /* Темно-серый цвет текста */
-    text-align: center; /* Центрирование заголовка */
-    font-weight: 600; /* Полужирный текст */
+    color: #343a40;
+    text-align: center;
+    font-weight: 600;
 }
 
 .no-cars-message {
-    color: #007bff; /* Синий цвет для сообщения об отсутствии машин */
+    color: #007bff;
     margin-bottom: 20px;
-    text-align: center; /* Центрирование текста сообщения */
+    text-align: center;
 }
 
 .pagination {
@@ -34,24 +34,24 @@
 
 .pagination button {
     padding: 8px 16px;
-    background-color: #007bff; /* Синий цвет кнопок пагинации */
+    background-color: #007bff;
     color: white;
-    border: 1px solid transparent; /* Прозрачная граница */
+    border: 1px solid transparent;
     cursor: pointer;
     font-size: 14px;
     font-weight: 600;
 }
 
 .pagination button:disabled {
-    background-color: #6c757d; /* Серый цвет для отключенных кнопок */
+    background-color: #6c757d;
     cursor: not-allowed;
 }
 
 .pagination button:hover:not(:disabled) {
-    background-color: #0056b3; /* Темно-синий цвет при наведении */
+    background-color: #0056b3;
 }
 
 .pagination-info {
-    color: #6c757d; /* Серый цвет текста информации о пагинации */
+    color: #6c757d;
     font-size: 14px;
 }

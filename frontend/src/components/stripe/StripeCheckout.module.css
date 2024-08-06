@@ -1,51 +1,46 @@
-/* Стиль для контейнера компонента */
 .stripeCheckoutContainer {
-    background-color: #f9f9f9; /* Светло-серый фон */
-    padding: 15px; /* Уменьшили отступы */
-    border-radius: 4px; /* Уменьшили радиус скругления углов */
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Легкая тень */
-    margin-bottom: 15px; /* Отступ снизу */
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
 }
 
-/* Стиль для заголовков */
 .stripeCheckoutContainer h4,
 .stripeCheckoutContainer h3 {
-    color: #007bff; /* Синий цвет для заголовков */
-    font-size: 14px; /* Уменьшили размер шрифта */
-    margin-bottom: 10px; /* Отступ снизу */
+    color: #007bff;
+    font-size: 14px;
+    margin-bottom: 10px;
 }
 
-/* Стиль для чекбоксов и лейблов */
 .stripeCheckoutContainer label {
     display: block;
-    margin-bottom: 10px; /* Отступ снизу */
-    font-size: 12px; /* Уменьшили размер шрифта */
-    color: #333; /* Темно-серый текст */
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #333;
 }
 
 .stripeCheckoutContainer input[type="checkbox"] {
-    margin-right: 5px; /* Отступ справа от чекбокса */
+    margin-right: 5px;
 }
 
-/* Стиль для сообщений об ошибках */
 .errorMessage {
-    color: #d9534f; /* Красный цвет для ошибок */
-    font-size: 12px; /* Уменьшили размер шрифта */
-    margin-top: 5px; /* Отступ сверху */
+    color: #d9534f;
+    font-size: 12px;
+    margin-top: 5px;
 }
 
-/* Стиль для кнопки */
 .stripeCheckoutButton {
-    background-color: #007bff; /* Синий фон кнопки */
-    color: #fff; /* Белый текст */
-    border: none; /* Убрали границу */
-    border-radius: 4px; /* Закругленные углы */
-    padding: 8px 16px; /* Уменьшили отступы */
-    font-size: 12px; /* Уменьшили размер шрифта */
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 12px;
     cursor: pointer;
-    transition: background-color 0.3s ease; /* Плавное изменение фона */
+    transition: background-color 0.3s ease;
 }
 
 .stripeCheckoutButton:hover {
-    background-color: #0056b3; /* Темно-синий цвет при наведении */
+    background-color: #0056b3;
 }

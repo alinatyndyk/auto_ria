@@ -151,9 +151,7 @@ const addPhotos = createAsyncThunk<String[], IAddPhotos>(
     'carSlice/addPhotos',
     async ({ carId, photos }, { rejectWithValue }) => {
         try {
-            console.log("Adding photos:", photos); // Вывод массива строк
             const { data } = await carService.addPhotos(carId, photos);
-            console.log(data + "added photos////////////");
             return data;
         } catch (e) {
             const err = e as AxiosError;

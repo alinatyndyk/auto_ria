@@ -5,9 +5,9 @@
     padding: 20px;
     border-radius: 4px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #f0f0f0; /* светло-серый фон */
-    color: #333; /* темно-серый текст */
-    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
+    background-color: #f0f0f0;
+    color: #333;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .inputContainer {
@@ -15,43 +15,42 @@
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
-    position: relative; /* чтобы абсолютно позиционировать кнопку */
+    position: relative;
 }
 
 .input {
     flex: 1;
     padding: 10px;
     margin-right: 10px;
-    border: none; /* убираем стандартную границу */
-    background-color: transparent; /* прозрачный фон */
-    color: #333; /* темно-серый текст */
-    border-bottom: 1px solid #ccc; /* светло-серая линия снизу */
-    transition: border-color 0.3s ease; /* плавное изменение цвета линии */
-    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
+    border: none;
+    background-color: transparent;
+    color: #333;
+    border-bottom: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+    font-family: 'Montserrat', sans-serif;
 }
 
 .input:hover {
-    border-color: #666; /* серая линия при наведении */
+    border-color: #666;
 }
 
 .changeButton,
 .submitButton,
 .saveButton {
-    padding: 8px 16px; /* уменьшенные отступы */
-    background-color: #f0f0f0; /* светло-серый фон */
+    padding: 8px 16px;
+    background-color: #f0f0f0;
     color: #333;
-    border: none; /* убираем обводку */
-    border-radius: 4px; /* закругленные углы */
-    font-size: 14px; /* уменьшенный размер шрифта */
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* тень */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
-    font-family: 'Montserrat', sans-serif; /* шрифт Montserrat */
+    font-family: 'Montserrat', sans-serif;
 }
 
 .changeButton:hover,
 .submitButton:hover,
 .saveButton:hover {
-    background-color: #ccc; /* светло-серый фон при наведении */
+    background-color: #ccc;
 }
-

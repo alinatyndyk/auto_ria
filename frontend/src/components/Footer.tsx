@@ -1,7 +1,6 @@
-import React from 'react';
+import { faCar, faInfoCircle, faLocationArrow, faUser } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCar, faClock, faDollarSign, faEuroSign, faHorseHead, faHryvnia, faInfoCircle, faLocationArrow, faUser } from '@fortawesome/free-solid-svg-icons';
-import './Footer.css'; // Make sure to include CSS for styling
+import './Footer.css';
 
 const Footer = () => {
     return (

@@ -1,7 +1,7 @@
 import { faIdBadge, faKey, faMapMarkerAlt, faUserCircle } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { FC, useState } from 'react';
-import { useAppNavigate } from '../../hooks';
+import { FC, useEffect, useState } from 'react';
+import { useAppNavigate, useAppSelector } from '../../hooks';
 import { IUserResponse } from '../../interfaces/user/seller.interface';
 
 interface IProps {
@@ -10,12 +10,21 @@ interface IProps {
 
 const AdminProfile: FC<IProps> = ({ seller }) => {
     const { id, avatar, name, lastName, role, region, city, createdAt } = seller;
-    const picture = avatar === null ? 'channels4_profile.jpg' : avatar;
     const navigate = useAppNavigate();
-    const date = createdAt.slice(0, 3);
-    const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
+    const { updateUserToggle, updateUser } = useAppSelector(state => state.sellerReducer);
 
+    const [profile, setProfile] = useState<IUserResponse>(seller);
     const [activeTab, setActiveTab] = useState<string>('car-panel');
+
+    const picture = profile.avatar ?? 'channels4_profile.jpg';
+    const date = profile.createdAt.slice(0, 10);
+    const formattedNumbers = `${date.slice(0, 10)}`;
+
+    useEffect(() => {
+        if (updateUserToggle) {
+            setProfile(updateUser as IUserResponse);
+        }
+    }, [updateUserToggle, updateUser]);
 
     const handleNavigation = (path: string) => {
         navigate(path);
@@ -41,20 +50,20 @@ const AdminProfile: FC<IProps> = ({ seller }) => {
                     <div>
                         <div style={{ marginBottom: '5px' }}>
                             <FontAwesomeIcon icon={faIdBadge} style={{ marginRight: '5px' }} />
-                            <span>ID: {id}</span>
+                            <span>ID: {profile.id}</span>
                         </div>
                         <div style={{ marginBottom: '5px' }}>
                             <FontAwesomeIcon icon={faUserCircle} style={{ marginRight: '5px' }} />
-                            <span>{name} {lastName}</span>
+                            <span>{profile.name} {profile.lastName}</span>
                         </div>
                         <div style={{ marginBottom: '5px' }}>
                             <FontAwesomeIcon icon={faKey} style={{ marginRight: '5px' }} />
-                            <span>Access: {role}</span>
+                            <span>Access: {profile.role}</span>
                         </div>
                         <div style={{ marginBottom: '5px' }}>
                             <FontAwesomeIcon icon={faMapMarkerAlt} style={{ marginRight: '5px' }} />
-                            <span>{region}, {city}</span>
-                            <div>joined: {formattedNumbers}</div>
+                            <span>{profile.region}, {profile.city}</span>
+                            <div>Joined: {formattedNumbers}</div>
                         </div>
                         <hr />
                     </div>

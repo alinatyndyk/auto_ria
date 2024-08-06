@@ -483,25 +483,19 @@ public class CarController {
                 if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
                     carsService.checkCredentials(request, id);
                 } 
-                // else {
-                //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of("User is not authorized"));
-                // }
+
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of("Unauthorized"));
             }
 
             CarSQL carSQL = carsService.extractById(id);
 
-            // Get the existing photo names
             List<String> existingPhotoNames = carSQL.getPhoto();
 
-            // Create a set to track which photos are already on the server
             Set<String> existingPhotosSet = new HashSet<>(existingPhotoNames);
 
-            // Create a list to hold the names of new photos to be added
             List<String> newPhotoNames = new ArrayList<>();
 
-            // Process new pictures
             for (MultipartFile file : newPictures) {
                 String fileName = file.getOriginalFilename();
                 if (fileName != null && !existingPhotosSet.contains(fileName)) {
@@ -510,7 +504,6 @@ public class CarController {
                 }
             }
 
-            // Only update the photo list with new names
             if (!newPhotoNames.isEmpty()) {
                 List<String> updatedPhotoNames = new ArrayList<>(existingPhotoNames);
                 updatedPhotoNames.addAll(newPhotoNames);
@@ -518,7 +511,6 @@ public class CarController {
                 carsService.save(carSQL);
             }
 
-            // Return only the new photo names
             return ResponseEntity.status(HttpStatus.ACCEPTED).body(newPhotoNames);
         } catch (CustomException e) {
             return ResponseEntity.status(e.getStatus()).body(List.of(e.getMessage()));

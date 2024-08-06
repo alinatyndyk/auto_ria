@@ -1,20 +1,20 @@
 import { Navigate, Route, Routes } from "react-router";
 import './App.css';
+import { CarPanel } from "./components/CarPanel";
+import { CodePanel } from "./components/CodePanel";
 import { CarFull } from "./components/cars/CarFull";
+import CarProfilePage from "./components/cars/CarProfilePage";
+import { StripeCheckout } from "./components/stripe/StripeCheckout";
 import { ActivateForm } from "./forms/auth/activate/ActivateForm";
 import { ForgotPasswordForm } from "./forms/auth/passwords/ForgotPasswordForm";
 import { ResetPasswordForm } from "./forms/auth/passwords/ResetPasswordForm";
 import { MainLayout } from "./layouts";
 import { LoginPage } from "./pages";
+import { ChangeAccountInfoPage } from "./pages/ChangeAccountInfoPage";
 import { ProfilePage } from "./pages/auth/ProfilePage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import CarPage from './pages/car/CarPage';
 import ErrorForbidden from "./pages/error/ErrorForbidden";
-import CarProfilePage from "./components/cars/CarProfilePage";
-import { StripeCheckout } from "./components/stripe/StripeCheckout";
-import { ChangeAccountInfoPage } from "./pages/ChangeAccountInfoPage";
-import { CodePanel } from "./components/CodePanel";
-import { CarPanel } from "./components/CarPanel";
 function App() {
     return (
         <Routes>
@@ -26,9 +26,9 @@ function App() {
                 <Route path={'auth/register/:role'} element={<RegisterPage />} />
                 <Route path="profile" element={<ProfilePage />}>
                     <Route path="cars" element={<CarProfilePage />} />
-                    <Route path="premium" element={<StripeCheckout/>} />
+                    <Route path="premium" element={<StripeCheckout />} />
                     <Route path="update" element={<ChangeAccountInfoPage />} />
-                    <Route path="car-panel" element={<CarPanel/>} />
+                    <Route path="car-panel" element={<CarPanel />} />
                     <Route path="code-panel" element={<CodePanel />} />
                 </Route>
                 <Route path={'auth/forgot-password/'} element={<ForgotPasswordForm />} />

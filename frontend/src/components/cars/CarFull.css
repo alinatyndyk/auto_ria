@@ -6,7 +6,7 @@
     font-size: 12px;
     display: flex;
     flex-direction: row;
-    gap: 20px; /* Space between carousel and info section */
+    gap: 20px;
 }
 
 .carFull__carousel {
@@ -17,13 +17,16 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
-    max-width: 300px; /* Ensure the info section doesn't expand too wide */
+    max-width: 300px;
 }
 
-.carFull__price, .carFull__location, .carFull__details div, .carFull__desc div {
+.carFull__price, 
+.carFull__location, 
+.carFull__details div, 
+.carFull__desc div {
     display: flex;
     align-items: center;
-    gap: 5px; /* Space between icon and text */
+    gap: 5px;
 }
 
 .carFull__price {
@@ -37,35 +40,42 @@
     color: #555;
 }
 
-.carFull__details, .carFull__desc {
+.carFull__details, 
+.carFull__desc {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.carFull__pricesBox, .carFull__middleValueBox {
+.carFull__pricesBox, 
+.carFull__middleValueBox {
     border: 1px solid #ddd;
     padding: 10px;
     border-radius: 5px;
     margin-top: 10px;
 }
 
-.carFull__prices div, .carFull__middleValueBox div {
+.carFull__prices div, 
+.carFull__middleValueBox div {
     display: flex;
     align-items: center;
     gap: 5px;
 }
 
-.carFull__deleteButton {
-    background-color: red;
-    color: white;
+.carFull__deleteButton,
+.carFull__unbanButton {
     border: none;
     padding: 5px 10px;
     font-size: 10px;
     cursor: pointer;
     border-radius: 3px;
     margin-top: 5px;
-    width: fit-content; /* Makes the button only as wide as its content */
+    width: fit-content;
+}
+
+.carFull__deleteButton {
+    background-color: red;
+    color: white;
 }
 
 .carFull__deleteButton:hover {
@@ -75,13 +85,6 @@
 .carFull__unbanButton {
     background-color: green;
     color: white;
-    border: none;
-    padding: 5px 10px;
-    font-size: 10px;
-    cursor: pointer;
-    border-radius: 3px;
-    margin-top: 5px;
-    width: fit-content; /* Makes the button only as wide as its content */
 }
 
 .carFull__unbanButton:hover {
@@ -89,8 +92,8 @@
 }
 
 .carFull__updateForm {
-    flex: 1 0 100%; /* Ensure the update form spans the full width below the carousel */
-    margin-top: 20px; /* Space between the info section and the update form */
+    flex: 1 0 100%;
+    margin-top: 20px;
 }
 
 .carFull__photoPanel {
@@ -153,7 +156,6 @@
 .addPhotoButton,
 .deletePhotoButton {
     padding: 10px 20px;
-    border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -169,28 +171,19 @@
 }
 
 .deletePhotoButton {
-    background-color: #dc3545;
+    background-color: #d9534f;
     color: white;
+    border: none;
+    font-size: 16px;
 }
 
 .deletePhotoButton:hover {
     background-color: #c82333;
 }
 
-.deletePhotoButton {
-    /* Default styles for the button */
-    background-color: #d9534f; /* Red */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
 .deletePhotoButton.disabled {
-    background-color: #e0e0e0; /* Light grey */
-    color: #9e9e9e; /* Grey */
+    background-color: #e0e0e0;
+    color: #9e9e9e;
     cursor: not-allowed;
 }
 
@@ -201,12 +194,12 @@
 .carFull__photosContainer {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* Optional: Adds space between items */
+    gap: 10px;
 }
 
 .carFull__photoContainer {
-    width: calc(20% - 10px); /* 5 items per row, adjusting for gap */
-    height: 100px; /* Maintain the height */
-    margin-bottom: 10px; /* Space below each row */
-    box-sizing: border-box; /* Ensure padding and borders are included in the width */
+    width: calc(20% - 10px);
+    height: 100px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
 }

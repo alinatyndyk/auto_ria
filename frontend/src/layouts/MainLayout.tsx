@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from 'react';
 import { Outlet } from 'react-router-dom';
+import Footer from '../components/Footer';
 import { ERole } from '../constants/role.enum';
 import { LogOutForm } from '../forms/auth/logs/LogOutForm';
 import { useAppDispatch, useAppNavigate, useAppSelector } from '../hooks';
@@ -7,7 +8,6 @@ import { ISellerResponse } from '../interfaces/user/seller.interface';
 import { sellerActions } from '../redux/slices/seller.slice';
 import { securityService } from '../services/security.service';
 import './MainLayout.css';
-import Footer from '../components/Footer';
 
 const MainLayout: FC = () => {
     const navigate = useAppNavigate();
@@ -77,7 +77,7 @@ const MainLayout: FC = () => {
 
     const authNavigationComponent = storedAuth === 'true' ? (
         <div className="profile-menu">
-            <button 
+            <button
                 className="profile-button"
                 onClick={() => navigate('/profile')}
             >

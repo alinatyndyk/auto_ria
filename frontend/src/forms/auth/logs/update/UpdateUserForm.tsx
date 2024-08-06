@@ -1,6 +1,6 @@
 import React, { FC, useEffect, useState } from 'react';
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { useAppDispatch, useAppNavigate, useAppSelector } from '../../../../hooks';
+import { useAppDispatch, useAppSelector } from '../../../../hooks';
 import { EGeoState, IGeoCity, IGeoRegion } from '../../../../interfaces/geo.interface';
 import { IUserUpdateRequest } from '../../../../interfaces/user/seller.interface';
 import { sellerActions } from '../../../../redux/slices/seller.slice';
@@ -30,7 +30,7 @@ const UpdateUserForm: FC = () => {
 
     useEffect(() => {
         setRegions(regions);
-    }, [regions])
+    }, [regions]);
 
     useEffect(() => {
         setCities(cities);
@@ -87,6 +87,7 @@ const UpdateUserForm: FC = () => {
                         setCarCity('');
                         setCarRegion('');
                         reset();
+                        dispatch(sellerActions.userUpdateToggle());
                     }
                 });
         }
@@ -147,6 +148,7 @@ const UpdateUserForm: FC = () => {
                                     </div>
                                 );
                             }
+                            return null;
                         })}
                     </div>
                 }

@@ -5,7 +5,7 @@
     display: flex;
     background-color: whitesmoke;
     height: 130px;
-    width: 300px; /* увеличиваем ширину карточки на 20px */
+    width: 300px;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
@@ -43,8 +43,8 @@
   }
   
   .car-details div {
-    font-size: 7px; /* уменьшаем размер текста */
-    margin-bottom: 2px; /* уменьшаем расстояние между строками */
+    font-size: 7px;
+    margin-bottom: 2px;
   }
   
   .car-details .price {

@@ -1,8 +1,8 @@
 import { FC } from 'react';
-import { Cars } from './Cars';
 import { CarForm } from '../../forms';
-import { securityService } from '../../services/security.service';
 import ErrorForbidden from '../../pages/error/ErrorForbidden';
+import { securityService } from '../../services/security.service';
+import { Cars } from './Cars';
 
 const CarProfilePage: FC = () => {
   const AuthObj = localStorage.getItem('authorization');

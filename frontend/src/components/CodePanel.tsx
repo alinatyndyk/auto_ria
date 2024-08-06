@@ -1,8 +1,6 @@
 import { FC } from 'react';
-import { GenerateAdminForm } from '../forms/auth/codes/GenerateAdminForm';
-import { GenerateManagerForm } from '../forms/auth/codes/GenerateManagerForm';
-import './CarPanel.css';
 import { FindCarById } from '../forms/car/FindCarById';
+import './CarPanel.css';
 import { CarForm } from './cars';
 
 const CodePanel: FC = () => {
@@ -15,7 +13,7 @@ const CodePanel: FC = () => {
                     <p>Search for a car in the database by its unique ID.</p>
                     <FindCarById />
                 </div>
-                <CarForm/>
+                <CarForm />
             </div>
         </div>
     );

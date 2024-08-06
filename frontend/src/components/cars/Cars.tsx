@@ -5,6 +5,7 @@ import { CarsResponse } from '../../interfaces';
 import { carActions } from "../../redux/slices";
 import { Car } from "./Car";
 import './Cars.css';
+import ErrorForbidden from '../../pages/error/ErrorForbidden';
 
 interface IProps {
     sellerId: number | null
@@ -20,20 +21,28 @@ const Cars: FC<IProps> = ({ sellerId }) => {
     const initialPage = searchParams.get("page");
     const [getPage, setPage] = useState<number>(initialPage ? parseInt(initialPage) : 1);
     let [gerCars, setCars] = useState<CarsResponse[]>([]);
+    const [showError, setShowError] = useState(false);
 
     useEffect(() => {
-        searchParams.set('page', getPage.toString());
-        setSearchParams(searchParams);
-        if (sellerId != null) {
-            dispatch(carActions.getBySeller({ page: getPage - 1, id: sellerId }));
+        if (getPage > pagesInTotal && pagesInTotal > 0) {
+            setShowError(true);
         } else {
-            dispatch(carActions.getAll(getPage));
+            setShowError(false);
+            searchParams.set('page', getPage.toString());
+            setSearchParams(searchParams);
+            if (sellerId != null) {
+                dispatch(carActions.getBySeller({ page: getPage - 1, id: sellerId }));
+            } else {
+                dispatch(carActions.getAll(getPage));
+            }
         }
-    }, [getPage, sellerId]);
+    }, [getPage, sellerId, pagesInTotal]);
 
     useEffect(() => {
-        setCars(cars);
-    }, [cars]);
+        if (!showError) {
+            setCars(cars);
+        }
+    }, [cars, showError]);
 
     useEffect(() => {
         if (carAdded && numberOfElements < 2) {
@@ -53,6 +62,10 @@ const Cars: FC<IProps> = ({ sellerId }) => {
     const nextPage = () => {
         if (getPage < pagesInTotal) setPage(nextPage => nextPage + 1);
     };
+
+    if (showError) {
+        return <ErrorForbidden cause='Page doesnt exist' />;
+    }
 
     return (
         <div className="cars-container">

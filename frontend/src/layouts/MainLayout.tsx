@@ -18,6 +18,7 @@ const MainLayout: FC = () => {
     const { errorDeleteById } = useAppSelector((state) => state.sellerReducer);
     const [profileInfo, setProfileInfo] = useState<ISellerResponse | null>(null);
     const [showResponse, setShowResponse] = useState<boolean>(false);
+    const [showModal, setShowModal] = useState<boolean>(false);
 
     useEffect(() => {
         if (AuthObj !== null && storedAuth === 'true') {
@@ -46,13 +47,32 @@ const MainLayout: FC = () => {
                 const id: number = decryptedAuth.id;
                 const { type } = await dispatch(sellerActions.deleteById(id));
                 const lastWord = type.substring(type.lastIndexOf('/') + 1);
-                if (lastWord === 'fulfilled') {
-                    setTimeout(() => {
-                        navigate('/cars');
-                    }, 300);
-                }
+                return lastWord === 'fulfilled';
             }
         }
+        return false;
+    };
+
+    const handleDeleteClick = () => {
+        setShowModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        const success = await deleteAccount();
+        if (success) {
+            setShowModal(false);
+            navigate('/cars');
+        } else {
+            setShowResponse(true);
+            const timer = setTimeout(() => {
+                setShowResponse(false);
+                setShowModal(false); // Close the modal after showing the error for 5 seconds
+            }, 5000);
+        }
+    };
+
+    const handleCancelDelete = () => {
+        setShowModal(false);
     };
 
     const authNavigationComponent = storedAuth === 'true' ? (
@@ -78,7 +98,7 @@ const MainLayout: FC = () => {
             </button>
             <div className="dropdown-menu">
                 <button onClick={() => navigate('/profile')}>Profile</button>
-                <button onClick={deleteAccount}>Delete my account</button>
+                <button onClick={handleDeleteClick}>Delete my account</button>
                 <LogOutForm />
             </div>
         </div>
@@ -97,11 +117,29 @@ const MainLayout: FC = () => {
                 {!storedAuth && <button onClick={() => navigate('/cars')}>Cars</button>}
             </div>
             <Outlet />
-                <Footer/>
+            <Footer />
+            {showModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h4>Are you sure you want to delete your account?</h4>
+                        {showResponse && (
+                            <div className="error-message">
+                                {errorDeleteById?.message || 'Произошла ошибка при удалении аккаунта.'}
+                            </div>
+                        )}
+                        <div className="modal-actions">
+                            <button className="modal-button confirm" onClick={handleConfirmDelete}>
+                                Delete
+                            </button>
+                            <button className="modal-button cancel" onClick={handleCancelDelete}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
 export { MainLayout };
-
-

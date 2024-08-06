@@ -472,55 +472,60 @@ public class CarController {
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
-    @PostMapping("add-pictures/{id}")
-public ResponseEntity<String> patchPhotos(@PathVariable int id,
-        @RequestParam("photos") MultipartFile[] newPictures,
-        HttpServletRequest request) {
-    try {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof UserDetails) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
-                carsService.checkCredentials(request, id);
+    @PostMapping("/add-pictures/{id}")
+    public ResponseEntity<List<String>> patchPhotos(@PathVariable int id,
+                                                     @RequestParam("photos") MultipartFile[] newPictures,
+                                                     HttpServletRequest request) {
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication.getPrincipal() instanceof UserDetails) {
+                UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+                if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
+                    carsService.checkCredentials(request, id);
+                } 
+                // else {
+                //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of("User is not authorized"));
+                // }
             } else {
-                throw new CustomException("User is not authorized", HttpStatus.FORBIDDEN);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of("Unauthorized"));
             }
-        } else {
-            throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
-        }
 
-        CarSQL carSQL = carsService.extractById(id);
+            CarSQL carSQL = carsService.extractById(id);
 
-        // Get the existing photo names
-        List<String> existingPhotoNames = carSQL.getPhoto();
+            // Get the existing photo names
+            List<String> existingPhotoNames = carSQL.getPhoto();
 
-        // Create a set to track which photos are already on the server
-        Set<String> existingPhotosSet = new HashSet<>(existingPhotoNames);
+            // Create a set to track which photos are already on the server
+            Set<String> existingPhotosSet = new HashSet<>(existingPhotoNames);
 
-        // Create a list to hold the names of new photos to be added
-        List<String> newPhotoNames = new ArrayList<>(existingPhotoNames);
+            // Create a list to hold the names of new photos to be added
+            List<String> newPhotoNames = new ArrayList<>();
 
-        // Process new pictures
-        for (MultipartFile file : newPictures) {
-            String fileName = file.getOriginalFilename();
-            if (!existingPhotosSet.contains(fileName)) {
-                commonService.transferAvatar(file, fileName);
-                newPhotoNames.add(fileName);
+            // Process new pictures
+            for (MultipartFile file : newPictures) {
+                String fileName = file.getOriginalFilename();
+                if (fileName != null && !existingPhotosSet.contains(fileName)) {
+                    commonService.transferAvatar(file, fileName);
+                    newPhotoNames.add(fileName);
+                }
             }
+
+            // Only update the photo list with new names
+            if (!newPhotoNames.isEmpty()) {
+                List<String> updatedPhotoNames = new ArrayList<>(existingPhotoNames);
+                updatedPhotoNames.addAll(newPhotoNames);
+                carSQL.setPhoto(updatedPhotoNames);
+                carsService.save(carSQL);
+            }
+
+            // Return only the new photo names
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(newPhotoNames);
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getStatus()).body(List.of(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(List.of("Unexpected error occurred"));
         }
-
-        // Update the photo list for the car
-        carSQL.setPhoto(newPhotoNames);
-        carsService.save(carSQL);
-
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
-    } catch (CustomException e) {
-        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
     }
-}
-
 
     @PreAuthorize("hasRole('ADMIN', 'USER')")
     @DeleteMapping("/{id}")

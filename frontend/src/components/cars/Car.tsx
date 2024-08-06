@@ -41,4 +41,3 @@ const Car: FC<IProps> = ({ car }) => {
 };
 
 export { Car };
-

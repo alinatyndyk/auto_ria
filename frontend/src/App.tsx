@@ -13,6 +13,8 @@ import ErrorForbidden from "./pages/error/ErrorForbidden";
 import CarProfilePage from "./components/cars/CarProfilePage";
 import { StripeCheckout } from "./components/stripe/StripeCheckout";
 import { ChangeAccountInfoPage } from "./pages/ChangeAccountInfoPage";
+import { CodePanel } from "./components/CodePanel";
+import { CarPanel } from "./components/cars/CarPanel";
 function App() {
     return (
         <Routes>
@@ -26,6 +28,8 @@ function App() {
                     <Route path="cars" element={<CarProfilePage />} />
                     <Route path="premium" element={<StripeCheckout/>} />
                     <Route path="update" element={<ChangeAccountInfoPage />} />
+                    <Route path="car-panel" element={<CarPanel/>} />
+                    <Route path="code-panel" element={<CodePanel />} />
                 </Route>
                 <Route path={'auth/forgot-password/'} element={<ForgotPasswordForm />} />
                 <Route path={'auth/reset-password/'} element={<ResetPasswordForm />} />

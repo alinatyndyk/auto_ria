@@ -6,141 +6,129 @@ import { authService } from "../../services";
 import useTheme from "../hooks/useTheme";
 import { useAppDispatch } from "../../hooks";
 import { sellerActions } from "../../redux/slices/seller.slice";
-import styles from './StripeCheckout.module.css'; // Подключаем CSS-модуль
+import styles from './StripeCheckout.module.css'; // Import CSS module
 
 const StripeCheckout = () => {
-
     const seller = useTheme();
     const dispatch = useAppDispatch();
 
     const [getUseDefaultCard, setUseDefaultCard] = useState(false);
     const [getAsDefaultCard, setAsDefaultCard] = useState(false);
     const [autoPay, setAutoPay] = useState(false);
-    const [getErrors, setErrors] = useState<String | null>();
+    const [getErrors, setErrors] = useState<String | null>(null);
 
     const payNow = async (token: any) => {
         try {
-            const response =
-                await axios.post("http://localhost:8080/payments/buy-premium", {
-                    token: token.id,
-                    useDefaultCard: getUseDefaultCard,
-                    setAsDefaultCard: getAsDefaultCard,
-                    autoPay: autoPay
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${authService.getAccessToken()}`
-                    }
-                })
+            const response = await axios.post("http://localhost:8080/payments/buy-premium", {
+                token: token.id,
+                useDefaultCard: getUseDefaultCard,
+                setAsDefaultCard: getAsDefaultCard,
+                autoPay: autoPay
+            }, {
+                headers: {
+                    Authorization: `Bearer ${authService.getAccessToken()}`
+                }
+            });
+
             if (response.status === 200) {
                 dispatch(sellerActions.toggle());
             }
         } catch (e) {
             const error = e as { response: { data: IError } };
-            setErrors(error.response.data.message);
+            setErrors(String(error.response.data.message));
         }
-    }
+    };
 
     const addCard = async (token: any) => {
         try {
-            const response =
-                await axios.post("http://localhost:8080/payments/add-payment-source", {
-                    token: token.id
-                }, {
-                    headers: {
-                        Authorization: `Bearer ${authService.getAccessToken()}`
-                    }
-                })
+            const response = await axios.post("http://localhost:8080/payments/add-payment-source", {
+                token: token.id
+            }, {
+                headers: {
+                    Authorization: `Bearer ${authService.getAccessToken()}`
+                }
+            });
+
             if (response.status === 200) {
+                // Assuming you want to reload the page after adding a card
                 window.location.reload();
             }
         } catch (e) {
             const error = e as { response: { data: IError } };
-            setErrors(error.response.data.message);
-        }
-    }
-
-    const handleIsAutoPay = (event: { target: { checked: any; }; }) => {
-        if (event.target.checked) {
-            setAutoPay(true);
-            setAsDefaultCard(true);
-        } else {
-            setAutoPay(false);
+            setErrors(String(error.response.data.message));
         }
     };
 
-    const handleIsAutoPayWithSource = (event: { target: { checked: any; }; }) => {
+    const handleIsAutoPay = (event: { target: { checked: boolean; }; }) => {
+        setAutoPay(event.target.checked);
         if (event.target.checked) {
-            setAutoPay(true);
+            setAsDefaultCard(true);
+        }
+    };
+
+    const handleIsAutoPayWithSource = (event: { target: { checked: boolean; }; }) => {
+        setAutoPay(event.target.checked);
+        if (event.target.checked) {
             setUseDefaultCard(true);
-        } else {
-            setAutoPay(false);
         }
     };
 
-    const handlePayWithDefaultCard = (event: { target: { checked: any; }; }) => {
-        if (event.target.checked || autoPay) {
-            setUseDefaultCard(true);
-        } else {
-            setUseDefaultCard(false);
-        }
+    const handlePayWithDefaultCard = (event: { target: { checked: boolean; }; }) => {
+        setUseDefaultCard(event.target.checked || autoPay);
     };
 
-    const handleSetAsDefaultCard = (event: { target: { checked: any; }; }) => {
-        if (event.target.checked) {
-            setAsDefaultCard(true);
-        } else if (autoPay && !seller.paymentSourcePresent) {
-            setAsDefaultCard(true);
-        } else {
-            setAsDefaultCard(false);
-        }
+    const handleSetAsDefaultCard = (event: { target: { checked: boolean; }; }) => {
+        setAsDefaultCard(event.target.checked || (autoPay && !seller.paymentSourcePresent));
     };
 
-    const stripeKeyPublish =
-        'pk_test_51Nf481Ae4RILjJWGS16n8CI5yhK3nWg0kTMZVvRTOgMOY4KBlgI21EcPsSj9tY4tfDTQWrlh1v0egnN0ozBT9ATQ00kuhJ8UrS'
+    const stripeKeyPublish = 'pk_test_51Nf481Ae4RILjJWGS16n8CI5yhK3nWg0kTMZVvRTOgMOY4KBlgI21EcPsSj9tY4tfDTQWrlh1v0egnN0ozBT9ATQ00kuhJ8UrS';
 
     let paymentComponent;
     const isPaymentSourcePresent = seller.paymentSourcePresent ?? false;
 
     if (isPaymentSourcePresent) {
-        paymentComponent = <div className={styles.paymentContainer}>
-            <label>
-                <input onChange={handleIsAutoPayWithSource} type="checkbox" /> You want to be charged automatically and start a subscription?
-                <div>
-                    <input checked={getUseDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox" /> You want to pay with a default card of this account?
-                    {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
+        paymentComponent = (
+            <div className={styles.paymentContainer}>
+                <label>
+                    <input onChange={handleIsAutoPayWithSource} type="checkbox" /> You want to be charged automatically and start a subscription?
+                    <div>
+                        <input checked={getUseDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox" /> You want to pay with a default card of this account?
+                        {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
+                    </div>
+                    {getErrors && <div className={styles.errorMessage}>{getErrors}</div>}
+                </label>
+                {!getUseDefaultCard ? (
+                    <Stripe
+                        stripeKey={stripeKeyPublish}
+                        token={payNow}
+                        email={seller.id ? seller.id.toString() : ''}
+                    />
+                ) : (
+                    <button className={styles.stripeCheckoutButton} onClick={() => payNow({ id: '' })}>pay with default card</button>
+                )}
+            </div>
+        );
+    } else {
+        paymentComponent = (
+            <div>
+                <div className={styles.paymentContainer}>
+                    {getErrors && <div className={styles.errorMessage}>{JSON.stringify(getErrors)}</div>}
+                    <label>
+                        <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox" /> You want to make this a default card for this account?
+                        {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
+                    </label>
+                    <label>
+                        <input onChange={handleIsAutoPay} type="checkbox" /> You want to be charged automatically and start a subscription?
+                    </label>
                 </div>
-                {getErrors && <div className={styles.errorMessage}>{getErrors}</div>}
-            </label>
-
-            {!getUseDefaultCard ?
                 <Stripe
                     stripeKey={stripeKeyPublish}
                     token={payNow}
-                    email={seller.id.toString()}
-                /> : <button className={styles.stripeCheckoutButton} onClick={() => payNow('')}>pay with default card</button>
-            }
-        </div>
-    } else if (!isPaymentSourcePresent) {
-        paymentComponent = <div>
-            <div className={styles.paymentContainer}>
-                {getErrors && <div className={styles.errorMessage}>{JSON.stringify(getErrors)}</div>}
-                <label>
-                    <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox" /> You want to make this a default card for this account?
-                    {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
-                </label>
-                <label>
-                    <input onChange={handleIsAutoPay} type="checkbox" /> You want to be charged automatically and start a subscription?
-                </label>
+                    email={seller.id ? seller.id.toString() : ''}
+                    description={"Buy AutoRia premium"}
+                />
             </div>
-            <Stripe
-                stripeKey={stripeKeyPublish}
-                token={payNow}
-                email={seller.id.toString()}
-                description={"Buy AutoRia premium"}
-            />
-        </div>
-    } else {
-        paymentComponent = <div>Could not extract payment method...</div>
+        );
     }
 
     return (

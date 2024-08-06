@@ -3,34 +3,29 @@ import { useAppNavigate, useAppSelector } from '../../hooks';
 import { IUserResponse } from "../../interfaces/user/seller.interface";
 
 interface IProps {
-    seller: IUserResponse
+    seller: IUserResponse;
 }
 
 const SellerProfile: FC<IProps> = ({ seller }) => {
-
     const navigate = useAppNavigate();
     const { premiumBoughtToggle } = useAppSelector(state => state.sellerReducer);
 
-    const [getAccountType, setAccountType] = useState<String>();
+    const [displayedAccountType, setDisplayedAccountType] = useState<string>(seller.accountType);
 
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
     } = seller;
 
-    let picture;
-    if (avatar === null) {
-        picture = "channels4_profile.jpg";
-    } else {
-        picture = avatar;
-    }
+    let picture = avatar ?? "channels4_profile.jpg";
 
     useEffect(() => {
-        if (accountType === "BASIC") {
-            setAccountType("PREMIUM");
+        // Update displayed account type if the user has bought premium
+        if (premiumBoughtToggle && accountType === "BASIC") {
+            setDisplayedAccountType("PREMIUM");
         }
-    }, [premiumBoughtToggle])
+    }, [premiumBoughtToggle, accountType]);
 
-    let authNavigationComponent = (
+    const authNavigationComponent = (
         <div className="profile-actions">
             <button onClick={() => navigate('/profile/cars')}>My cars</button>
             <button onClick={() => navigate('/profile/premium')}>Premium and Cards</button>
@@ -38,22 +33,23 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
         </div>
     );
 
-
-    const date = createdAt.slice(0, 3);
-    const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
+    const date = createdAt.slice(0, 10); // Adjusted to slice date properly
+    const formattedNumbers = `${date.slice(0, 10)}`; // Format date properly
 
     return (
         <div>
             <div style={{ display: "flex", columnGap: "20px" }}>
-                <img style={{ height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px" }}
-                    src={`http://localhost:8080/users/avatar/${picture}`} alt="Avatar" />
+                <img
+                    style={{ height: "80px", width: "80px", borderRadius: "50%", marginRight: "10px" }}
+                    src={`http://localhost:8080/users/avatar/${picture}`}
+                    alt="Avatar"
+                />
                 <div>
-
                     <div>id: {id}</div>
                     <div>{name} {lastName}</div>
                     <div>✆ {number}</div>
                     <div style={{ fontSize: "9px" }}>◉ {region}, {city}</div>
-                    <div>account: {(accountType === "BASIC") && (getAccountType === "PREMIUM") ? getAccountType : accountType}</div>
+                    <div>account: {displayedAccountType}</div>
                     <div>joined: {formattedNumbers}</div>
                 </div>
             </div>
@@ -66,4 +62,3 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
 };
 
 export { SellerProfile };
-

@@ -6,6 +6,7 @@ import { carService } from "../../services";
 interface IState {
     cars: CarsResponse[],
     car: CarsResponse | null,
+    carUpdated: CarsResponse | null,
     numberOfElements: number
     isCarLoading: boolean;
     brands: string[],
@@ -31,6 +32,7 @@ interface IState {
 const initialState: IState = {
     cars: [],
     carAdded: null,
+    carUpdated: null,
     numberOfElements: 0,
     car: null,
     isCarLoading: false,
@@ -145,13 +147,13 @@ const deletePhotos = createAsyncThunk<String, IDeletePhotos>(
     }
 );
 
-const addPhotos = createAsyncThunk<String, IAddPhotos>(
+const addPhotos = createAsyncThunk<String[], IAddPhotos>(
     'carSlice/addPhotos',
     async ({ carId, photos }, { rejectWithValue }) => {
         try {
             console.log("Adding photos:", photos); // Вывод массива строк
             const { data } = await carService.addPhotos(carId, photos);
-            console.log(data + "data////////////");
+            console.log(data + "added photos////////////");
             return data;
         } catch (e) {
             const err = e as AxiosError;
@@ -213,7 +215,7 @@ const create = createAsyncThunk<CarsResponse, ICreateCar>(
     }
 );
 
-const update = createAsyncThunk<ICar, IUpdateCarRequest>(
+const update = createAsyncThunk<CarsResponse, IUpdateCarRequest>(
     'carSlice/update',
     async (request, { rejectWithValue }) => {
         try {
@@ -260,6 +262,9 @@ const slice = createSlice({
             })
             .addCase(getMiddleById.fulfilled, (state, action) => {
                 state.middleValue = action.payload;
+            })
+            .addCase(update.fulfilled, (state, action) => {
+                state.car = action.payload;
             })
             .addCase(getBySeller.fulfilled, (state, action) => {
                 state.cars = action.payload.content;

@@ -197,3 +197,16 @@
 .deletePhotoButton:disabled {
     pointer-events: none;
 }
+
+.carFull__photosContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Optional: Adds space between items */
+}
+
+.carFull__photoContainer {
+    width: calc(20% - 10px); /* 5 items per row, adjusting for gap */
+    height: 100px; /* Maintain the height */
+    margin-bottom: 10px; /* Space below each row */
+    box-sizing: border-box; /* Ensure padding and borders are included in the width */
+}

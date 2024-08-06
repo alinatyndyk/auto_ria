@@ -11,7 +11,7 @@ const carService = {
     banById: (id: number): IRes<String> => axiosService.post(urls.cars.banById(id)),
     unbanById: (id: number): IRes<String> => axiosService.post(urls.cars.unbanById(id)),
     deletePhotos: (carId: number, photos: string[]): IRes<String> => axiosService.post(urls.cars.deletePhotos(carId), { photos }),
-    addPhotos: (carId: number, photos: FormData): Promise<IRes<String>> => axiosService.post(urls.cars.addPhotos(carId), photos, {
+    addPhotos: (carId: number, photos: FormData): Promise<IRes<String[]>> => axiosService.post(urls.cars.addPhotos(carId), photos, {
         headers: {
             "Content-Type": "multipart/form-data",
         }
@@ -23,7 +23,7 @@ const carService = {
             "Content-Type": "multipart/form-data",
         }
     }),
-    updateById: (id: number, car: Partial<IUpdateInputCar>): IRes<ICar> => axiosService.patch(urls.cars.byId(id), car),
+    updateById: (id: number, car: Partial<IUpdateInputCar>): IRes<CarsResponse> => axiosService.patch(urls.cars.byId(id), car),
     getBySeller: (id: number, page: number): IRes<ICarResponse> => axiosService.get(urls.cars.bySeller(id, page)),
 }
 

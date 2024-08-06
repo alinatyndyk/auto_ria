@@ -22,7 +22,7 @@ const CarFull: FC = () => {
     const { userAuthotization } = useAppSelector(state => state.sellerReducer);
 
     const [getBanResponse, setBanResponse] = useState('');
-    const { errorDeleteById } = useAppSelector(state => state.carReducer);
+    const { errorDeleteById, carForUpdate } = useAppSelector(state => state.carReducer);
 
     const [selectedPhotos, setSelectedPhotos] = useState<string[]>([]);
     const [showPhotoSelection, setShowPhotoSelection] = useState<boolean>(false);
@@ -31,9 +31,15 @@ const CarFull: FC = () => {
     useEffect(() => {
         if (!isNaN(Number(carId)) && Number(carId) > 0) {
             dispatch(carActions.getById(Number(carId)));
-            dispatch(carActions.getMiddleById(Number(carId)));
         }
     }, [dispatch, carId]);
+
+    useEffect(() => {
+        if (car) {
+            dispatch(carActions.getMiddleById(Number(car.id)));  // Fetch middle prices whenever car changes
+            setCarPhotos(car.photo);
+        }
+    }, [dispatch, car]);
 
     useEffect(() => {
         const token = authService.getAccessToken();
@@ -41,12 +47,6 @@ const CarFull: FC = () => {
             dispatch(sellerActions.getByToken());
         }
     }, [dispatch]);
-
-    useEffect(() => {
-        if (car) {
-            setCarPhotos(car.photo);
-        }
-    }, [car]);
 
     const deleteCar = (carId: number) => {
         dispatch(carActions.deleteById(carId));
@@ -98,7 +98,17 @@ const CarFull: FC = () => {
             }
             const carID = car?.id;
             if (carID) {
-                await dispatch(carActions.addPhotos({ carId: carID, photos: formData }));
+                try {
+                    const response = await dispatch(carActions.addPhotos({ carId: carID, photos: formData }));
+                    console.log(JSON.stringify(response.payload));
+
+                    if (Array.isArray(response.payload)) {
+                        const newPhotos = response.payload.filter((photo): photo is string => typeof photo === 'string');
+                        setCarPhotos(prevPhotos => [...prevPhotos, ...newPhotos]);
+                    }
+                } catch (error) {
+                    console.error('Error uploading photos:', error);
+                }
             }
         }
     };
@@ -132,7 +142,7 @@ const CarFull: FC = () => {
                 <br />
                 {userAuthotization && (userAuthotization.id === car.user.id || userAuthotization.role === ERole.ADMIN) &&
                     <div className="carFull__updateForm">
-                        <CarUpdateForm car={car}/>
+                        <CarUpdateForm car={car} />
                     </div>
                 }
                 <div className="header" style={{ marginBottom: "30px" }}>
@@ -188,7 +198,7 @@ const CarFull: FC = () => {
                 <div className="carFull__pricesBox">
                     <div className="carFull__prices">
                         <div><FontAwesomeIcon icon={faDollarSign} /> usd: {car.priceUSD}</div>
-                        <div><FontAwesomeIcon icon={faEuroSign} /> eur: {car.priceEUR}</div>
+                        <div><FontAwesomeIcon icon={faEuroSign} />eur: {car.priceEUR}</div>
                         <div><FontAwesomeIcon icon={faHryvnia} /> uah: {car.priceUAH}</div>
                     </div>
                 </div>
@@ -227,4 +237,3 @@ const CarFull: FC = () => {
 };
 
 export { CarFull };
-

@@ -1,14 +1,17 @@
-import { FC } from 'react';
-import { CarForm } from '../../forms/car/CarForm';
+import { FC, useEffect, useState } from 'react';
+import { useAppNavigate, useAppSelector } from '../../hooks';
 import { IUserResponse } from "../../interfaces/user/seller.interface";
-import { Cars } from "../cars";
-import { StripeCheckout } from "../stripe/StripeCheckout";
 
 interface IProps {
     seller: IUserResponse
 }
 
 const SellerProfile: FC<IProps> = ({ seller }) => {
+
+    const navigate = useAppNavigate();
+    const { premiumBoughtToggle } = useAppSelector(state => state.sellerReducer);
+
+    const [getAccountType, setAccountType] = useState<String>();
 
     const {
         id, city, number, region, avatar, name, lastName, accountType, createdAt
@@ -20,6 +23,21 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
     } else {
         picture = avatar;
     }
+
+    useEffect(() => {
+        if (accountType === "BASIC") {
+            setAccountType("PREMIUM");
+        }
+    }, [premiumBoughtToggle])
+
+    let authNavigationComponent = (
+        <div className="profile-actions">
+            <button onClick={() => navigate('/profile/cars')}>My cars</button>
+            <button onClick={() => navigate('/profile/premium')}>Premium and Cards</button>
+            <button onClick={() => navigate('/profile/update')}>Update account info</button>
+        </div>
+    );
+
 
     const date = createdAt.slice(0, 3);
     const formattedNumbers = `${date[0]}.${date[1]}.${date[2]}`;
@@ -35,19 +53,17 @@ const SellerProfile: FC<IProps> = ({ seller }) => {
                     <div>{name} {lastName}</div>
                     <div>✆ {number}</div>
                     <div style={{ fontSize: "9px" }}>◉ {region}, {city}</div>
-                    <div>account: {accountType}</div>
+                    <div>account: {(accountType === "BASIC") && (getAccountType === "PREMIUM") ? getAccountType : accountType}</div>
                     <div>joined: {formattedNumbers}</div>
-                    <div style={{ width: "500px" }}>
-                        <StripeCheckout seller={seller} />
-                    </div>
                 </div>
-                <CarForm />
             </div>
-            <br />
-            <Cars sellerId={id} />
 
+            <div className="header" style={{ marginBottom: "30px" }}>
+                <div className="auth-links">{authNavigationComponent}</div>
+            </div>
         </div>
     );
 };
 
 export { SellerProfile };
+

@@ -24,7 +24,8 @@ interface IState {
     totalPages: number,
     user: IUserResponse | null,
     userConvesation: IUserResponse | null,
-    isUserLoading: boolean
+    isUserLoading: boolean,
+    premiumBoughtToggle: boolean,
 }
 
 const initialState: IState = {
@@ -45,7 +46,8 @@ const initialState: IState = {
     totalPages: 0,
     user: null,
     userConvesation: null,
-    isUserLoading: false
+    isUserLoading: false,
+    premiumBoughtToggle: false,
 }
 
 const getById = createAsyncThunk<IUserResponse, number>(
@@ -60,6 +62,7 @@ const getById = createAsyncThunk<IUserResponse, number>(
         }
     }
 );
+
 
 const getUserConversation = createAsyncThunk<IUserResponse, number>(
     'sellerSlice/getUserConversation',
@@ -149,7 +152,11 @@ const getRegionsPlaces = createAsyncThunk<IGeoCityForState, IGeoStateRequest>(
 const slice = createSlice({
     name: 'sellerSlice',
     initialState,
-    reducers: {},
+    reducers: {
+        toggle: (state) => {
+            state.premiumBoughtToggle = !state.premiumBoughtToggle;
+        },
+    },
     extraReducers: builder =>
         builder
             .addCase(getById.pending, (state) => {

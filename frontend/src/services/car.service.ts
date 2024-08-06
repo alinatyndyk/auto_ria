@@ -10,9 +10,15 @@ const carService = {
     deleteById: (id: number): IRes<String> => axiosService.delete(urls.cars.deleteById(id)),
     banById: (id: number): IRes<String> => axiosService.post(urls.cars.banById(id)),
     unbanById: (id: number): IRes<String> => axiosService.post(urls.cars.unbanById(id)),
+    deletePhotos: (carId: number, photos: string[]): IRes<String> => axiosService.post(urls.cars.deletePhotos(carId), { photos }),
+    addPhotos: (carId: number, photos: FormData): Promise<IRes<String>> => axiosService.post(urls.cars.addPhotos(carId), photos, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        }
+    }),
     getAllBrands: (): IRes<string[]> => axiosService.get(urls.cars.allBrands()),
     getAllModelsByBrand: (brand: string): IRes<string[]> => axiosService.get(urls.cars.allModelsByBrand(brand)),
-    create: (car: ICreateCar): IRes<ICar> => axiosService.post(urls.cars.cars, car, {
+    create: (car: ICreateCar): IRes<CarsResponse> => axiosService.post(urls.cars.cars, car, {
         headers: {
             "Content-Type": "multipart/form-data",
         }

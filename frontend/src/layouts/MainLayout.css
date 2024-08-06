@@ -111,4 +111,85 @@
 .profile-actions {
     display: flex;
     gap: 16px; /* увеличим горизонтальный отступ между элементами */
-}  
+}
+
+/* MainLayout.css */
+
+/* Container for profile menu */
+.profile-menu {
+    position: relative;
+}
+
+/* Style for profile button */
+.profile-button {
+    display: flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 5px;
+}
+
+/* Style for profile avatar */
+.profile-avatar {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+/* Dropdown menu styling */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%; /* Position below the profile button */
+    right: 0; /* Align right edge of the menu with the profile button */
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    max-height: 300px; /* Adjust height as needed */
+    overflow-y: auto; /* Adds scroll if content exceeds max height */
+    min-width: 200px; /* Ensure the menu has a minimum width */
+}
+
+/* Show the dropdown menu on hover */
+.profile-menu:hover .dropdown-menu {
+    display: block;
+}
+
+/* Styling for menu buttons */
+.dropdown-menu button {
+    display: block;
+    background: transparent;
+    border: none;
+    padding: 10px;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    box-sizing: border-box; /* Ensures padding does not affect the width */
+}
+
+/* Change background on hover */
+.dropdown-menu button:hover {
+    background-color: #f1f1f1;
+}
+
+/* Style for authentication links */
+.auth-links {
+    display: flex;
+    align-items: center;
+}
+
+.auth-links button {
+    margin-left: 10px;
+}
+
+/* Error message styling */
+.error-message {
+    color: red;
+    margin-top: 10px;
+}

@@ -4,20 +4,23 @@ import { useAppDispatch, useAppSelector } from "../../hooks";
 import { carActions } from "../../redux/slices";
 import { Car } from "./Car";
 import './Cars.css';
+import { CarsResponse } from '../../interfaces';
+import { getSearchParamsForLocation } from 'react-router-dom/dist/dom';
 
 interface IProps {
     sellerId: number | null
 }
 
 const Cars: FC<IProps> = ({ sellerId }) => {
-    const { cars, pagesInTotal } = useAppSelector(state => state.carReducer);
+    const { cars, pagesInTotal, carAdded, numberOfElements } = useAppSelector(state => state.carReducer);
     const dispatch = useAppDispatch();
     const [searchParams, setSearchParams] = useSearchParams();
 
     const [getButtons, setButtons] = useState(true);
     const [getNextButtons, setNextButtons] = useState(false);
-    let [getPage, setPage] = useState<number>(1);
-
+    const initialPage = searchParams.get("page");
+    const [getPage, setPage] = useState<number>(initialPage ? parseInt(initialPage) : 1);
+    let [gerCars, setCars] = useState<CarsResponse[]>([]);
 
     useEffect(() => {
         searchParams.set('page', getPage.toString());
@@ -27,34 +30,36 @@ const Cars: FC<IProps> = ({ sellerId }) => {
         } else {
             dispatch(carActions.getAll(getPage));
         }
+    }, [getPage, sellerId]);
 
-        if (getPage <= 1) {
-            setButtons(true);
-        } else {
-            setButtons(false);
-        }
+    useEffect(() => {
+        setCars(cars);
+    }, [cars]);
 
-        if (getPage >= pagesInTotal) {
-            setNextButtons(true);
-        } else {
-            setNextButtons(false);
+    useEffect(() => {
+        if (carAdded && numberOfElements < 2) {
+            setCars(prevState => [...prevState, carAdded]);
         }
-    }, [getPage, sellerId, pagesInTotal])
+    }, [carAdded]);
+
+    useEffect(() => {
+        setButtons(getPage <= 1);
+        setNextButtons(getPage >= pagesInTotal);
+    }, [getPage, pagesInTotal]);
 
     const prevPage = () => {
-        setPage(prevState => prevState - 1);
+        if (getPage > 1) setPage(prevPage => prevPage - 1);
     };
 
     const nextPage = () => {
-        setPage(prevState => prevState + 1);
+        if (getPage < pagesInTotal) setPage(nextPage => nextPage + 1);
     };
-
 
     return (
         <div className="cars-container">
             <h2 className="cars-title">Cars</h2>
             {pagesInTotal === 0 && <div className="no-cars-message">There are no cars to view</div>}
-            {cars.map(car => <Car key={car.id} car={car} />)}
+            {gerCars.map(car => <Car key={car.id} car={car} />)}
             <div className="pagination">
                 <button disabled={getButtons} onClick={prevPage}>Prev</button>
                 <div className="pagination-info">Page {getPage} of {pagesInTotal}</div>
@@ -65,4 +70,3 @@ const Cars: FC<IProps> = ({ sellerId }) => {
 };
 
 export { Cars };
-

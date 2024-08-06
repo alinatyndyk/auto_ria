@@ -10,6 +10,9 @@ import { ProfilePage } from "./pages/auth/ProfilePage";
 import { RegisterPage } from "./pages/auth/RegisterPage";
 import CarPage from './pages/car/CarPage';
 import ErrorForbidden from "./pages/error/ErrorForbidden";
+import CarProfilePage from "./components/cars/CarProfilePage";
+import { StripeCheckout } from "./components/stripe/StripeCheckout";
+import { ChangeAccountInfoPage } from "./pages/ChangeAccountInfoPage";
 function App() {
     return (
         <Routes>
@@ -19,7 +22,11 @@ function App() {
                 <Route path={'cars/:carId'} element={<CarFull />} />
                 <Route path={'auth/login'} element={<LoginPage />} />
                 <Route path={'auth/register/:role'} element={<RegisterPage />} />
-                <Route path={'profile'} element={<ProfilePage />} />
+                <Route path="profile" element={<ProfilePage />}>
+                    <Route path="cars" element={<CarProfilePage />} />
+                    <Route path="premium" element={<StripeCheckout/>} />
+                    <Route path="update" element={<ChangeAccountInfoPage />} />
+                </Route>
                 <Route path={'auth/forgot-password/'} element={<ForgotPasswordForm />} />
                 <Route path={'auth/reset-password/'} element={<ResetPasswordForm />} />
                 <Route path={'auth/activate-account/:role'} element={<ActivateForm />} />

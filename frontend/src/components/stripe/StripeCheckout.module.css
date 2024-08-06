@@ -1,0 +1,51 @@
+/* Стиль для контейнера компонента */
+.stripeCheckoutContainer {
+    background-color: #f9f9f9; /* Светло-серый фон */
+    padding: 15px; /* Уменьшили отступы */
+    border-radius: 4px; /* Уменьшили радиус скругления углов */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    margin-bottom: 15px; /* Отступ снизу */
+}
+
+/* Стиль для заголовков */
+.stripeCheckoutContainer h4,
+.stripeCheckoutContainer h3 {
+    color: #007bff; /* Синий цвет для заголовков */
+    font-size: 14px; /* Уменьшили размер шрифта */
+    margin-bottom: 10px; /* Отступ снизу */
+}
+
+/* Стиль для чекбоксов и лейблов */
+.stripeCheckoutContainer label {
+    display: block;
+    margin-bottom: 10px; /* Отступ снизу */
+    font-size: 12px; /* Уменьшили размер шрифта */
+    color: #333; /* Темно-серый текст */
+}
+
+.stripeCheckoutContainer input[type="checkbox"] {
+    margin-right: 5px; /* Отступ справа от чекбокса */
+}
+
+/* Стиль для сообщений об ошибках */
+.errorMessage {
+    color: #d9534f; /* Красный цвет для ошибок */
+    font-size: 12px; /* Уменьшили размер шрифта */
+    margin-top: 5px; /* Отступ сверху */
+}
+
+/* Стиль для кнопки */
+.stripeCheckoutButton {
+    background-color: #007bff; /* Синий фон кнопки */
+    color: #fff; /* Белый текст */
+    border: none; /* Убрали границу */
+    border-radius: 4px; /* Закругленные углы */
+    padding: 8px 16px; /* Уменьшили отступы */
+    font-size: 12px; /* Уменьшили размер шрифта */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Плавное изменение фона */
+}
+
+.stripeCheckoutButton:hover {
+    background-color: #0056b3; /* Темно-синий цвет при наведении */
+}

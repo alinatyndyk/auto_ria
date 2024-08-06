@@ -1,51 +1,57 @@
-/* Cars.css */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap');
 
 .cars-container {
-    background-color: white; /* белый фон контейнера */
+    background-color: #ffffff; /* Белый фон контейнера */
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* тень контейнера */
-    overflow-y: auto; /* добавляем вертикальную прокрутку при необходимости */
-  }
-  
-  .cars-title {
-    font-size: 2rem;
+    border: 1px solid #ddd; /* Легкая граница вокруг контейнера */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Легкая тень */
+    overflow-y: auto; /* Добавляем вертикальную прокрутку при необходимости */
+    width: 100%; /* Ширина 100% для заполнения доступного пространства */
+    box-sizing: border-box; /* Включаем отступы и границы в общую ширину и высоту */
+    margin: 0; /* Убираем внешние отступы */
+}
+
+.cars-title {
+    font-size: 1.5rem; /* Размер шрифта заголовка */
     margin-bottom: 20px;
-    color: #343a40; /* темно-серый цвет текста */
-  }
-  
-  .no-cars-message {
-    color: blue;
+    color: #343a40; /* Темно-серый цвет текста */
+    text-align: center; /* Центрирование заголовка */
+    font-weight: 600; /* Полужирный текст */
+}
+
+.no-cars-message {
+    color: #007bff; /* Синий цвет для сообщения об отсутствии машин */
     margin-bottom: 20px;
-  }
-  
-  .pagination {
+    text-align: center; /* Центрирование текста сообщения */
+}
+
+.pagination {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 20px;
-  }
-  
-  .pagination button {
+}
+
+.pagination button {
     padding: 8px 16px;
-    background-color: #007bff; /* синий цвет кнопок пагинации */
+    background-color: #007bff; /* Синий цвет кнопок пагинации */
     color: white;
-    border: none;
-    border-radius: 4px;
+    border: 1px solid transparent; /* Прозрачная граница */
     cursor: pointer;
-  }
-  
-  .pagination button:disabled {
-    background-color: #6c757d; /* серый цвет для отключенных кнопок */
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.pagination button:disabled {
+    background-color: #6c757d; /* Серый цвет для отключенных кнопок */
     cursor: not-allowed;
-  }
-  
-  .pagination button:hover:not(:disabled) {
-    background-color: #0056b3; /* темно-синий цвет при наведении */
-  }
-  
-  .pagination-info {
-    color: #6c757d; /* серый цвет текста информации о пагинации */
-    font-size: 1rem;
-  }
-  
+}
+
+.pagination button:hover:not(:disabled) {
+    background-color: #0056b3; /* Темно-синий цвет при наведении */
+}
+
+.pagination-info {
+    color: #6c757d; /* Серый цвет текста информации о пагинации */
+    font-size: 14px;
+}

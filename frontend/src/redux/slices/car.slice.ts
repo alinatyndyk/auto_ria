@@ -1,11 +1,12 @@
 import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
-import { CarsResponse, ICar, ICarResponse, ICreateCar, IError, IMiddleCarValues, IUpdateCarRequest } from "../../interfaces";
+import { CarsResponse, IAddPhotos, ICar, ICarResponse, ICreateCar, IDeletePhotos, IError, IMiddleCarValues, IUpdateCarRequest } from "../../interfaces";
 import { carService } from "../../services";
 
 interface IState {
     cars: CarsResponse[],
     car: CarsResponse | null,
+    numberOfElements: number
     isCarLoading: boolean;
     brands: string[],
     models: string[],
@@ -17,16 +18,20 @@ interface IState {
     errorGetAll: IError | null
     errorGetById: IError | null
     errorDeleteById: IError | null
+    errorDeletePhotos: IError | null
     errorBanById: IError | null
     errorUnbanById: IError | null
     errorCreate: IError | null
     errorUpdateById: IError | null
     errorGetMiddle: IError | null
-    middleValue: IMiddleCarValues | null
+    middleValue: IMiddleCarValues | null,
+    carAdded: CarsResponse | null
 }
 
 const initialState: IState = {
     cars: [],
+    carAdded: null,
+    numberOfElements: 0,
     car: null,
     isCarLoading: false,
     brands: [],
@@ -45,6 +50,7 @@ const initialState: IState = {
     errorUpdateById: null,
     errorGetMiddle: null,
     middleValue: null,
+    errorDeletePhotos: null
 }
 
 const getAll = createAsyncThunk<ICarResponse, number>(
@@ -125,6 +131,36 @@ const unbanById = createAsyncThunk(
     }
 );
 
+const deletePhotos = createAsyncThunk<String, IDeletePhotos>(
+    'carSlice/deletePhotos',
+    async ({ carId, photos }, { rejectWithValue }) => {
+        try {
+            console.log("Deleting photos:", photos); // Вывод массива строк
+            const { data } = await carService.deletePhotos(carId, photos);
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+const addPhotos = createAsyncThunk<String, IAddPhotos>(
+    'carSlice/addPhotos',
+    async ({ carId, photos }, { rejectWithValue }) => {
+        try {
+            console.log("Adding photos:", photos); // Вывод массива строк
+            const { data } = await carService.addPhotos(carId, photos);
+            console.log(data + "data////////////");
+            return data;
+        } catch (e) {
+            const err = e as AxiosError;
+            return rejectWithValue(err.response?.data);
+        }
+    }
+);
+
+
 const getAllBrands = createAsyncThunk<string[]>(
     'carSlice/getAllBrands',
     async (_, { rejectWithValue }) => {
@@ -164,7 +200,7 @@ const getBySeller = createAsyncThunk<ICarResponse, { id: number, page: number }>
     }
 );
 
-const create = createAsyncThunk<ICar, ICreateCar>(
+const create = createAsyncThunk<CarsResponse, ICreateCar>(
     'carSlice/create',
     async (car, { rejectWithValue }) => {
         try {
@@ -200,6 +236,7 @@ const slice = createSlice({
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
+                state.numberOfElements = action.payload.numberOfElements;
             })
             .addCase(getById.pending, (state) => {
                 state.isCarLoading = true;
@@ -218,6 +255,9 @@ const slice = createSlice({
             .addCase(getAllModelsByBrand.fulfilled, (state, action) => {
                 state.models = action.payload;
             })
+            .addCase(create.fulfilled, (state, action) => {
+                state.carAdded = action.payload;
+            })
             .addCase(getMiddleById.fulfilled, (state, action) => {
                 state.middleValue = action.payload;
             })
@@ -225,6 +265,7 @@ const slice = createSlice({
                 state.cars = action.payload.content;
                 state.pageCurrent = action.payload.pageable.pageNumber;
                 state.pagesInTotal = action.payload.totalPages;
+                state.numberOfElements = action.payload.numberOfElements;
             })
             .addMatcher(isRejectedWithValue(), (state, action) => {
                 if (action.type === "carSlice/getById/rejected") {
@@ -245,6 +286,8 @@ const slice = createSlice({
                     state.errorUpdateById = action.payload as IError;
                 } else if (action.type === "carSlice/getMiddleById/rejected") {
                     state.errorGetMiddle = action.payload as IError;
+                } else if (action.type === "carSlice/deletePhotos/rejected") {
+                    state.errorDeletePhotos = action.payload as IError;
                 } else {
                     state.carErrors = action.payload as IError;
                 }
@@ -267,6 +310,8 @@ const carActions = {
     create,
     update,
     getMiddleById,
+    deletePhotos,
+    addPhotos
 }
 
 export {

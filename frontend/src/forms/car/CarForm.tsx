@@ -122,12 +122,12 @@ const CarForm: FC = () => {
 
     return (
         <div className={styles.carForm}>
-            <div>Create new car</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', marginBottom: '10px' }}>Create new car</div>
             {getResponse === "Car created successfully" ?
-                <div style={{ color: 'green', fontSize: '10px' }}>{getResponse}</div>
-                : <div style={{ color: 'darkred', fontSize: '10px' }}>{getResponse}</div>}
+                <div style={{ color: 'green', fontSize: '14px' }}>{getResponse}</div>
+                : <div style={{ color: 'darkred', fontSize: '14px' }}>{getResponse}</div>}
             <form encType="multipart/form-data" onSubmit={handleSubmit(save)}>
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         type="text"
@@ -157,7 +157,7 @@ const CarForm: FC = () => {
                         ))}
                     </div>
                 )}
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -186,7 +186,7 @@ const CarForm: FC = () => {
                         ))}
                     </div>
                 )}
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -197,7 +197,7 @@ const CarForm: FC = () => {
                         })}
                     />
                 </div>
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -209,7 +209,8 @@ const CarForm: FC = () => {
                         onChange={handleInputChange}
                     />
                     <button
-                        className={styles.changeButton}
+                        className={styles.button}
+                        type="button"
                         onClick={() => {
                             setRegionInput(false);
                             setCarRegion('');
@@ -235,7 +236,7 @@ const CarForm: FC = () => {
                         ))}
                     </div>
                 )}
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -247,7 +248,8 @@ const CarForm: FC = () => {
                         onChange={handleCityInputChange}
                     />
                     <button
-                        className={styles.changeButton}
+                        className={styles.button}
+                        type="button"
                         onClick={() => {
                             setCityInput(false);
                             setCarCity('');
@@ -277,10 +279,10 @@ const CarForm: FC = () => {
                             })}
                     </div>
                 )}
-                <div>
+                <div className={styles.inputContainer}>
                     <input className={styles.input} type="number" placeholder={'Price'} {...register('price')} />
                 </div>
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -309,7 +311,7 @@ const CarForm: FC = () => {
                         ))}
                     </div>
                 )}
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         formEncType="multipart/form-data"
@@ -319,7 +321,7 @@ const CarForm: FC = () => {
                         {...register('pictures')}
                     />
                 </div>
-                <div>
+                <div className={styles.inputContainer}>
                     <input
                         className={styles.input}
                         autoComplete={'off'}
@@ -328,11 +330,10 @@ const CarForm: FC = () => {
                         {...register('description')}
                     />
                 </div>
-                <button className={styles.submitButton}>Save</button>
+                <button className={`${styles.button} ${styles.submitButton}`} type="submit">Save</button>
             </form>
         </div>
     );
 };
 
 export { CarForm };
-

@@ -22,6 +22,8 @@ const urls = {
         deleteById: (id: number): string => `${cars}/${id}`,
         banById: (id: number): string => `${cars}/ban/${id}`,
         unbanById: (id: number): string => `${cars}/activate/${id}`,
+        deletePhotos: (id: number): string => `${cars}/delete-pictures/${id}`,
+        addPhotos: (id: number): string => `${cars}/add-pictures/${id}`,
         bySeller: (id: number, page: number): string => `${cars}/by-user/${id}/page/${page}`,
     },
     auth: {

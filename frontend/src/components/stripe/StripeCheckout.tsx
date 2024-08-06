@@ -1,15 +1,17 @@
 import axios from "axios";
-import { FC, useState } from 'react';
+import { useState } from 'react';
 import Stripe from "react-stripe-checkout";
 import { IError } from "../../interfaces";
-import { IUserResponse } from "../../interfaces/user/seller.interface";
 import { authService } from "../../services";
+import useTheme from "../hooks/useTheme";
+import { useAppDispatch } from "../../hooks";
+import { sellerActions } from "../../redux/slices/seller.slice";
+import styles from './StripeCheckout.module.css'; // Подключаем CSS-модуль
 
-interface IProps {
-    seller: IUserResponse
-}
+const StripeCheckout = () => {
 
-const StripeCheckout: FC<IProps> = ({ seller }) => {
+    const seller = useTheme();
+    const dispatch = useAppDispatch();
 
     const [getUseDefaultCard, setUseDefaultCard] = useState(false);
     const [getAsDefaultCard, setAsDefaultCard] = useState(false);
@@ -30,7 +32,7 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     }
                 })
             if (response.status === 200) {
-                window.location.reload();
+                dispatch(sellerActions.toggle());
             }
         } catch (e) {
             const error = e as { response: { data: IError } };
@@ -100,21 +102,14 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
     const isPaymentSourcePresent = seller.paymentSourcePresent ?? false;
 
     if (isPaymentSourcePresent) {
-        paymentComponent = <div style={{ display: 'flex' }}>
+        paymentComponent = <div className={styles.paymentContainer}>
             <label>
-                <input onChange={handleIsAutoPayWithSource} type="checkbox" /> You want to be charged automatically
-                and
-                start a
-                subscription?
+                <input onChange={handleIsAutoPayWithSource} type="checkbox" /> You want to be charged automatically and start a subscription?
                 <div>
-                    <input checked={getUseDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox" /> You want to
-                    pay
-
-                    with a default card of this account?
-                    {autoPay ? <div style={{ color: 'maroon' }}>Subscriptions *require* default cards for monthly
-                        payments</div> : null}
+                    <input checked={getUseDefaultCard} onChange={handlePayWithDefaultCard} type="checkbox" /> You want to pay with a default card of this account?
+                    {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
                 </div>
-                <label>{getErrors}</label>
+                {getErrors && <div className={styles.errorMessage}>{getErrors}</div>}
             </label>
 
             {!getUseDefaultCard ?
@@ -122,28 +117,19 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
                     stripeKey={stripeKeyPublish}
                     token={payNow}
                     email={seller.id.toString()}
-                /> : <button style={{
-                    color: "white",
-                    height: "40px",
-                    width: "100px",
-                    backgroundColor: "cadetblue",
-                    borderRadius: "5px",
-                    border: "none"
-                }} onClick={() => payNow('')}>pay with default card</button>
+                /> : <button className={styles.stripeCheckoutButton} onClick={() => payNow('')}>pay with default card</button>
             }
         </div>
     } else if (!isPaymentSourcePresent) {
         paymentComponent = <div>
-            <div style={{ display: 'flex' }}>
-                <label>{JSON.stringify(getErrors)}</label>
+            <div className={styles.paymentContainer}>
+                {getErrors && <div className={styles.errorMessage}>{JSON.stringify(getErrors)}</div>}
                 <label>
                     <input checked={getAsDefaultCard} onChange={handleSetAsDefaultCard} type="checkbox" /> You want to make this a default card for this account?
-                    {autoPay ? <div style={{ color: 'maroon' }}>Subscriptions *require* default cards for monthly
-                        payments</div> : null}
+                    {autoPay ? <div className={styles.errorMessage}>Subscriptions *require* default cards for monthly payments</div> : null}
                 </label>
                 <label>
-                    <input onChange={handleIsAutoPay} type="checkbox" /> You want to be charged automatically and start a
-                    subscription?
+                    <input onChange={handleIsAutoPay} type="checkbox" /> You want to be charged automatically and start a subscription?
                 </label>
             </div>
             <Stripe
@@ -159,33 +145,18 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 
     return (
         <div>
-            <div style={{
-                backgroundColor: "whitesmoke",
-                fontSize: "9px",
-                padding: "20px",
-                borderRadius: "5px",
-                columnGap: "10px"
-            }}>
-                <h4 style={{ color: "green" }}>Buy premium</h4>
-                <h3 style={{ color: "green" }}>MARK: A Subscription lasts 1 month,
-                    automatic subscriptions renew every month automatically by withdrawing money from your default
-                    card</h3>
+            <div className={styles.stripeCheckoutContainer}>
+                <h4>Buy premium</h4>
+                <h3>MARK: A Subscription lasts 1 month, automatic subscriptions renew every month automatically by withdrawing money from your default card</h3>
                 {paymentComponent}
             </div>
             <hr />
-            <div style={{
-                backgroundColor: "whitesmoke",
-                fontSize: "9px",
-                padding: "20px",
-                borderRadius: "5px",
-                columnGap: "10px"
-            }}>
-                <h4 style={{ color: "green" }}>Add default payment source</h4>
+            <div className={styles.stripeCheckoutContainer}>
+                <h4>Add default payment source</h4>
                 <Stripe
                     stripeKey={stripeKeyPublish}
                     token={addCard}
                     description={"Bind a card to AutoRia"}
-
                 />
             </div>
         </div>
@@ -193,4 +164,3 @@ const StripeCheckout: FC<IProps> = ({ seller }) => {
 };
 
 export { StripeCheckout };
-

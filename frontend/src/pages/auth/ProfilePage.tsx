@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { useLocation } from 'react-router';
+import { Outlet, useLocation } from 'react-router';
 import LoadingPage from '../../components/LoadingPage';
 import { AdminProfile } from "../../components/profiles/AdminProfile";
 import { ManagerProfile } from "../../components/profiles/ManagerProfile";
@@ -61,14 +61,7 @@ const ProfilePage: FC = () => {
     return (
         <div>
             {userComponent}
-            <div style={{ display: "flex", alignItems: "center", flexDirection: "column" }}>
-                <h2>Change your account information</h2>
-                <div style={{ margin: "20px", display: "flex", columnGap: "20px" }}>
-                    <UpdateUserForm />
-                    <br />
-                    <ChangePasswordForm />
-                </div>
-            </div>
+            <Outlet />
         </div>
 
     );

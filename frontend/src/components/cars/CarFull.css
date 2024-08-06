@@ -93,3 +93,107 @@
     margin-top: 20px; /* Space between the info section and the update form */
 }
 
+.carFull__photoPanel {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+}
+
+.carFull__photoContainer {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 5px;
+    overflow: hidden;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.carFull__photoContainer.selected {
+    border: 2px solid #007bff;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.carFull__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+    transition: filter 0.3s ease;
+}
+
+.carFull__photoContainer.selected .carFull__photo {
+    filter: brightness(0.7);
+}
+
+.carFull__photoIndex {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.carFull__photoActions {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 10px;
+}
+
+.addPhotoButton,
+.deletePhotoButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.addPhotoButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.addPhotoButton:hover {
+    background-color: #218838;
+}
+
+.deletePhotoButton {
+    background-color: #dc3545;
+    color: white;
+}
+
+.deletePhotoButton:hover {
+    background-color: #c82333;
+}
+
+.deletePhotoButton {
+    /* Default styles for the button */
+    background-color: #d9534f; /* Red */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.deletePhotoButton.disabled {
+    background-color: #e0e0e0; /* Light grey */
+    color: #9e9e9e; /* Grey */
+    cursor: not-allowed;
+}
+
+.deletePhotoButton:disabled {
+    pointer-events: none;
+}

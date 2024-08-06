@@ -78,6 +78,16 @@ export interface ICarResponse {
     empty: boolean;
 }
 
+export interface IDeletePhotos {
+    photos: string[];
+    carId: number;
+}
+
+export interface IAddPhotos {
+    photos: FormData;
+    carId: number;
+}
+
 export interface CarsResponse {
     id: number;
     brand: string;

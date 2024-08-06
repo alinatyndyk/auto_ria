@@ -4,8 +4,10 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.data.domain.Page;
@@ -429,15 +431,15 @@ public class CarController {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN', 'USER')")
-    @PatchMapping("photos/{id}")
-    public ResponseEntity<String> patchPhotos(@PathVariable int id,
-            @RequestParam("pictures[]") MultipartFile[] newPictures,
+    @PostMapping("delete-pictures/{id}")
+    public ResponseEntity<String> deletePhotos(@PathVariable int id,
+            @RequestBody Map<String, List<String>> body,
             HttpServletRequest request) {
         try {
+            List<String> deletePictures = body.get("photos");
+            System.out.println("Удалить фотографии:" + deletePictures);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
             if (authentication.getPrincipal() instanceof UserDetails) {
                 UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
@@ -448,36 +450,77 @@ public class CarController {
                 throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
             }
 
-            CarSQL carSQL = carsService.extractById(id);
-
-            List<String> newPicNames = new ArrayList<>();
-
-            for (MultipartFile file : newPictures) {
-                newPicNames.add(file.getOriginalFilename());
+            if (deletePictures == null || deletePictures.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No pictures specified for deletion");
             }
-            List<String> alreadyOnServer = new ArrayList<>();
 
-            for (String photoName : carSQL.getPhoto()) {
-                if (!newPicNames.contains(photoName)) {
-                    commonService.removeAvatar(photoName);
-                } else {
-                    alreadyOnServer.add(photoName);
+            CarSQL car = carsService.extractById(id);
+            List<String> allPictures = car.getPhoto();
+            deletePictures.forEach(picture -> {
+                if (allPictures.contains(picture)) {
+                    allPictures.remove(picture);
+                    commonService.removeAvatar(picture);
                 }
-            }
+            });
+            car.setPhoto(allPictures);
+            carsService.save(car);
 
-            for (MultipartFile pic : newPictures) {
-                if (!alreadyOnServer.contains(pic.getOriginalFilename())) {
-                    commonService.transferAvatar(pic, pic.getOriginalFilename());
-                }
-            }
-
-            carSQL.setPhoto(newPicNames);
-
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Selected photos successfully deleted");
         } catch (CustomException e) {
             throw new CustomException(e.getMessage(), e.getStatus());
         }
     }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PostMapping("add-pictures/{id}")
+public ResponseEntity<String> patchPhotos(@PathVariable int id,
+        @RequestParam("photos") MultipartFile[] newPictures,
+        HttpServletRequest request) {
+    try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof UserDetails) {
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            if (userDetails.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("USER"))) {
+                carsService.checkCredentials(request, id);
+            } else {
+                throw new CustomException("User is not authorized", HttpStatus.FORBIDDEN);
+            }
+        } else {
+            throw new CustomException("Unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        CarSQL carSQL = carsService.extractById(id);
+
+        // Get the existing photo names
+        List<String> existingPhotoNames = carSQL.getPhoto();
+
+        // Create a set to track which photos are already on the server
+        Set<String> existingPhotosSet = new HashSet<>(existingPhotoNames);
+
+        // Create a list to hold the names of new photos to be added
+        List<String> newPhotoNames = new ArrayList<>(existingPhotoNames);
+
+        // Process new pictures
+        for (MultipartFile file : newPictures) {
+            String fileName = file.getOriginalFilename();
+            if (!existingPhotosSet.contains(fileName)) {
+                commonService.transferAvatar(file, fileName);
+                newPhotoNames.add(fileName);
+            }
+        }
+
+        // Update the photo list for the car
+        carSQL.setPhoto(newPhotoNames);
+        carsService.save(carSQL);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Files successfully uploaded");
+    } catch (CustomException e) {
+        return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
+    }
+}
+
 
     @PreAuthorize("hasRole('ADMIN', 'USER')")
     @DeleteMapping("/{id}")
